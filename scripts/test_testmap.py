@@ -179,3 +179,65 @@ def test_shared_prefix_before_blank_line_is_not_a_duplicate(monkeypatch, tmp_pat
         "game/tests/unit/test_b.gd": BLANK_PREFIX_B,
     }))
     assert tm.duplicates() == []
+
+
+def _measure(holes=1, merge_files=0, dupes=0):
+    """Синтетический вывод measure() — ровно той формы, что читает snapshot()."""
+    return {
+        "gd_files": 2, "gd_tests": 4, "py_files": 1, "py_tests": 2,
+        "coverage": {"production_files": 5, "covered": 5 - holes,
+                     "holes": ["scripts/core/x%d.gd" % i for i in range(holes)]},
+        "merge_groups": [("scripts/core/sys.gd", ["a", "b", "c"])] if merge_files else [],
+        "duplicates": [["x::t", "y::t"]] * dupes,
+    }
+
+
+BASE = {"gd_files": 2, "gd_tests": 4, "py_files": 1, "py_tests": 2,
+        "holes": 1, "merge_groups": 0, "merge_files": 0, "duplicate_groups": 0}
+
+
+def test_check_passes_at_baseline():
+    code, lines = tm.check(_measure(), dict(BASE))
+    assert code == 0
+    assert lines[0].startswith("TESTMAP OK")
+
+
+def test_check_fails_on_new_hole_and_names_the_metric():
+    code, lines = tm.check(_measure(holes=2), dict(BASE))
+    assert code == 1
+    assert any("holes: было 1 → стало 2" in ln for ln in lines)
+
+
+def test_check_fails_on_new_fragmentation_file():
+    """Третий (четвёртый) файл на одном носителе — регрессия, а не «норм, новый тест».
+    Именно эту ветку рэтчет заводит: файл на тикет вместо файла на носителя."""
+    code, lines = tm.check(_measure(merge_files=3), dict(BASE))
+    assert code == 1
+    assert any("merge_files" in ln for ln in lines)
+
+
+def test_check_fails_on_new_duplicate():
+    code, lines = tm.check(_measure(dupes=1), dict(BASE))
+    assert code == 1
+    assert any("duplicate_groups" in ln for ln in lines)
+
+
+def test_check_accepts_improvement_but_asks_to_rebase():
+    base = dict(BASE, holes=4)
+    code, lines = tm.check(_measure(holes=1), base)
+    assert code == 0
+    assert "holes 4→1" in lines[0] and "--write-baseline" in lines[0]
+
+
+def test_check_without_baseline_is_red_not_silent():
+    code, lines = tm.check(_measure(), None)
+    assert code == 2 and "не зафиксирован" in lines[0]
+
+
+def test_check_baseline_key_set_must_match_metrics():
+    """Тот же урок, что D-277 в gdd_gate: молча отсутствующий ключ — это «ноль
+    допусков» или «метрику убрали и забыли», а не проверка."""
+    code, lines = tm.check(_measure(), {"holes": 1})
+    assert code == 2 and "НЕ СООТВЕТСТВУЕТ МЕТРИКАМ" in lines[0]
+    code, lines = tm.check(_measure(), dict(BASE, q_ghost_rows=0))
+    assert code == 2 and "лишних" in lines[0] and "q_ghost_rows" in lines[0]

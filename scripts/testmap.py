@@ -214,27 +214,95 @@ def measure() -> dict:
     }
 
 
+def baseline_path() -> Path:
+    """Путь базлайна — функция от ROOT, а не константа модуля: тесты подменяют ROOT,
+    и константа отправила бы синтетический снимок в реальный tracked-файл (2026-10-27)."""
+    return ROOT / "scripts" / "testmap.baseline.json"
+#: Метрики, которые рэтчет считает направленной регрессией (больше — хуже).
+#: `merge_groups` и число файлов/тестов в рэтчете НЕ входят: группы могут расти
+#: без роста числа файлов, а сами файлы при сведении (С-3) только уменьшаются.
+RATCHET_KEYS = ("holes", "merge_files", "duplicate_groups")
+BASE_KEYS = ("gd_files", "gd_tests", "py_files", "py_tests", "holes",
+             "merge_groups", "merge_files", "duplicate_groups")
+
+
+def snapshot(m: dict) -> dict:
+    """Снимок метрик для базлайна — то же, что сверяет --check."""
+    cov = m["coverage"]
+    return {
+        "gd_files": m["gd_files"], "gd_tests": m["gd_tests"],
+        "py_files": m["py_files"], "py_tests": m["py_tests"],
+        "holes": len(cov["holes"]), "merge_groups": len(m["merge_groups"]),
+        "merge_files": sum(len(v) for _, v in m["merge_groups"]),
+        "duplicate_groups": len(m["duplicates"]),
+    }
+
+
+def check(m: dict, base):
+    """Рэтчет набора тестов (С-5, слово владельца «встраивай», 2026-10-27).
+
+    Возвращает (код выхода, строки отчёта): 0 — не хуже базлайна, 1 — регрессия,
+    2 — базлайн непригоден (нет файла или ключи не совпадают с метриками).
+    Улучшение (метрика ниже базлайна) — тоже 0, но с напоминанием зафиксировать:
+    молча живущий завышенный базлайн превращает рэтчет в декорацию.
+    """
+    snap = snapshot(m)
+    if base is None:
+        return 2, ["RED: базлайн карты тестов не зафиксирован — "
+                   "python3 scripts/testmap.py --write-baseline"]
+    missing = [k for k in BASE_KEYS if k not in base]
+    stale = [k for k in base if k not in BASE_KEYS]
+    if missing or stale:
+        parts = []
+        if missing:
+            parts.append(f"нет {missing}")
+        if stale:
+            parts.append(f"лишних {stale}")
+        return 2, ["RED: БАЗЛАЙН НЕ СООТВЕТСТВУЕТ МЕТРИКАМ: " + ", ".join(parts)
+                   + " — пересоздай python3 scripts/testmap.py --write-baseline"]
+    worse = [(k, base[k], snap[k]) for k in RATCHET_KEYS if snap[k] > base[k]]
+    better = [(k, base[k], snap[k]) for k in RATCHET_KEYS if snap[k] < base[k]]
+    if worse:
+        return 1, [
+            "RED: набор тестов стал хуже базлайна (T-227, план сведения — docs/mvp/TEST-MAP.md):",
+        ] + [
+            f"  {k}: было {b} → стало {v} (+{v - b})" for k, b, v in worse
+        ] + [
+            "  что делать: новый production-файл — тест в файл его носителя (не новый файл);",
+            "  новый файл на уже оскоплённого носителя — проверка переезжает в файл носителя;",
+            "  дубль тела — свести (метрика доказывает совпадение тел, а не имён);",
+            "  легитимное ухудшение (носитель нечего покрывать) — EXCLUDED_PREFIXES с причиной",
+            "  или python3 scripts/testmap.py --write-baseline (строка в диффе, на ревью).",
+        ]
+    note = f"TESTMAP OK: дыр {snap['holes']}, файлов в группах слияния {snap['merge_files']}, дублей {snap['duplicate_groups']}"
+    if better:
+        note += " · улучшение против базлайна (" + ", ".join(
+            f"{k} {b}→{v}" for k, b, v in better) + " — зафиксируй --write-baseline)"
+    return 0, [note]
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true", help="машинный вывод вместо отчёта")
     ap.add_argument("--top", type=int, default=12, help="сколько строк печатать в таблицах")
     ap.add_argument("--write-baseline", action="store_true",
                     help="зафиксировать метрики в scripts/testmap.baseline.json")
+    ap.add_argument("--check", action="store_true",
+                    help="рэтчет: Красным, если дыр/дублей/оскопления стало больше базлайна")
     a = ap.parse_args(argv)
     m = measure()
     if a.write_baseline:
-        cov = m["coverage"]
-        snap = {
-            "gd_files": m["gd_files"], "gd_tests": m["gd_tests"],
-            "py_files": m["py_files"], "py_tests": m["py_tests"],
-            "holes": len(cov["holes"]), "merge_groups": len(m["merge_groups"]),
-            "merge_files": sum(len(v) for _, v in m["merge_groups"]),
-            "duplicate_groups": len(m["duplicates"]),
-        }
-        (ROOT / "scripts" / "testmap.baseline.json").write_text(
+        snap = snapshot(m)
+        baseline_path().write_text(
             json.dumps(snap, indent=1, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
         print("базлайн записан:", json.dumps(snap, ensure_ascii=False, sort_keys=True))
         return 0
+    if a.check:
+        bp = baseline_path()
+        code, lines = check(m, json.loads(bp.read_text(encoding="utf-8")) if bp.exists() else None)
+        for ln in lines:
+            print(ln)
+        return code
     if a.json:
         print(json.dumps(m, ensure_ascii=False, indent=1))
         return 0
