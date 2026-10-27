@@ -54,7 +54,8 @@ while :; do
   echo "$(date +%H:%M) в работе: $# юнитов, ${1%%:*} .. ${last%%:*}"
   for job; do
     id=${job%%:*}
-    for m in ${job##*:}; do
+    IFS=, read -ra models <<< "${job##*:}"
+    for m in "${models[@]}"; do
       python3 $J next --model "$m" --id "$id" 2>&1 | tail -2 || echo "FAIL $id $m"
     done
   done
