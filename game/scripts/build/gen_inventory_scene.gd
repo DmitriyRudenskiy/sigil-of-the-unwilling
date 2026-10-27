@@ -191,18 +191,24 @@ func _build() -> void:
 	uid += 1
 	_add_node(
 		"Desc_lbl", "Label", "Center/Window/Right",
-		_box(900, 386, 1390, 410), uid)
+		_box(900, 372, 1390, 396), uid)
 	uid += 1
 	_add_node(
 		# Ни цвета, ни размера: цвет наследуется от корня экрана (золото), а
 		# размер — от темы. Свои override'ы сюда просить нельзя: font_color
 		# считается мёртвым (T-189), а размер ниже 16 — нечитаемым (T-190).
+		# 88 px, а не 50: текст — три строки (имя, описание, габарит) по ~29 px,
+		# в 50 px третья строка залезала на панель армии (кадр 2026-10-27).
+		# ponytail: 88 px = ровно три строки; описание длиннее ~90 знаков
+		# (в каталоге максимум 46) свернётся в четвёртую и упрётся в панель —
+		# апгрейд: или блок выше, или описание в тултипе.
 		"Desc", "Label", "Center/Window/Right",
-		"autowrap_mode = 3\nvertical_alignment = 1\n" + _box(900, 410, 1390, 460), uid)
+		"autowrap_mode = 3\nvertical_alignment = 1\n" + _box(900, 396, 1390, 484), uid)
 	uid += 1
 
 	# Кнопки действий — справа от сетки: раньше они стояли на y 531..577, то есть
-	# поверх панели армии (Bottom 470..650).
+	# поверх панели армии (Bottom 486..666 — сдвинута на 16 px вниз, чтобы
+	# трёхстрочное описание влезло над ней).
 	for pair in [["Equip", 26], ["Remove", 90], ["Dispose", 154]]:
 		_add_node(
 			String(pair[0]), "Button", "Center/Window/Right",
@@ -232,7 +238,7 @@ func _build() -> void:
 
 	_add_node(
 		"Bottom", "PanelContainer", "Center/Window",
-		"theme_type_variation = &\"ArtifactBottom\"\n" + _box(10, 470, 1390, 650), uid)
+		"theme_type_variation = &\"ArtifactBottom\"\n" + _box(10, 486, 1390, 666), uid)
 	uid += 1
 
 	for i in 7:

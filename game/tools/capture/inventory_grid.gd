@@ -17,17 +17,31 @@ var hero: HeroController = HeroController.new()
 hero.hero_name = "Тестовый герой"
 screen.add_child(hero)
 var inv: HeroInventory = hero.inventory
+# Имена и описания — настоящие строки каталога по объёму: описание выбранного
+# предмета обязано влезть в свой блок (три строки над панелью армии), а пустые
+# строки фикстуры этот перепуск прячут.
 for pair in [
-	["club", Vector2i(2, 3)],
-	["leather_vest", Vector2i(2, 3)],
-	["buckler", Vector2i(2, 2)],
-	["sandals", Vector2i(1, 2)],
-	["amulet_mourning", Vector2i(1, 2)],
-	["ring_vitality", Vector2i(1, 1)],
-	["helm_sentinel", Vector2i(2, 2)],
-	["cloth_pants", Vector2i(2, 3)],
+	["club", Vector2i(2, 3), "Посох неприкаянности"],
+	["leather_vest", Vector2i(2, 3), "Кожаная безрукавка"],
+	["buckler", Vector2i(2, 2), "Круглый щит"],
+	["sandals", Vector2i(1, 2), "Путные сандалии"],
+	["amulet_mourning", Vector2i(1, 2), "Поминательный амулет"],
+	["ring_vitality", Vector2i(1, 1), "Кольцо живучести"],
+	["helm_sentinel", Vector2i(2, 2), "Шлем стража"],
+	["cloth_pants", Vector2i(2, 3), "Штаны из некрашеного сукна"],
 ]:
-	var art := Artifact.from_dict({"id": StringName(pair[0]), "cells": pair[1]})
+	var desc := ""
+	if pair[0] == "buckler":
+		# Длина — как в каталоге (самая длинная строка там 46 знаков): описание
+		# занимает одну строку, а выдуманная простыня проверяла бы не экран,
+		# а терпение к перепуску.
+		desc = "Круглая спина для чужих ошибок."
+	var art := Artifact.from_dict({
+		"id": StringName(pair[0]),
+		"cells": pair[1],
+		"display_name": String(pair[2]),
+		"description": desc,
+	})
 	if not inv.add_to_backpack(art):
 		# В рюкзак предмет попадает и так: отказ размещения рантайм не прячет,
 		# его создаёт только миграция сейва v10 (`_sync_placements` помечает
@@ -39,7 +53,16 @@ for pair in [
 # верху — кадр показывал бы не экран, а артефакт съёмки.
 screen.set_anchors_preset(Control.PRESET_FULL_RECT)
 screen.set_hero(hero)
+# Состояние для ux-review знаков: один предмет надет, его же дубликат лежит в сумке
+# (ему некуда — красная рамка), а выбран другой (золотая рамка + подсветка габарита).
+# Наводится теми же вызовами, что делает игрок, а не полями экрана.
+var worn: Artifact = inv.backpack[0]
+inv.equip(worn)
+inv.backpack.append(Artifact.from_dict({
+	"id": worn.id, "cells": worn.cells, "display_name": String(worn.display_name)}))
+inv.backpack_changed.emit()
 screen.show()
+screen.select_backpack(1)
 return {
 	"ok": true,
 	"backpack": inv.backpack.size(),

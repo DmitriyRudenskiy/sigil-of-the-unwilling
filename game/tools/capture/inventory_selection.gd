@@ -51,9 +51,11 @@ for i in 4:
 	var lab: Node = screen.get_node_or_null("Center/Window/Left/StatValue_%d" % i) as Node
 	texts.append(lab.text if lab != null else "?")
 var marks: Array = []
-for i in 6:
+for i in made.size():
+	# Узел предмета, а не ячейки ленты: предмет в сетке занимает несколько клеток,
+	# и рамка «выбран»/«некуда» относится к предмету.
 	var cell: Node = screen.get_node_or_null(
-		"Center/Window/Right/Inventory/BackpackSlot_%d" % i) as Node
+		"Center/Window/Right/Grid/Items/Item_%d" % i) as Node
 	if cell == null:
 		marks.append("?")
 		continue
