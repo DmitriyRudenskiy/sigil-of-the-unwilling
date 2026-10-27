@@ -136,13 +136,37 @@ def test_setup_code_падает_на_несуществующем_файле(tm
     assert capture.SETUP_ENV in str(e.value) and "файла нет" in str(e.value)
 
 
+def test_setup_code_ищет_голое_имя_в_tools_capture(tmp_path, monkeypatch):
+    """`CAPTURE_SETUP=inventory_grid` — состояние, а не GDScript-выражение.
+
+    Без резолвинга строка уходила в game_eval и падала «Failed to compile
+    GDScript (error 43)» — симптом, указывающий на код фикстуры, которого там нет.
+    """
+    fixtures = tmp_path / "tools" / "capture"
+    fixtures.mkdir(parents=True)
+    (fixtures / "foo.gd").write_text("print(2)\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(capture, "FIXTURE_DIR", fixtures)
+    assert capture.setup_code({capture.SETUP_ENV: "foo"}) == "print(2)"
+    assert capture.setup_code({capture.SETUP_ENV: "tools/capture/foo.gd"}) == "print(2)"
+    # Инлайн остаётся инлайном: файла `pass.gd` нет, код не подменяется.
+    assert capture.setup_code({capture.SETUP_ENV: "pass"}) == "pass"
+    # Несуществующий путь с расширением — не молчаливый инлайн-код.
+    with pytest.raises(CaptureError):
+        capture.setup_code({capture.SETUP_ENV: "@tools/capture/nope.gd"})
+
+
 class _RecordingMcp:
     """Мок MCP-клиента: пишет порядок вызовов, отдаёт валидный PNG на скриншот."""
 
     def __init__(self) -> None:
         self.calls: list[str] = []
+        self.scene = ""
 
     def run_scene(self, scene: str) -> None:
+        # Предзаданный `scene` остаётся: так мок моделирует «заказали одно,
+        # в current_scene другое» (см. test_capture_scene_не_пишет_кадр_чужой_сцены).
+        self.scene = self.scene or scene
         self.calls.append("run_scene")
 
     def wait_ready(self) -> None:
@@ -151,8 +175,10 @@ class _RecordingMcp:
     def wait_frames(self, n: int) -> None:
         self.calls.append(f"wait_frames:{n}")
 
-    def execute_code(self, code: str) -> None:
+    def execute_code(self, code: str):
         self.calls.append(f"execute::{code.strip()}")
+        # Гард сцены из capture_scene спрашивает путь current_scene.
+        return self.scene if "scene_file_path" in code else None
 
     def screenshot(self) -> bytes:
         self.calls.append("screenshot")
@@ -163,6 +189,21 @@ class _RecordingMcp:
             if needle in call:
                 return i
         raise AssertionError(f"вызов с {needle!r} не записан: {self.calls}")
+
+
+def test_capture_scene_не_пишет_кадр_чужой_сцены(tmp_path):
+    """Кадр принадлежит заказанной сцене, а не той, что осталась в дереве.
+
+    Голое имя в `CAPTURE_SCENE` не роняет съёмку: run_scene не находит сцену,
+    current_scene остаётся предыдущей, и снимок сходится с ней байт в байт
+    (замер 2026-10-27: три «разных» кадра — один sha256 965218a7…, все меню).
+    """
+    mcp = _RecordingMcp()
+    mcp.scene = "res://scenes/main_menu.tscn"
+    with pytest.raises(CaptureError) as e:
+        capture.capture_scene(mcp, "inventory_grid", tmp_path, "x", "тест")
+    assert "current_scene" in str(e.value) and "main_menu" in str(e.value)
+    assert "screenshot" not in mcp.calls, "кадр чужой сцены не должен писаться"
 
 
 def test_capture_scene_ставит_состояние_после_пина_но_до_скриншота(tmp_path):
@@ -183,8 +224,8 @@ class _ReportingMcp(_RecordingMcp):
     """Мок, возвращающий словарь из кода состояния (так делает живой `execute_code`)."""
 
     def execute_code(self, code: str):
-        self.calls.append(f"execute::{code.strip()}")
-        return {"ok": True, "plaque_visible": True} if "select_card()" in code else None
+        running = super().execute_code(code)  # пишет вызов и отвечает гарду сцены
+        return {"ok": True, "plaque_visible": True} if "select_card()" in code else running
 
 
 def test_capture_scene_отдаёт_отчёт_кода_состояния(tmp_path):
@@ -237,7 +278,9 @@ def test_capture_scene_без_состояния_не_вызывает_лишн�
     mcp = _RecordingMcp()
     capture.capture_scene(mcp, "res://scenes/x.tscn", tmp_path, "x", "тест")
     executes = [c for c in mcp.calls if c.startswith("execute::")]
-    assert len(executes) == 1 and "borderless = true" in executes[0], mcp.calls
+    # Гард сцены + пин окна; кода состояния нет ни в одном вызове.
+    assert len(executes) == 2 and "borderless = true" in executes[1], mcp.calls
+    assert not any("select_card()" in c for c in executes), mcp.calls
 
 
 # ── съёмка по запросу ──────────────────────────────────────────────────────

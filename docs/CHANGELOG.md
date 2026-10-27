@@ -9,6 +9,31 @@ date: 2026-10-27
 
 # CHANGELOG — docs/
 
+## 2026-10-27 — съёмочный канал перестал врать: фикстура по имени, чужая сцена — отказ
+
+**Что.** `CAPTURE_SETUP` принимает голое имя фикстуры (`inventory_grid`) и путь без
+`@`; значение, под которое существует файл, больше не считается инлайн-GDScript
+(`game/tests/mcp/capture.py: setup_code`). `CAPTURE_SCENE` проверяется: `capture_scene`
+сверяет `current_scene.scene_file_path` с заказанным путём и падает `CaptureError` до
+съёма кадра. Шаг 1 ux-review в `AGENTS.md` отправляет в `game/tests/mcp/capture.py`
+(канальный съёмщик, [[CAPTURE-HELPER]]) вместо несуществующего
+`scripts/capture_ui_screens.gd`.
+
+**Почему.** Голое имя фикстуры давало `Failed to compile GDScript (error 43)` — симптом,
+по которому ищут ошибку в скрипте, а не в вызове. Голое имя сцены не роняло ничего:
+`run_scene` не находил сцену, в `current_scene` оставалась предыдущая, и снимок сходился
+с ней байт в байт — замер 2026-10-27: три «разных» кадра (меню, инвентарь, инвентарь
+с фикстурой) дали один sha256 `965218a7…`, и все три были меню. Манифест при этом
+утверждал, что состояние применено (`CAPTURE_SETUP вернул: {'ok': True, 'placed': 8}`).
+
+**Проверено.** `python3 -m pytest tests/mcp/test_capture.py -q` → 26 passed, 1 skipped
+(+2 теста: разрешение голого имени фикстуры и отказ на чужой сцене). Живой прогон:
+`CAPTURE_SCENE=res://scenes/ui/artifact_inventory_screen.tscn CAPTURE_SETUP=inventory_grid`
+→ `116b538e…` (кадр инвентаря, а не меню); `CAPTURE_SCENE=inventory_grid` → `CaptureError`.
+Полный гейт: GdUnit 3492 теста, 0 падений; MCP 82 passed / 2 skipped / 1 failed —
+падение детерминированно известное, T-178 (`test_explored_but_unseen_terrain_stays_drawn_dimmed`),
+к правке отношения не имеет.
+
 ## 2026-10-27 — ux-review получил адресную сетку (`.pi/skills/ui-grid-review`)
 
 **Что.** Приёмка экрана против макета перестала быть «на глаз, словами». Три

@@ -58,10 +58,12 @@
 ux-review — не шаг владельца и не предлог отложить задачу со словами «headless
 не проверяет». UI-приёмку делает сам агент зрением по живому кадру:
 
-1. **Кадр.** Поднять экран так, как его поднимает игрок (godot-mcp:
-   `run_project` + `select_scene`/`game_eval`, либо канал
-   `scripts/capture_ui_screens.gd`), снять кадр в целевом разрешении в
-   `tmp/shots/<screen>-<seq>.png` (пиксели в git не идут, D-185).
+1. **Кадр.** Поднять экран так, как его поднимает игрок — канальный съёмщик
+   `game/tests/mcp/capture.py` (godot-mcp: `run_project` + `select_scene`/`game_eval`, —
+   команда воспроизведения в [[CAPTURE-HELPER]]: `CAPTURE_SCENE=res://…/x.tscn
+   CAPTURE_SETUP=<фикстура> python3 -m pytest tests/mcp/test_capture.py -q`), снять кадр
+   в целевом разрешении в `tmp/shots/<screen>-<seq>.png` (пиксели в git не идут, D-185).
+   Кадр состояния без `CAPTURE_SETUP` — другой кадр, а не нужный.
 2. **Сравнение.** Открыть кадр и макет-источник
    (`design/single_window_layout/all_screens_ui.png`) инструментом чтения
    изображений и разобрать поэлементно: состав, места, текст и иконки, пустые

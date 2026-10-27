@@ -27,7 +27,11 @@ CANONICAL_SIZE = (1920, 1080)
 # Сколько кадров ждём между праймингом и отчётным снимком (см. capture_scene).
 PRIME_SETTLE_FRAMES = 5
 SIZE_ENV = "CAPTURE_SIZE"
+SCENE_ENV = "CAPTURE_SCENE"
 SETUP_ENV = "CAPTURE_SETUP"
+# Где искать состояние по голому имени: `CAPTURE_SETUP=inventory_grid` →
+# tools/capture/inventory_grid.gd (тот же приём, что `CAPTURE_SCENE` для сцен).
+FIXTURE_DIR = Path(__file__).resolve().parents[2] / "tools" / "capture"
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
 
@@ -175,6 +179,17 @@ def setup_code(env: dict[str, str] | None = None) -> str:
     raw = str((env if env is not None else os.environ).get(SETUP_ENV, "")).strip()
     if not raw:
         return ""
+    # Голое имя фикстуры (`CAPTURE_SETUP=inventory_grid`) — тот же приём, каким
+    # `CAPTURE_SCENE` ищет сцену, и та же ловушка, что описана в CAPTURE-HELPER:
+    # без резолвинга строка уходит в game_eval как выражение и падает «Failed to
+    # compile GDScript (error 43)», где искать надо не код, а вызов. Инлайн-код от
+    # имени отличает то, что на диске лежит файл: `tools/capture/<имя>.gd` или
+    # указанный путь. Совпадений нет — как и раньше, это инлайн-GDScript.
+    if "\n" not in raw and not raw.startswith("@"):
+        guess = Path(raw).expanduser() if raw.endswith(".gd") \
+            else FIXTURE_DIR / f"{raw}.gd"
+        if guess.is_file():
+            return guess.read_text(encoding="utf-8").strip()
     if raw.startswith("@"):
         path = Path(raw[1:]).expanduser()
         if not path.is_file():
@@ -190,6 +205,19 @@ def capture_scene(mcp: Any, scene: str, out_dir: Path, name: str,
     size = tuple(size or canonical_size())
     mcp.run_scene(scene)
     mcp.wait_ready()
+    # Кадр обязан принадлежать заказанной сцене. Невалидный `CAPTURE_SCENE`
+    # (голое имя `inventory_grid` вместо res://…/artifact_inventory_screen.tscn)
+    # не падает: в current_scene остаётся ПРЕДЫДУЩАЯ сцена, снимок сходится с ней
+    # байт в байт, а манифест утверждает фикстуру. Замер 2026-10-27: три «разных»
+    # кадра (main_menu, inventory, inventory_grid) сошлись одним sha256 965218a7…,
+    # и все три были меню.
+    running = str(mcp.execute_code(
+        "var s = get_tree().current_scene\n"
+        "return str(s.scene_file_path) if s else '<нет текущей сцены>'"))
+    if running != scene:
+        raise CaptureError(
+            f"{SCENE_ENV}={scene}: в current_scene «{running}» — заказанная сцена не "
+            "загружена (нужен путь вида res://scenes/…/x.tscn, голое имя не резолвится)")
     mcp.wait_frames(20)
     mcp.execute_code(pin_window_code(size))
     setup_result: Any = None
