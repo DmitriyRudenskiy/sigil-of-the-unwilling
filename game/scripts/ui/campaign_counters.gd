@@ -47,6 +47,14 @@ const ROWS: Array[Dictionary] = [
 		"ticket": "T-159",
 	},
 	{
+		"id": &"sack",
+		"mockup": "мешок",
+		"resource": &"provisions",
+		# Слой 2: `SettlementProcessor` ведёт MVP-триаду, провиант в кампейн-ходе
+		# не считается.
+		"ticket": "T-159",
+	},
+	{
 		"id": &"wood",
 		"mockup": "брёвна",
 		"resource": &"wood",
@@ -59,20 +67,21 @@ const ROWS: Array[Dictionary] = [
 		"ticket": "",
 	},
 	{
-		"id": &"sack",
-		"mockup": "мешок",
-		"resource": &"provisions",
-		# Слой 2: `SettlementProcessor` ведёт MVP-триаду, провиант в кампейн-ходе
-		# не считается.
-		"ticket": "T-159",
-	},
-	{
 		"id": &"gold",
 		"mockup": "монеты",
 		"resource": &"",
 		# Золото живёт в мировом пути (`CITY_RESOURCE_CAPACITIES.gold`), в
 		# кампейн-составе поля нет.
 		"ticket": "T-159",
+	},
+	{
+		"id": &"ninth",
+		"mockup": "ноль без иконки",
+		"resource": &"",
+		# Девятая ячейка макета: валюты-носителя нет (строка 10 карты `reference`,
+		# D-203 обещает «девять счётчиков»), литеральный «0» из кадра рисовать
+		# запрещено (D-200) — полоса показывает заглушку с меткой задачи (T-243).
+		"ticket": "T-243",
 	},
 ]
 
