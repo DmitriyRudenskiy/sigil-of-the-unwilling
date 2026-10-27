@@ -83,14 +83,23 @@ pytest (mcp):    файлов 30, функций 78
 из дыр (`quest_journal_screen`, `faction_screen`, `resources_panel`, `arena_hex_cell`,
 `turn_timer`) попадают в скан автоматически, и новый экран не требует нового теста.
 
-### С-3 · По одному файлу на носителя в 27 группах
+### С-3 · По одному файлу на носителя в 28 группах
 
 Транспортная операция: `func test_*` переезжают в файл носителя (`test_city*.gd` →
 `test_city.gd` и т.д.), файл-приложение удаляется, заголовки-обоснования тикетов
 переезжают комментариями. Число тест-функций не меняется, число файлов падает.
-Крупнейшие группы: `world/city.gd` (17 файлов), `systems/battle_state.gd` (16),
-`ui/battle_ui.gd` (7), `campaign/campaign_battle.gd` (6), `ui/city_screen.gd` (6),
-`ui/campaign_hud.gd` (6), `world/pop_unit.gd` (6).
+Состояние на 2026-10-27: **28 групп, 141 файл** (было 146). Срез **С-3а**: пять файлов
+ядра города влиты в `world/test_city.gd` (82 теста, 936 строк), группа `world/city.gd`
+17 → 12 — отчёт и запреты в `TICKETS.md`, T-227 · С-3а.
+
+Крупнейшие группы сейчас: `systems/battle_state.gd` (16), `world/city.gd` (12),
+`ui/battle_ui.gd` (8), `ui/city_screen.gd` (7), `campaign/campaign_battle.gd` (6),
+`campaign/campaign_composition.gd` (6), `core/hex_utils.gd` (6), `ui/campaign_hud.gd` (6).
+
+Из оставшихся 12 файлов группы `world/city.gd` **8 проверяют другой носитель** (`city_check`,
+`city_turn_processor`, `city_manager`, `city_factory`, `city_screen`, `SmolderingCity`) —
+в группу их складывает эвристика имени `merges()`. Переименование сбросило бы метрику,
+не уменьшив числа файлов, поэтому оно не принято молча (T-227 · С-3а).
 
 ### С-4 · Триаже 92 дыр
 
