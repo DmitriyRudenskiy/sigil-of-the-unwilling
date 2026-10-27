@@ -74,24 +74,6 @@ func _read(path: String) -> String:
 	return text
 
 
-## AC1: в исходниках четырёх экранов нет ни add_theme_stylebox_override, ни
-# theme_override_styles (строк .tscn). Закомментированные упоминания не считаются —
-# они не исполняются, но их тоже видно: тест режет «#» с начала строки.
-func test_tail_sources_have_no_stylebox_overrides() -> void:
-	var offenders := PackedStringArray()
-	for path in _SOURCES:
-		for line in _read(path).split("\n"):
-			var t := line.strip_edges()
-			if t.begins_with("#") or t.begins_with(";"):
-				continue
-			if "add_theme_stylebox_override" in t or "theme_override_styles/" in t:
-				offenders.append("%s: %s" % [path.get_file(), t.left(70)])
-	assert_str("\n".join(offenders)).is_empty() \
-		.override_failure_message("остались stylebox-override:\n" + "\n".join(offenders))
-
-
-## adventure_ui: стиль правой колонки был изобретён кодом — проверяем, что в теме
-# лежит ровно он же, узел его резолвит, и значения перенесены без потерь.
 func test_adventure_column_carries_transcribed_style() -> void:
 	var scene := _mk("adventure_ui")
 	await get_tree().process_frame
@@ -209,13 +191,10 @@ func test_options_popup_had_dead_override_only() -> void:
 		)
 
 
-## Негативный контроль: незарегистрированный носитель не должен резолвить стиль
-# PanelInfoSlot — иначе тест выше был бы пустым.
-func test_unknown_variation_does_not_resolve_slot_style() -> void:
-	var p := Panel.new()
-	p.theme_type_variation = "PanelInfoSlotMissing"
-	get_tree().root.add_child(p)
-	_spawned.append(p)
-	await get_tree().process_frame
-	assert_bool(ThemeCarrierGuard.resolves_carrier(p, _THEME, "panel", "PanelInfoSlot")).is_false() \
-		.override_failure_message("несуществующий носитель резолвит Panel/slot — проверка пуста")
+# T-227 (С-2): проверки «в исходниках нет обхода темы» и «несуществующий тип не
+# резолвит» переехали в res://tests/unit/ui/test_theme_source_scan.gd (скан всего
+# production-кода, а не «своих» файлов) и res://tests/unit/ui/test_theme_variation_matrix.gd
+# (контракт от носителя: все 70 вариантов темы, а не три экрана, которым завели файл).
+# Здесь остались только проверки, привязанные к этому экрану: что ТЕМА отдаёт ровно те
+# значения, которые рисовал снятый override (AC2), и что живой узел экрана не получает
+# переопределений в рантайме.

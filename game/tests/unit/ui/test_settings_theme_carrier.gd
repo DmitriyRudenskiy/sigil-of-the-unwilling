@@ -107,13 +107,10 @@ func test_theme_carries_the_removed_style_values() -> void:
 				.override_failure_message("скругление кнопки должен остаться 6")
 
 
-## Негативный контроль: вариант темы обязан быть зарегистрирован с base_type.
-## На несуществующем типе движок отдаёт дефолт виджета, и экран молча теряет стиль.
-func test_unregistered_type_does_not_resolve_carrier() -> void:
-	var panel := PanelContainer.new()
-	_nodes.append(panel)
-	panel.theme = _THEME
-	panel.theme_type_variation = &"PanelSettingsMissing"
-	get_tree().root.add_child(panel)
-	assert_bool(ThemeCarrierGuard.resolves_carrier(panel, _THEME, "panel", "PanelSettings")).is_false() \
-		.override_failure_message("несуществующий тип резолвит носитель — проверка ничего не стоит")
+# T-227 (С-2): проверки «в исходниках нет обхода темы» и «несуществующий тип не
+# резолвит» переехали в res://tests/unit/ui/test_theme_source_scan.gd (скан всего
+# production-кода, а не «своих» файлов) и res://tests/unit/ui/test_theme_variation_matrix.gd
+# (контракт от носителя: все 70 вариантов темы, а не три экрана, которым завели файл).
+# Здесь остались только проверки, привязанные к этому экрану: что ТЕМА отдаёт ровно те
+# значения, которые рисовал снятый override (AC2), и что живой узел экрана не получает
+# переопределений в рантайме.

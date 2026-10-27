@@ -128,54 +128,8 @@ func test_frame_does_not_fall_back_to_panel_default() -> void:
 		.override_failure_message("`Frame` резолвит Panel/styles/panel — носитель не применился")
 
 
-## Негативный контроль: несуществующий носитель не обязан резолвить стиль рамки —
-# иначе проверка резолва выше ничего не стоила бы.
-func test_unknown_variation_does_not_resolve_frame_style() -> void:
-	var probe := Panel.new()
-	probe.theme_type_variation = &"MinimapFrameMissing"
-	get_tree().root.add_child(probe)
-	var frame_style: StyleBox = _THEME.get_stylebox("panel", "MinimapFrame")
-	var got: StyleBox = probe.get_theme_stylebox("panel")
-	assert_bool(got == null or got.get_instance_id() != frame_style.get_instance_id()).is_true() \
-		.override_failure_message("чужой носитель резолвит MinimapFrame — проверка резолва пуста")
-	probe.free()
 
 
-## Вторая половина T-147: сценевых stylebox-override во всём game/scenes не осталось.
-# Считаются строки вида `theme_override_styles/... = ...`, комментарии пропускаются.
-func test_no_scene_stylebox_overrides_remain() -> void:
-	var found := PackedStringArray()
-	var total := 0
-	for path in _tscn_files("res://scenes"):
-		var f := FileAccess.open(path, FileAccess.READ)
-		if f == null:
-			continue
-		var body := f.get_as_text()
-		f.close()
-		for line in body.split("\n"):
-			var t := line.strip_edges()
-			if t.begins_with("#") or t.begins_with(";"):
-				continue
-			if t.begins_with("theme_override_styles/"):
-				total += 1
-				found.append("%s: %s" % [path, t])
-	assert_int(total).is_equal(_REMAINING_IN_SCENES) \
-		.override_failure_message(
-			"в game/scenes %d сценевых stylebox-override вместо %d:\n%s"
-			% [total, _REMAINING_IN_SCENES, "\n".join(found)]
-		)
-
-
-# Уникальность sub_resource id — инвариант уровня темы, а не этого экрана: одна копия
-# проверки живёт в tests/unit/ui/test_army_panel_theme_carrier.gd
-# (::test_theme_sub_resource_ids_are_unique), там, где дубликат id и был найден.
-# Вторая копия отсюда удалена как дубль (T-227).
-
-## base_type носителя обязан быть именно `Panel`. Мутация «base_type =
-# PanelContainer» резолв НЕ ломает (и Panel, и PanelContainer читают стиль `panel`),
-# то есть проверка резолва её не ловит — а носитель с чужим base_type живёт в теме
-# как будущая ловушка: смена имени стиля (или перенос на узел без `panel`) тогда
-# поедёт молча. Гард текстовый, потому что тема — ресурс, а не код.
 func test_carrier_declares_panel_base_type() -> void:
 	var f := FileAccess.open("res://assets/theme/game_theme.tres", FileAccess.READ)
 	assert_that(f).is_not_null()
@@ -206,3 +160,10 @@ func _tscn_files(path: String) -> PackedStringArray:
 		name = d.get_next()
 	d.list_dir_end()
 	return out
+# T-227 (С-2): проверки «в исходниках нет обхода темы» и «несуществующий тип не
+# резолвит» переехали в res://tests/unit/ui/test_theme_source_scan.gd (скан всего
+# production-кода, а не «своих» файлов) и res://tests/unit/ui/test_theme_variation_matrix.gd
+# (контракт от носителя: все 70 вариантов темы, а не три экрана, которым завели файл).
+# Здесь остались только проверки, привязанные к этому экрану: что ТЕМА отдаёт ровно те
+# значения, которые рисовал снятый override (AC2), и что живой узел экрана не получает
+# переопределений в рантайме.

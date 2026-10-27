@@ -132,14 +132,10 @@ func test_removed_focus_override_was_dead() -> void:
 		.override_failure_message("Button резолвит focus не из темы — удаление override меняло пиксел")
 
 
-## Негативный контроль: вариант обязан быть зарегистрирован с base_type. На
-# несуществующем типе движок отдаёт стиль базового PanelContainer, и узел молча
-# теряет носитель.
-func test_unregistered_type_does_not_resolve_carrier() -> void:
-	var p := PanelContainer.new()
-	_nodes.append(p)
-	p.theme = _THEME
-	p.theme_type_variation = &"PanelWindowMissing"
-	get_tree().root.add_child(p)
-	assert_bool(ThemeCarrierGuard.resolves_carrier(p, _THEME, "panel", "PanelWindow")).is_false() \
-		.override_failure_message("несуществующий тип резолвит носитель — проверка ничего не стоит")
+# T-227 (С-2): проверки «в исходниках нет обхода темы» и «несуществующий тип не
+# резолвит» переехали в res://tests/unit/ui/test_theme_source_scan.gd (скан всего
+# production-кода, а не «своих» файлов) и res://tests/unit/ui/test_theme_variation_matrix.gd
+# (контракт от носителя: все 70 вариантов темы, а не три экрана, которым завели файл).
+# Здесь остались только проверки, привязанные к этому экрану: что ТЕМА отдаёт ровно те
+# значения, которые рисовал снятый override (AC2), и что живой узел экрана не получает
+# переопределений в рантайме.

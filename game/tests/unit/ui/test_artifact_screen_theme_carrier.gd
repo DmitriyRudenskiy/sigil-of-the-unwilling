@@ -196,22 +196,6 @@ func test_nodes_do_not_fall_back_to_panel_container_default() -> void:
 			.override_failure_message("`%s` резолвит дефолт PanelContainer — носитель не применился" % path)
 
 
-## Негативный контроль: несуществующий носитель не обязан резолвить эти стили —
-# иначе проверка резолва выше ничего не стоила бы.
-func test_unknown_variation_does_not_resolve_these_styles() -> void:
-	var probe := PanelContainer.new()
-	probe.theme_type_variation = &"ArtifactBottomMissing"
-	get_tree().root.add_child(probe)
-	assert_bool(ThemeCarrierGuard.resolves_carrier(probe, _THEME, "panel", "ArtifactBottom")).is_false() \
-		.override_failure_message("чужой носитель резолвит ArtifactBottom — проверка резолва пуста")
-	probe.free()
-
-
-## base_type носителей обязан быть именно `PanelContainer`. Мутация «base_type =
-# Panel» резолв НЕ ломает (оба класса читают стиль `panel`), то есть проверка
-# резолва её не ловит — а носитель с чужим base_type живёт в теме как будущая
-# ловушка. Гард текстовый, потому что тема — ресурс, а не код
-# (правило 8, docs/mvp/CAPTURE-HELPER.md).
 func test_carriers_declare_panel_container_base_type() -> void:
 	var f := FileAccess.open("res://assets/theme/game_theme.tres", FileAccess.READ)
 	assert_that(f).is_not_null()
@@ -228,18 +212,10 @@ func test_carriers_declare_panel_container_base_type() -> void:
 			)
 
 
-## Снятый обход не должен вернуться в этот скрипт: stylebox-override здесь — ноль.
-func test_no_stylebox_overrides_remain_in_script() -> void:
-	var f := FileAccess.open("res://scripts/ui/artifact_inventory_screen.gd", FileAccess.READ)
-	assert_that(f).is_not_null()
-	var text := f.get_as_text()
-	f.close()
-	var here := 0
-	for line in text.split("\n"):
-		var t := line.strip_edges()
-		if t.begins_with("#") or t.begins_with(";"):
-			continue
-		if "add_theme_stylebox_override" in t:
-			here += 1
-	assert_int(here).is_equal(_REMAINING_IN_SCRIPT) \
-		.override_failure_message("в artifact_inventory_screen.gd осталось %d stylebox-override" % here)
+# T-227 (С-2): проверки «в исходниках нет обхода темы» и «несуществующий тип не
+# резолвит» переехали в res://tests/unit/ui/test_theme_source_scan.gd (скан всего
+# production-кода, а не «своих» файлов) и res://tests/unit/ui/test_theme_variation_matrix.gd
+# (контракт от носителя: все 70 вариантов темы, а не три экрана, которым завели файл).
+# Здесь остались только проверки, привязанные к этому экрану: что ТЕМА отдаёт ровно те
+# значения, которые рисовал снятый override (AC2), и что живой узел экрана не получает
+# переопределений в рантайме.

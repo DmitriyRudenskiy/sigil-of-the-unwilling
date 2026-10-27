@@ -57,22 +57,6 @@ func test_bottom_bar_has_no_plate_carrier() -> void:
 		.override_failure_message("на Control нижней панели висит stylebox-переопределение")
 
 
-## Вариант темы обязан быть зарегистрирован с base_type: на «Panel» (мешок стилей,
-## не тип виджета) движок носитель не резолвит — отдаёт дефолт движка. Гард на
-## регрессивный соблазн «упрощу до theme_type_variation = "Panel"».
-func test_unregistered_type_does_not_resolve_carrier() -> void:
-	var panel := PanelContainer.new()
-	_nodes.append(panel)
-	panel.theme = _THEME
-	panel.theme_type_variation = &"Panel"
-	get_tree().root.add_child(panel)
-	assert_bool(ThemeCarrierGuard.resolves_carrier(panel, _THEME, "panel", "Panel")).is_false() \
-		.override_failure_message("«Panel» резолвится — замер устарел")
-	assert_str(str(_THEME.get_type_variation_base("PanelPlate"))).is_equal("PanelContainer") \
-		.override_failure_message("PanelPlate не зарегистрирован как вариант PanelContainer")
-
-## Панель спелбука: `panel` — не stylebox-имя Control, движок на мокрое имя молчит,
-## поэтому прежнее переопределение было мёртвым кодом. Проверяем, что его больше нет.
 func test_spellbook_panel_has_no_dead_stylebox_overrides() -> void:
 	var panel: BattleSpellbookPanel = _SPELLBOOK_SCENE.instantiate()
 	_nodes.append(panel)
@@ -87,3 +71,10 @@ func test_spellbook_panel_has_no_dead_stylebox_overrides() -> void:
 	for btn in panel._spell_buttons:
 		assert_bool(btn.has_theme_stylebox("panel")).is_false() \
 			.override_failure_message("на Button висит stylebox по имени, которое Button не читает")
+# T-227 (С-2): проверки «в исходниках нет обхода темы» и «несуществующий тип не
+# резолвит» переехали в res://tests/unit/ui/test_theme_source_scan.gd (скан всего
+# production-кода, а не «своих» файлов) и res://tests/unit/ui/test_theme_variation_matrix.gd
+# (контракт от носителя: все 70 вариантов темы, а не три экрана, которым завели файл).
+# Здесь остались только проверки, привязанные к этому экрану: что ТЕМА отдаёт ровно те
+# значения, которые рисовал снятый override (AC2), и что живой узел экрана не получает
+# переопределений в рантайме.

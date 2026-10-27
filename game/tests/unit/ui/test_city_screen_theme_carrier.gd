@@ -171,57 +171,6 @@ func test_chips_keep_states_outside_variation() -> void:
 			)
 
 
-## AC1 для подсреза: в чипах обходов не осталось, и счётчик по экрану не отрос.
-# Файл целиком нулём быть не может — в нём ещё подсрезы 2–4, — поэтому проверка
-# рэтчетом: ровно 12 вызовов, и ни одного на снятый хелпер.
-func test_chip_overrides_removed_and_counter_ratcheted() -> void:
-	var f := FileAccess.open("res://scripts/ui/city_screen.gd", FileAccess.READ)
-	assert_that(f).is_not_null()
-	var text := f.get_as_text()
-	f.close()
-	var offenders := PackedStringArray()
-	var live := 0
-	for line in text.split("\n"):
-		var t := line.strip_edges()
-		if t.begins_with("#") or t.begins_with(";"):
-			continue
-		if "_resource_metric_style" in t:
-			offenders.append("снятый хелпер всё ещё упоминается: " + t.left(70))
-		if "add_theme_stylebox_override" in t:
-			live += 1
-			offenders.append("остался override: " + t.left(70))
-	assert_bool("_resource_metric_style" in text).is_false() \
-		.override_failure_message("хелпер _resource_metric_style обязан быть удалён вместе с вызовами")
-	assert_int(live).is_equal(_REMAINING_OVERRIDES) \
-		.override_failure_message(
-			"в city_screen.gd %d stylebox-override вместо %d (подсрез 1 снял 4 из 16):\n%s"
-			% [live, _REMAINING_OVERRIDES, "\n".join(offenders)]
-		)
-
-
-## Негативный контроль силы гарда: несуществующий носитель не должен резолвить
-# стиль чипа — иначе проверка резолва выше была бы пустой.
-func test_unknown_variation_does_not_resolve_chip_style() -> void:
-	var b := Button.new()
-	b.theme_type_variation = "CityResourceMetricMissing"
-	get_tree().root.add_child(b)
-	await get_tree().process_frame
-	assert_bool(ThemeCarrierGuard.resolves_carrier(b, _THEME, "normal", "CityResourceMetric")).is_false() \
-		.override_failure_message("несуществующий носитель резолвит стиль чипа — проверка пуста")
-	b.free()
-
-
-# ── Подсрез 2: панели оболочки города ────────────────────────────────────────────
-#
-# Шесть панелей (шапка, инспектор, легенда, сайдбар, легаси-панель, фон доски)
-# красились стилем, который код собирал в _panel_style. Перенесены в тему тремя
-# носителями: CityPanelGold, CityPanelDark, CityBoardPanel (base_type = "PanelContainer").
-#
-# Про точность цвета: Godot сравнивает Color с epsilon ~1.19e-7 (float-точность),
-# поэтому гард ловит перенос с осмысленным дрейфом (0.1882 вместо 0.1882352977991104 —
-# это 3.5e-5) и не ловит различия ниже бита растра. Для пиксела это и есть «то же
-# значение»; контроль чувствительности кадра (съёмка 2026-10-20) подтверждает, что
-# властвует тема.
 
 func _panel(screen: Node, node_name: String) -> PanelContainer:
 	var node := screen.find_child(node_name, true, false) as PanelContainer
@@ -329,68 +278,6 @@ func test_legacy_panel_hidden_but_still_carries_style() -> void:
 		)
 
 
-## AC1 для подсреза: шесть обходов сняты, счётчик по файлу — 6, и ни один из
-# оставшихся не относится к панелям оболочки.
-func test_shell_overrides_removed_and_counter_ratcheted() -> void:
-	var f := FileAccess.open("res://scripts/ui/city_screen.gd", FileAccess.READ)
-	assert_that(f).is_not_null()
-	var text := f.get_as_text()
-	f.close()
-	var live := 0
-	var shell_offenders := PackedStringArray()
-	for line in text.split("\n"):
-		var t := line.strip_edges()
-		if t.begins_with("#") or t.begins_with(";"):
-			continue
-		if "add_theme_stylebox_override" not in t:
-			continue
-		live += 1
-		for node_name in _SHELL:
-			if t.begins_with(node_name + ".add_theme_stylebox_override") \
-					or t.begins_with("_" + node_name + ".add_theme_stylebox_override"):
-				shell_offenders.append(t.left(70))
-	assert_int(live).is_equal(_REMAINING_OVERRIDES) \
-		.override_failure_message(
-			"в city_screen.gd %d stylebox-override вместо %d (подсрез 2 снял 6 из 12)"
-			% [live, _REMAINING_OVERRIDES]
-		)
-	assert_int(shell_offenders.size()).is_equal(0) \
-		.override_failure_message(
-			"у панелей оболочки остался override — он сильнее темы:\n%s" % "\n".join(shell_offenders)
-		)
-
-
-## Негативный контроль: несуществующий носитель не резолвит стиль панели — иначе
-# проверка резолва выше была бы пустой (то же требование, что и для чипов).
-func test_unknown_variation_does_not_resolve_shell_style() -> void:
-	var panel := PanelContainer.new()
-	panel.theme_type_variation = "CityPanelGoldMissing"
-	get_tree().root.add_child(panel)
-	await get_tree().process_frame
-	assert_bool(ThemeCarrierGuard.resolves_carrier(panel, _THEME, "panel", "CityPanelGold")).is_false() \
-		.override_failure_message("несуществующий носитель резолвит стиль панели — проверка пуста")
-	panel.free()
-
-
-# ── Подсрез 3: каталог зданий ───────────────────────────────────────────────────
-#
-# Карточки, вкладки и панель стоимости каталога красились стилями, которые код
-# собирал в `_panel_style` и в двух локальных StyleBoxFlat. Перенесены в тему
-# носителями CityCard / CityCardSelected / CityCostPanel (base_type = "PanelContainer")
-# и CityTab (base_type = "Button").
-#
-# Главное отличие этого подреза от первых двух: выбор карточки — рантайм-мутация.
-# Раньше она перекрашивала карточку новым override'ом; теперь меняет носитель
-# (боевой прецедент PanelActive/PanelDead). Значит гард обязан проверять не только
-# «стиль тот», но и «переключение работает в обе стороны», иначе миграция могла бы
-# просто заморозить первую карточку золотой.
-#
-# Кадр состояния (съёмка 2026-10-20) снимается тем же кодом, что `_open_catalog`
-# ниже: без него сцена показывает пустой каталог (city == null), и нулевая дельта
-# доказывала бы отсутствие карточек, а не отсутствие сдвига.
-
-## Каталог открывается только с городом: `_render_catalog_cards` выходит из early-return
-# при city == null. Город и seed фиксированы — тот же код, что CAPTURE_SETUP съёмки.
 func _open_catalog() -> Node:
 	var screen := _mk_screen()
 	var city := City.new()
@@ -629,45 +516,10 @@ func test_cost_panel_carries_theme_variation() -> void:
 		.override_failure_message("ни одной панели стоимости не найдено — гард проверял пустоту")
 
 
-## AC1 для подсреза: пять обходов сняты, в файле остался один (фокус), и фабрика
-# стилей `_panel_style` удалена — после этого подреза изобретать стиль коду негде.
-func test_catalog_overrides_removed_and_counter_ratcheted() -> void:
-	var f := FileAccess.open("res://scripts/ui/city_screen.gd", FileAccess.READ)
-	assert_that(f).is_not_null()
-	var text := f.get_as_text()
-	f.close()
-	var live := 0
-	var offenders := PackedStringArray()
-	for line in text.split("\n"):
-		var t := line.strip_edges()
-		if t.begins_with("#") or t.begins_with(";"):
-			continue
-		if "add_theme_stylebox_override" not in t:
-			continue
-		live += 1
-		offenders.append(t.left(70))
-	assert_bool("_panel_style" in text).is_false() \
-		.override_failure_message(
-			"фабрика стилей _panel_style вернулась: после подреза 4 ей некого создавать"
-		)
-	assert_int(live).is_equal(_REMAINING_OVERRIDES) \
-		.override_failure_message(
-			"в city_screen.gd %d stylebox-override вместо %d (остался только фокус):\n%s"
-			% [live, _REMAINING_OVERRIDES, "\n".join(offenders)]
-		)
-	for line in offenders:
-		assert_bool("focus" in line).is_true() \
-			.override_failure_message(
-				"оставшийся override — не фокус клавиатуры, а новый обход: " + line
-			)
-
-
-## Негативный контроль: несуществующий носитель не резолвит стиль карточки.
-func test_unknown_variation_does_not_resolve_card_style() -> void:
-	var card := PanelContainer.new()
-	card.theme_type_variation = "CityCardMissing"
-	get_tree().root.add_child(card)
-	await get_tree().process_frame
-	assert_bool(ThemeCarrierGuard.resolves_carrier(card, _THEME, "panel", "CityCard")).is_false() \
-		.override_failure_message("несуществующий носитель резолвит стиль карточки — проверка пуста")
-	card.free()
+# T-227 (С-2): проверки «в исходниках нет обхода темы» и «несуществующий тип не
+# резолвит» переехали в res://tests/unit/ui/test_theme_source_scan.gd (скан всего
+# production-кода, а не «своих» файлов) и res://tests/unit/ui/test_theme_variation_matrix.gd
+# (контракт от носителя: все 70 вариантов темы, а не три экрана, которым завели файл).
+# Здесь остались только проверки, привязанные к этому экрану: что ТЕМА отдаёт ровно те
+# значения, которые рисовал снятый override (AC2), и что живой узел экрана не получает
+# переопределений в рантайме.

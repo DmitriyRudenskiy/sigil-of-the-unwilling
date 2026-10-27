@@ -163,60 +163,8 @@ func test_slots_do_not_fall_back_to_panel_default() -> void:
 			)
 
 
-## Негативный контроль силы гарда: несуществующий носитель не должен резолвить
-# стиль слота — иначе проверки резолва выше ничего не стоили бы.
-func test_unknown_variation_does_not_resolve_slot_style() -> void:
-	var probe := Panel.new()
-	probe.theme_type_variation = &"ArmySlotMissing"
-	get_tree().root.add_child(probe)
-	assert_bool(ThemeCarrierGuard.resolves_carrier(probe, _THEME, "panel", "ArmySlot")).is_false() \
-		.override_failure_message("чужой носитель резолвит ArmySlot — проверка резолва пуста")
-	probe.free()
 
 
-## AC1 для подсреза: в army_panel.gd обходов не осталось, и счётчик по game/scripts
-# не отрос. Файл обязан быть нулевым — это последний его stylebox-обход.
-func test_army_panel_overrides_removed_and_counter_ratcheted() -> void:
-	var f := FileAccess.open("res://scripts/ui/army_panel.gd", FileAccess.READ)
-	assert_that(f).is_not_null()
-	var text := f.get_as_text()
-	f.close()
-	var here := 0
-	for line in text.split("\n"):
-		var t := line.strip_edges()
-		if t.begins_with("#") or t.begins_with(";"):
-			continue
-		if "add_theme_stylebox_override" in t:
-			here += 1
-	assert_int(here).is_equal(0) \
-		.override_failure_message("в army_panel.gd осталось %d stylebox-override" % here)
-
-	var total := 0
-	var where := PackedStringArray()
-	for path in _gd_files("res://scripts"):
-		var g := FileAccess.open(path, FileAccess.READ)
-		if g == null:
-			continue
-		var body := g.get_as_text()
-		g.close()
-		for line in body.split("\n"):
-			var t := line.strip_edges()
-			if t.begins_with("#") or t.begins_with(";"):
-				continue
-			if "add_theme_stylebox_override" in t:
-				total += 1
-				where.append(path)
-	assert_int(total).is_equal(_REMAINING_IN_SCRIPTS) \
-		.override_failure_message(
-			"в game/scripts %d stylebox-override вместо %d:\n%s"
-			% [total, _REMAINING_IN_SCRIPTS, "\n".join(where)]
-		)
-
-
-## Уникальность sub_resource id в файле темы (инвариант уровня темы, единственная
-#копия — вторая была в test_minimap_frame_carrier.gd, удалена как дубль, T-227). Дубликат id молча отдаёт ссылку на
-# ПЕРВЫЙ ресурс: носитель слота резолвился в алый стиль `PanelArmySlot`,
-# тема при этом читалась без единой ошибки.
 func test_theme_sub_resource_ids_are_unique() -> void:
 	var f := FileAccess.open("res://assets/theme/game_theme.tres", FileAccess.READ)
 	assert_that(f).is_not_null()
@@ -252,3 +200,10 @@ func _gd_files(path: String) -> PackedStringArray:
 		name = d.get_next()
 	d.list_dir_end()
 	return out
+# T-227 (С-2): проверки «в исходниках нет обхода темы» и «несуществующий тип не
+# резолвит» переехали в res://tests/unit/ui/test_theme_source_scan.gd (скан всего
+# production-кода, а не «своих» файлов) и res://tests/unit/ui/test_theme_variation_matrix.gd
+# (контракт от носителя: все 70 вариантов темы, а не три экрана, которым завели файл).
+# Здесь остались только проверки, привязанные к этому экрану: что ТЕМА отдаёт ровно те
+# значения, которые рисовал снятый override (AC2), и что живой узел экрана не получает
+# переопределений в рантайме.
