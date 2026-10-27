@@ -1,0 +1,110 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_attack_01.png" id="1_oy5tk"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_attack_02.png" id="2_8t706"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_attack_03.png" id="3_r7h2e"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_attack_04.png" id="4_jsdkq"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_hit_01.png" id="5_dpuw7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_hit_02.png" id="6_ldx1y"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_hit_03.png" id="7_tp503"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_hit_04.png" id="8_a3lay"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_idle_01.png" id="9_cjyde"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_idle_02.png" id="10_v4pdn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_idle_03.png" id="11_obmvr"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_idle_04.png" id="12_ra64r"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_turn_01.png" id="13_lbdxu"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_turn_02.png" id="14_hdm6r"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_turn_03.png" id="15_wf85h"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_turn_04.png" id="16_tm0wt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_walk_01.png" id="17_c311t"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_walk_02.png" id="18_kf10v"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_walk_03.png" id="19_ogg7v"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wolf/char_enemy_wolf_walk_04.png" id="20_4bfi7"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_oy5tk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_8t706")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_r7h2e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_jsdkq")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_dpuw7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_ldx1y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_tp503")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_a3lay")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_cjyde")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_v4pdn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_obmvr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_ra64r")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_lbdxu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_hdm6r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_wf85h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_tm0wt")
+}],
+"loop": 0,
+"name": &"turn",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_c311t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_kf10v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_ogg7v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_4bfi7")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 4.0
+}]

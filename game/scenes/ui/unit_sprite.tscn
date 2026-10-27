@@ -5,6 +5,10 @@ z_index = 6
 
 [node name="Figure" type="Sprite2D" parent="."]
 
+[node name="Anim" type="AnimatedSprite2D" parent="."]
+visible = false
+centered = false
+
 [node name="Initial" type="Label" parent="."]
 offset_left = -10.0
 offset_top = -14.0
@@ -18,5 +22,7 @@ offset_left = -12.0
 offset_top = 34.0
 offset_right = 12.0
 offset_bottom = 58.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_font_sizes/font_size = 16
 text = "1"
+outline_size = 6

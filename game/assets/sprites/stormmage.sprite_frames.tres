@@ -1,0 +1,110 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_attack_01.png" id="1_js4tg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_attack_02.png" id="2_1vu75"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_attack_03.png" id="3_nl1is"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_attack_04.png" id="4_3qmml"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_hit_01.png" id="5_lle4p"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_hit_02.png" id="6_2ph7u"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_hit_03.png" id="7_anx7w"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_hit_04.png" id="8_5k7hq"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_idle_01.png" id="9_ycej1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_idle_02.png" id="10_12jle"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_idle_03.png" id="11_sm6hx"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_idle_04.png" id="12_8avam"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_turn_01.png" id="13_g6ufa"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_turn_02.png" id="14_hmn8j"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_turn_03.png" id="15_awfab"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_turn_04.png" id="16_mti8c"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_walk_01.png" id="17_tn6pd"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_walk_02.png" id="18_sd4xl"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_walk_03.png" id="19_w131x"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/char_player_stormmage_walk_04.png" id="20_hu72q"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_js4tg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_1vu75")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_nl1is")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_3qmml")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_lle4p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_2ph7u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_anx7w")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_5k7hq")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_ycej1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_12jle")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_sm6hx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_8avam")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_g6ufa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_hmn8j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_awfab")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_mti8c")
+}],
+"loop": 0,
+"name": &"turn",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_tn6pd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_sd4xl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_w131x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_hu72q")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 4.0
+}]

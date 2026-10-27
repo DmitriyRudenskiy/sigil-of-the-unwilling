@@ -1,0 +1,110 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_attack_01.png" id="1_xmsb3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_attack_02.png" id="2_cmrvu"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_attack_03.png" id="3_ix0lf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_attack_04.png" id="4_6uce6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_hit_01.png" id="5_s7awk"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_hit_02.png" id="6_ywhpc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_hit_03.png" id="7_71jfv"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_hit_04.png" id="8_rb6uf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_idle_01.png" id="9_6p0yo"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_idle_02.png" id="10_dvtds"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_idle_03.png" id="11_u7evm"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_idle_04.png" id="12_xutei"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_turn_01.png" id="13_a5a0p"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_turn_02.png" id="14_hc1a5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_turn_03.png" id="15_14pvr"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_turn_04.png" id="16_snv5k"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_walk_01.png" id="17_l8t2t"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_walk_02.png" id="18_8htyd"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_walk_03.png" id="19_j0gm8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/barbarian/char_player_barbarian_walk_04.png" id="20_it6ut"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_xmsb3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_cmrvu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_ix0lf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_6uce6")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_s7awk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_ywhpc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_71jfv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_rb6uf")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_6p0yo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_dvtds")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_u7evm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_xutei")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_a5a0p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_hc1a5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_14pvr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_snv5k")
+}],
+"loop": 0,
+"name": &"turn",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_l8t2t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_8htyd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_j0gm8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_it6ut")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 4.0
+}]

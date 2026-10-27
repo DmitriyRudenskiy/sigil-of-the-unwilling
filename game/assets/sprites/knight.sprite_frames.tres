@@ -1,0 +1,110 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_attack_01.png" id="1_gogof"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_attack_02.png" id="2_l40cr"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_attack_03.png" id="3_c2s40"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_attack_04.png" id="4_7032h"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_hit_01.png" id="5_s3oam"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_hit_02.png" id="6_urlte"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_hit_03.png" id="7_0fwqh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_hit_04.png" id="8_sb051"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_idle_01.png" id="9_u3hpb"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_idle_02.png" id="10_agd8p"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_idle_03.png" id="11_fhuga"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_idle_04.png" id="12_tx7nh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_turn_01.png" id="13_gcnhe"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_turn_02.png" id="14_i1dkg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_turn_03.png" id="15_hs6n6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_turn_04.png" id="16_ehcan"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_walk_01.png" id="17_7wtmi"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_walk_02.png" id="18_klc1h"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_walk_03.png" id="19_o1smg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/knight/char_player_knight_walk_04.png" id="20_840h5"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_gogof")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_l40cr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_c2s40")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_7032h")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_s3oam")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_urlte")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_0fwqh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_sb051")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_u3hpb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_agd8p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_fhuga")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_tx7nh")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_gcnhe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_i1dkg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_hs6n6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_ehcan")
+}],
+"loop": 0,
+"name": &"turn",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_7wtmi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_klc1h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_o1smg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_840h5")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 4.0
+}]

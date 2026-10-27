@@ -1,0 +1,110 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_attack_01.png" id="1_42fqs"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_attack_02.png" id="2_gdiqo"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_attack_03.png" id="3_bougg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_attack_04.png" id="4_fnufj"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_hit_01.png" id="5_u6ha3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_hit_02.png" id="6_hvfvt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_hit_03.png" id="7_6u6kd"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_hit_04.png" id="8_iuu0p"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_idle_01.png" id="9_dnet3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_idle_02.png" id="10_aftol"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_idle_03.png" id="11_l2gaf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_idle_04.png" id="12_rwelp"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_turn_01.png" id="13_ucc3c"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_turn_02.png" id="14_26tj0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_turn_03.png" id="15_84c7k"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_turn_04.png" id="16_tokk4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_walk_01.png" id="17_vkoxh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_walk_02.png" id="18_6j6xt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_walk_03.png" id="19_0ni4q"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/char_player_wizard_walk_04.png" id="20_k3gbj"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_42fqs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_gdiqo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_bougg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_fnufj")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_u6ha3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_hvfvt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_6u6kd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_iuu0p")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_dnet3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_aftol")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_l2gaf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_rwelp")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_ucc3c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_26tj0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_84c7k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_tokk4")
+}],
+"loop": 0,
+"name": &"turn",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_vkoxh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_6j6xt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_0ni4q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_k3gbj")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 4.0
+}]

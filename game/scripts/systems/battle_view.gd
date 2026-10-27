@@ -154,14 +154,28 @@ func fit_camera() -> void:
 func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 	var n: Node2D = _UnitSprite.instantiate()
 	var key := unit.get_key()
-	var ppath := UnitSprites.find_portrait(key)
 	var sp: Sprite2D = n.get_node("Figure")
-	if ppath != "":
-		sp.texture = load(ppath)
+	var anim: AnimatedSprite2D = n.get_node("Anim")
+	var facing := unit.side == BattleState.Side.ATTACKER
+	var frames := CharacterFrames.frames_for(key)
+	if frames != null:
+		# Анимированный носитель есть ⇒ портрет и буква-заглушка убираются: вторая
+		# картинка того же юнита поверх фигуры — мусор, а не резервная подпись.
+		anim.sprite_frames = frames
+		anim.offset = CharacterFrames.FEET_OFFSET
+		anim.scale = Vector2.ONE * CharacterFrames.SCALE
+		anim.flip_h = facing
+		anim.visible = true
+		anim.play(&"idle")
+		n.get_node("Initial").visible = false
 	else:
-		var col := ThemeConfig.C_SIDE_ATTACKER if unit.side == BattleState.Side.ATTACKER else ThemeConfig.C_SIDE_DEFENDER
-		sp.texture = PlaceholderTexture.circle(22, col, Color(0.1, 0.1, 0.1))
-	sp.flip_h = (unit.side == BattleState.Side.ATTACKER)
+		var ppath := UnitSprites.find_portrait(key)
+		if ppath != "":
+			sp.texture = load(ppath)
+		else:
+			var col := ThemeConfig.C_SIDE_ATTACKER if facing else ThemeConfig.C_SIDE_DEFENDER
+			sp.texture = PlaceholderTexture.circle(22, col, Color(0.1, 0.1, 0.1))
+		sp.flip_h = facing
 
 	var display_name := unit.get_display_name()
 	var il: Label = n.get_node("Initial")
@@ -188,6 +202,9 @@ func flash_unit(unit: BattleState.BattleUnit) -> void:
 	var node := _find_node(unit)
 	if node == null:
 		return
+	var an := _anim_of(node)
+	if an != null:
+		_play_once(an, &"hit")
 	var tw := create_tween()
 	tw.tween_property(node, "modulate", ThemeConfig.C_HIT_FLASH, GameNumbers.HIT_FLASH_SEC)
 	tw.tween_property(node, "modulate", Color.WHITE, GameNumbers.HIT_FLASH_RECOVER_SEC)
@@ -210,17 +227,40 @@ func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> Tween:
 	if node == null or path.size() < 2:
 		return null
 	_kill_unit_tweens(unit.uid)
-	var an := node.get_node_or_null("Anim")
+	var an := _anim_of(node)
 	if an != null:
+		an.animation = &"walk"
 		an.play()
 	var tw := create_tween()
 	_active_tweens[unit.uid] = tw
 	for i in range(1, path.size()):
 		tw.tween_property(node, "position", _tile_map.map_to_local(path[i]), MOVE_TWEEN_SEC)
 	if an != null:
-		tw.tween_callback(an.stop)
+		# `stop()` оставил бы юнита на последнем кадре походки — шаг на месте.
+		tw.tween_callback(func(): an.play(&"idle"))
 	tw.finished.connect(func(): _active_tweens.erase(unit.uid))
 	return tw
+
+## Анимированная фигурка юнита либо `null`: юнит без анимированного носителя остаётся
+## портретом, и гасить в нём нечего (проверка `visible`, а не наличия узла — `Anim`
+## есть в сцене всегда, просто пустой).
+func _anim_of(node: Node) -> AnimatedSprite2D:
+	var an := node.get_node_or_null("Anim") as AnimatedSprite2D
+	return an if an != null and an.visible else null
+
+
+## Одноразовая дорожка (`attack`, `hit`) возвращается в `idle`: зациклить её нельзя
+## (последний кадр замаха как постоянная поза выглядит застреванием), а стека
+## анимаций здесь нет и заводить его ради двух дорожек не за чем.
+## Дорожки может не быть — у части комплекта кадра получения удара нет (priest);
+## тогда остаётся цветовая вспышка, которую делает вызывающий код.
+func _play_once(an: AnimatedSprite2D, track: StringName) -> void:
+	if an.sprite_frames == null or not an.sprite_frames.has_animation(track):
+		return
+	an.animation = track
+	an.play()
+	an.animation_finished.connect(func(): an.play(&"idle"), CONNECT_ONE_SHOT)
+
 
 func animate_attack(attacker: BattleState.BattleUnit, defender: BattleState.BattleUnit) -> void:
 	var attacker_node := _find_node(attacker)
@@ -230,6 +270,9 @@ func animate_attack(attacker: BattleState.BattleUnit, defender: BattleState.Batt
 		return
 
 	_kill_unit_tweens(attacker.uid)
+	var an := _anim_of(attacker_node)
+	if an != null:
+		_play_once(an, &"attack")
 
 	var start_pos: Vector2 = attacker_node.position
 	var dir: Vector2 = (defender_node.position - start_pos).normalized() * ATTACK_LUNGE_PX
