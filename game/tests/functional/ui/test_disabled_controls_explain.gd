@@ -25,6 +25,11 @@ extends BaseTest
 ## строке сообщения (`city_screen._placement_reasons`) — другой носитель того же
 ## столпа. Бой — остаток 3.4 (зона battle-demo).
 
+## Скрытые выключенные контролы последнего обхода: в инвентарь D-252 не входят
+## (невидимой кнопке нечего объяснять), но печатаются в отчёте — «спрятал и
+## выключил» должно оставаться видимым, а не исчезать из поля зрения.
+var _hidden_disabled: Array[String] = []
+
 const MENU_SCENE_PATH := "res://scenes/main_menu.tscn"
 const CREATION_SCENE_PATH := "res://scenes/ui/character_creation.tscn"
 const SAVE_LOAD_SCENE_PATH := "res://scenes/ui/save_load_screen.tscn"
@@ -58,10 +63,23 @@ func _spawn(path: String) -> Node:
 
 
 ## Инвентарь выключенных контролов: пути (относительно корня экрана) всех кнопок и
-## списков, у которых `disabled == true`. Собирается обходом дерева, а не списком
-## путей: смысл проверки в том, чтобы заметить нового молча выключенного кандидата.
+## списков, у которых `disabled == true` и которые **видно**. Собирается обходом
+## дерева, а не списком путей: смысл проверки в том, чтобы заметить нового молча
+## выключенного кандидата.
+##
+## Из инвентаря снят только тот контрол, который **сам себя** скрыл
+## (2026-10-27, полоса hero-screen, T-252/D-280). Правило D-252 про то, что игрок,
+## ткнувший в неактивную кнопку, обязан понять причину; у невидимой кнопки нет ни
+## аффорданса, ни нажатия, ни наведённого курсора — `tooltip_text` на
+## `visible == false` писатель без читателя, ровно тот класс, который проект
+## вычищает в других местах. Снимается именно `button.visible`, а не
+## `is_visible_in_tree()`: экран, спрятанный до вызова (SaveLoadScreen в меню),
+## свои кнопки покажет вместе с собой, и они в инвентаре остаются. Проверка не
+## превращается в «выключил и спрятал от гейта»: снятый контрол печатается в
+## отчёте.
 func _disabled_paths(root: Node) -> Array[String]:
 	var out: Array[String] = []
+	_hidden_disabled = []
 	var prefix: String = str(root.get_path()) + "/"
 	var stack: Array[Node] = [root]
 	while not stack.is_empty():
@@ -70,8 +88,13 @@ func _disabled_paths(root: Node) -> Array[String]:
 			stack.append(child)
 			var button := child as BaseButton
 			if button != null and button.disabled:
-				out.append(str((child as Node).get_path()).trim_prefix(prefix))
+				var path := str((child as Node).get_path()).trim_prefix(prefix)
+				if button.visible:
+					out.append(path)
+				else:
+					_hidden_disabled.append(path)
 	out.sort()
+	_hidden_disabled.sort()
 	return out
 
 
@@ -92,9 +115,12 @@ func _assert_equal(actual: String, expected: String, what: String) -> void:
 ## именно поэтому причина ставится уже в `_ready`, а не только в `open()`.
 func _expected_menu_disabled(has_save: bool) -> Array[String]:
 	var out: Array[String] = [CREDITS_PATH, EXIT_PATH]
-	# Экран снаряжения живёт внутри меню и выключает свою плитку «?» при
-	# монтировании: журнала квестов в игре нет (T-252), причина — в подсказке.
-	out.append("HeroModelWindow/Center/Window/Sheet/Units/Quests")
+	# Плитка «?» экрана снаряжения (правый нижний угол макета 12) при монтировании
+	# выключается И прячется одним местом кода (`artifact_inventory_screen._build_units`:
+	# `visible = false` и `disabled = true`, журнала квестов нет — T-252, D-280).
+	# В инвентаре D-252 её быть не может: невидимую кнопку нельзя ни нажать, ни
+	# навести, — её подсказка читателя не имеет (D-282). Контрол не исчезает из поля
+	# зрения: он печатается в отчёте теста как «отключённый, но скрытый».
 	if not has_save:
 		out.append(CONTINUE_PATH)
 	for i in 5:
@@ -116,6 +142,9 @@ func test_menu_disabled_items_carry_a_reason() -> void:
 	for path in disabled:
 		assert_str(_tooltip(menu, path)).override_failure_message(
 			"выключенный пункт %s не объясняет причину" % path).is_not_empty()
+	if not _hidden_disabled.is_empty():
+		print("отключённые, но скрытые контролы меню (причина не требуется, D-252): "
+			+ str(_hidden_disabled))
 	_assert_equal(_tooltip(menu, CREDITS_PATH), GameText.menu_credits_unavailable(),
 		"причина «Титров»")
 	_assert_equal(_tooltip(menu, EXIT_PATH), GameText.menu_exit_unavailable(),
