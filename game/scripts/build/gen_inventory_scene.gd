@@ -1,25 +1,50 @@
 extends SceneTree
 
+## Генератор сцены экрана «Герой» (`scenes/ui/artifact_inventory_screen.tscn`).
+##
+## Состав и геометрия — не здесь: блоки берутся из `scripts/ui/hero_layout.gd`
+## (единственная таблица, docs/20-ux-hero-screen.md §2–§3), ассеты — из
+## `assets/ui/hero/MANIFEST.json`. Узлы расставлены якорями-долями, поэтому
+## композиция макета держится при любом размере окна (AC «без прокрутки»).
+
 var OUT := "res://scenes/ui/artifact_inventory_screen.tscn"
 
 var _ext: Array = []
+var _ids: Dictionary = {}
 var _node_lines: Array = []
 
-# Геометрия сетки снаряжения живёт в скрипте экрана; генератор берёт её оттуда же,
-# чтобы раскладка сцены и `_refresh_grid()` не разъезжались.
-const _Screen = preload("res://scripts/ui/artifact_inventory_screen.gd")
+const _L = preload("res://scripts/ui/hero_layout.gd")
 
-const _DOLL_X := [258, 318, 180, 6, 68, 318, 180, 318, 6, 22, 318, 46, 258, 6, 68, 318]
-const _DOLL_Y := [6, 6, 66, 58, 58, 68, 146, 130, 160, 230, 218, 300, 298, 370, 370, 392]
+# id'ы ext_resource: 1 — скрипт экрана, дальше — носители кита hero/ и иконки.
+const _KIT := {
+	"panel_parchment": 10, "panel_stone": 11, "banner_name": 12,
+	"frame_portrait": 13, "slot_doll": 14, "cell_grid": 15, "tile_brass": 16,
+	"rule_brass": 17, "bar_track": 18, "bar_mana": 19, "bar_hp": 20,
+	"figure": 21, "portrait": 22, "frame_card": 23, "frame_row": 24,
+}
 
 func _ext_resource(res_type: String, path: String, uid: int) -> void:
-	var rec := {"type": res_type, "path": path, "id": uid}
-	_ext.append(rec)
+	if _ids.has(uid):
+		return
+	_ids[uid] = true
+	_ext.append({"type": res_type, "path": path, "id": uid})
 
-func _add_node(name: String, typ: String, parent_path: String, extra: String = "", uid: int = 0) -> void:
+func _kit(name: String) -> String:
+	_ext_resource("Texture2D", "res://assets/ui/hero/" + name + ".png", _KIT[name])
+	return "ExtResource(\"" + str(_KIT[name]) + "\")"
+
+func _icon(name: String) -> String:
+	var id := 100 + _ext.size()
+	_ext_resource("Texture2D", "res://assets/ui/icons/" + name + ".png", id)
+	return "ExtResource(\"" + str(id) + "\")"
+
+var _u := 1000
+
+func _add_node(name: String, typ: String, parent_path: String, extra: String = "", _uid: int = 0) -> void:
 	var line := "[node name=\"" + name + "\" type=\"" + typ + "\""
-	if uid > 0:
-		line += " unique_id=" + str(uid)
+	if true:
+		line += " unique_id=" + str(_u)
+		_u += 1
 	if parent_path != "":
 		line += " parent=\"" + parent_path + "\""
 	line += "]"
@@ -28,264 +53,351 @@ func _add_node(name: String, typ: String, parent_path: String, extra: String = "
 	line += "\n\n"
 	_node_lines.append(line)
 
+## Якорные доли прямоугольника `r` (координаты канвы) внутри блока `parent`.
+## Смещений узел не имеет вовсе: размер задают якоря, а не offset'ы.
+func _anch(r: Rect2, parent: String) -> String:
+	# Родитель — весь лист (canvas), если это не блок таблицы.
+	var p := Rect2(Vector2.ZERO, _L.CANVAS)
+	if _L.BLOCKS.has(parent):
+		p = _L.BLOCKS[parent]
+	return "anchor_left = %s\nanchor_top = %s\nanchor_right = %s\nanchor_bottom = %s\n" % [
+		_f(r.position.x / p.size.x), _f(r.position.y / p.size.y),
+		_f((r.position.x + r.size.x) / p.size.x),
+		_f((r.position.y + r.size.y) / p.size.y)]
+
+func _f(v: float) -> String:
+	return "%.6f" % v
+
+## Узел-блок из таблицы: якоря от `parent`, опциональный фон-плитка.
+func _block(node: String, parent: String, uid: int, bg: String = "") -> void:
+	_add_node(node, "Control", parent, _anch(_L.BLOCKS[node], parent), uid)
+	uid += 1
+	if bg != "":
+		_add_node(
+			"Bg", "NinePatchRect", parent + "/" + node,
+			"texture = " + _kit(bg) + "\n"
+			+ "patch_margin_left = 40\npatch_margin_top = 40\n"
+			+ "patch_margin_right = 40\npatch_margin_bottom = 40\n"
+			+ "axis_stretch_horizontal = 1\naxis_stretch_vertical = 1\n"
+			+ "mouse_filter = 2\nanchor_right = 1.0\nanchor_bottom = 1.0\n", uid)
+		uid += 1
+
 func _build() -> void:
 	_ext_resource("Script", "res://scripts/ui/artifact_inventory_screen.gd", 1)
-
 	var uid := 1000
 
 	_add_node("ArtifactInventoryScreen", "Control", "", "script = ExtResource(\"1\")", uid)
 	uid += 1
-
-	# Центр окна — обычный Control, а не CenterContainer (T-154, дефект «а»):
-	# контейнер разворачивал Window (обычный Control без min-size) в 0×0, весь
-	# контент разбегался от центра, а рамка Outline не рисовалась вовсе.
-	_add_node(
-		"Center", "Control", ".",
-		"offset_left = 10.0\noffset_top = 10.0\noffset_right = 1410.0\noffset_bottom = 690.0\n", uid)
-	uid += 1
-
-	_add_node(
-		"Window", "Control", "Center",
-		"offset_left = 10.0\noffset_top = 10.0\noffset_right = 1390.0\noffset_bottom = 670.0\n", uid)
-	uid += 1
-
-	# Рамка — на весь Window: без якорей PanelContainer свёрнут в 0×0 и рамку не рисует.
+	# Экран — на всё окно (корень на полных якорях): композиция макета 12
+	# живёт долями, прокрутки нет и быть не должно (AC1, T-248).
+	for pair in [["Center", "."], ["Window", "Center"], ["Sheet", "Center/Window"]]:
+		_add_node(
+			pair[0], "Control", pair[1],
+			"anchor_right = 1.0\nanchor_bottom = 1.0\nmouse_filter = 2\n", uid)
+		uid += 1
 	_add_node(
 		"Outline", "PanelContainer", "Center/Window",
-		"anchor_right = 1.0\nanchor_bottom = 1.0\ntheme_type_variation = &\"ArtifactOutline\"\n", uid)
+		"anchor_right = 1.0\nanchor_bottom = 1.0\nmouse_filter = 2\n"
+		+ "theme_type_variation = &\"ArtifactOutline\"\n", uid)
 	uid += 1
 
-	# Left/Side/Right — не прямоугольники-колонки, а нулевые точки: их дети
-	# расписаны в координатах окна (историческая разметка сцены). См. комментарий
-	# у _box ниже: смещение родителя сложилось бы с offset ребёнка дважды.
-	_add_node("Left", "Control", "Center/Window", _box(0, 0, 0, 0), uid)
+	# — левая пергаментная колонка ------------------------------------------
+	_block("Left", "Sheet", uid, "panel_parchment")
 	uid += 1
-
-	_add_node(
-		"Portrait", "TextureRect", "Center/Window/Left",
-		"offset_left = 11.0\noffset_top = 11.0\noffset_right = 91.0\noffset_bottom = 91.0\nstretch_mode = 5\n", uid)
-	uid += 1
+	var left := "Sheet/Left"
+	var L: Rect2 = _L.BLOCKS["Left"]
+	var stats: Rect2 = _L.BLOCKS["Stats"]
+	var list: Rect2 = _L.BLOCKS["EquipList"]
 
 	_add_node(
-		"Name", "Label", "Center/Window/Left",
-		"offset_left = 100.0\noffset_top = 31.0\noffset_right = 300.0\noffset_bottom = 60.0\n", uid)
+		"PortraitFrame", "TextureRect", left,
+		_anchor_within("Portrait", L) + "texture = " + _kit("frame_portrait")
+		+ "\nstretch_mode = 5\nmouse_filter = 2\n", uid)
 	uid += 1
+	_add_node(
+		"Portrait", "TextureRect", left,
+		_anchor_within("Portrait", L) + "texture = " + _kit("portrait")
+		+ "\nstretch_mode = 5\nmouse_filter = 2\n", uid)
+	uid += 1
+	# Плашка имени и «Уровень» — из макета; имени узла `Name` касаются тесты.
+	_add_node(
+		"NamePlate", "NinePatchRect", left,
+		_anchor_within("Name", L) + "texture = " + _kit("banner_name")
+		+ "\npatch_margin_left = 28\npatch_margin_top = 20\n"
+		+ "patch_margin_right = 28\npatch_margin_bottom = 20\n"
+		+ "axis_stretch_horizontal = 1\naxis_stretch_vertical = 1\nmouse_filter = 2\n", uid)
+	uid += 1
+	_add_node(
+		"Name", "Label", left,
+		_anchor_within("Name", L)
+		+ "horizontal_alignment = 1\nvertical_alignment = 1\n"
+		+ "theme_type_variation = &\"LabelTitle\"\n", uid)
+	uid += 1
+	_add_node(
+		"LevelRow", "Label", left,
+		_anchor_within("LevelRow", L) + "horizontal_alignment = 1\n", uid)
+	uid += 1
+	for rule in [["Rule1", "Rule1"], ["Rule2", "Rule2"]]:
+		_add_node(
+			rule[0], "TextureRect", left,
+			_anchor_within(rule[1], L) + "texture = " + _kit("rule_brass")
+			+ "\nstretch_mode = 1\nmouse_filter = 2\n", uid)
+		uid += 1
 
+	# Характеристики: 2 столбца × 2 строки (макет A6–D7). Имена узлов
+	# StatIcon_/StatName_/StatValue_ сохранены — их читают скрипт и тесты.
+	var cell := Vector2(stats.size.x / 2.0, stats.size.y / 2.0)
 	for i in 4:
+		var col: int = i % 2
+		var row: int = i / 2
+		var base := Rect2(
+			stats.position + Vector2(col * cell.x, row * cell.y), cell)
 		_add_node(
-			"StatIcon_" + str(i), "TextureRect", "Center/Window/Left",
-			"offset_left = " + str(20 + i * 101) + ".0\noffset_top = 95.0\noffset_right = " + str(66 + i * 101) + ".0\noffset_bottom = 141.0\n", uid)
-		uid += 1
-
-	for i in 4:
-		_add_node(
-			"StatName_" + str(i), "Label", "Center/Window/Left",
-			"offset_left = " + str(20 + i * 101) + ".0\noffset_top = 143.0\noffset_right = " + str(121 + i * 101) + ".0\noffset_bottom = 161.0\n", uid)
-		uid += 1
-
-	for i in 4:
-		_add_node(
-			"StatValue_" + str(i), "Label", "Center/Window/Left",
-			"offset_left = " + str(12 + i * 101) + ".0\noffset_top = 168.0\noffset_right = " + str(109 + i * 101) + ".0\noffset_bottom = 189.0\n", uid)
-		uid += 1
-
-	_add_node(
-		"Mana_lbl", "Label", "Center/Window/Left",
-		"offset_left = 12.0\noffset_top = 191.0\noffset_right = 162.0\noffset_bottom = 211.0\n", uid)
-	uid += 1
-	_add_node(
-		"Mana_val", "Label", "Center/Window/Left",
-		"offset_left = 204.0\noffset_top = 191.0\noffset_right = 300.0\noffset_bottom = 211.0\n", uid)
-	uid += 1
-	_add_node(
-		"Exp_lbl", "Label", "Center/Window/Left",
-		"offset_left = 12.0\noffset_top = 240.0\noffset_right = 162.0\noffset_bottom = 260.0\n", uid)
-	uid += 1
-	_add_node(
-		"Exp_val", "Label", "Center/Window/Left",
-		"offset_left = 204.0\noffset_top = 240.0\noffset_right = 300.0\noffset_bottom = 260.0\n", uid)
-	uid += 1
-	_add_node(
-		"School_lbl", "Label", "Center/Window/Left",
-		"offset_left = 12.0\noffset_top = 289.0\noffset_right = 162.0\noffset_bottom = 309.0\n", uid)
-	uid += 1
-	_add_node(
-		"School_val", "Label", "Center/Window/Left",
-		"offset_left = 204.0\noffset_top = 289.0\noffset_right = 300.0\noffset_bottom = 309.0\n", uid)
-	uid += 1
-
-	_add_node(
-		"Skills_lbl", "Label", "Center/Window/Left",
-		"offset_left = 12.0\noffset_top = 320.0\noffset_right = 132.0\noffset_bottom = 340.0\n", uid)
-	uid += 1
-
-	for i in 6:
-		_add_node(
-			"Skill_" + str(i), "Button", "Center/Window/Left",
-			"offset_left = " + str(22 + (i % 2) * 190) + ".0\noffset_top = " + str(352 + (i / 2) * 82) + ".0\noffset_right = " + str(142 + (i % 2) * 190) + ".0\noffset_bottom = " + str(422 + (i / 2) * 82) + ".0\n", uid)
+			"StatIcon_" + str(i), "TextureRect", left,
+			_anchor_rect(Rect2(base.position + Vector2(4, 6), Vector2(30, 30)), L), uid)
 		uid += 1
 		_add_node(
-			"SkillIcon", "TextureRect", "Center/Window/Left/Skill_" + str(i),
-			"mouse_filter = 2\n" + _box(8, 15, 48, 55), uid)
+			"StatName_" + str(i), "Label", left,
+			_anchor_rect(Rect2(base.position + Vector2(42, 4), Vector2(cell.x - 100, 20)), L), uid)
 		uid += 1
 		_add_node(
-			"SkillLevel", "Label", "Center/Window/Left/Skill_" + str(i),
-			"visible = false\nmouse_filter = 2\nhorizontal_alignment = 1\n" + _gold(20) + "\n" + _box(52, 24, 112, 46), uid)
+			"StatValue_" + str(i), "Label", left,
+			_anchor_rect(Rect2(base.position + Vector2(44, 24), Vector2(cell.x - 52, 24)), L)
+			+ "theme_type_variation = &\"LabelNumber\"\n", uid)
 		uid += 1
 
-	_add_node("Right", "Control", "Center/Window", _box(0, 0, 0, 0), uid)
-	uid += 1
+	# Список надетого: 7 строк по frame_row (макет A7–D10).
+	for i in 7:
+		var y0: float = list.position.y + i * (list.size.y / 7.0)
+		var row_r := Rect2(list.position.x, y0, list.size.x, list.size.y / 7.0)
+		_add_node(
+			"EquipRow_" + str(i), "TextureRect", left,
+			_anchor_rect(row_r, L) + "texture = " + _kit("frame_row")
+			+ "\nstretch_mode = 1\nmouse_filter = 2\nvisible = false\n", uid)
+		uid += 1
+		_add_node(
+			"EquipIcon_" + str(i), "TextureRect", left + "/EquipRow_" + str(i),
+			"anchor_left = 0.02\nanchor_top = 0.08\nanchor_right = 0.09\nanchor_bottom = 0.9\n"
+			+ "stretch_mode = 5\nmouse_filter = 2\n", uid)
+		uid += 1
+		_add_node(
+			"EquipName_" + str(i), "Label", left + "/EquipRow_" + str(i),
+			"anchor_left = 0.1\nanchor_right = 0.98\nanchor_bottom = 1.0\n"
+			+ "vertical_alignment = 1\n", uid)
+		uid += 1
 
+	# — каменная плита центра ----------------------------------------------
+	_block("Stone", "Sheet", uid, "panel_stone")
+	uid += 1
+	var S: Rect2 = _L.BLOCKS["Stone"]
+	var stone := "Sheet/Stone"
 	_add_node(
-		"Figure", "TextureRect", "Center/Window/Right",
-		"offset_left = 607.0\noffset_top = 13.0\noffset_right = 847.0\noffset_bottom = 373.0\nstretch_mode = 5\n", uid)
+		"Figure", "TextureRect", stone,
+		_anchor_within("Figure", S) + "texture = " + _kit("figure")
+		+ "\nstretch_mode = 5\nmouse_filter = 2\n", uid)
 	uid += 1
 
-	for i in 16:
+	# Кукла: 16 рамок по анатомии макета; слот (`Artifact.Slot`) у первых 12,
+	# остальные — пустой декор (T-242).
+	_add_node("Doll", "Control", stone,
+		"anchor_right = 1.0\nanchor_bottom = 1.0\nmouse_filter = 2\n", uid)
+	uid += 1
+	for i in _L.DOLL_SLOTS_N:
+		# DOLL задан долями кадра (как в карте элементов), Doll живёт в Stone —
+		# перевод в локальные пиксели плиты.
+		var c: Vector2 = _L.DOLL[i] * _L.CANVAS - S.position
+		var r := Rect2(
+			c - _L.DOLL_SIZE / 2.0, _L.DOLL_SIZE)
 		_add_node(
-			"DollSlot_" + str(i), "TextureRect", "Center/Window/Right",
-			"offset_left = " + str(510 + _DOLL_X[i]) + ".0\noffset_top = " + str(10 + _DOLL_Y[i]) + ".0\noffset_right = " + str(566 + _DOLL_X[i]) + ".0\noffset_bottom = " + str(66 + _DOLL_Y[i]) + ".0\n", uid)
+			"DollSlot_" + str(i), "TextureRect", stone + "/Doll",
+			_anchor_rect(r, S) + "texture = " + _kit("slot_doll")
+			+ "\nstretch_mode = 5\nmouse_filter = 2\n", uid)
 		uid += 1
 		_add_node(
-			"EquipIcon", "TextureRect", "Center/Window/Right/DollSlot_" + str(i),
-			"visible = false\nmouse_filter = 2\n" + _box(0, 0, 56, 56), uid)
+			"DollIcon_" + str(i), "TextureRect", stone + "/Doll",
+			_anchor_rect(r.grow(-6.0), S)
+			+ "mouse_filter = 2\nvisible = false\n", uid)
 		uid += 1
 
-	# Сетка снаряжения (grid-inventory-and-merchant 4.1): 6×4 клетки по 56 px
-	# с шагом 60 вместо шести BackpackSlot_* и постраничной прокрутки. Координаты
-	# берёт один источник — константы экрана, иначе генератор и `_refresh_grid()`
-	# разъедутся на первом же изменении размера клетки.
-	var g: Vector2i = _Screen.GRID_ORIGIN
-	var pitch: int = _Screen.CELL_PITCH
-	var cell: int = _Screen.CELL_SIZE
+	# Сумка 10×5 = 50 ячеек (носитель — GameNumbers.INVENTORY_GRID, D-280).
 	_add_node(
-		"Grid", "Control", "Center/Window/Right",
-		_box(g.x, g.y, g.x + pitch * 6, g.y + pitch * 4), uid)
+		"Bag", "Control", stone, _anch(_L.BLOCKS["Bag"], "Stone") + "mouse_filter = 2\n", uid)
 	uid += 1
-	for row in 4:
-		for col in 6:
-			# Координаты — внутри Grid'а (сам Grid стоит в сетке окна), иначе
-			# смещение родителя сложится с offset клетки дважды.
-			var x0: int = col * pitch
-			var y0: int = row * pitch
+	var bag: Rect2 = _L.BLOCKS["Bag"]
+	var pitch := Vector2(bag.size.x / _L.GRID_COLS, bag.size.y / _L.GRID_ROWS)
+	for row in _L.GRID_ROWS:
+		for col in _L.GRID_COLS:
+			var p0 := Vector2(col * pitch.x, row * pitch.y)
 			_add_node(
-				"GridCell_%d_%d" % [col, row], "ColorRect", "Center/Window/Right/Grid",
-				"mouse_filter = 2\n" + _box(x0, y0, x0 + cell, y0 + cell)
-				+ "color = " + _color(_Screen.CELL_EMPTY), uid)
+				"GridCell_%d_%d" % [col, row], "TextureRect", stone + "/Bag",
+				"offset_left = %s\noffset_top = %s\noffset_right = %s\noffset_bottom = %s\n" % [
+					_f(p0.x), _f(p0.y), _f(p0.x + pitch.x - _L.CELL_GAP),
+					_f(p0.y + pitch.y - _L.CELL_GAP)]
+				+ "texture = " + _kit("cell_grid") + "\nstretch_mode = 5\nmouse_filter = 2\n", uid)
 			uid += 1
 	_add_node(
-		"Items", "Control", "Center/Window/Right/Grid",
-		"mouse_filter = 2\n" + _box(0, 0, pitch * 6, pitch * 4), uid)
+		"Items", "Control", stone + "/Bag",
+		"anchor_right = 1.0\nanchor_bottom = 1.0\nmouse_filter = 2\n", uid)
 	uid += 1
 
-	_add_node(
-		# Подпись — по левому краю колонки: полоса перевеса растёт вправо от
-		# x=900, и центрированная подпись уезжала бы от своих предметов (кадр
-		# 2026-10-27: «Перевес» на 260 px правее первой иконки).
-		"Overflow_lbl", "Label", "Center/Window/Right",
-		_box(900, 286, 1390, 310), uid)
-	uid += 1
-	_add_node(
-		"Overflow", "Control", "Center/Window/Right",
-		"mouse_filter = 2\n" + _box(900, 310, 1390, 370), uid)
-	uid += 1
-	_add_node(
-		"Desc_lbl", "Label", "Center/Window/Right",
-		_box(900, 372, 1390, 396), uid)
-	uid += 1
-	_add_node(
-		# Ни цвета, ни размера: цвет наследуется от корня экрана (золото), а
-		# размер — от темы. Свои override'ы сюда просить нельзя: font_color
-		# считается мёртвым (T-189), а размер ниже 16 — нечитаемым (T-190).
-		# 88 px, а не 50: текст — три строки (имя, описание, габарит) по ~29 px,
-		# в 50 px третья строка залезала на панель армии (кадр 2026-10-27).
-		# ponytail: 88 px = ровно три строки; описание длиннее ~90 знаков
-		# (в каталоге максимум 46) свернётся в четвёртую и упрётся в панель —
-		# апгрейд: или блок выше, или описание в тултипе.
-		"Desc", "Label", "Center/Window/Right",
-		"autowrap_mode = 3\nvertical_alignment = 1\n" + _box(900, 396, 1390, 484), uid)
-	uid += 1
-
-	# Кнопки действий — справа от сетки: раньше они стояли на y 531..577, то есть
-	# поверх панели армии (Bottom 486..666 — сдвинута на 16 px вниз, чтобы
-	# трёхстрочное описание влезло над ней).
-	for pair in [["Equip", 26], ["Remove", 90], ["Dispose", 154]]:
+	# Перевес — вне макета: полоса над сумкой (макет перевеса не рисует).
+	for nm in ["Overflow_lbl", "Overflow"]:
 		_add_node(
-			String(pair[0]), "Button", "Center/Window/Right",
-			_box(1280, int(pair[1]), 1390, int(pair[1]) + 56), uid)
+			nm, "Label" if nm.ends_with("_lbl") else "Control", stone,
+			_anchor_within("Overflow", S)
+			+ ("horizontal_alignment = 0\n" if nm.ends_with("_lbl") else "mouse_filter = 2\n"), uid)
 		uid += 1
 
-	_add_node("Side", "Control", "Center/Window", _box(0, 0, 0, 0), uid)
+	# — зона переноса A: мана и школа (камня макета не касаются) -------------
+	_block("BandMana", "Sheet", uid)
+	uid += 1
+	var band := "Sheet/BandMana"
+	_add_node("Mana_lbl", "Label", band,
+		"anchor_left = 0.0\nanchor_top = 0.0\nanchor_right = 1.0\nanchor_bottom = 0.05\n", uid)
+	uid += 1
+	_add_node("Mana_val", "Label", band,
+		"anchor_left = 0.0\nanchor_top = 0.05\nanchor_right = 1.0\nanchor_bottom = 0.11\n"
+		+ "theme_type_variation = &\"LabelNumber\"\n", uid)
+	uid += 1
+	_add_node("ManaTrack", "TextureRect", band,
+		"anchor_left = 0.0\nanchor_top = 0.11\nanchor_right = 1.0\nanchor_bottom = 0.145\n"
+		+ "texture = " + _kit("bar_track") + "\nstretch_mode = 1\nmouse_filter = 2\n", uid)
+	uid += 1
+	_add_node("ManaBar", "TextureRect", band,
+		"anchor_left = 0.0\nanchor_top = 0.11\nanchor_right = 1.0\nanchor_bottom = 0.145\n"
+		+ "texture = " + _kit("bar_mana") + "\nstretch_mode = 1\nmouse_filter = 2\n", uid)
+	uid += 1
+	_add_node("School_lbl", "Label", band,
+		"anchor_left = 0.0\nanchor_top = 0.155\nanchor_right = 1.0\nanchor_bottom = 0.205\n", uid)
+	uid += 1
+	_add_node("School_val", "Label", band,
+		"anchor_left = 0.0\nanchor_top = 0.205\nanchor_right = 1.0\nanchor_bottom = 0.26\n", uid)
 	uid += 1
 
-	_add_node(
-		"Banner", "TextureRect", "Center/Window/Side",
-		"offset_left = 329.0\noffset_top = 19.0\noffset_right = 391.0\noffset_bottom = 81.0\nstretch_mode = 5\n", uid)
+	# — зона переноса C: навыки и построения --------------------------------
+	_block("BandSkills", "Sheet", uid)
 	uid += 1
-	_add_node(
-		"Mini", "TextureRect", "Center/Window/Side",
-		"offset_left = 329.0\noffset_top = 89.0\noffset_right = 391.0\noffset_bottom = 135.0\nstretch_mode = 5\n", uid)
+	var bs := "Sheet/BandSkills"
+	_add_node("Skills_lbl", "Label", bs,
+		"anchor_left = 0.0\nanchor_top = 0.0\nanchor_right = 1.0\nanchor_bottom = 0.055\n", uid)
 	uid += 1
 	for i in 6:
-		_add_node(
-			"SideSlot_" + str(i), "TextureRect", "Center/Window/Side",
-			"offset_left = 329.0\noffset_top = " + str(132 + i * 50) + ".0\noffset_right = 391.0\noffset_bottom = " + str(174 + i * 50) + ".0\n", uid)
+		var t0 := 0.06 + i * 0.055
+		_add_node("Skill_" + str(i), "Button", bs,
+			"anchor_left = 0.0\nanchor_top = %s\nanchor_right = 1.0\nanchor_bottom = %s\n"
+			% [_f(t0), _f(t0 + 0.05)] + "text = \"\"\n", uid)
 		uid += 1
-	_add_node(
-		"Ok", "Button", "Center/Window/Side",
-		"offset_left = 329.0\noffset_top = 542.0\noffset_right = 391.0\noffset_bottom = 588.0\n", uid)
+	_add_node("Formations_lbl", "Label", bs,
+		"anchor_left = 0.0\nanchor_top = 0.42\nanchor_right = 1.0\nanchor_bottom = 0.475\n", uid)
 	uid += 1
-
-	_add_node(
-		"Bottom", "PanelContainer", "Center/Window",
-		"theme_type_variation = &\"ArtifactBottom\"\n" + _box(10, 486, 1390, 666), uid)
-	uid += 1
-
-	for i in 7:
-		_add_node(
-			"ArmySlot_" + str(i), "TextureRect", "Center/Window/Bottom",
-			"offset_left = " + str(10 + i * 82) + ".0\noffset_top = 10.0\noffset_right = " + str(86 + i * 82) + ".0\noffset_bottom = 86.0\n", uid)
-		uid += 1
-		_add_node(
-			"ArmyIcon", "TextureRect", "Center/Window/Bottom/ArmySlot_" + str(i),
-			"visible = false\nmouse_filter = 2\n" + _box(6, 6, 70, 70), uid)
-		uid += 1
-		_add_node(
-			"ArmyCount", "Label", "Center/Window/Bottom/ArmySlot_" + str(i),
-			"visible = false\nmouse_filter = 2\nhorizontal_alignment = 2\n"
-			+ "theme_type_variation = &\"LabelNumber\"\n" + _box(6, 50, 74, 76), uid)
-		uid += 1
-
-	_add_node(
-		"Formations", "Control", "Center/Window/Bottom",
-		_box(1224, 11, 1357, 84), uid)
+	_add_node("Formations", "Control", bs,
+		"anchor_left = 0.0\nanchor_top = 0.48\nanchor_right = 1.0\nanchor_bottom = 0.72\n"
+		+ "mouse_filter = 2\n", uid)
 	uid += 1
 	for i in 4:
-		_add_node(
-			"Form_" + str(i), "Button", "Center/Window/Bottom/Formations",
-			"offset_left = " + str(6 + (i % 2) * 66) + ".0\noffset_top = " + str(6 + (i / 2) * 36) + ".0\noffset_right = " + str(66 + (i % 2) * 66) + ".0\noffset_bottom = " + str(38 + (i / 2) * 36) + ".0\n", uid)
+		_add_node("Form_" + str(i), "Button", bs + "/Formations",
+			"anchor_left = %s\nanchor_top = %s\nanchor_right = %s\nanchor_bottom = %s\n" % [
+				_f((i % 2) * 0.5), _f((i / 2) * 0.5),
+				_f((i % 2) * 0.5 + 0.5), _f((i / 2) * 0.5 + 0.5)] + "text = \"\"\n", uid)
 		uid += 1
 
-## Координаты узла. Родители детей Left/Side/Right — нулевые точки, поэтому
-## числа здесь читаются как координаты окна, а не как смещение внутри колонки.
-func _box(l: int, t: int, r: int, b: int) -> String:
-	return "offset_left = " + str(l) + ".0\noffset_top = " + str(t) + ".0\noffset_right = " + str(r) + ".0\noffset_bottom = " + str(b) + ".0\n"
+	# — колонка армии: карточки, «×», «?» ----------------------------------
+	_block("Units", "Sheet", uid)
+	uid += 1
+	var units := "Sheet/Units"
+	_add_node("Bottom", "Control", units,
+		_anchor_within("CardScroll", _L.BLOCKS["Units"]) + "mouse_filter = 2\n", uid)
+	uid += 1
+	# Узел `Bottom` сохранён: на него повязаны тема ArtifactBottom и тесты
+	# носителя темы; содержимое — карточки вместо семи иконок армии.
+	var card_h: float = _L.CARD["h"]
+	for i in 4:
+		var n := str(i)
+		var card_parent := units + "/Bottom/Card_" + n
+		_add_node("Card_" + n, "Control", units + "/Bottom",
+			"anchor_left = 0.0\nanchor_top = %s\nanchor_right = 1.0\nanchor_bottom = %s\n" % [
+				_f(i * _L.CARD["pitch"] / _L.BLOCKS["CardScroll"].size.y),
+				_f((i * _L.CARD["pitch"] + card_h) / _L.BLOCKS["CardScroll"].size.y)]
+			+ "mouse_filter = 2\n", uid)
+		uid += 1
+		# Дочерние узлы карточки anch'ируются локально карточке: её ширина —
+		# ширина колонки, высота — CARD["h"].
+		var card_size := Vector2(_L.BLOCKS["Units"].size.x, card_h)
+		_add_node("ArmySlot_" + n, "TextureRect", card_parent,
+			_anchor_rect(_L.CARD["portrait"], Rect2(Vector2.ZERO, card_size))
+			+ "texture = " + _kit("frame_card") + "\nstretch_mode = 5\nmouse_filter = 2\n", uid)
+		uid += 1
+		_add_node("ArmyIcon_" + n, "TextureRect", card_parent,
+			_anchor_rect(_L.CARD["portrait"].grow(-14.0), Rect2(Vector2.ZERO, card_size))
+			+ "stretch_mode = 5\nmouse_filter = 2\nvisible = false\n", uid)
+		uid += 1
+		_add_node("CardName_" + n, "Label", card_parent,
+			_anchor_rect(_L.CARD["name"], Rect2(Vector2.ZERO, card_size))
+			+ "clip_text = true\nvertical_alignment = 1\n", uid)
+		uid += 1
+		_add_node("ArmyCount_" + n, "Label", card_parent,
+			_anchor_rect(_L.CARD["lv_label"], Rect2(Vector2.ZERO, card_size))
+			+ "theme_type_variation = &\"LabelNumber\"\n", uid)
+		uid += 1
+		for pair2 in [["CardLv_", "lv_label", ""], ["CardHp_", "hp_bar", "bar_track"],
+				["CardMp_", "mp_bar", "bar_track"]]:
+			var key: String = pair2[1]
+			_add_node(
+				pair2[0] + n,
+				"Label" if pair2[2] == "" else "TextureRect",
+				card_parent,
+				_anchor_rect(_L.CARD[key], Rect2(Vector2.ZERO, card_size))
+				+ ("horizontal_alignment = 1\n" if pair2[2] == ""
+					else "texture = " + _kit(pair2[2]) + "\nstretch_mode = 1\nmouse_filter = 2\n"), uid)
+			uid += 1
+	_add_node("Close", "Button", units,
+		_anchor_within("Close", _L.BLOCKS["Units"])
+		+ "text = \"×\"\ntheme_type_variation = &\"Button\"\n", uid)
+	uid += 1
+	_add_node("Quests", "Button", units,
+		_anchor_within("Quests", _L.BLOCKS["Units"]) + "text = \"?\"\n", uid)
+	uid += 1
 
-## Литерал цвета для .tscn: `str(Color)` отдаёт кортеж `(r, g, b, a)`, а редактор
-## пишет `Color(r, g, b, a)`; без обёртки каждый прогон генератора переписывал
-## бы цвет в файле (дрейф 107 строк, найден 2026-10-27).
-func _color(c: Color) -> String:
-	return "Color" + str(c) + "\n"
+	# — панель предмета (макет: всплывающая подсказка поверх сумки) ---------
+	_add_node("ItemTip", "PanelContainer", "Sheet",
+		_anch(_L.BLOCKS["ItemTip"], "Sheet")
+		+ "theme_type_variation = &\"ArtifactOutline\"\nvisible = false\n", uid)
+	uid += 1
+	var tip := "Sheet/ItemTip"
+	_add_node("TipBox", "VBoxContainer", tip, "mouse_filter = 2\n", uid)
+	uid += 1
+	_add_node("TipName", "Label", tip + "/TipBox", "autowrap_mode = 3\n", uid)
+	uid += 1
+	_add_node("TipDesc", "Label", tip + "/TipBox",
+		"autowrap_mode = 3\n", uid)
+	uid += 1
+	# Desc_lbl/Desc — перенесённые узлы старой подписи (макет их не рисует):
+	# остаются под подсказкой, чтобы тесты действий предмета читали то же место.
+	_add_node("Desc_lbl", "Label", tip + "/TipBox", "visible = false\n", uid)
+	uid += 1
+	_add_node("Desc", "Label", tip + "/TipBox", "visible = false\n", uid)
+	uid += 1
+	_add_node("TipButtons", "HBoxContainer", tip + "/TipBox", "", uid)
+	uid += 1
+	for nm in ["Equip", "Remove", "Dispose"]:
+		_add_node(nm, "Button", tip + "/TipButtons", "text = \"\"\n", uid)
+		uid += 1
+	_add_node("TipIcon", "TextureRect", tip,
+		"anchor_left = 0.82\nanchor_top = 0.04\nanchor_right = 0.98\nanchor_bottom = 0.34\n"
+		+ "stretch_mode = 5\nmouse_filter = 2\n", uid)
 
-func _gold(sz: int) -> String:
-	return "theme_override_colors/font_color = " + _color(ThemeConfig.C_TEXT_GOLD_SOFT) + "theme_override_font_sizes/font_size = " + str(sz)
+## Якорные доли блока из таблицы внутри блока-родителя `parent`.
+func _anchor_within(block: String, parent: Rect2) -> String:
+	return _anchor_rect(_L.BLOCKS[block], parent)
 
-func _white(sz: int) -> String:
-	return "theme_override_colors/font_color = " + _color(ThemeConfig.C_TEXT_WHITE) + "theme_override_font_sizes/font_size = " + str(sz)
+func _anchor_rect(r: Rect2, parent: Rect2) -> String:
+	return "anchor_left = %s\nanchor_top = %s\nanchor_right = %s\nanchor_bottom = %s\n" % [
+		_f(r.position.x / parent.size.x), _f(r.position.y / parent.size.y),
+		_f((r.position.x + r.size.x) / parent.size.x),
+		_f((r.position.y + r.size.y) / parent.size.y)]
 
 func _emit() -> void:
-	var out := ""
-	out += "[gd_scene load_steps=" + str(_ext.size() + 1) + " format=3]\n"
+	var out := "[gd_scene load_steps=" + str(_ext.size() + 1) + " format=3]\n"
 	for e in _ext:
 		out += '[ext_resource type="' + e.type + '" path="' + e.path + '" id="' + str(e.id) + '"]\n'
 	for l in _node_lines:

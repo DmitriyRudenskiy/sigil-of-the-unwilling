@@ -4,11 +4,17 @@ extends RefCounted
 const HERO_DAILY_MOVEMENT       := 10.0
 const HERO_BASE_SPEED           := 120.0
 const TOOL_INVENTORY_SLOTS      := 8
-const MAX_BACKPACK_SIZE         := 16
-## Сетка снаряжения (grid-inventory-and-merchant): 6×4 = 24 клетки вместо
-## счёта предметов. Ширина 6 — чтобы копьё 1×6 ложилось и горизонтально,
-## и вертикально. Число — заявка на баланс (docs/07-balance.md §10).
-const INVENTORY_GRID            := Vector2i(6, 4)
+## Вместимость сетки снаряжения — число клеток макета 12 (D-280), а не лимит
+## стратегических ресурсов (он — `BACKPACK_TOTAL_CAP`). 50 = одна клетка на
+## предмет при сетке 10×5: сетка и вместимость обязаны сходиться, иначе
+## переполнение наступает при неполной сетке.
+const MAX_BACKPACK_SIZE         := 50
+## Сетка снаряжения (grid-inventory-and-merchant): макет 12 рисует 10×5 = 50
+## ячеек сумки (reference/12_inventory_parchment_sheet.jpeg, x 0.357–0.807,
+## y 0.572–0.966; замер — docs/20-ux-hero-screen.md §2). Ширина 10 — чтобы
+## копьё 1×6 ложилось и горизонтально, и вертикально (исторический смысл
+## ширины 6 сохранён). Число — заявка на баланс (docs/07-balance.md §10).
+const INVENTORY_GRID            := Vector2i(10, 5)
 const MAX_HERO_ARMY_SIZE        := 7
 const HERO_RETREAT_LOSS_FRACTION := 0.5
 const HERO_LEVEL_UP_EXP         := 100
