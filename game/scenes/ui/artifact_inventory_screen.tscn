@@ -1910,19 +1910,19 @@ vertical_alignment = 1
 
 
 [node name="ArmyCount_0" type="Label" unique_id=1177 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_0"]
-anchor_left = 0.487455
-anchor_top = 0.729412
+anchor_left = 0.458781
+anchor_top = 0.717647
 anchor_right = 0.598566
-anchor_bottom = 0.823529
+anchor_bottom = 0.835294
 theme_type_variation = &"LabelNumber"
 
 
 
 [node name="CardLv_0" type="Label" unique_id=1178 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_0"]
-anchor_left = 0.487455
-anchor_top = 0.729412
+anchor_left = 0.458781
+anchor_top = 0.717647
 anchor_right = 0.598566
-anchor_bottom = 0.823529
+anchor_bottom = 0.835294
 horizontal_alignment = 1
 
 
@@ -1995,19 +1995,19 @@ vertical_alignment = 1
 
 
 [node name="ArmyCount_1" type="Label" unique_id=1185 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_1"]
-anchor_left = 0.487455
-anchor_top = 0.729412
+anchor_left = 0.458781
+anchor_top = 0.717647
 anchor_right = 0.598566
-anchor_bottom = 0.823529
+anchor_bottom = 0.835294
 theme_type_variation = &"LabelNumber"
 
 
 
 [node name="CardLv_1" type="Label" unique_id=1186 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_1"]
-anchor_left = 0.487455
-anchor_top = 0.729412
+anchor_left = 0.458781
+anchor_top = 0.717647
 anchor_right = 0.598566
-anchor_bottom = 0.823529
+anchor_bottom = 0.835294
 horizontal_alignment = 1
 
 
@@ -2080,19 +2080,19 @@ vertical_alignment = 1
 
 
 [node name="ArmyCount_2" type="Label" unique_id=1193 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_2"]
-anchor_left = 0.487455
-anchor_top = 0.729412
+anchor_left = 0.458781
+anchor_top = 0.717647
 anchor_right = 0.598566
-anchor_bottom = 0.823529
+anchor_bottom = 0.835294
 theme_type_variation = &"LabelNumber"
 
 
 
 [node name="CardLv_2" type="Label" unique_id=1194 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_2"]
-anchor_left = 0.487455
-anchor_top = 0.729412
+anchor_left = 0.458781
+anchor_top = 0.717647
 anchor_right = 0.598566
-anchor_bottom = 0.823529
+anchor_bottom = 0.835294
 horizontal_alignment = 1
 
 
@@ -2165,19 +2165,19 @@ vertical_alignment = 1
 
 
 [node name="ArmyCount_3" type="Label" unique_id=1201 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_3"]
-anchor_left = 0.487455
-anchor_top = 0.729412
+anchor_left = 0.458781
+anchor_top = 0.717647
 anchor_right = 0.598566
-anchor_bottom = 0.823529
+anchor_bottom = 0.835294
 theme_type_variation = &"LabelNumber"
 
 
 
 [node name="CardLv_3" type="Label" unique_id=1202 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_3"]
-anchor_left = 0.487455
-anchor_top = 0.729412
+anchor_left = 0.458781
+anchor_top = 0.717647
 anchor_right = 0.598566
-anchor_bottom = 0.823529
+anchor_bottom = 0.835294
 horizontal_alignment = 1
 
 

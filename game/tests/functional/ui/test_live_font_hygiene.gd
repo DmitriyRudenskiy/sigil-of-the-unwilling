@@ -286,6 +286,10 @@ func test_army_counter_fits_its_slot() -> void:
 	var win: Node = menu.get_node("HeroModelWindow") as Node
 	var game_theme: Theme = load(_THEME) as Theme
 	var declared: int = int(game_theme.get_font_size("font_size", "LabelNumber"))
+	# D-280: карточки войск размечены долями, а не пиксельными офсетами,
+	# поэтому бокс читается после прохода разметки и из фактического size.
+	await get_tree().process_frame
+	await get_tree().process_frame
 	# Макет 12: армейская полоса — четыре карточки в колонке справа (D-280).
 	for i in 4:
 		var slot: Control = win.get_node(
@@ -297,10 +301,11 @@ func test_army_counter_fits_its_slot() -> void:
 			"счётчик Slot_%d резолвит не кегль роли LabelNumber" % i).is_equal(declared)
 		var font: Font = lbl.get_theme_font("font_size") as Font
 		var need: float = font.get_string_size("1234", HORIZONTAL_ALIGNMENT_LEFT, -1, kegl).x
-		var box: float = lbl.offset_right - lbl.offset_left
+		var box: float = lbl.size.x
 		assert_float(box).override_failure_message(
 			"бокс счётчика Slot_%d уже четырёхзначного числа (%.1f < %.1f)" % [i, box, need]
 			).is_greater_equal(need)
 		assert_int(lbl.horizontal_alignment).is_equal(HORIZONTAL_ALIGNMENT_RIGHT)
-		assert_bool(lbl.offset_right <= slot.size.x and lbl.offset_bottom <= slot.size.y) \
+		assert_bool(lbl.position.x + lbl.size.x <= slot.size.x + 0.5
+				and lbl.position.y + lbl.size.y <= slot.size.y + 0.5) \
 			.override_failure_message("счётчик Slot_%d выходит за границы слота" % i).is_true()

@@ -55,15 +55,18 @@ func test_out_of_grid_is_refused_with_grid_size() -> void:
 ## «Не хватает одной клетки» — текст с фактическими числами.
 func test_one_cell_short_reports_both_numbers() -> void:
 	var inv := HeroInventory.new()
-	# 19 колец занимают 19 клеток: в ряду остаётся 5 свободных, копью нужно 6.
-	for i in 19:
+	# Кольца занимают поле так, что в последнем ряду остаётся 5 клеток, а
+	# копью нужно 6. Число колец — от вместимости: литерал эпохи 6×4 молча
+	# перестал бы что-либо недодавать (D-280).
+	var filled := GameNumbers.MAX_BACKPACK_SIZE - 5
+	for i in filled:
 		assert_bool(inv.add_to_backpack(_ring("ring_%d" % i))).is_true()
 	assert_that(inv.free_cell_count()).is_equal(5)
 	var added := inv.add_to_backpack(_item("spear", Artifact.Slot.WEAPON, Vector2i(1, 6)))
 	assert_bool(added).is_false()
 	assert_str(inv.last_placement_error).contains("6")
 	assert_str(inv.last_placement_error).contains("5")
-	assert_that(inv.backpack.size()).is_equal(19)
+	assert_that(inv.backpack.size()).is_equal(filled)
 
 
 ## Надел копьё — шесть клеток снова свободны.
@@ -71,10 +74,10 @@ func test_equipping_frees_the_footprint() -> void:
 	var inv := HeroInventory.new()
 	var spear := _item("spear", Artifact.Slot.WEAPON, Vector2i(6, 1))
 	inv.add_to_backpack(spear)
-	assert_that(inv.free_cell_count()).is_equal(18)
+	assert_that(inv.free_cell_count()).is_equal(GameNumbers.MAX_BACKPACK_SIZE - 6)
 	assert_bool(inv.equip(spear)).is_true()
 	assert_that(inv.backpack.size()).is_equal(0)
-	assert_that(inv.free_cell_count()).is_equal(24)
+	assert_that(inv.free_cell_count()).is_equal(GameNumbers.MAX_BACKPACK_SIZE)
 
 
 ## Снял вещь — она занимает клетки; если клеток нет, снятие отказывает целиком.
@@ -82,7 +85,7 @@ func test_unequip_needs_room() -> void:
 	var inv := HeroInventory.new()
 	var armor := _item("armor", Artifact.Slot.TORSO, Vector2i(2, 3))
 	assert_bool(inv.equip(armor)).is_true()
-	for i in 24 - 6 + 1:
+	for i in GameNumbers.MAX_BACKPACK_SIZE - 6 + 1:
 		inv.add_to_backpack(_ring("ring_%d" % i))
 	assert_that(inv.free_cell_count()).is_less(6)
 	assert_object(inv.unequip(Artifact.Slot.TORSO)).is_null()

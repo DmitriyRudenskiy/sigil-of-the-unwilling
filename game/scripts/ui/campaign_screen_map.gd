@@ -296,6 +296,27 @@ const ROWS: Array[Dictionary] = [
 
 
 
+## Поставить узел в прямоугольник строки реестра: доли кадра становятся якорями,
+## поэтому экран не содержит ни одного собственного числа, с которым можно
+## разойтись с макетом. `host_id` — строка-хозяин, если узел вложен в другой
+## блок (ячейка счётчика внутри полосы, кольцо вокруг медальона); пустая — весь
+## кадр. Прямоугольник задан всеми четырьмя якорями при нулевых offset'ах: у
+## пресета с краем якоря верх/низ стоят на одной границе и высота получается
+## нулевой — текст есть в модели, его нет на экране.
+static func apply_rect(node: Control, element_id: StringName, host_id: StringName = &"") -> void:
+	var rect: Rect2 = row_by_id(element_id).get("rect", Rect2())
+	var host: Rect2 = row_by_id(host_id).get("rect", Rect2(0.0, 0.0, 1.0, 1.0))
+	node.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	node.anchor_left = (rect.position.x - host.position.x) / host.size.x
+	node.anchor_top = (rect.position.y - host.position.y) / host.size.y
+	node.anchor_right = (rect.end.x - host.position.x) / host.size.x
+	node.anchor_bottom = (rect.end.y - host.position.y) / host.size.y
+	node.offset_left = 0.0
+	node.offset_top = 0.0
+	node.offset_right = 0.0
+	node.offset_bottom = 0.0
+
+
 static func row_by_id(id: StringName) -> Dictionary:
 	for row in ROWS:
 		if row.get("id", &"") == id:

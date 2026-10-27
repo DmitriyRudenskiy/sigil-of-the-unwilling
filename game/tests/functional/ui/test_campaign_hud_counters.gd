@@ -74,7 +74,10 @@ func _city() -> City:
 
 func test_counter_bar_is_built_from_registry() -> void:
 	await _boot_campaign()
-	var bar := _main.get_node_or_null(COUNTER_BAR_PATH) as Container
+	# Полоса — `Control`, а не `Container`: контейнер делит ширину между
+	# видимыми детьми и сдвигал бы счётчики со своих ячеек макета, когда сосед
+	# скрыт по значению (D-281 3.8).
+	var bar := _main.get_node_or_null(COUNTER_BAR_PATH) as Control
 	assert_object(bar).is_not_null()
 	var rendered := Counters.rendered_rows()
 	assert_int(bar.get_child_count()).is_equal(rendered.size())
@@ -115,7 +118,7 @@ func test_counter_follows_the_carrier_without_restart() -> void:
 func test_counters_without_values_are_not_rendered() -> void:
 	await _boot_campaign()
 	var hud := _hud()
-	var bar := _main.get_node(COUNTER_BAR_PATH) as Container
+	var bar := _main.get_node(COUNTER_BAR_PATH) as Control
 	assert_bool(bar.has_node("Counter_gold")).is_false()
 	assert_bool(bar.has_node("Counter_drop_red")).is_false()
 	assert_bool(bar.has_node("Counter_gem_green")).is_false()

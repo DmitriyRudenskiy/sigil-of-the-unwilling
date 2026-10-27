@@ -55,7 +55,7 @@ const CARD := {
 	"pitch": 200.0,
 	"portrait": Rect2(51, 0, 150, 129),
 	"name": Rect2(51, 122, 79, 39),
-	"lv_label": Rect2(136, 124, 31, 16),
+	"lv_label": Rect2(128, 122, 39, 20),
 	"hp_bar": Rect2(167, 126, 68, 12),
 	"mp_label": Rect2(136, 152, 31, 16),
 	"mp_bar": Rect2(167, 154, 68, 12),

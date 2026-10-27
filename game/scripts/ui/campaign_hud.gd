@@ -386,16 +386,15 @@ func _build() -> void:
 ## Каждый блок растянут ровно в свой прямоугольник: у экрана нет ни одного
 ## собственного числа, с которого можно было бы разойтись с макетом.
 func _place(node: Control, element_id: StringName) -> void:
-	var rect: Rect2 = CampaignScreenMap.row_by_id(element_id).get("rect", Rect2())
-	node.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	node.anchor_left = rect.position.x
-	node.anchor_top = rect.position.y
-	node.anchor_right = rect.end.x
-	node.anchor_bottom = rect.end.y
-	node.offset_left = 0.0
-	node.offset_top = 0.0
-	node.offset_right = 0.0
-	node.offset_bottom = 0.0
+	CampaignScreenMap.apply_rect(node, element_id)
+
+
+## То же место, но у узла, вложенного в другой блок: доли кадра из реестра
+## пересчитываются в якори родителя по строке-хозяину. Без пересчёта вложенный
+## узел получил бы якоря кадра: кольцо медальона рисовалось бы в габарите самого
+## медальона, а чип целей — в его центре (D-281, задача 3.3).
+func _place_in(node: Control, element_id: StringName, host_id: StringName) -> void:
+	CampaignScreenMap.apply_rect(node, element_id, host_id)
 
 
 ## 7.10 — полоса счётчиков макета: один контейнер на строку реестра, порядок —
@@ -403,9 +402,13 @@ func _place(node: Control, element_id: StringName) -> void:
 ## мёртвые кнопки нельзя (конвенция «нет несуществующих действий»): это метки с
 ## иконкой, а каноническое имя ресурса уходит в подсказку.
 func _build_counter_bar() -> void:
-	var bar := HBoxContainer.new()
+	# Не `HBoxContainer`: контейнер делит ширину между *видимыми* детьми, поэтому
+	# скрытый по значению счётчик сдвигал бы соседей со своих ячеек макета
+	# (строка 1.5: порядок счётчиков — часть сверки с макетом). Полоса — простой
+	# Control, каждая ячейка стоит по своей строке реестра.
+	var bar := Control.new()
 	bar.name = COUNTER_BAR_NAME
-	bar.add_theme_constant_override("separation", 0)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bar)
 	_place(bar, &"counter_frame")
 	for row in CounterRegistry.rendered_rows():
@@ -413,9 +416,11 @@ func _build_counter_bar() -> void:
 		box.name = "Counter_%s" % String(row.get("id", &""))
 		box.tooltip_text = CounterRegistry.label_text(row)
 		box.add_theme_constant_override("separation", 4)
-		# Ячейки полосы делят её ширину поровну: в макете счётчики — равные
-		# латунные ячейки, и равная доля ширины есть у каждой строки реестра.
-		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		# Ячейка — своя строка реестра, а не равная доля ширины: в макете у каждой
+		# строки своё место в полосе, и сосед не едет, когда счётчик скрыт.
+		# Идентификатор строки счётчика в реестре экрана с префиксом (`counter_food`),
+		# в реестре счётчиков — без (`food`): узел и ячейка ищутся по одному имени.
+		_place_in(box, &"counter_%s" % String(row.get("id", &"")), &"counter_frame")
 		box.alignment = BoxContainer.ALIGNMENT_CENTER
 		var icon := TextureRect.new()
 		icon.name = "Icon"
@@ -750,10 +755,6 @@ func get_tutorial_text() -> String:
 
 ## Ребёнок растянут на весь родителя — так рисуются носитель внутри кнопки
 ## (кольцо медальона) и плашка без собственной раскладки.
-func _fill(node: Control) -> void:
-	node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-
-
 ## Медальон нижней полосы (D-281, задача 3.3): кольцо = прожитая доля месяца из
 ## CampaignCalendar.days_per_month(), бейдж = цели с done == false, клик = журнал
 ## целей (носитель D-241). Резной ободок макета — T-247; до носителя рисунка
@@ -771,13 +772,18 @@ func _build_medallion() -> void:
 	_medallion_ring.name = "MedallionRing"
 	_medallion_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_medallion.add_child(_medallion_ring)
-	_fill(_medallion_ring)
+	# Кольцо макета шире медальона — оно обводит его, а не вписано в него.
+	_place_in(_medallion_ring, &"medallion_ring", &"medallion")
 	_medallion_badge = Label.new()
 	_medallion_badge.name = MEDALLION_BADGE_NAME
 	_medallion_badge.theme_type_variation = &"LabelNumber"
 	_medallion_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_medallion.add_child(_medallion_badge)
-	_medallion_badge.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	# Чип целей стоит по своей строке реестра — над кольцом, у верхнего края
+	# медальона (макет: тёмный круглый чип с золотым числом).
+	_place_in(_medallion_badge, &"medallion_badge", &"medallion")
+	_medallion_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_medallion_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 
 
 ## Клик по медальону — вход/выход журнала целей. Пересчёта целей здесь нет:
