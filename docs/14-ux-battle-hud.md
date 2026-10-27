@@ -5,7 +5,7 @@ tags:
   - ux
   - battle
 status: draft
-date: 2026-10-13
+date: 2026-10-27
 ---
 
 # UX-спека: боевой HUD (UI-2)
@@ -171,12 +171,17 @@ date: 2026-10-13
 Раздел описывает фактическое поведение, а не желаемое; источник указан для каждой
 строки.
 
-- **Поле боя под малый экран**: `scripts/systems/battle_view.gd`
-  (`field_fit_scale`) масштабирует камеру ×0.8, когда **высота окна** ≤ 720 px,
-  иначе ×1.0; мера — `get_window().size`, а не `get_viewport().get_visible_rect()`
-  (при `stretch/mode=canvas_items` layout-viewport всегда 1920×1080, D-266).
-  Числа — `scripts/constants/game_numbers_battle.gd`
-  (`BATTLE_LOWRES_MAX_HEIGHT`, `BATTLE_LOWRES_FIT_SCALE`).
+- **Поле боя и полосы HUD**: `scripts/systems/battle_view.gd` (`fit_camera`) вписывает
+  поле в **вьюпорт минус полосы HUD** и сдвигает его центр на `(top − bottom) / 2z`,
+  где запас приходит извне: `scripts/ui/battle_ui.gd` (`hud_bands`) читает
+  `get_global_rect()` полос `hero_cards`/`initiative_bar`/`bottom_bar` из
+  `scenes/ui/battle_ui.tscn`, а `scripts/systems/battle_controller.gd`
+  (`_apply_hud_reserve`) внедряет его во view. Носитель числа — сцена: правка панели
+  правит и запас; констант разрешения больше нет (D-279 взамен множителя ×0.8 по порогу
+  высоты окна, D-266). Замер после фикса: доля кадра 0.710 при 1920×1080 и 0.711 при
+  1280×720, верх поля совпадает с нижней границей верхних полос.
+  **Остаток:** бейдж `turn_timer` (158 px по центру, нижняя граница 295) не резервируется
+  и накрывает верхний ряд поля в центральной колонке — T-230.
 - **Карточка противника видна всегда**: `scripts/systems/battle_controller.gd`
   вызывает `BattleUI.show_default_enemy_card(state)` на `_ready()` и когда
   прицел снят (`_on_attack_target_updated(null)`); подпись окна — «Противник»,
