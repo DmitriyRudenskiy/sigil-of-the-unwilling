@@ -169,6 +169,63 @@ def test_ticket_awaiting_pending_decision_needs_blocked_on(world):
     assert not any("ТИКЕТ T-2" in e for e in errors)
 
 
+def test_question_citation_outside_registry_is_red(world):
+    """Ссылка дока на незаведённый вопрос красная: «вопрос задан» ≠ «вопрос существует»."""
+    docs, _ = world
+    (docs / "01-core-loop.md").write_text(
+        (docs / "01-core-loop.md").read_text(encoding="utf-8") + "\nСм. Q-M900 и Q-M901.\n",
+        encoding="utf-8")
+    bad, _ = gate.check()
+    hits = [b for b in bad if "НЕВЕДОМЫЙ ВОПРОС" in b]
+    assert len(hits) == 2 and any("Q-M901" in h for h in hits), bad
+    (docs / "QUESTIONS.md").write_text(
+        (docs / "QUESTIONS.md").read_text(encoding="utf-8")
+        + "| Q-M900 | вопрос | тут | а/б | нет | Статус: ⏳ открыт |\n", encoding="utf-8")
+    bad, _ = gate.check()
+    hits = [b for b in bad if "НЕВЕДОМЫЙ ВОПРОС" in b]
+    assert len(hits) == 1 and "Q-M900" not in hits[0], hits
+
+
+def test_bank_is_exempt_from_question_citations(world):
+    """Банк — зона без гейта: ссылка внутри банка не красится."""
+    docs, _ = world
+    (docs / "bank").mkdir()
+    (docs / "bank" / "K-1.md").write_text("Q-M999\n", encoding="utf-8")
+    bad, _ = gate.check()
+    assert [b for b in bad if "НЕВЕДОМЫЙ ВОПРОС" in b] == [], bad
+
+
+def test_duplicate_question_numbers_are_measured(world):
+    """Задвоенный номер вопроса — сигнал, что закрытие записали отдельной строкой."""
+    docs, _ = world
+    q = docs / "QUESTIONS.md"
+    q.write_text(q.read_text(encoding="utf-8") +
+                 "| Q-M1 | **дубль той же строки** | тут | а | нет |\n", encoding="utf-8")
+    assert gate.duplicate_numbers() == 1
+
+
+def test_dead_path_in_gdd_section_is_measured(world, monkeypatch):
+    """Путь-призрак в живой секции попадает в замер ratchet'а; живой путь — нет."""
+    docs, _ = world
+    (world[0].parent / "scripts").mkdir(exist_ok=True)
+    (world[0].parent / "scripts" / "gdd_gate.py").write_text("x\n", encoding="utf-8")
+    (docs / "01-core-loop.md").write_text(
+        (docs / "01-core-loop.md").read_text(encoding="utf-8")
+        + "\nНоситель: `game/scripts/nope.gd` и `scripts/gdd_gate.py`.\n", encoding="utf-8")
+    monkeypatch.setattr(gate, "ROOT", world[0].parent)
+    got = gate.dead_paths()
+    assert any("game/scripts/nope.gd" == d.split(": ", 1)[1] for d in got), got
+    assert not any("gdd_gate.py" in d for d in got), got
+
+
+def test_registries_are_exempt_from_dead_paths(world, monkeypatch):
+    """Реестры — история: ссылка на несуществующий путь в них не считается."""
+    docs, _ = world
+    (docs / "00-CHANGELOG.md").write_text("было: `game/scripts/nope.gd`\n", encoding="utf-8")
+    monkeypatch.setattr(gate, "ROOT", world[0].parent)
+    assert not any("nope.gd" in d for d in gate.dead_paths())
+
+
 def test_duplicate_risk_number_is_red(world):
     _green_baseline(world)
     r = world[0] / "09-risks.md"

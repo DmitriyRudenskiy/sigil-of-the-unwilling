@@ -2,5 +2,7 @@
  "q_without_type": 97,
  "q_without_priority": 115,
  "d_without_rejected": 169,
- "risks_without_number": 10
+ "risks_without_number": 10,
+ "dead_paths": 5,
+ "q_duplicate_numbers": 13
 }

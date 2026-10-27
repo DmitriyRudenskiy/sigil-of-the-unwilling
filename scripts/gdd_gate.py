@@ -15,7 +15,16 @@
 4. Ratchet (D-272): число старых записей без полей имеет право только сокращаться —
    рост краснит прогон. Базлайн — `scripts/gdd_gate.baseline.json`.
 5. Номера рисков `R-##` не повторяются.
-6. Тикет, ссылающийся на предварительное (`⏳`) решение, обязан нести
+6. Каждая ссылка `Q-M##` в `docs/` существует в реестре `docs/QUESTIONS.md`
+   (банк `docs/bank/` — зона без гейта). Ссылка на незаведённый вопрос выглядит как
+   закрытая дыра и читается как доказательство.
+7. Путь в backticks внутри живой GDD-секции существует в репозитории (реестры
+   `CHANGELOG`/`DECISIONS`/`QUESTIONS` — история, они исключены). Число мёртвых
+   путей — часть ratchet: сокращается, но не растёт.
+8. Номер вопроса в `docs/QUESTIONS.md` не задвоен (дубль = закрытие записали новой
+   строкой, а «открытую» оставили: счётчик открытых начинает врать). Число дублей —
+   часть ratchet'а.
+9. Тикет, ссылающийся на предварительное (`⏳`) решение, обязан нести
    `blocked-on: D-xxx` — иначе связь «ждёт решения» теряется.
 
 Выход: 0 — зелено, 1 — нарушения, 2 — базлайн отсутствует/битый.
@@ -39,7 +48,7 @@ TYPE_RE = r"\[(agent|human)\]"
 PRIO_RE = "🔴|🟡|🟢"
 
 BACKLOG_KEYS = ("q_without_type", "q_without_priority", "d_without_rejected",
-                "risks_without_number")
+                "risks_without_number", "dead_paths", "q_duplicate_numbers")
 
 
 def strip_code(line: str) -> str:
@@ -103,7 +112,75 @@ def measure() -> dict[str, int]:
         "q_without_priority": sum(1 for l in q if not re.search(PRIO_RE, strip_code(l))),
         "d_without_rejected": sum(1 for l in d if "Отвергнутые" not in l),
         "risks_without_number": sum(1 for l in r if not re.search(r"\bR-\d+", l)),
+        "dead_paths": len(dead_paths()),
+        "q_duplicate_numbers": duplicate_numbers(),
     }
+
+
+DEAD_PATH_PREFIX = ("docs/", "game/", "scripts/", "openspec/", "design/", "tools/",
+                    "assets/")
+DEAD_PATH_EXEMPT = ("CHANGELOG", "DECISIONS", "QUESTIONS")
+
+
+def duplicate_numbers() -> int:
+    """Сколько номеров вопросов встречаются больше одного раза.
+
+    Дубль появляется так: закрытие записывают новой строкой, а старую «открытую»
+    оставляют. Счётчик открытых вопросов становится призрачным, и шаг 0 аудита
+    показывает то, чего нет. Старые строки не переписываются (D-272), поэтому
+    номер — бэклог ratchet'а, а не ошибка.
+    """
+    seen: dict[str, int] = {}
+    for l in q_rows():
+        m = re.match(r"^\| (Q-M\d+)", l)
+        if m:
+            seen[m.group(1)] = seen.get(m.group(1), 0) + 1
+    return sum(1 for c in seen.values() if c > 1)
+
+
+def dead_paths() -> list[str]:
+    """Пути в backticks внутри GDD-секций, которых нет в репозитории.
+
+    Реестры (`CHANGELOG`/`DECISIONS`/`QUESTIONS`) — история: они вне выборки GDD-секций
+    (нет ведущей цифры) и дополнительно исключены по имени; имеют право ссылаться на
+    путь, который существовал тогда. Живой документ такого права
+    не имеет: ссылка на несуществующий носитель читается как подтверждение.
+    Путь разрешается и от корня репо, и от `game/` (в доках — res//-конвенция).
+    """
+    bad = []
+    for f in sorted(DOCS.glob("[0-9]*.md")):
+        if any(e in f.stem for e in DEAD_PATH_EXEMPT):
+            continue
+        for raw in sorted(set(re.findall(r"`([^`\s]+)`", f.read_text(encoding="utf-8")))):
+            if not raw.startswith(DEAD_PATH_PREFIX) or any(
+                    c in raw for c in "*…<>{}"):
+                continue
+            rel = raw.split(":")[0]
+            if "." not in rel.rsplit("/", 1)[-1]:
+                continue
+            if (ROOT / rel).exists() or (ROOT / "game" / rel).exists():
+                continue
+            bad.append(f"{f.name}: {raw}")
+    return bad
+
+
+def question_citations() -> list[str]:
+    """Ссылки `Q-M##` вне реестра. Банк исключён (зона без гейта, как везде).
+
+    Без этой проверки аудит может объявить строку закрытой ссылкой на «открытый
+    вопрос», которого нет: расхождение становится невидимым, а выглядит как учтённое.
+    """
+    reg = (DOCS / "QUESTIONS.md").read_text(encoding="utf-8")
+    known = set(re.findall(r"Q-M(\d+)", reg))
+    bad = []
+    for f in sorted(DOCS.rglob("*.md")):
+        rel = f.relative_to(DOCS).as_posix()
+        if rel.startswith("bank/"):
+            continue
+        for qid in sorted(set(re.findall(r"Q-M(\d+)", f.read_text(encoding="utf-8")))):
+            if qid not in known:
+                bad.append(f"ССЫЛКА НА НЕВЕДОМЫЙ ВОПРОС: {rel}: Q-M{qid} нет в реестре")
+    return bad
 
 
 def check() -> tuple[list[str], dict[str, int]]:
@@ -155,6 +232,8 @@ def check() -> tuple[list[str], dict[str, int]]:
             for dnum in pending:
                 if dnum in sect and "blocked-on" not in sect:
                     errors.append(f"ТИКЕТ {head.group(1)} ждёт {dnum}, а `blocked-on` не несёт")
+
+    errors += question_citations()
 
     return errors, measure()
 

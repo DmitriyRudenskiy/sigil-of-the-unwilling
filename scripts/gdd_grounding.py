@@ -84,12 +84,20 @@ def blocks() -> list[tuple[int, list[str]]]:
             block.append(f"  … ещё {len(rows) - 10}")
         out.append((prio, block))
 
-    # Открытый = не закрыт и не редирект (`Q-M1 → **K-M1**` — ответ живёт в другом
-    # реестре). Без этой поправки дайджест врал бы: «🔴 0» при 13 открытых
-    # легаси-вопросах, у которых приоритета просто нет.
-    closed = [l for l in qrows if "закрыт" in l]
-    redirected = [l for l in qrows if "закрыт" not in l and "→ **" in l]
-    open_rows = [l for l in qrows if "закрыт" not in l and "→ **" not in l]
+    # Открытый = не закрыт и не редирект на другой реестр (`Q-M1 → **K-M1**`).
+    # Две ошибки, найденные на живом реестре: (1) «открытый = в строке есть 🔴»
+    # давало «🔴 0» при 13 легаси-вопросах без приоритета; (2) любая стрелка со
+    # `**` считалась редиректом, из-за чего строки нового формата
+    # `Q-M105 → **открыт (…)**` выпадали из счёта и дайджест врал вниз.
+    def _closed(l: str) -> bool:
+        return bool(re.search(r"→?\s*\*\*(?<!не)закрыт|(?<!не)закрыт \(", l))
+
+    def _redirect(l: str) -> bool:
+        return not _closed(l) and bool(re.search(r"→\s*\*\*[A-Z]-", l))
+
+    closed = [l for l in qrows if _closed(l)]
+    redirected = [l for l in qrows if _redirect(l)]
+    open_rows = [l for l in qrows if not _closed(l) and not _redirect(l)]
     red = [l for l in open_rows if "🔴" in l]
     yellow = [l for l in open_rows if "🟡" in l]
     legacy = [l for l in open_rows if not re.search(PRIO_RE, strip_code(l))]
