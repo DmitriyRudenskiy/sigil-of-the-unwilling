@@ -98,7 +98,7 @@ date: 2026-10-28
 | 27 | Плитка «×» (J1) | `signal closed` (`artifact_inventory_screen.gd:90`), сейчас — кнопка `Side/Ok` | `tile_brass.png` + глиф `×` | есть носитель |
 | 28 | Подсказка предмета (поверх D6–I10) | `artifact.display_name/description`, `GameText.artifact_footprint`, `item_rarity.color_for` | `frame_card.png` + `tile_brass.png` (заголовок) | есть носитель; сейчас описание — постоянная подпись `Right/Desc` вне всякой панели |
 | 29 | Действия предмета: Экипировать/Снять/Уничтожить | `inv.equip/unequip/remove_from_backpack` (`artifact_inventory_screen.gd:592-631`) | `tile_brass.png` × 3 | есть носитель; **в макете кнопок нет** → §5 зона D |
-| 30 | Шесть навыков | `_hero.skills.levels` (`_skill_level`, там же:292) | `icons/{nature_sense,keen_eye,navigation,geology,alchemy}.png` | есть носитель; в кадре макета их нет → §5 зона A |
+| 30 | Шесть навыков | `_hero.skills.levels` (`_skill_level`, там же:292) | `icons/{nature_sense,keen_eye,navigation,geology,alchemy}.png` — рисованные 128×128 (были плоские 40×40) | есть носитель; в кадре макета их нет → §5 зона A |
 | 31 | Четыре построения | **нет носителя**: `_on_form()` — тело `pass` (`artifact_inventory_screen.gd:633`), `grep -ni formation game/scripts` даёт только генератор сцены; ни перечня построений, ни состояния в модели нет | `icons/{army_s,arrow_s,flag_s,compass_s}.png` | **нет носителя** (T-250) |
 | 32 | Полоса «Перевес» | `inv.is_overflow`, `GameText.artifact_overflow` | `cell_grid.png` | есть носитель; в кадре не видна (пустая) |
 | 33 | Экран целиком, без прокрутки (AC1) | none (свойство кадра) | none | решается долевыми якорями §1; проверка — §6 |

@@ -6972,8 +6972,10 @@ M / missing K` по формату COVERAGE из `docs/20-ux-hero-screen.md` §8
 `scripts/ui_kit/place_hero_art.py`: `portrait.png` 80×80 → 512×368,
 `figure.png` 240×360 → 428×478 (фон срезан по связным областям, дырка кольца и
 т.п. остаются прозрачными, мелкие блики — нет). Заодно сняты с заглушек
-4 иконки характеристик (`assets/ui/icons/hero/`, `_STAT_ICON` переведён на них)
-и 60 иконок предметов `assets/artifacts/` (128×128, RGBA вместо плоских глифов).
+4 иконки характеристик (`assets/ui/icons/hero/`, `_STAT_ICON` переведён на них),
+5 иконок навыков (`assets/ui/icons/`, имена файлов те же — читатель один,
+`_SKILL_ICON`) и 60 иконок предметов `assets/artifacts/` (128×128, RGBA вместо
+плоских глифов).
 Пропорция бокса = пропорция прямоугольника `hero_layout.gd`, иначе
 TextureRect растягивает рисунок. Строки `game/assets/PROVENANCE.md` — жёлтый
 (права на модель Krea-2 turbo не проверялись), `MANIFEST.json` перезаписан.

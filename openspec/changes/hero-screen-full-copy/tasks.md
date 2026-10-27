@@ -50,8 +50,9 @@
       участника, полосы) — векторный билдер `scripts/ui_kit/build_hero_kit.py`
       (D-275, «зерно из замера, без диффузии»). Фигуративное (портрет, фигура,
       иконки четырёх характеристик, 60 иконок предметов) — диффузией по спеке
-      `scripts/concept_art/hero_screen_spec.json`, 2026-10-29: 67 кадров krea2,
-      укладка `scripts/ui_kit/place_hero_art.py` → T-249 закрыт.
+      `scripts/concept_art/hero_screen_spec.json`, 2026-10-29: 72 кадра krea2
+      (портрет, фигура, 4 характеристики, 5 навыков, 60 предметов), укладка
+      `scripts/ui_kit/place_hero_art.py` → T-249 закрыт.
 - [x] 2.3 Отбор и провенанс: кадры смотрены контактным листом и на живом кадре
       экрана; seed'ы и промпты — `concept_art/manifest.json`, эталонные кропы —
       `scripts/concept_art/etalons_hero/`, строки `game/assets/PROVENANCE.md`

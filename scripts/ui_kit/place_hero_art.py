@@ -41,6 +41,11 @@ TARGETS: dict[str, tuple[str, tuple[int, int], str, bool]] = {
     "stat_magic": ("ui/icons/hero/stat_magic.png", (128, 128), "contain", True),
     "stat_knowledge": ("ui/icons/hero/stat_knowledge.png", (128, 128), "contain", True),
 }
+
+# Иконки навыков экрана «Герой»: носители те же, что были (assets/ui/icons/),
+# меняются только пиксели — 40×40 плоские заглушки → 128×128 с альфой.
+for _skill in ("nature_sense", "keen_eye", "navigation", "geology", "alchemy"):
+    TARGETS["skill_" + _skill] = (f"ui/icons/{_skill}.png", (128, 128), "contain", True)
 # иконки предметов лежат одной папкой и одним размером — список id берём из спеки
 ITEMS_DEST = "artifacts/{id}.png"
 ITEMS_BOX = (128, 128)
