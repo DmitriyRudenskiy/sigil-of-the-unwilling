@@ -30,6 +30,11 @@ var _campaign_screen_paused: bool = false
 ## с узла, а не создаётся кодом: сцена — носитель состава кампании.
 @onready var campaign_ui_manager: CampaignUIManager = $CampaignUIManager if has_node("CampaignUIManager") else null
 
+## Поле карты кампании (T-194): прод-вызывающий `MapScreenModel`. Узла может не
+## быть в чужой сборке, поэтому проверка `has_node` обязательна.
+@onready var campaign_map_field: CampaignMapField = (
+	$CampaignMap/CampaignMapField if has_node("CampaignMap/CampaignMapField") else null)
+
 
 func _ready():
 	_connect_ui()
@@ -130,6 +135,10 @@ func _mount_campaign_hud() -> void:
 	# что был у таймера (`advance_turn` + `on_day_passed`), чтобы кнопка не
 	# заводила второй порядок фаз.
 	campaign_hud.turn_requested.connect(_advance_day)
+	# T-194: поле карты привязывается к тому же регион-графу, что и сейв-срез —
+	# после `_apply_pending_flow`, иначе Continue показал бы карту новой игры.
+	if campaign_map_field != null:
+		campaign_map_field.bind_map(composition.region_map)
 	_update_turn_availability()
 	# Полоса счётчиков и дата — за носителем: первый вызов сразу после привязки
 	# города, дальше — по сигналу дня (`_on_day_passed`). Своего счёта дней у HUD
@@ -178,6 +187,10 @@ func _on_day_passed(day: int):
 	# единственный источник обновления, а не `_advance_day`.
 	if campaign_hud != null:
 		campaign_hud.refresh_campaign(day)
+	# Туман и позиция героя меняются каждый ход: поле перерисовывается по тому же
+	# сигналу, что и счётчики, — своего таймера у него нет.
+	if campaign_map_field != null:
+		campaign_map_field.refresh()
 	# Автосохранение хода (mvp-ui-flow 5.4): у переключателя «Автосохранение» до
 	# этого шага не было читателя — настройка писалась экраном настроек и не
 	# читалась никем, поэтому кампанийный слот в живом прохождении не создавался,

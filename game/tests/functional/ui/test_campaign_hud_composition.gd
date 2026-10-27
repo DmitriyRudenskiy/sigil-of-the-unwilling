@@ -24,7 +24,7 @@ const ScreenMap := preload("res://scripts/ui/campaign_screen_map.gd")
 ## кнопок правого верхнего угла, панели отряда, таблички, кнопки хода, даты и
 ## трёх тайлов полосы (последние три лежат в `TopButtons` текстовыми кнопками).
 ## Расти должно по группам 2–3 смены; правка числа вниз = падение состава.
-const BASELINE_COVERED := 16
+const BASELINE_COVERED := 17
 
 
 var _main: Node = null

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://main123"]
+[gd_scene load_steps=9 format=3 uid="uid://main123"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/managers/game_manager.gd" id="2_gm"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/systems/crisis_event_system.gd" id="4_crisis"]
 [ext_resource type="Script" path="res://scripts/ui/campaign_hud.gd" id="5_hud"]
 [ext_resource type="Script" path="res://scripts/ui/campaign_ui_manager.gd" id="6_uimgr"]
+[ext_resource type="Script" path="res://scripts/ui/campaign_map_field.gd" id="7_mapfield"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -24,6 +25,16 @@ script = ExtResource("6_uimgr")
 
 [node name="CrisisEventSystem" type="Node" parent="."]
 script = ExtResource("4_crisis")
+
+; Поле карты кампании (T-194, D-281): гексы регион-графа под слоем HUD. Слой
+; ниже `CampaignHUD`, поэтому кнопки доходят до себя, а клики по карте — до поля.
+[node name="CampaignMap" type="CanvasLayer" parent="."]
+
+[node name="CampaignMapField" type="Control" parent="CampaignMap"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("7_mapfield")
 
 ; Слой кампейн-HUD (ui-mockup-parity §7.1, Q-M87 → (б), D-204): носитель экрана
 ; города в игровом пути. Отдельный CanvasLayer — экран города не зависит от
