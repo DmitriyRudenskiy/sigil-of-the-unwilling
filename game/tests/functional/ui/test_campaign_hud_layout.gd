@@ -27,7 +27,9 @@ const BOTTOM_BAND_ORDER: Array[StringName] = [
 	&"party_frame", &"sign_plaque", &"medallion", &"ability_frame", &"cart_button",
 ]
 ## Левая нижняя колонка сверху вниз: тайлы полосы.
-const LEFT_COLUMN_ORDER: Array[StringName] = [&"tile_city", &"tile_party", &"tile_menu", &"tile_reset"]
+const LEFT_COLUMN_ORDER: Array[StringName] = [
+	&"tile_city", &"tile_party", &"tile_menu", &"tile_reset",
+]
 
 
 var _main: Node = null

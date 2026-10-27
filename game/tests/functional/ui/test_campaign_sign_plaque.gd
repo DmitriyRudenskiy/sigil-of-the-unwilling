@@ -238,14 +238,14 @@ func test_plaque_sits_where_the_registry_puts_it() -> void:
 	assert_bool(rect.size.y > 0.0).is_true()
 	var frame := (plaque.get_parent() as Control).get_global_rect()
 	var want: Rect2 = ScreenMap.row_by_id(&"sign_plaque").get("rect", Rect2())
-	# Плита привязана к строке реестра по нижней кромке: X и ширина — по реестру,
-	# низ — по нижней кромке кадра. Высота у строки макета однострочная, а
-	# содержимое плиты — четыре строки, поэтому плита дорастает вверх
-	# (`GROW_DIRECTION_BEGIN`); проверка по нижней кромке ловит и это: стоило бы
-	# оставить рост вниз, низ вылез бы за окно.
-	var measured := [rect.position.x - frame.position.x, rect.size.x,
-			frame.end.y - rect.end.y]
-	var expected := [want.position.x * frame.size.x, want.size.x * frame.size.x,
+	# Плита привязана к строке реестра центром по X и нижней кромкой: строка
+	# макета — однострочная латунная плашка, а содержимое плиты — четыре строки,
+	# поэтому плита дорастает вверх и вширь (`GROW_DIRECTION_BEGIN`,
+	# `GROW_DIRECTION_BOTH`). Проверка по нижней кромке ловит и это: стоило бы
+	# оставить рост вниз, низ вылез бы за окно. Ширина здесь не сравнивается —
+	# она у содержимого, а не у носителя рисунка.
+	var measured := [rect.get_center().x - frame.position.x, frame.end.y - rect.end.y]
+	var expected := [(want.get_center().x) * frame.size.x,
 			(1.0 - want.end.y) * frame.size.y]
 	for i in measured.size():
 		assert_bool(absf(measured[i] - expected[i]) < 2.0).is_true() \

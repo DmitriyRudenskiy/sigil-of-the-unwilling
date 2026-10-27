@@ -1,5 +1,5 @@
 {
-  "_comment": "Носители элементов экрана кампании (openspec: map-screen-full-copy, шаг 3; T-247/T-246/T-244/T-245/T-243). Отдельно от spec.json (тот — разведка стиля) и от map_spec.json (тот — графика поля): здесь производственный прогон одного утверждённого режима для мелких UI-носителей, список сюжетов = реестр элементов game/scripts/ui/campaign_screen_map.gd, у которого нет рисунка. Эталон signs — семейство медальонных сигилов макета; эталон plates — интерфейс-кадр. Слои запроса: style категории -> style варианта -> frame категории -> subject.",
+  "_comment": "Носители элементов экрана кампании (openspec: map-screen-full-copy; T-259/T-246/T-244/T-245/T-243/T-248). Список сюжетов = реестр элементов game/scripts/ui/campaign_screen_map.gd, у которого нет рисунка. Эталон signs/emblems — семейство медальонных сигилов макета, эталон plates — интерфейс-кадр. Слои запроса: style категории -> style варианта -> frame категории -> subject. campaign-ui-2: палитра снята с макета 10 полосой кадра (тёмный сине-серый сланец + латунь + бирюза + золотое письмо), а не с тёплого пергамента, как в u1: пергаментные плашки u1 были расхождением с макетом. Составные предметы идут в emblems (рамка «embossed picture, not a letter, not a rune»), простые силуэты — в signs.",
   "comfy": "http://192.168.0.230:8188",
   "out_dir": "image-clone/campaign_ui",
   "references_dir": "image-clone/etalons",
@@ -8,7 +8,7 @@
     "quality": 90,
     "lossless": true
   },
-  "prompt_version": "campaign-ui-1",
+  "prompt_version": "campaign-ui-2",
   "model": "krea2",
   "probe_models": [
     "krea2"
@@ -24,9 +24,9 @@
   },
   "variants": [
     {
-      "id": "u1_iron_parchment",
-      "name": "u1_iron_parchment",
-      "style": "hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders",
+      "id": "u2_slate_brass",
+      "name": "u2_slate_brass",
+      "style": "hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark blue-grey slate stone inlaid with tarnished brass and teal, bright gold lettering and gold glyphs, limited palette of slate #2b3a44 #3d4f5a, brass #a97f3f #d8a954, teal #2f7f92, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders",
       "negative": "photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants"
     }
   ],
@@ -36,42 +36,34 @@
         1024,
         1024
       ],
-      "count": 8,
+      "count": 6,
       "reference": "1791970213325-01a139be-d2ce-786a-9d3b-1f9bbd4cd245.png",
       "style": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view",
       "frame": "one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design",
       "items": [
         {
-          "id": "camp_medallion",
-          "subject": "glyph of an open human palm laid over a closed eye"
-        },
-        {
           "id": "camp_medallion_ring",
-          "subject": "glyph of a thin bronze ring with one missing arc, like a counting ring"
+          "subject": "an open ring arc, one quarter of the ring left empty"
         },
         {
           "id": "camp_sign_food",
-          "subject": "glyph of a round loaf of bread with a short knife"
-        },
-        {
-          "id": "camp_sign_potion",
-          "subject": "glyph of a stoppered round-bottom glass flask"
+          "subject": "a round loaf of bread"
         },
         {
           "id": "camp_turn_swords",
-          "subject": "glyph of two crossed swords with hilts at the bottom"
+          "subject": "two crossed swords"
         },
         {
           "id": "camp_turn_globe",
-          "subject": "glyph of a small armillary sphere of three rings"
+          "subject": "a crossed armillary sphere"
         },
         {
           "id": "camp_date_gear",
-          "subject": "glyph of a toothed gear wheel with a square hub"
+          "subject": "a toothed gear wheel"
         },
         {
           "id": "camp_tile_reset",
-          "subject": "glyph of a curved arrow returning into its own tail"
+          "subject": "a plain raised ring outline with an empty centre"
         }
       ]
     },
@@ -80,30 +72,46 @@
         1024,
         1024
       ],
-      "count": 5,
+      "count": 9,
       "reference": "1791999397246-01a13b7a-0abb-7b89-a0aa-4d39e5f5f207.jpeg",
-      "style": "carved dark iron and dark wood interface plates with thin brass filigree and parchment insets, matte painted rendering, engraved edges, empty recessed centres meant to hold content, flat front view",
+      "style": "carved dark blue-grey slate interface plates framed in thin brass filigree with teal inlay lines, matte painted rendering, engraved edges, empty recessed centres meant to hold content, flat front view",
       "frame": "one single interface plate, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, empty plaque with no text and no icons inside",
       "items": [
         {
           "id": "camp_plate_ability",
-          "subject": "rectangular plaque frame with four engraved corner ornaments and one blank recessed centre"
+          "subject": "rectangular plaque frame divided by thin brass bars into eight empty square slots in two rows of four"
         },
         {
           "id": "camp_plate_minimap",
-          "subject": "small square map frame plate with a plain blank recessed centre"
+          "subject": "square map frame plate with a plain blank recessed centre"
         },
         {
           "id": "camp_plate_party",
-          "subject": "long horizontal plaque frame divided by thin brass bars into five equal empty square slots in one row"
+          "subject": "two separate blocks of empty square slots framed in brass, one block of four slots in two rows and one block of one slot, a gap between the blocks"
         },
         {
           "id": "camp_plate_counter",
-          "subject": "narrow horizontal counter chip plaque with one blank recessed number field"
+          "subject": "single narrow counter cell with a brass frame and one blank recessed number field"
         },
         {
           "id": "camp_plate_slot",
           "subject": "single empty square slot frame with a recessed centre and beaded inner edge"
+        },
+        {
+          "id": "camp_plate_sign",
+          "subject": "wide low plaque with rounded brass corners and one long blank recessed band for a name"
+        },
+        {
+          "id": "camp_plate_date",
+          "subject": "narrow horizontal plaque with a brass rim, a long blank recessed band and one small brass gear wheel at the right end"
+        },
+        {
+          "id": "camp_plate_strip",
+          "subject": "tall narrow vertical plate divided by thin brass bars into four stacked empty square cells"
+        },
+        {
+          "id": "camp_plate_panel",
+          "subject": "wide low panel of slate cells with a brass frame and ornamental corner scrolls, empty"
         }
       ]
     },
@@ -112,30 +120,50 @@
         1024,
         1024
       ],
-      "count": 5,
+      "count": 10,
       "reference": "1791970213325-01a139be-d2ce-786a-9d3b-1f9bbd4cd245.png",
       "style": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous raised picture embossed at the centre, strong contrast of dark metal and bright embossed object, flat front view",
       "frame": "one circular medallion, its disc filled by an embossed picture of the subject, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, the picture is an object not a letter, not a rune, not a monogram, not a cross",
       "items": [
         {
+          "id": "camp_medallion",
+          "subject": "a rolled parchment scroll with ribbed ends"
+        },
+        {
           "id": "camp_medallion_badge",
-          "subject": "a round red gemstone cabochon set in the middle of the disc, four metal claws holding the gem"
+          "subject": "a round chip with a thick raised rim and a plain empty centre"
         },
         {
           "id": "camp_sign_coins",
-          "subject": "a stack of three gold coins with visible rim edges, the pile standing upright"
+          "subject": "a stack of five coins"
         },
         {
-          "id": "camp_sign_shield",
-          "subject": "a metal heraldic shield with a round boss in the middle, standing upright"
+          "id": "camp_sign_house",
+          "subject": "a small house with a pitched roof and one window"
+        },
+        {
+          "id": "camp_sign_apple",
+          "subject": "a red apple with one leaf"
         },
         {
           "id": "camp_cart",
-          "subject": "a wooden cart with two spoked wheels and a linen sack on the cart bed"
+          "subject": "a wooden cart with a tied sack and two spoked wheels"
         },
         {
           "id": "camp_hero_marker",
-          "subject": "a metal gauntlet holding a spear with a leaf-shaped spearhead, spear upright"
+          "subject": "an armoured gauntlet gripping an upright spear"
+        },
+        {
+          "id": "camp_button_book",
+          "subject": "an open book with blank pages"
+        },
+        {
+          "id": "camp_button_gear",
+          "subject": "a toothed gear wheel"
+        },
+        {
+          "id": "camp_turn_big",
+          "subject": "a round button disc with four triangular points at north, east, south and west and a plain empty centre"
         }
       ]
     }

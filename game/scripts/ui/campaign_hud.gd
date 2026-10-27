@@ -365,7 +365,7 @@ func _build() -> void:
 		button.theme_type_variation = &"ButtonAction"
 		# Размер — по ячейке макета, а не по подписи: минимальный размер кнопки
 		# (140×40) шире ячейки 0.04 кадра, и соседние кнопки легли бы друг на
-		# друга. Подпись до носителя рисунка (T-247) остаётся текстовой и
+		# друга. Подпись до носителя рисунка (T-259) остаётся текстовой и
 		# сокращается многоточием, а не обрезается по пикселю.
 		button.custom_minimum_size = Vector2.ZERO
 		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -646,6 +646,9 @@ func _build_sign_plaque() -> void:
 	# больше своего прямоугольника. Расти обязано вверх, иначе нижний край уходит
 	# за нижнюю кромку окна и метки задачи становятся невидимыми.
 	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	# И вширь — симметрично: строка макета уже содержимого, а плита обязана
+	# оставаться под медальоном центром, а не уезжать вправо (ux-review 3.9).
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	panel.visible = false
 	add_child(panel)
 	_place(panel, &"sign_plaque")
@@ -757,7 +760,7 @@ func get_tutorial_text() -> String:
 ## (кольцо медальона) и плашка без собственной раскладки.
 ## Медальон нижней полосы (D-281, задача 3.3): кольцо = прожитая доля месяца из
 ## CampaignCalendar.days_per_month(), бейдж = цели с done == false, клик = журнал
-## целей (носитель D-241). Резной ободок макета — T-247; до носителя рисунка
+## целей (носитель D-241). Резной ободок макета — T-259; до носителя рисунка
 ## кольцо рисуется линией.
 func _build_medallion() -> void:
 	_medallion = Button.new()

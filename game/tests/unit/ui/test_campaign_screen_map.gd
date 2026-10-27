@@ -36,7 +36,7 @@ func test_ids_unique_and_blocks_known() -> void:
 
 
 ## Главный инвариант D-200: у элемента либо носитель значения, либо задача о том,
-## что носителя нет. То же к рисунку — либо готовый носитель, либо партия T-247.
+## что носителя нет. То же к рисунку — либо готовый носитель, либо партия T-259.
 func test_every_element_has_carrier_or_ticket() -> void:
 	for row in ScreenMap.ROWS:
 		var ticket := String(row.get("ticket", ""))
