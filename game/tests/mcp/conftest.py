@@ -33,6 +33,13 @@ SERVER_ENV = {"GODOT_PATH": GODOT_BIN}
 if os.environ.get("DISPLAY"):
     SERVER_ENV["DISPLAY"] = os.environ["DISPLAY"]
 
+# Фикстура кадра (`CAPTURE_SETUP`) читает местность фона из `CAPTURE_TERRAIN`:
+# mcp SDK пробрасывает потомку только свой список переменных, поэтому нужную
+# передаём явно — иначе три кадра разной местности молча снимаются одним и тем же
+# лугом (проверено: md5 снежного и неопознанного кадров совпали).
+if os.environ.get("CAPTURE_TERRAIN"):
+    SERVER_ENV["CAPTURE_TERRAIN"] = os.environ["CAPTURE_TERRAIN"]
+
 
 def _worker_port() -> int:
     """ci-speedup: интеракционный порт MCP (дефолт 9090 — backward-compat).

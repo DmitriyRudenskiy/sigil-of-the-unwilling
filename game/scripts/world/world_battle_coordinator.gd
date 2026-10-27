@@ -142,6 +142,10 @@ func _launch_battle(
 		)
 		return
 
+	handoff.enemy_terrain = (
+		map_gen.get_terrain_name(enemy_cell)
+		if map_gen != null and map_gen.has_method("get_terrain_name") else "grass"
+	)
 	_pending_enemy_cell = enemy_cell
 	_roles_swapped = p_roles_swapped
 	if hero.has_method("force_stop"):
@@ -155,7 +159,8 @@ func _launch_battle(
 		handoff.get_attacker_artifact_mods(),
 		handoff.get_defender_artifact_mods(),
 		handoff.obstacle_seed,
-		handoff.get_hero_magic()
+		handoff.get_hero_magic(),
+		handoff.enemy_terrain
 	)
 
 func _on_battle_started() -> void:

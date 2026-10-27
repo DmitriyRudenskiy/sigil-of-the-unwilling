@@ -98,36 +98,8 @@ func is_paused() -> bool:
 	return _paused
 
 
-## battle-unit-vitals: the turn clock lives in BattleState; the executor owns
-## when it runs — armed only while waiting for the player's input, so AI turns
-## never spend it. A modal window pauses it without losing the remaining time.
-var _turn_timer_armed := false
-
-func is_turn_timer_armed() -> bool:
-	return _turn_timer_armed
-
-func pause_turn_timer() -> void:
-	if _turn_timer_armed and _battle_state != null:
-		_battle_state.turn_timer_running = false
-
-func resume_turn_timer() -> void:
-	if _turn_timer_armed and _battle_state != null:
-		_battle_state.turn_timer_running = true
-
-## Called every frame from the battle controller; expiry skips the turn the
-## same way the "skip" button does.
-func tick_turn_timer(delta: float) -> void:
-	if not _turn_timer_armed or _paused or _state != State.WAITING_INPUT:
-		return
-	if _battle_state == null or not _battle_state.turn_timer_running:
-		return
-	if _battle_state.tick_turn_timer(delta):
-		status_updated.emit(GameText.battle_time_up())
-		request_skip()
-
 func start_battle() -> void:
 	_paused = false
-	_turn_timer_armed = false
 	_pending_completion = PendingAction.NONE
 	_end_emitted = false
 	_morale_allowed = false
@@ -469,8 +441,6 @@ func _advance_to_next_turn() -> void:
 			return
 
 		_transition_to(State.WAITING_INPUT)
-		_turn_timer_armed = true
-		_battle_state.arm_turn_timer()
 	else:
 		_run_ai_turn()
 
@@ -600,10 +570,6 @@ func _emit_end() -> void:
 func _transition_to(new_state: State) -> void:
 	_state = new_state
 	_state_token += 1
-	if new_state != State.WAITING_INPUT:
-		_turn_timer_armed = false
-		if _battle_state != null:
-			_battle_state.disarm_turn_timer()
 	phase_changed.emit(new_state)
 	if _retreat_policy.is_requested() and new_state == State.WAITING_INPUT:
 		_retreat_policy._execute()

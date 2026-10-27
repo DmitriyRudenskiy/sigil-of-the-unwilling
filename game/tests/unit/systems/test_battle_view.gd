@@ -50,16 +50,32 @@ func test_animate_move_null_guard() -> void:
 	var tw := _view.animate_move(null, [])
 	assert_that(tw).is_null()
 
+## Мера поля — геометрия поля BW×BH, а не `get_used_rect()` тайлового слоя: в залитые
+## клетки входит декоративная обводка (±RING, пока под полем нет кадра местности), и
+## камера, нацеленная на used_rect, вписывает в кадр её: юниты становились вдвое
+## меньше своих клеток (замер до правки — зум 0.655 вместо 1.386 при 11×9).
 func test_fit_camera_centers_on_field() -> void:
 	_view.paint_field()
 	_view.fit_camera()
 	var cam: Camera2D = _view.get_node("Camera")
-	var used: Rect2i = _view._tile_map.get_used_rect()
-	assert_bool(used.size.x > 0 and used.size.y > 0).is_true()
-	var p0: Vector2 = _view._tile_map.map_to_local(used.position)
-	var p1: Vector2 = _view._tile_map.map_to_local(used.position + used.size - Vector2i(1, 1))
-	var expected: Vector2 = (p0 + p1) / 2.0
-	assert_bool(cam.position.distance_to(expected) < 0.01).is_true()
+	var tm: TileMapLayer = _view._tile_map
+	var expected: Vector2 = (tm.map_to_local(Vector2i.ZERO)
+		+ tm.map_to_local(Vector2i(BattleState.BW - 1, BattleState.BH - 1))) / 2.0
+	assert_bool(cam.position.distance_to(expected) < 0.01).is_true().override_failure_message(
+		"камера не в центре поля %d×%d (%s против %s)"
+		% [BattleState.BW, BattleState.BH, str(cam.position), str(expected)]
+	)
+	# Проверка того, что сравнение не пустышка: пока обводка залита, центр used_rect
+	# обязан ОТЛИЧАТЬСЯ — иначе возврат к старой мере проходил бы незамеченным.
+	var used: Rect2i = tm.get_used_rect()
+	var ring_centre: Vector2 = (tm.map_to_local(used.position)
+		+ tm.map_to_local(used.position + used.size - Vector2i(1, 1))) / 2.0
+	assert_bool(used.position.x < 0 and used.position.y < 0).is_true().override_failure_message(
+		"обводки в поле нет — старая и новая мера совпали, проверка ничего не стоит"
+	)
+	assert_bool(cam.position.distance_to(ring_centre) > 1.0).is_true().override_failure_message(
+		"камера смотрит в центр обводки, а не в центр поля"
+	)
 
 
 func test_floating_text() -> void:

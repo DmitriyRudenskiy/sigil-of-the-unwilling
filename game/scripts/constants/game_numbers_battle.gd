@@ -1,8 +1,10 @@
 class_name GameNumbersBattle
 extends RefCounted
 
-const BATTLE_BOARD_W             := 17
-const BATTLE_BOARD_H             := 11
+## Поле боя 11×9 = 99 гексов (`battle-99-hex-clean-hud`, владелец 2026-10-27).
+## Единственная мера геометрии: потребители читают `BattleState.BW/BH`.
+const BATTLE_BOARD_W             := 11
+const BATTLE_BOARD_H             := 9
 const BATTLE_HEX_OUTLINE_RADIUS := 38.0
 const BATTLE_ATTACK_LUNGE_PX    := 26.0
 const BATTLE_MOVE_TWEEN_SEC     := 0.15

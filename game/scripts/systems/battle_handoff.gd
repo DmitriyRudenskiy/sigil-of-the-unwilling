@@ -13,6 +13,9 @@ var enemy_bonus: Dictionary = {}
 var obstacle_seed: int = -1
 var roles_swapped: bool = false
 var enemy_cell: Vector2i = Vector2i(-1, -1)
+## Мировая местность клетки врага — задаёт задний план боя (battle-99-hex-clean-hud).
+## Заполняет координатор: у handoff нет доступа к карте.
+var enemy_terrain: String = "grass"
 
 # ── Валидация ──
 var is_valid: bool = false

@@ -104,7 +104,6 @@ static func battle_move_help(name: String) -> String: return TranslationServer.t
 static func battle_click_enemy() -> String: return TranslationServer.translate("battle.click_enemy")
 static func battle_no_mana() -> String: return TranslationServer.translate("battle.no_mana")
 
-static func battle_time_up() -> String: return TranslationServer.translate("battle.time_up")
 static func battle_downed_waits(name: String) -> String:
 	return TranslationServer.translate("battle.downed_waits").format({"name": name})
 static func battle_death_save_roll(name: String, roll: int) -> String:

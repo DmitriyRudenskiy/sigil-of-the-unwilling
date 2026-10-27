@@ -101,9 +101,6 @@ msgstr ""
 msgid "battle.no_mana"
 msgstr ""
 
-msgid "battle.time_up"
-msgstr ""
-
 msgid "battle.downed_waits"
 msgstr ""
 

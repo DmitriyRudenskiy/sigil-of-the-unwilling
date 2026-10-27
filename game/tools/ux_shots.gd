@@ -55,18 +55,6 @@ func _run() -> void:
 		await _shot(ui, "04_error_chip")
 		ui.set_attack_preview("")
 
-	# A: очередь — активный/обычный/мёртвый (форма, не только цвет)
-	if ui.has_method("update_initiative"):
-		var units: Array[BattleState.BattleUnit] = []
-		var a = _make_unit("Ала", 20, 20, 12, 3, 1)
-		var b = _make_unit("Бор", 8, 30, 14, 2, 1)
-		var c = _make_unit("Вив", 0, 24, 10, 1, 1)
-		c.alive = false
-		for u in [a, b, c]:
-			units.append(u)
-		ui.update_initiative(units, a)
-		await _shot(ui, "05_queue_states")
-
 	# все контролы: lock (skip остаётся активной — инвариант)
 	if ui.has_method("set_controls_enabled"):
 		ui.set_controls_enabled(false)
@@ -118,25 +106,12 @@ func _run() -> void:
 		magic.mana_max = 20
 		magic.mana_current = 14
 		ui.update_hero_cards(state, magic)
-		var queue: Array[BattleState.BattleUnit] = []
-		for u in [own, foe, mob]:
-			queue.append(u)
-		ui.update_initiative(queue, own)
-		if live_state != null:
-			live_state.turn_time_limit = 30
-			live_state.turn_time_left = 12.0
-			live_state.turn_timer_running = true
 		if ui.has_method("set_rescue_enabled"):
 			ui.set_rescue_enabled(true)
 		await _shot(ui, "10_hero_cards")
 
-	# остаток на исходе (красное кольцо) — состояние, а не новый элемент
-	if live_state != null:
-		live_state.turn_time_left = 4.0
-		await _shot(ui, "11_timer_low")
-
-	# ни одного героя и никакого таймера: пустые носители => пустые зоны,
-	# а не нули (правило «никаких фейковых чисел», docs/14 §3)
+	# ни одного героя: пустые носители => пустые зоны, а не нули
+	# (правило «никаких фейковых чисел», docs/14 §3)
 	if ui.has_method("update_hero_cards"):
 		var bare := BattleState.new()
 		var plain = _make_unit("Костяной часовой", 21, 21, 12, 3, 6)
@@ -144,16 +119,8 @@ func _run() -> void:
 		bare.attacker_units.append(plain)
 		bare.defender_units.append(mob)
 		ui.update_hero_cards(bare, null)
-		var bare_queue: Array[BattleState.BattleUnit] = []
-		for u in [plain, mob]:
-			bare_queue.append(u)
-		ui.update_initiative(bare_queue, plain)
 		if ui.has_method("set_rescue_enabled"):
 			ui.set_rescue_enabled(false)
-		if live_state != null:
-			live_state.turn_time_limit = 0
-			live_state.turn_time_left = 0.0
-			live_state.turn_timer_running = false
 		await _shot(ui, "12_no_hero_no_timer")
 
 	print("UX_SHOTS_DONE=%d" % _shots_done)

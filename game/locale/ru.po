@@ -116,9 +116,6 @@ msgstr "⚔️ Кликните врага с красным контуром."
 msgid "battle.no_mana"
 msgstr "Недостаточно маны или школа не изучена."
 
-msgid "battle.time_up"
-msgstr "⏳ Время вышло — ход пропущен."
-
 msgid "battle.downed_waits"
 msgstr "{name} без сознания и не действует."
 

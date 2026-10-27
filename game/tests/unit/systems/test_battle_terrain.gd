@@ -152,11 +152,13 @@ func test_no_terrain_behavior_unchanged() -> void:
 	# Regression guard: empty terrain map -> plain BFS reachability (speed = hexes).
 	var state := BattleState.new()
 	var u := _make_unit("militia", 4, 40, 5, 3, BattleState.Side.ATTACKER)
-	u.cell = Vector2i(8, 5)
+	# Клетка 5 гексов от цели влезает и в поле 11×9 (прежний 17-широкий запас не
+	# нужен): старт у левого края, 5 и 6 гексов по той же строке.
+	u.cell = Vector2i(4, 4)
 	state.attacker_units.append(u)
 	var reachable: Dictionary = state.get_reachable_for_unit(u, func() -> Dictionary: return {})
 	# Open board: a cell 5 hexes away is reachable, 6 is not.
-	var five_away := Vector2i(13, 5)
-	var six_away := Vector2i(14, 5)
+	var five_away := Vector2i(9, 4)
+	var six_away := Vector2i(10, 4)
 	assert_bool(reachable.has(five_away)).is_true().override_failure_message("5 hexes at speed 5 must be reachable on plain board")
 	assert_bool(reachable.has(six_away)).is_false().override_failure_message("6 hexes at speed 5 must NOT be reachable")

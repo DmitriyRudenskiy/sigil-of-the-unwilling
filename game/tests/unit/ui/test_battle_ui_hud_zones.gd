@@ -1,6 +1,7 @@
 extends BaseTest
 
-# UI-3 шаг 2: зоны A (инициатива), B (карточка цели), F (финал) — презентационный слой.
+# UI-3 шаг 2: зоны B (карточка цели), F (финал) — презентационный слой.
+# Зона A (лента очереди) снята со сцены сменой battle-99-hex-clean-hud.
 
 const _BATTLE_UI_SCENE := preload("res://scenes/ui/battle_ui.tscn")
 
@@ -30,27 +31,6 @@ func _mk_ui() -> BattleUI:
 	_ui = ui
 	get_tree().root.add_child(ui)
 	return ui
-
-func test_zone_a_initiative_cells_and_active() -> void:
-	var ui: BattleUI = _mk_ui()
-	var alive := _mk_unit("Скелет", 5)
-	var active := _mk_unit("Вампир", 3)
-	var dead := _mk_unit("Зомби", 0)
-	var units: Array[BattleState.BattleUnit] = [alive, active, dead]
-
-	ui.update_initiative(units, active)
-
-	var box: HBoxContainer = ui._init_box
-	assert_int(box.get_child_count()).is_equal(3)
-	var cells := {}
-	for c in box.get_children():
-		cells[c.name] = c
-	var active_cell: PanelContainer = cells["cell_%d" % active.uid]
-	var dead_cell: PanelContainer = cells["cell_%d" % dead.uid]
-	var plain_cell: PanelContainer = cells["cell_%d" % alive.uid]
-	assert_str(str(active_cell.theme_type_variation)).is_equal("PanelQueueTileActive")
-	assert_str(str(dead_cell.theme_type_variation)).is_equal("PanelQueueTileDead")
-	assert_str(str(plain_cell.theme_type_variation)).is_equal("PanelQueueTile")
 
 func test_zone_b_target_card_live_fields() -> void:
 	var ui: BattleUI = _mk_ui()

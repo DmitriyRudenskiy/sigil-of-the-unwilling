@@ -38,16 +38,6 @@ func _ready() -> void:
 	_apply_hud_reserve()
 	_view.fit_camera()
 
-## battle-unit-vitals: the turn clock is model state (BattleState); the battle
-## controller is its only ticker, so freeing the scene stops the clock too.
-func _process(delta: float) -> void:
-	if _executor == null:
-		return
-	_executor.tick_turn_timer(delta)
-	# Шаг 5.3: часы — состояние, экран их только показывает (виджет сам гасит
-	# перерисовку, пока показанная секунда не изменилась).
-	_ui.set_turn_timer(_state.turn_time_left, _state.turn_time_limit, _state.turn_timer_running)
-
 func _init_state() -> void:
 	_state = BattleState.new()
 	_ai = BattleAI.new()
@@ -69,8 +59,6 @@ func _wire_ui_signals() -> void:
 	_ui.spell_chosen.connect(_on_spell_chosen)
 	_ui.settings_requested.connect(_on_settings)
 	_ui.settings_closed.connect(resume_from_settings)
-	_ui.spellbook_opened.connect(_pause_turn_timer)
-	_ui.spellbook_closed.connect(_resume_turn_timer)
 
 func _init_input() -> void:
 	_input = BattleInput.new()
@@ -101,7 +89,6 @@ func _wire_signals() -> void:
 	_executor.end_battle.connect(battle_finished.emit)
 	_executor.phase_changed.connect(_on_executor_phase_changed)
 	_executor.initiative_changed.connect(_on_initiative_changed)
-	_executor.active_unit_changed.connect(_ui.update_active_unit)
 	_executor.floating_text.connect(_view.show_floating_text)
 	_input.attack_preview_updated.connect(_ui.set_attack_preview)
 	_input.attack_target_updated.connect(_on_attack_target_updated)
@@ -136,12 +123,19 @@ func _generate_terrain() -> void:
 	rng.seed = _obstacle_seed
 	_state.generate_terrain(rng)
 
+## Препятствия — центральная полоса. И число, и ширина полосы считаются от размера
+## доски: восемь камней прежней нормы, сжатые в три колонки поля 11×9, с реальной
+## вероятностью перекрывают поле наглухо (для 17×11 формула даёт 8 камней в x 4..12 —
+## ровно как было).
 func _place_obstacles() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _obstacle_seed
+	var count := int(round(BattleState.BW * BattleState.BH * 0.043))
 	var n := 0
-	while n < 8:
-		var cell := Vector2i(rng.randi_range(4, BattleState.BW - 5), rng.randi_range(1, BattleState.BH - 2))
+	while n < count:
+		var cell := Vector2i(
+			rng.randi_range(int(BattleState.BW * 0.25), int(BattleState.BW * 0.75)),
+			rng.randi_range(1, BattleState.BH - 2))
 		if obstacles.has(cell):
 			continue
 		obstacles[cell] = true
@@ -151,7 +145,6 @@ func _place_obstacles() -> void:
 
 func _on_unit_selected(u: BattleState.BattleUnit) -> void:
 	_on_status_updated(GameText.battle_move_help(u.get_display_name()))
-	_ui.update_active_unit(u)
 	_ui.set_attack_enabled(_input.highlight_attack.size() > 0)
 
 func _on_move_requested(unit: BattleState.BattleUnit, target: Vector2i) -> void:
@@ -207,16 +200,6 @@ func _on_rescue() -> void:
 
 func _on_spellbook() -> void:
 	_ui.open_spellbook(_state, _hero_magic)
-
-## battle-unit-vitals: an open modal spellbook must not eat the turn clock;
-## closing it continues the same remaining time.
-func _pause_turn_timer() -> void:
-	if _executor != null:
-		_executor.pause_turn_timer()
-
-func _resume_turn_timer() -> void:
-	if _executor != null:
-		_executor.resume_turn_timer()
 
 func _on_spell_chosen(spell_id: StringName) -> void:
 	if not _executor.is_input_active():
@@ -372,9 +355,12 @@ func start_battle(
 	attacker_artifact_mods: Dictionary = {},
 	defender_artifact_mods: Dictionary = {},
 	obstacle_seed: int = -1,
-	hero_magic: HeroMagic = null
+	hero_magic: HeroMagic = null,
+	background_terrain: String = "grass"
 ) -> void:
 	_hero_magic = hero_magic
+	_state.background_terrain = background_terrain
+	_view.set_background(background_terrain)
 	if obstacle_seed < 0:
 		obstacle_seed = randi()
 	_obstacle_seed = obstacle_seed
@@ -402,7 +388,6 @@ func _apply_hud_reserve() -> void:
 
 
 func _on_initiative_changed() -> void:
-	_ui.update_initiative(_state.turn_queue, _state.active_unit)
 	_refresh_hero_hud()
 
 

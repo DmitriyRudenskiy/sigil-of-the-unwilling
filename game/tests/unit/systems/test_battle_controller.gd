@@ -20,8 +20,12 @@ func test_place_obstacles_deterministic() -> void:
 	a._view = view_a
 	a._obstacle_seed = 42
 	a._place_obstacles()
-	assert_int(a.obstacles.size()).is_equal(8)
-	assert_int(view_a.obstacles_added).is_equal(8)
+	# Число камней выводится из площади поля (battle-99-hex-clean-hud), поэтому
+	# проверяется свойство, а не удвоенная формула: плотность ≤ 6% поля.
+	assert_int(a.obstacles.size() * 100).is_less_equal(BattleState.BW * BattleState.BH * 6) \
+			.override_failure_message("камней слишком много для такого поля")
+	assert_int(a.obstacles.size()).is_greater(0)
+	assert_int(view_a.obstacles_added).is_equal(a.obstacles.size())
 
 	var b = auto_free(BattleController.new())
 	var view_b := StubView.new()
@@ -39,8 +43,10 @@ func test_place_obstacles_within_bounds() -> void:
 	a._view = view_a
 	a._obstacle_seed = 7
 	a._place_obstacles()
+	# Полоса — центр поля, с отступом минимум в две колонки от каждого края:
+	# на узком поле камни не должны вставать в колонки развёртки.
 	for cell in a.obstacles:
-		assert_int(cell.x).is_between(4, BattleState.BW - 5)
+		assert_int(cell.x).is_between(2, BattleState.BW - 3)
 		assert_int(cell.y).is_between(1, BattleState.BH - 2)
 	view_a.free()
 

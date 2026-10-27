@@ -228,11 +228,11 @@ func test_ai_targets_threat_first() -> void:
 	# Дальнобойный враг, способный выстрелить (угроза), приоритетнее раненого.
 	var state := BattleState.new()
 	var me := _make_unit("swordsmen", 5, 50, 5, 4, BattleState.Side.ATTACKER)
-	me.cell = Vector2i(8, 5)
+	me.cell = Vector2i(5, 5)
 	var archer := _make_unit("archer", 4, 30, 6, 2, BattleState.Side.DEFENDER, ["ranged"])
-	archer.cell = Vector2i(11, 5)  # dist 3 — может выстрелить
+	archer.cell = Vector2i(8, 5)  # dist 3 — может выстрелить
 	var wounded := _make_unit("goblins", 3, 20, 4, 1, BattleState.Side.DEFENDER)
-	wounded.cell = Vector2i(10, 5)
+	wounded.cell = Vector2i(7, 5)
 	wounded.set_count(2)  # 20% стека — ранен
 	state.attacker_units.append(me)
 	state.defender_units.append(archer)
@@ -252,12 +252,12 @@ func test_ai_targets_wounded_before_full() -> void:
 	# Без угроз: раненый (<30%) приоритетнее полного стека.
 	var state := BattleState.new()
 	var me := _make_unit("swordsmen", 5, 50, 5, 4, BattleState.Side.ATTACKER)
-	me.cell = Vector2i(8, 5)
+	me.cell = Vector2i(5, 5)
 	var wounded := _make_unit("goblins", 3, 20, 4, 1, BattleState.Side.DEFENDER)
-	wounded.cell = Vector2i(12, 5)
+	wounded.cell = Vector2i(9, 5)
 	wounded.set_count(2)  # 20%
 	var full := _make_unit("orcs", 4, 30, 5, 2, BattleState.Side.DEFENDER)
-	full.cell = Vector2i(10, 5)
+	full.cell = Vector2i(7, 5)
 	state.attacker_units.append(me)
 	state.defender_units.append(wounded)
 	state.defender_units.append(full)
@@ -276,12 +276,12 @@ func test_ai_animal_targets_nearest() -> void:
 	# Животные: всегда ближайший, без приоритетов.
 	var state := BattleState.new()
 	var wolf := _make_unit("wolves", 4, 30, 6, 2, BattleState.Side.ATTACKER)
-	wolf.cell = Vector2i(8, 5)
+	wolf.cell = Vector2i(4, 5)
 	var far_wounded := _make_unit("goblins", 3, 20, 4, 1, BattleState.Side.DEFENDER)
-	far_wounded.cell = Vector2i(14, 5)
+	far_wounded.cell = Vector2i(10, 5)
 	far_wounded.set_count(1)  # 10% — ранен
 	var near_full := _make_unit("orcs", 4, 30, 5, 2, BattleState.Side.DEFENDER)
-	near_full.cell = Vector2i(12, 5)
+	near_full.cell = Vector2i(8, 5)
 	state.attacker_units.append(wolf)
 	state.defender_units.append(far_wounded)
 	state.defender_units.append(near_full)

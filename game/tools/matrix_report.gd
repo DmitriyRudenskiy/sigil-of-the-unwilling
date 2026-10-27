@@ -342,9 +342,7 @@ func _battle_beat(class_id: String, turn_number: int, frames: int, pilot: Node) 
 		if bs != null:
 			out.over = str(bs.battle_over)
 			out.idx = str(bs.turn_idx)
-			out.left = "%.1f" % float(bs.turn_time_left)
 			out.player = str(bs.is_player_turn)
-			out.timer = str(bs.turn_timer_running)
 			out.queue = str(bs.turn_queue.size())
 			# Состав сторон — первое, о чём спрашивает бой без прогресса: «некому ходить»
 			# (одна сторона пуста) и «некого достать» (обе живы) — это разные дефекты.
@@ -355,13 +353,13 @@ func _battle_beat(class_id: String, turn_number: int, frames: int, pilot: Node) 
 				str(u.side), str(u.is_alive()), str(u.get("has_moved")), int(u.uid), str(u.cell)]
 	# Состояние исполнителя решает, кто именно стоит: WAITING_INPUT (3-й член
 	# enum'а State = 2) с неотработанной политикой автоигрока или ANIMATING/TURN_START
-	# с незавершённым await. Плюс вооружён ли часы хода и не стоит ли дерево на паузе
-	# (Timer-узлы на дереве под паузой не тикают).
+	# с незавершённым await. Плюс не стоит ли дерево на паузе (Timer-узлы на дереве
+	# под паузой не тикают).
 	var ex: Node = b.get_node_or_null("BattleTurnExecutor")
 	if ex != null:
 		out.player = "%s state=%s armed=%s" % [str(bs.is_player_turn) if bs != null else "",
 			"%s paused=%s token=%s" % [str(ex.get_current_state()), str(ex.get("_paused")),
-				str(ex.get("_pause_token"))], str(ex.is_turn_timer_armed())]
+				str(ex.get("_pause_token"))]]
 		var timers := 0
 		for t in _collect_timers(ex):
 			if not t.stopped:
@@ -374,7 +372,7 @@ func _battle_beat(class_id: String, turn_number: int, frames: int, pilot: Node) 
 			str(ex.get("_battle_state") == bs)]
 	if pilot._hero != null and is_instance_valid(pilot._hero):
 		out.cell = str(pilot._hero_cell())
-	out.timer = "%s stall=%d/%s proc=%s" % [str(bs.turn_timer_running) if bs != null else "",
+	out.timer = "stall=%d/%s proc=%s" % [
 		int(pilot.get("_battle_stall_frames")), str(pilot.get("_battle_stall_key")),
 		str(pilot.is_processing())]
 	return out

@@ -10,7 +10,8 @@ func start_battle(
 	attacker_artifact_mods: Dictionary = {},
 	defender_artifact_mods: Dictionary = {},
 	obstacle_seed: int = -1,
-	hero_magic: Variant = null
+	hero_magic: Variant = null,
+	enemy_terrain: String = "grass"
 ) -> void:
 	started += 1
 	last_enemy_army = defender_army

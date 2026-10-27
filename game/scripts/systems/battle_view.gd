@@ -13,13 +13,35 @@ const _UnitSprite = preload("res://scenes/ui/unit_sprite.tscn")
 const _HeroFigure = preload("res://scenes/ui/hero_figure.tscn")
 const _RetaliationArrow = preload("res://scenes/ui/retaliation_arrow.tscn")
 
+## Задний план и биом поля выбираются по мировой местности клетки врага
+## (`BattleState.background_terrain`), а не по типу боевой местности: ключи
+## «snow»/«swamp» — биомы мирового атласа, которых в перечне `HexTerrain` нет.
+## Местность без кадра = штатный вид (clear color + тайлы grass), а не пустой кадр.
+const BACKGROUNDS := {
+	"snow": "res://assets/ui/backgrounds/battle_snow.png",
+	"swamp": "res://assets/ui/backgrounds/battle_swamp.png",
+}
+const BIOMES := {
+	"snow": TileAtlas.Biome.SNOW,
+	"swamp": TileAtlas.Biome.SWAMP,
+}
+
+## Промежуточный вид до тех пор, пока у носителя нет кадра местности без
+## собственной гекс-сетки: `true` — кадр поля боя становится самим полем (тайлы
+## гаснут, границу рисует `BoardOutline`), `false` — штатный вид тайлами, кадр
+## виден только за краями поля. Решение по кадру — за владельцем (ux-review).
+const ART_AS_FIELD := false
+
 enum CursorMode { DEFAULT, ATTACK, SPELL, RANGED, MOVE }
 
+@onready var _background: Sprite2D = $Background
 @onready var _terrain: TileMapLayer = $Terrain
 @onready var _overlay: HighlightOverlay = $Highlight
 @onready var _cursor: CursorOverlay = $Cursor
+@onready var _board_edge: BoardOutline = $BoardEdge
 @onready var _camera: Camera2D = $Camera
 var _tile_map: TileMapLayer = null
+var _background_terrain := "grass"  # ключ фона, заданный хостом (`set_background`)
 var _sprites_by_uid: Dictionary = {}
 var _active_tweens: Dictionary = {}
 
@@ -39,8 +61,10 @@ func setup() -> void:
 
 	_overlay.tm = _tile_map
 	_overlay.z_index = 5
+	_board_edge.tm = _tile_map
 
 	_camera.make_current()
+	set_background(_background_terrain)
 
 	_cursor.name = "BattleCursor"
 	_cursor.z_index = 30
@@ -49,18 +73,49 @@ func setup() -> void:
 	if not get_viewport().size_changed.is_connected(fit_camera):
 		get_viewport().size_changed.connect(fit_camera)
 
+## Поле «кадр вместо тайлов» имеет смысл только когда кадр выбранной местности
+## действительно под полем.
+func uses_art_field() -> bool:
+	return ART_AS_FIELD and _background != null and _background.texture != null
+
+
 func paint_field() -> void:
 	# Координаты читаются из манифеста атласа; вариант берётся по клетке, чтобы
-	# поле боя не выглядело одним штампованным тайлом.
-	var variants: Array = TileAtlas.base_coords(TileAtlas.Biome.GRASS)
+	# поле боя не выглядело одним штампованным тайлом. Поле перерисовывается
+	# целиком: `set_background` приходит позже первого `paint_field()` и меняет
+	# ширину обводки, а старые клетки обводки иначе останутся в `get_used_rect()`
+	# — на них смотрит `field_size()`, то есть в камере останется фантомное поле.
+	_tile_map.clear()
+	var biome: int = BIOMES.get(_background_terrain, TileAtlas.Biome.GRASS)
+	var variants: Array = TileAtlas.base_coords(biome)
 	if variants.is_empty():
-		push_error("TileAtlas: у биома grass нет базовых тайлов")
+		push_error("TileAtlas: у биома %s нет базовых тайлов" % TileAtlas.BIOME_NAMES[biome])
 		return
-	for y in range(-RING, BattleState.BH + RING):
-		for x in range(-RING, BattleState.BW + RING):
+	# Два вида поля под выбранным кадром местности, переключаются одной константой
+	# `ART_AS_FIELD` (кадр вместо тайлов / тайлы поверх кадра) — см. вердикт
+	# ux-review: кадр владельца несёт собственную гекс-сетку, она расходится с
+	# нашей. Геометрия поля в обоих случаях остаётся на тайлмапе: `field_size()`
+	# и `fit_camera` считают её по залитым клеткам.
+	var art_field := uses_art_field()
+	_tile_map.modulate.a = 0.0 if art_field else 1.0
+	# Декоративная обводка ±RING нужна, когда вокруг поля только clear color: она
+	# прячет обрезанный край тайлсета. Когда под полем кадр местности, его же
+	# пейзаж и работает оправой, а обводка съедает кадр и раздувает камеру.
+	var ring: int = RING if _background.texture == null else 0
+	for y in range(-ring, BattleState.BH + ring):
+		for x in range(-ring, BattleState.BW + ring):
 			var cell := Vector2i(x, y)
 			_tile_map.set_cell(cell, TileAtlas.SOURCE_ID,
 				variants[TileAtlas.variant_for(cell, 0, variants.size())])
+	_board_edge.cells.clear()
+	if art_field:
+		for x in BattleState.BW:
+			_board_edge.cells.append(Vector2i(x, 0))
+			_board_edge.cells.append(Vector2i(x, BattleState.BH - 1))
+		for y in range(1, BattleState.BH - 1):
+			_board_edge.cells.append(Vector2i(0, y))
+			_board_edge.cells.append(Vector2i(BattleState.BW - 1, y))
+	_board_edge.refresh()
 
 func add_obstacle(cell: Vector2i, emoji: String) -> void:
 	var lbl: Label = _ObstacleLabel.instantiate()
@@ -86,12 +141,14 @@ func spawn_hero_figure() -> void:
 func _field_ends() -> Array:
 	if _tile_map.tile_set == null:
 		return []
-	var used: Rect2i = _tile_map.get_used_rect()
-	if used.size.x <= 0 or used.size.y <= 0:
+	# Геометрия поля — игровое поле BW×BH, а не `get_used_rect()`: в залитые
+# клетки входит декоративная обводка, и камера, нацеленная на used_rect,
+# вписывает в кадр её, уменьшая юнитов вдвое.
+	if _tile_map.get_cell_source_id(Vector2i(0, 0)) == -1:
 		return []
 	return [
-		_tile_map.map_to_local(used.position),
-		_tile_map.map_to_local(used.position + used.size - Vector2i(1, 1)),
+		_tile_map.map_to_local(Vector2i.ZERO),
+		_tile_map.map_to_local(Vector2i(BattleState.BW - 1, BattleState.BH - 1)),
 	]
 
 
@@ -129,6 +186,36 @@ func field_center() -> Vector2:
 	return (ends[0] + ends[1]) / 2.0
 
 
+func set_background(terrain: String) -> void:
+	_background_terrain = terrain
+	var path: String = str(BACKGROUNDS.get(terrain, ""))
+	var tex: Texture2D = null
+	if path != "" and ResourceLoader.exists(path):
+		tex = load(path) as Texture2D
+	_background.texture = tex
+	_background.visible = tex != null
+	fit_background()
+	# Биом поля зависит от того же ключа — перекрашиваем, если поле уже нарисовано
+	# (`setup()` предшествует `paint_field()`, а местность приходит позже).
+	if _tile_map != null and _tile_map.tile_set != null:
+		paint_field()
+
+
+## Кадр — задник всего видимого куска мира (вьюпорт / зум), а не поля: гексы
+## поверх него рисует тайлсет, а пейзаж обязан дожить по краям поля.
+func fit_background() -> void:
+	if _background.texture == null:
+		return
+	var z: float = _camera.zoom.x if _camera != null else 1.0
+	if z <= 0.0:
+		z = 1.0
+	var sz: Vector2 = get_viewport().get_visible_rect().size / z
+	var t: Vector2 = _background.texture.get_size()
+	var k: float = maxf(sz.x / t.x, sz.y / t.y)
+	_background.position = field_center()
+	_background.scale = Vector2(k, k)
+
+
 func fit_camera() -> void:
 	if _field_ends().is_empty():
 		return
@@ -150,6 +237,7 @@ func fit_camera() -> void:
 	# в полосу, но осталось бы отцентровано по всему кадру и нижней половиной легло бы
 	# на HUD. При bottom > top камера уходит вниз по миру, то есть поле на экране — вверх.
 	_camera.position = center - Vector2(0.0, (_hud_reserve.x - _hud_reserve.y) / (2.0 * z))
+	fit_background()
 
 func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 	var n: Node2D = _UnitSprite.instantiate()

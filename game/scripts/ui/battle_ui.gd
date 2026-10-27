@@ -3,12 +3,6 @@ extends CanvasLayer
 
 const THEME_PATH := "res://assets/theme/game_theme.tres"
 const HERO_PORTRAIT_PATH := "res://assets/ui/hero/portrait.png"
-# Ячейка очереди хода (макет 11) — квадратный портрет 72 с бейджем уровня.
-const _TILE_PX := 94.0  # макет 11: плитка очереди ~94 px, щель 5 px
-# Варианты темы ячейки: обычный / активный (золотая рама) / мёртвый.
-const TILE_VARIANT := "PanelQueueTile"
-const TILE_VARIANT_ACTIVE := "PanelQueueTileActive"
-const TILE_VARIANT_DEAD := "PanelQueueTileDead"
 
 signal retreat_requested
 signal rescue_requested
@@ -24,7 +18,6 @@ signal settings_requested
 signal settings_closed
 signal result_accepted
 
-static var _portrait_tex: Dictionary = {}
 static var _hero_portrait: Texture2D = null
 
 # Макет 11: нижний ряд — два кластера медальонов без плиты. Слева — отступление
@@ -33,7 +26,6 @@ static var _hero_portrait: Texture2D = null
 @onready var _bottom_bar: Control = $bottom_bar
 ## T-220: полосы, чья геометрия отъедает вертикаль поля боя (носитель числа — сцена).
 @onready var _hero_cards_band: Control = $hero_cards
-@onready var _initiative_band: Control = $initiative_bar
 @onready var _settings_btn: Button = $"bottom_bar/bar_box/left_box/settings_btn"
 @onready var _retreat_btn: Button = $"bottom_bar/bar_box/left_box/retreat_btn"
 @onready var _rescue_btn: Button = $"bottom_bar/bar_box/left_box/rescue_btn"
@@ -49,10 +41,8 @@ static var _hero_portrait: Texture2D = null
 @onready var _spellbook_btn: Button = $"bottom_bar/bar_box/right_box/spellbook_btn"
 @onready var _history_panel: PanelContainer = $history_panel
 @onready var _history_list: ItemList = $"history_panel/history_list"
-@onready var _init_box: HBoxContainer = $initiative_bar/init_col/init_box
 @onready var _hero_left: Control = $hero_cards/hero_left
 @onready var _hero_right: Control = $hero_cards/hero_right
-@onready var _turn_timer: TurnTimer = $turn_timer
 @onready var _target_card: PanelContainer = $target_card
 @onready var _tc_name: Label = $"target_card/tc_box/tc_name"
 @onready var _tc_caption: Label = $"target_card/tc_box/tc_caption"
@@ -77,7 +67,6 @@ var _action_buttons: Array[Button] = []
 var _theme: Theme = null
 var _history: Array[String] = []
 var _history_pos := 0
-var _initiative_units: Array[BattleState.BattleUnit] = []
 var _hero_refs: Dictionary = {}
 
 func _ready() -> void:
@@ -149,7 +138,7 @@ func _apply_theme() -> void:
 
 ## CanvasLayer не Control — тему вешаем на корневые контролы слоя.
 func theme_root_theme(t: Theme) -> void:
-	for c in ["bottom_bar", "initiative_bar", "target_card", "end_overlay", "history_panel"]:
+	for c in ["bottom_bar", "target_card", "end_overlay", "history_panel"]:
 		get_node(NodePath(c)).theme = t
 	# Носитель плит — тема, а не код. В game_theme.tres нет носителя для
 	# PanelContainer, поэтому раньше сюда клался `Panel/styles/panel`
@@ -247,117 +236,6 @@ func show_default_enemy_card(state: BattleState) -> void:
 			show_target_card(unit, "Противник")
 			return
 	hide_target_card()
-
-func update_active_unit(unit: BattleState.BattleUnit) -> void:
-	# A: переподсветка активного в очереди инициативы
-	_refresh_initiative_highlight(unit)
-
-# A: очередь инициативы — live из BattleState.turn_queue; активный — PanelActive
-# (золотая рамка, docs/14 §4.A), мёртвый — PanelDead + десат + штриховка
-# (различимы формой, не тоном — M3-1).
-func update_initiative(
-	units: Array[BattleState.BattleUnit],
-	active_unit: BattleState.BattleUnit
-) -> void:
-	_initiative_units = units
-	for child in _init_box.get_children():
-		_init_box.remove_child(child)
-		child.queue_free()
-	for unit in units:
-		_init_box.add_child(_make_initiative_cell(unit))
-	_refresh_initiative_highlight(active_unit)
-
-func _make_initiative_cell(unit: BattleState.BattleUnit) -> PanelContainer:
-	var cell := PanelContainer.new()
-	var dead: bool = not unit.is_alive()
-	cell.theme_type_variation = TILE_VARIANT_DEAD if dead else TILE_VARIANT
-	cell.name = "cell_%d" % unit.uid
-	cell.custom_minimum_size = Vector2(_TILE_PX, _TILE_PX)
-	if dead:
-		var hatch := TextureRect.new()
-		hatch.texture = _hatch_texture()
-		hatch.texture_repeat = 1  # TextureRect.RepeatMode.REPEAT_ENABLED (Godot 4.7)
-		hatch.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		hatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cell.add_child(hatch)
-	# Макет 11: ячейка — квадратный портрет с бейджем уровня в углу. Имени и
-	# чисел в ней нет: имя и здоровье даёт карточка цели, количество — на поле
-	# (композиция — макет, поведение — спека docs/14 §4.A).
-	var row := HBoxContainer.new()
-	row.name = "row"
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(_make_initiative_portrait(unit))
-	cell.add_child(row)
-	return cell
-
-
-
-
-func _make_initiative_portrait(unit: BattleState.BattleUnit) -> Control:
-	var box := Control.new()
-	box.name = "portrait_box"
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.custom_minimum_size = Vector2(_TILE_PX - 4.0, _TILE_PX - 4.0)
-	var portrait := TextureRect.new()
-	portrait.name = "portrait"
-	portrait.texture = _unit_portrait(unit.get_key())
-	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
-	if not unit.is_alive():
-		portrait.modulate = Color(0.4, 0.4, 0.4, 0.8)  # десат мёртвого (docs/14 §4.A)
-	box.add_child(portrait)
-	var level: int = unit.get_level()
-	if level > 0:
-		# Бейдж уровня — в нижнем левом углу плитки (макет 11).
-		var badge := Label.new()
-		badge.name = "level_badge"
-		badge.theme_type_variation = "LabelQueueBadge"
-		badge.text = str(level)
-		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		badge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-		badge.position = Vector2(4, -24)
-		box.add_child(badge)
-	return box
-
-
-
-
-static func _unit_portrait(key: String) -> Texture2D:
-	if _portrait_tex.has(key):
-		return _portrait_tex[key]
-	var tex: Texture2D = null
-	var path := UnitSprites.find_portrait(key)
-	if path != "" and ResourceLoader.exists(path):
-		tex = load(path) as Texture2D
-	_portrait_tex[key] = tex
-	return tex
-
-static var _hatch_tex: ImageTexture = null
-
-
-## М3-1: диагональная штриховка мёртвой ячейки — различимость формой.
-static func _hatch_texture() -> ImageTexture:
-	if _hatch_tex == null:
-		var img := Image.create(8, 8, false, Image.FORMAT_RGBA8)
-		img.fill(Color(0, 0, 0, 0))
-		var c := Color(0.02, 0.01, 0.01, 0.55)
-		for i in 8:
-			img.set_pixel(i, i, c)
-			img.set_pixel((i + 1) % 8, i, c)
-		_hatch_tex = ImageTexture.create_from_image(img)
-	return _hatch_tex
-
-
-func _refresh_initiative_highlight(active_unit: BattleState.BattleUnit) -> void:
-	for child in _init_box.get_children():
-		if child is PanelContainer and child.name.begins_with("cell_"):
-			var uid: int = int(child.name.get_slice("_", 1))
-			if child.theme_type_variation == TILE_VARIANT_DEAD:
-				continue
-			var is_active: bool = active_unit != null and uid == active_unit.uid
-			child.theme_type_variation = TILE_VARIANT_ACTIVE if is_active else TILE_VARIANT
 
 # F: финал боя — единственный выход «Продолжить» (docs/14 §4.F); потери — моно
 # (числа отделены от подписи: end_info serif + end_numbers LabelNumber).
@@ -482,14 +360,6 @@ static func _hero_portrait_texture() -> Texture2D:
 	return _hero_portrait
 
 
-# --- Таймер хода (макет, шаг 5.3) -----------------------------------------
-# Значения несёт BattleState (turn_time_left / turn_time_limit / turn_timer_running);
-# режим без ограничения — неактивное состояние элемента, а не исчезание.
-func set_turn_timer(seconds_left: float, limit: int, running: bool) -> void:
-	if _turn_timer != null:
-		_turn_timer.set_state(seconds_left, limit, running)
-
-
 # «Спасение» (макет, шаг 5.2): кнопка активна, только когда есть кого поднимать.
 func set_rescue_enabled(enabled: bool) -> void:
 	if _rescue_btn != null:
@@ -562,19 +432,15 @@ func _on_settings_closed() -> void:
 ## `scenes/ui/battle_ui.tscn` автоматически правит и запас поля боя, поэтому «чинить
 ## хардкод разрешений» не приходится.
 ##
-## Верх = нижняя граница самой низкой из верхних полос (карточки героя, инициатива).
-## Бейдж таймера хода (158 px по центру) сознательно НЕ резервируется на всю ширину:
-## под него ушло бы ещё ~140 px поля, а клеток в его колонке нет — наложение фиксируется
-## кадром ux-review, а не числом в тесте.
+## Верх = нижняя граница верхней полосы (карточки героя), и только если полоса
+## видна: скрытая панель не имеет права отъедать вертикаль поля.
 ##
 ## Вызывается после первого кадра (хост читает после `process_frame`): до раскладки
 ## `get_global_rect()` пуст, и запас молча стал бы нулём.
 func hud_bands() -> Vector2:
 	var top := 0.0
-	for band in [_hero_cards_band, _initiative_band]:
-		if band == null:
-			continue
-		top = maxf(top, band.get_global_rect().end.y)
+	if _hero_cards_band != null:
+		top = _hero_cards_band.get_global_rect().end.y
 	var bottom := 0.0
 	if _bottom_bar != null:
 		bottom = _bottom_bar.get_global_rect().size.y

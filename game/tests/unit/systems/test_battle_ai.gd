@@ -52,7 +52,7 @@ func test_move_towards_target() -> void:
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	defender.cell = Vector2i(2, 5)
-	attacker.cell = Vector2i(12, 5)
+	attacker.cell = Vector2i(9, 5)
 
 	var blocked: Dictionary = state.build_all_blocked(defender, {})
 	var decision = ai.decide_turn(defender, state, blocked)
@@ -79,7 +79,7 @@ func test_attacker_ai_targets_defender() -> void:
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	attacker.cell = Vector2i(4, 5)
-	defender.cell = Vector2i(12, 5)
+	defender.cell = Vector2i(9, 5)
 
 	var blocked: Dictionary = state.build_all_blocked(attacker, {})
 	var decision = ai.decide_turn(attacker, state, blocked)
@@ -118,7 +118,7 @@ func _setup_flying_vs_ground():
 	var pegasus = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var goblins = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	pegasus.cell = Vector2i(6, 5)
-	goblins.cell = Vector2i(12, 5)
+	goblins.cell = Vector2i(9, 5)
 	state._rebuild_unit_grid()
 	return {"state": state, "flying": pegasus, "defender": goblins}
 

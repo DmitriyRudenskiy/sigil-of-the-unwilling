@@ -69,12 +69,13 @@ func test_hud_reserve_equals_the_scene_bands() -> void:
 	var view := _view_of(battle)
 	var bands := _ui_of(battle).hud_bands()
 	var cards := _rect_of(battle, "BattleUI/hero_cards")
-	var init := _rect_of(battle, "BattleUI/initiative_bar")
 	var bar := _rect_of(battle, "BattleUI/bottom_bar")
 	assert_bool(bar.size.y > 0.0 and cards.size.y > 0.0).is_true().override_failure_message(
 		"полосы не разложены — проверка запаса была бы пустой"
 	)
-	assert_float(bands.x).is_equal_approx(maxf(cards.end.y, init.end.y), 0.01) \
+	# Верхний пояс — только карточки героев: лента очереди и кольцо инициативы
+	# сняты со сцены сменой battle-99-hex-clean-hud.
+	assert_float(bands.x).is_equal_approx(cards.end.y, 0.01) \
 		.override_failure_message("верхний запас %.1f не равен нижней границе верхних полос" % bands.x)
 	assert_float(bands.y).is_equal_approx(bar.size.y, 0.01) \
 		.override_failure_message("нижний запас %.1f не равен высоте панели %.1f" % [bands.y, bar.size.y])

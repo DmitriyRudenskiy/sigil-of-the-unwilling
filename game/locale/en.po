@@ -116,9 +116,6 @@ msgstr "⚔️ Click the enemy with a red outline."
 msgid "battle.no_mana"
 msgstr "Not enough mana or the school is not learned."
 
-msgid "battle.time_up"
-msgstr "⏳ Time is up — the turn is skipped."
-
 msgid "battle.downed_waits"
 msgstr "{name} is unconscious and does not act."
 

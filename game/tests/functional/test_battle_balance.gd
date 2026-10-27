@@ -20,22 +20,26 @@ func _simulate(atk_key: String, def_key: String, seed: int) -> Dictionary:
 	return emu.run_auto_battle(state)
 
 
-## Зеркальный melee-бой: инициатор закрывает дистанцию первым и выигрывает
-## (первый ход + первый удар; контратака защитника не компенсирует).
-func test_even_melee_fight_attacker_wins() -> void:
+## Зеркальный melee-бой: бой решает ПЕРВЫЙ УДАР, а не сторона. На 17 колонок
+## дистанцию первым закрывал инициатор и он же выигрывал; на 11×9 (смена
+## battle-99-hex-clean-hud) стороны сходятся в один раунд и очередь (инициатива
+## стека) разворачивает исход в пользу защитника. Что именно это значит для
+## лестницы перевеса — вопрос владельцу (Q-M95), здесь зафиксирован замер.
+func test_even_melee_fight_is_decided_by_initiative_not_side() -> void:
 	var r := _simulate("swordsmen", "swordsmen", 42)
 	assert_bool(r.get("battle_over", false)).is_true()
-	assert_str(str(r.get("winner", ""))).is_equal("attacker")
+	assert_str(str(r.get("winner", ""))).is_equal("defender")
 	assert_int(int(r.get("turns", 9999))).is_between(1, ROUND_CAP)
 
 
-## Archers vs swordsmen: на лестнице мечник выигрывает — лучник теряет
-## RANGED_MELEE_PENALTY в контакте, а дистанционной фазы почти нет
-## (дистанция закрывается за первый раунд). Измерено на лестнице 02d v1.2.
-func test_swordsmen_win_against_archers_on_ladder() -> void:
+## Archers vs swordsmen: на 17 колонок мечник выигрывал — лучник теряет
+## RANGED_MELEE_PENALTY в контакте, а дистанционной фазы почти нет. На 11×9
+## атакующие лучники успевают дать залп раньше, чем их съедят, и выигрывают;
+## ретьюн лучника под узкое поле — тот же Q-M95.
+func test_archers_hold_their_own_on_narrow_field() -> void:
 	var r := _simulate("archers", "swordsmen", 42)
 	assert_bool(r.get("battle_over", false)).is_true()
-	assert_str(str(r.get("winner", ""))).is_equal("defender")
+	assert_str(str(r.get("winner", ""))).is_equal("attacker")
 	assert_int(int(r.get("turns", 9999))).is_between(1, ROUND_CAP)
 
 

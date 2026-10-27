@@ -47,6 +47,9 @@ const C_BATTLE_MORALE           := Color.YELLOW
 const C_BATTLE_SPELL_CAST       := Color.YELLOW
 const C_BATTLE_BG_FLOW          := Color(0.10, 0.10, 0.12)
 const C_BATTLE_BG_VIEW          := Color(0.33, 0.30, 0.18)
+## Рамка поля поверх кадра местности — светлая линия поверх тёмной подложки
+## (`BoardOutline`): кадр бывает и снежным, и болотным.
+const C_BATTLE_BOARD_EDGE       := Color(0.92, 0.97, 1.0, 0.75)
 const C_SIDE_ATTACKER           := Color(0.2, 0.5, 0.9)
 const C_SIDE_DEFENDER           := Color(0.9, 0.3, 0.2)
 const C_ACTIVE_INFO             := Color(0.85, 0.90, 1.0)

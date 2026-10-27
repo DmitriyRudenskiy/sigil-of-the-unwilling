@@ -148,51 +148,6 @@ func test_hero_without_hp_pool_hides_health_bar() -> void:
 	assert_bool(c["mana_row"].visible).is_false()
 
 
-# --- Очередь инициативы: портрет и бейдж уровня (5.2) -----------------------
-
-func test_initiative_cell_has_portrait_and_level_badge() -> void:
-	var ui := _mk_ui()
-	var with_level := _unit(BattleState.Side.ATTACKER, "Скелет", 4)
-	var no_level := _unit(BattleState.Side.ATTACKER, "Тень", 0)
-
-	ui.update_initiative([with_level, no_level], with_level)
-
-	var first: Control = ui._init_box.get_node("cell_%d" % with_level.uid)
-	var portrait := first.get_node_or_null("row/portrait_box/portrait") as TextureRect
-	assert_that(portrait).is_not_null()
-	assert_that(portrait.texture).is_not_null()
-	var badge := first.get_node_or_null("row/portrait_box/level_badge") as Label
-	assert_that(badge).is_not_null()
-	assert_str(badge.text).is_equal("4")
-
-	var second: Control = ui._init_box.get_node("cell_%d" % no_level.uid)
-	assert_that(second.get_node_or_null("row/portrait_box/level_badge")).is_null()
-
-
-# --- Таймер хода (5.3) ------------------------------------------------------
-
-func test_timer_shows_remaining_seconds() -> void:
-	var ui := _mk_ui()
-	var timer: Control = ui.get_node("turn_timer")
-	assert_bool(timer.visible).is_true()
-
-	ui.set_turn_timer(12.4, 30, true)
-
-	assert_str(timer.get_node("num").text).is_equal("13")
-
-
-func test_timer_without_time_limit_is_explicitly_inactive() -> void:
-	# Спека battle-hud, «Режим без таймера»: элемент не отображается ЛИБО
-	# отображается в явном неактивном состоянии. У нас — второй вариант.
-	var ui := _mk_ui()
-	var timer: Control = ui.get_node("turn_timer")
-
-	ui.set_turn_timer(0.0, 0, false)
-
-	assert_bool(timer.visible).is_true()
-	assert_str(timer.get_node("num").text).is_equal("—")
-
-
 # --- Кнопка «Спасение» (5.2) ------------------------------------------------
 
 func test_rescue_button_emits_rescue_request() -> void:

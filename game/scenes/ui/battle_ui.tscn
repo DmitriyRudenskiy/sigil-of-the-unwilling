@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://cs1lav0566l80" path="res://scripts/ui/battle_ui.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://df2h40vir4ujo" path="res://scenes/ui/battle_spellbook_panel.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="3"]
-[ext_resource type="Script" path="res://scripts/ui/turn_timer.gd" id="4_timer"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_gear.png" id="10_emblem_gear"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_flag.png" id="11_emblem_flag"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_ring.png" id="12_emblem_ring"]
@@ -334,26 +333,6 @@ grow_vertical = 2
 persistent = true
 show_additional = false
 
-[node name="initiative_bar" type="Control" parent="." unique_id=732893137]
-z_index = 2
-mouse_filter = 2
-anchors_preset = 10
-anchor_left = 0.2318
-anchor_right = 0.75
-offset_top = 8.0
-offset_bottom = 105.0
-grow_horizontal = 2
-
-[node name="init_col" type="VBoxContainer" parent="initiative_bar"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 0
-
-[node name="init_box" type="HBoxContainer" parent="initiative_bar/init_col"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 5
-
 [node name="hero_cards" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 10
@@ -569,31 +548,6 @@ layout_mode = 2
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 6
-
-[node name="turn_timer" type="Control" parent="."]
-z_index = 2
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.508
-anchor_right = 0.508
-offset_left = -79.0
-offset_top = 137.0
-offset_right = 79.0
-offset_bottom = 295.0
-grow_horizontal = 2
-script = ExtResource("4_timer")
-
-[node name="num" type="Label" parent="turn_timer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_type_variation = &"LabelTurnTimer"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="target_card" type="PanelContainer" parent="." unique_id=732893140]
 visible = false

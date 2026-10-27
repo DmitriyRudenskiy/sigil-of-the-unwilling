@@ -23,7 +23,8 @@ func start_battle(
 	attacker_artifact_mods: Dictionary = {},
 	defender_artifact_mods: Dictionary = {},
 	obstacle_seed: int = -1,
-	hero_magic: Variant = null
+	hero_magic: Variant = null,
+	enemy_terrain: String = "grass"
 ) -> void:
 	# T17/D2: без ГСЧ — отсутствие seed означает пустое поле препятствий.
 	if obstacle_seed < 0:
@@ -49,7 +50,8 @@ func start_battle(
 		attacker_artifact_mods,
 		defender_artifact_mods,
 		obstacle_seed,
-		hero_magic
+		hero_magic,
+		enemy_terrain
 	)
 
 func _on_battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack], battle: Node) -> void:
