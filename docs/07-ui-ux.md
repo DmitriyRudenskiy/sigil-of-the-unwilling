@@ -63,6 +63,45 @@ date: 2026-10-13
 
 **Инварианты:** любой модификатор достижим за ≤2 клика до причины (столп 1); в бою все правила D&D, влияющие на ход, видны на экране без подсказок (справка — по клавише).
 
+## Сцены UI: кто их поднимает
+
+Раздел заведён как первый свод T-279: имя сцены в реестре (`docs/mvp/TICKETS.md`,
+`docs/CHANGELOG.md`) документом не считается — документом считается этот раздел
+([[DECISIONS]] D-291). Колонка «кто поднимает» — результат проверки ссылки точным
+путём по `game/`, а не пересказ названий; тесты и `tools/theme_smoke.gd` в перечне
+сознательно опущены, они поднимают сцены только ради проверки.
+
+| Сцена | Кто поднимает | Что показывает |
+| --- | --- | --- |
+| `scenes/ui/save_load_screen.tscn` | `scenes/main_menu.tscn` | слоты сохранения/загрузки; выключенные слоты объясняют причину при монтировании (столп 1 `mvp-ui-flow` 3.3) |
+| `scenes/ui/settings_screen.tscn` | `scenes/main_menu.tscn`, `scenes/ui/battle_ui.tscn`, `scripts/ui/campaign_hud.gd` | настройки (язык, локализация строк, назначенные клавиши) |
+| `scenes/ui/chronicle_screen.tscn` | `scenes/main_menu.tscn`, `scripts/ui/campaign_hud.gd` | лента хроники; кампейн-режим читает `ChronicleLog.records()` (D-240) |
+| `scenes/ui/chronicle_entry.tscn` | `scripts/ui/chronicle_screen.gd` (`preload`) | одна строка хроники, шаблон для ленты |
+| `scenes/ui/city_screen.tscn` | `scripts/ui/campaign_hud.gd` (`preload`) | экран поселения; при тесноте теряет подзаголовок и вторичные метрики (порог размечен в `city_screen.gd`) |
+| `scenes/ui/sign_choice.tscn` | `scripts/ui/character_creation_ui.gd` (`_CAMPAIGN_SCENE`) | выбор Знака после создания героя, перед кампанией (T-002) |
+| `scenes/ui/unit_sprite.tscn` | `scripts/systems/battle_view.gd` (`_UnitSprite`) | спрайт юнита на тактическом поле |
+| `scenes/ui/arena_hex_cell.tscn` | `scripts/world/city_arena_view.gd` | плитка городской арены (`scenes/city_arena.tscn`, вход из `main_menu.gd`) |
+| `scenes/ui/death_sequence.tscn` | `scripts/world/hero_lifecycle_system.gd` | сцена смерти героя: преемник или воскрешение |
+| `scenes/ui/artifact_chest_dialog.tscn` | `scenes/ui/world_ui.tscn` | диалог открытия сундука артефактов (`open(chest)`) |
+| `scenes/ui/world_ui.tscn` | только `scenes/archive/world.tscn` | легаси-обёртка мира: содержит `adventure_ui.tscn`, сундук, хронику, город и смерть |
+| `scenes/ui/adventure_ui.tscn` | только `scenes/ui/world_ui.tscn` | легаси-раскладка приключения, смонтирована из семи панелей ниже |
+| `scenes/ui/info_panel.tscn` | `scenes/ui/adventure_ui.tscn` | панель времени суток и статуса (`set_time`, `set_status`) |
+| `scenes/ui/minimap_panel.tscn` | `scenes/ui/adventure_ui.tscn` | миникарта; геометрия 1:1 с `prototype_map.html` (рамка, поля, компас) |
+| `scenes/ui/resource_bar.tscn` | `scenes/ui/adventure_ui.tscn` | полоса ресурсов (`update_resources`) |
+| `scenes/ui/resources_panel.tscn` | `scenes/ui/adventure_ui.tscn` | панель ресурсов по реестру (`setup_registry`) |
+| `scenes/ui/skills_panel.tscn` | `scenes/ui/adventure_ui.tscn` | список навыков (`update_skills`) |
+| `scenes/ui/tools_panel.tscn` | `scenes/ui/adventure_ui.tscn` | панель инструментов (`update_tools`) |
+| `scenes/ui/TeamDialogScreen.tscn` | `scenes/ui/adventure_ui.tscn` | диалог с последователем по стадиям с вариантами и эффектами (`team-romance-roleplay` 5.2/5.3) |
+| `scenes/archive/world.tscn` | архив (D-157 cutover) | легаси-мир: hex-карта, герой, городской цикл, рейды; в рантайм-пути не участвует, тесты легаси-линии драйвят её по архивному пути |
+
+Цепочка `archive/world.tscn → world_ui.tscn → adventure_ui.tscn → семь панелей` —
+это **замороженная легаси-линия**, а не запасной экран: игрок в кампанийный контур
+(`main_menu → character_creation → main.tscn`) в неё не попадает, ссылаются на неё
+только архивная сцена, тесты и smoke-снапшоты тем. Панели живут в репо по
+трёхисходному правилу исхода (a) (тот же акт, что и архив сцены), и этот раздел —
+место, где их назначение перестаёт быть тайной для следующего, кто увидит их в
+списке «названо только в реестрах».
+
 ## Управление (по input map)
 
 Секция собрана из `game/project.godot` и обработчиков кода — это единственная
