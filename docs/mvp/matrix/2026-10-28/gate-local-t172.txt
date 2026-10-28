@@ -1,0 +1,33 @@
+# Гейт T-172 (2026-10-28, дерево 2e55b46d + docs D-287) — локальный прогон, не CI
+
+## GdUnit
+Overall Summary: 3584 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+
+## MCP
+PYTEST LEDGER: passed=90 skipped=2 failed=2 errors=0 collected=94
+MCP JUNIT: passed=90 skipped=2 failed=2 errors=0
+MCP VERDICT: YELLOW
+
+## Жертвы readiness с наблюдаемой причиной (первое вхождение каждого блока)
+E     среда в момент отказа: mem_available=718MB swap_free=6303/20479MB load1=0.55 godot_procs=3 psi_memory=some avg10=0.00 avg60=0.01 avg300=0.94 total=5131396594
+E     boot-трейс: файл трейса /home/user/sigil-of-the-unwilling/game/tmp/mcp_boot/boot_1398489_2.log пуст или не создан — Godot не дошёл до автозагрузки McpInteractionServer (не стартовал/умер на старте)
+_____________________ test_settings_screen_opens_from_menu _____________________
+--
+E     среда в момент отказа: mem_available=2398MB swap_free=6090/20479MB load1=0.4 godot_procs=3 psi_memory=some avg10=0.00 avg60=0.00 avg300=0.33 total=5131632864
+E     boot-трейс: файл трейса /home/user/sigil-of-the-unwilling/game/tmp/mcp_boot/boot_1398489_39.log пуст или не создан — Godot не дошёл до автозагрузки McpInteractionServer (не стартовал/умер на старте)
+------------------- generated xml file: /tmp/tmp.UEopvKuo0P --------------------
+--
+
+## Изолированный перезапуск обеих жертв (DISPLAY=:96, MCP_PORT=9481)
+2 passed in 76.83s (0:01:16) — test_balance_probe_deterministic, test_settings_screen_opens_from_menu
+
+## Среда в момент отказа (те же прогоны)
+free: 46 GB total / 44 used / 1-2 available; swap 11-19 GB used; чужой strata --serve 28.7 GB RSS; OOM-киллы ядра 2026-10-28 16:07
+
+## Предыстория этого же дня (гейты T-248, то же дерево без среза T-172)
+run 1: PYTEST LEDGER: passed=83 skipped=2 failed=1 errors=0 collected=86  (жертва test_settings_menu::test_settings_change_persists)
+run 2: PYTEST LEDGER: passed=81 skipped=2 failed=0 errors=3 collected=86  (жертвы test_city_cycle, test_weight_carry_save_load, test_threat_rings_visual)
+изолированно: 2 passed in 10.87s; 3 passed in 10.46s
+
+## Вывод
+Ни одного падения ассерта. Boot-трейс жертв пуст → игра не доходила до автозагрузки McpInteractionServer (не «порт не поднялся»); mem_available в момент отказа 718 MB и 2398 MB при godot_procs=3.

@@ -1,10 +1,10 @@
 {
  "duplicate_groups": 0,
  "gd_files": 376,
- "gd_tests": 3579,
+ "gd_tests": 3584,
  "holes": 82,
  "merge_files": 145,
  "merge_groups": 28,
- "py_files": 31,
- "py_tests": 81
+ "py_files": 32,
+ "py_tests": 89
 }
