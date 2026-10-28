@@ -21,14 +21,21 @@ extends BaseTest
 const _THEME := preload("res://assets/theme/game_theme.tres")
 const _THEME_PATH := "res://assets/theme/game_theme.tres"
 
-## Секции темы без `base_type` и не являющиеся движковым типом. Тема их держит,
-## `get_stylebox(style, секция)` работает, но `theme_type_variation` на узле их не
-## подхватывает — то есть присвоить такую секцию варианту = молчаливое ничего.
-## `TooltipPanel` используется именно так (kitchen_sink.gd:237) — зафиксировано как дыра,
-## а не как норма: чинится регистрацией base_type, см. T-228.
-const _ORPHAN_SECTIONS_USED := {
-	"TooltipPanel": "T-228 (витрина присваивает не-вариант; носителя подсказки нет)",
-}
+## Секции темы, которые не вариант (нет `base_type`) и не тип вообще: тема их держит,
+## `get_stylebox(style, секция)` работает, но ни движок, ни узел их не читают —
+## молчаливое ничего. Пусто с T-228, и пустым обязано оставаться: гард ниже краснеет
+## и на появлении новой сироты, и на протухании допуска.
+##
+## Урок T-228: сюда был записан `TooltipPanel` — но дырой оказалась НЕ секция.
+## Критерий «нативный тип == класс ClassDB» ложен для тем: у движка есть типы темы,
+## не являющиеся классами (`TooltipPanel`, `TooltipLabel`) — их читает внутренний код
+## отрисовки подсказки. Правильный вопрос — «есть ли имя в списке типов темы»
+## (`ThemeDB.get_default_theme().get_type_list()`). Замер T-228 дополняет: тот же резолв
+## по имени доступен узлу — `theme_type_variation = "TooltipPanel"` на PanelContainer
+## рисует пластину подсказки (кадр до/после: 7330 px), регистрация через `base_type`
+## нужна только для цепочки отката и редактора. Потому «сирота» и «не-вариант» — разные
+## вещи: сирота — имя, которого нет ни в одной теме.
+const _ORPHAN_SECTIONS_USED := {}
 
 var _nodes: Array[Node] = []
 
@@ -46,6 +53,16 @@ func _bases() -> Dictionary:
 	for m in re.search_all(FileAccess.get_file_as_string(_THEME_PATH)):
 		out[m.get_string(1)] = m.get_string(2)
 	return out
+
+
+## «Тип темы, который кто-то читает»: либо класс движка (Panel, Button), либо имя из
+## списка типов темы дефолтной темы (`TooltipPanel`, `TooltipLabel` — классов нет, а
+## подсказка движка их резолвит). Тема может держать и своё имя, но тогда читатель
+## обязан быть объявлен явно — см. `_ORPHAN_SECTIONS_USED`.
+func _is_theme_type(section: String) -> bool:
+	if ClassDB.class_exists(StringName(section)):
+		return true
+	return ThemeDB.get_default_theme().get_type_list().has(section)
 
 
 func _styles() -> Dictionary:
@@ -108,7 +125,7 @@ func test_theme_sections_are_types_or_variations() -> void:
 		if not registered:
 			bad.append("%s: не зарегистрирован в get_type_variation_list(%s)" % [name, base_type])
 	for name in styles.keys():
-		if not bases.has(name) and not ClassDB.class_exists(name):
+		if not bases.has(name) and not _is_theme_type(name):
 			orphans.append(name)
 	var offenders := PackedStringArray()
 	for name in orphans:
@@ -120,6 +137,49 @@ func test_theme_sections_are_types_or_variations() -> void:
 	assert_int(bad.size() + offenders.size()).is_equal(0) \
 		.override_failure_message("секции темы расходятся с движком:\n%s"
 			% "\n".join(bad) + "\n" + "\n".join(offenders))
+
+
+## Нативный тип темы, не являющийся классом, — единственный случай, когда секция без
+## `base_type` законна. Она законна ровно настолько, насколько движок читает то, что мы
+## на неё положили: хотя бы один объявленный нами пункт (stylebox / цвет / шрифт /
+## размер) обязан существовать у движка под этим типом, иначе секция — опечатка в имени
+## пункта, и её не прочитает никто (T-228: `TooltipPanel/panel` движок читает, это и есть
+## пластина подсказки; `TooltipLabel/font_color` + `font_size` — текст подсказки).
+func test_non_class_theme_types_are_read_by_the_engine() -> void:
+	var engine: Theme = ThemeDB.get_default_theme()
+	var checked := 0
+	var unread := PackedStringArray()
+	for t in _THEME.get_type_list():
+		var name := String(t)
+		if String(_THEME.get_type_variation_base(StringName(name))) != "":
+			continue
+		if ClassDB.class_exists(StringName(name)):
+			continue
+		assert_bool(engine.get_type_list().has(name)).is_true() \
+			.override_failure_message("секция %s не вариант и не тип темы движка" % name)
+		var readable := 0
+		for style in _THEME.get_stylebox_list(StringName(name)):
+			if engine.get_stylebox_list(StringName(name)).has(style):
+				readable += 1
+		for color in _THEME.get_color_list(StringName(name)):
+			if engine.get_color_list(StringName(name)).has(color):
+				readable += 1
+		for f in _THEME.get_font_list(StringName(name)):
+			if engine.get_font_list(StringName(name)).has(f):
+				readable += 1
+		for size in _THEME.get_font_size_list(StringName(name)):
+			if engine.get_font_size_list(StringName(name)).has(size):
+				readable += 1
+		if readable == 0:
+			unread.append(name)
+		checked += 1
+	assert_int(unread.size()).is_equal(0) \
+		.override_failure_message(
+			"типы темы, где движок не читает ни один наш пункт (пластины подсказки не будет):\n%s"
+			% "\n".join(unread))
+	# Пустой обход = молчаливый зелёный: таких типов в теме ровно два (подсказка).
+	assert_bool(checked >= 2).is_true() \
+		.override_failure_message("проверка нативных не-классовых типов пуста: типов %d" % checked)
 
 
 ## Позитивный контракт по всем вариантам: каждый объявленный stylebox резолвится на

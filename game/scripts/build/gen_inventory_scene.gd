@@ -421,7 +421,7 @@ func _build() -> void:
 			uid += 1
 	_add_node("Close", "Button", units,
 		_anchor_within("Close", _L.BLOCKS["Units"])
-		+ "text = \"×\"\ntheme_type_variation = &\"Button\"\n", uid)
+		+ "text = \"×\"\n", uid)
 	uid += 1
 	_add_node("Quests", "Button", units,
 		_anchor_within("Quests", _L.BLOCKS["Units"]) + "text = \"?\"\n", uid)

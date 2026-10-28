@@ -2220,7 +2220,6 @@ anchor_top = 0.006780
 anchor_right = 0.953405
 anchor_bottom = 0.084746
 text = "×"
-theme_type_variation = &"Button"
 
 
 

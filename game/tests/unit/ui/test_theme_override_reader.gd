@@ -237,13 +237,16 @@ func test_instance_root_type_resolves_nested_scenes() -> void:
 	assert_str(_instance_root_type("res://scenes/main_menu.tscn")).is_not_empty()
 
 
-## 4. Собственные (не нативные и не вариационные) типы тема всё-таки держит — `TooltipPanel`
-# и `TooltipLabel`. Это не поломка, а условие, которое надо знать: items из такого типа
-# читает нативный код узла, поэтому проверка цепочки классов остаётся верной, а вот
-# «тип темы == нативный класс» — ложь. Кейс фиксирует факт, чтобы следующий, кто решит
-# «упростить» гард до `ClassDB.class_exists(тип_темы)`, получил красный.
-func test_theme_has_custom_types_beyond_native_classes() -> void:
+## 4. Типы темы, которые не являются классами движка: `TooltipPanel` и `TooltipLabel`.
+# Это не «свои» выдумки, а нативные типы темы подсказки: класса с таким именем у
+# движка нет (`ClassDB.class_exists` = ложь), но дефолтная тема их знает и читает при
+# отрисовке подсказки (`ThemeDB.get_default_theme().get_type_list()` = истина). Кейс
+# фиксирует оба конца, чтобы гард не упрощали ни до `ClassDB.class_exists(тип_темы)`
+# (тогда живая секция объявится сиротой — так и родился T-228), ни до «всякий тип темы
+# кто-то да читает» (тогда настоящая сирота пройдёт молча).
+func test_theme_has_engine_types_that_are_not_classes() -> void:
 	var theme: Theme = load("res://assets/theme/game_theme.tres") as Theme
+	var engine_types: Array = ThemeDB.get_default_theme().get_type_list()
 	var custom: Array = []
 	for t in theme.get_type_list():
 		var name := String(t)
@@ -254,9 +257,15 @@ func test_theme_has_custom_types_beyond_native_classes() -> void:
 			continue
 		custom.append(name)
 	assert_int(custom.size()).override_failure_message(
-		"собственные типы темы исчезли — гард можно упрощать, но тогда и этот кейс"
+		"типы темы вне ClassDB исчезли — гард можно упрощать, но тогда и этот кейс"
 		).is_greater_equal(1)
 	assert_str(", ".join(PackedStringArray(custom))).contains("TooltipLabel")
+	for name in ["TooltipPanel", "TooltipLabel"]:
+		assert_bool(ClassDB.class_exists(StringName(name))).is_false() \
+			.override_failure_message("%s стал классом — гард пора пересматривать" % name)
+		assert_bool(engine_types.has(name)).is_true() \
+			.override_failure_message(
+				"движок перестал знать тип темы %s: наша секция по нему мертва" % name)
 
 ## 5. Роль темы не имеет права объявлять кегль ниже UI-пола (16 px, UI-AC7).
 #

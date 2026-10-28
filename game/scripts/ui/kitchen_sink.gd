@@ -234,7 +234,19 @@ func _sec_tooltip(grid: GridContainer) -> void:
 	var box := _section(grid, "Tooltip (§4.8, К-6)")
 	var row := _row(box)
 	var panel := PanelContainer.new()
+	# T-228, замер кадра (было/стало, theme_smoke): эти два присваивания ЖИВЫЕ.
+	# Godot резолвит `theme_type_variation` по ИМЕНИ секции темы, регистрация варианта
+	# через `base_type` для этого не нужна — она даёт цепочку отката и видимость в
+	# редакторе. Поэтому витрина и рисует пластину подсказки (TooltipPanel/panel) и её
+	# текст (TooltipLabel: цвет 0.91/0.84/0.66, кегль 20), не дожидаясь наведения.
+	# Снятие присваиваний — регресс кадра (проверено: 7330 px, пластина без золотой
+	# рамки), поэтому они оставлены, а исправлен критерий гарда, который звал их
+	# «молчаливым ничем».
 	panel.theme_type_variation = "TooltipPanel"
+	# Настоящий механизм подсказки рядом: тот же текст наводится по-настоящему, и
+	# игрок видит ту же пластину (tooltip_text не рисуется в статичном кадре — дельты
+	# нет, замеры совпали попиксельно).
+	panel.tooltip_text = "Значение: 60"
 	var body := _label("Значение: 60 (TooltipLabel)", "TooltipLabel")
 	panel.add_child(body)
 	panel.custom_minimum_size = Vector2(280, 44)

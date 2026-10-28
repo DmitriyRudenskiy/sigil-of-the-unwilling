@@ -132,6 +132,93 @@ func test_removed_focus_override_was_dead() -> void:
 		.override_failure_message("Button резолвит focus не из темы — удаление override меняло пиксел")
 
 
+## T-228: любой надетый на узел витрины вариант обязан быть зарегистрирован в теме
+# именно для базового типа этого узла. Литеральный скан source-scan таких назначений
+# не видит: витрина надевает варианты из словарей (PANEL_VARIATIONS, _label(v, v)),
+# поэтому здесь — обход живого дерева. Молчаливое ничего (вариант без base_type или
+# вариант чужого типа) на дереве витрины краснеет.
+func test_every_variation_on_the_sink_tree_is_live_for_its_node() -> void:
+	var sections := {}
+	for s in _THEME.get_type_list():
+		sections[String(s)] = true
+	var dead := PackedStringArray()
+	var wrong_base := PackedStringArray()
+	var wearing := 0
+	for c in _walk(_mk_sink()):
+		var variation := String(c.theme_type_variation)
+		if variation == "":
+			continue
+		wearing += 1
+		var base := String(_THEME.get_type_variation_base(StringName(variation)))
+		if base == "":
+		# Не зарегистрированный вариант сам по себе не дефект: Godot резолвит секцию по
+		# имени (замер T-228), поэтому TooltipPanel/TooltipLabel на витрине живые. Мёртвы
+		# два других случая: имени нет среди секций темы, и вариант равен типу узла.
+			if not sections.has(variation):
+				dead.append("%s (%s) надета секция %s — её нет в теме" % [
+					c.name, c.get_class(), variation])
+			elif variation == String(c.get_class()):
+				dead.append("%s (%s): вариант равен типу узла — самоприсваивание" % [
+					c.name, c.get_class()])
+			continue
+		if not ClassDB.is_parent_class(c.get_class(), StringName(base)):
+			wrong_base.append("%s (%s) не наследник базового типа варианта %s (%s)" % [
+				c.name, c.get_class(), variation, base])
+	assert_int(dead.size() + wrong_base.size()).is_equal(0) \
+		.override_failure_message(
+			"варианты темы на дереве витрины не работают:\n%s\n%s"
+			% ["\n".join(dead), "\n".join(wrong_base)])
+	# Пустой обход = молчаливый зелёный: витрина обязана что-то надевать.
+	assert_bool(wearing >= 20).is_true() \
+		.override_failure_message("на дереве витрины вариантов почти нет: %d" % wearing)
+
+
+## T-228: раздел §4.8 обязан показывать и настоящий механизм подсказки (tooltip_text),
+## и её пластину/текст — иначе витрина теряет единственное визуальное доказательство К-6
+## (пластину подсказки больше нигде не снять: на живых экранах она не рисуется).
+# Проверка привязана к разделу, а не к дереву целиком: tooltip_text есть и в других
+# секциях (слайдер, §4.6), и глобальное «хотя бы один узел» краснеет лишь когда
+# подсказок не осталось вовсе — мутант M6 это и показал.
+func test_tooltip_section_uses_the_engine_mechanism() -> void:
+	var scene := _mk_sink()
+	var section: Node = null
+	for c in _walk(scene):
+		var lbl := c as Label
+		if lbl != null and String(lbl.text).contains("§4.8"):
+			section = lbl.get_parent()
+	assert_object(section).is_not_null() \
+		.override_failure_message("на витрине не найден раздел §4.8 — проверка подсказки нечего не проверяет")
+	var with_tip: Array[Control] = []
+	for c in _walk(section):
+		if String(c.tooltip_text) != "":
+			with_tip.append(c)
+	assert_bool(with_tip.size() >= 1).is_true() \
+		.override_failure_message(
+			"в разделе §4.8 нет ни одного узла с tooltip_text — витрина рисует имитацию подсказки")
+	var plate: StyleBox = _THEME.get_stylebox("panel", "TooltipPanel")
+	assert_object(plate).is_not_null().override_failure_message(
+		"тема не держит TooltipPanel/panel — пластину подсказки рисует дефолт движка")
+	for c in with_tip:
+		assert_bool(c.get_theme_stylebox("panel", "TooltipPanel") == plate).is_true() \
+			.override_failure_message("живой узел резолвит не нашу пластину подсказки")
+	# Кадр-ловушка (ux-review T-228): первый вариант правки снял с панели витрины
+	# `theme_type_variation = "TooltipPanel"` «как с не-вариантом» — и на кадре пластина
+	# подсказки исчезла (7330 px, золотая рамка). Регресс стоит ровно столько, сколько
+	# стоит проверка: раздел обязан надевать секцию пластины и тип её текста.
+	var plate_worn := 0
+	var text_worn := 0
+	for c in _walk(section):
+		match String(c.theme_type_variation):
+			"TooltipPanel":
+				plate_worn += 1
+			"TooltipLabel":
+				text_worn += 1
+	assert_bool(plate_worn >= 1).is_true() \
+		.override_failure_message("в разделе §4.8 никто не надел TooltipPanel — пластина подсказки с кадра ушла")
+	assert_bool(text_worn >= 1).is_true() \
+		.override_failure_message("в разделе §4.8 никто не надел TooltipLabel — текст подсказки рисуется не каноном")
+
+
 # T-227 (С-2): проверки «в исходниках нет обхода темы» и «несуществующий тип не
 # резолвит» переехали в res://tests/unit/ui/test_theme_source_scan.gd (скан всего
 # production-кода, а не «своих» файлов) и res://tests/unit/ui/test_theme_variation_matrix.gd
