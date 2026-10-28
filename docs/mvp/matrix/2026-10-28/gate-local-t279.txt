@@ -1,0 +1,11 @@
+# гейт 2026-10-28 после 0b5c81b6 (T-279 первая сводка, docs+baseline) — выключка полного run_tests.sh
+# GdUnit 3584/0/0; MCP collected=110, passed=107 skipped=2 failed=0 errors=1 → YELLOW:
+# 1 error с подпиской readiness (среда, не регрессия, D-265) — сводка меняла только docs/ и baseline.json;
+# READINESS-CLASSIFIER selftest GREEN; doc_gates GREEN (аудит 127 = базлайн 127) до коммита.
+Overall Summary: 3584 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+PYTEST LEDGER: passed=107 skipped=2 failed=0 errors=1 collected=110
+MCP JUNIT: passed=107 skipped=2 failed=0 errors=1
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за): среда, не регрессия (D-265); тесты обязан переснять владелец либо повторный прогон:
+MCP VERDICT: YELLOW
+MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265)
+READINESS-CLASSIFIER: selftest GREEN
