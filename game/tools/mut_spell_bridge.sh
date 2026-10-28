@@ -15,6 +15,15 @@ trap restore EXIT
 
 run_red() {
   local name="$1"
+  local tag="${name%% *}"
+  if [ -n "${ONLY:-}" ] && ! echo " $ONLY " | grep -q " $tag "; then
+    restore
+    return
+  fi
+  if cmp -s "$SRC" "$BK"; then
+    echo "$name: *** МУТАНТ НЕ ПРИМЕНИЛСЯ — правка не нашла исходник ***"
+    return
+  fi
   local out
   out=$(timeout 900 godot --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd \
     --ignoreHeadlessMode -a "$TEST" 2>&1)
@@ -112,7 +121,7 @@ run_red "M8 драконьий порог уровня"
 python3 - <<'PY'
 p = "scripts/data/battle_spell_bridge.gd"
 s = open(p).read()
-s = s.replace('		if MIND_IMMUNE_SPELLS.has(spell_id):', '		if false:')
+s = s.replace('\t\tif spell_id in MIND_IMMUNE_SPELLS:', '\t\tif false:')
 open(p, "w").write(s)
 PY
 run_red "M9 ментальный иммунитет игнорируется"
@@ -139,8 +148,8 @@ run_red "M11 заклинание по мёртвому цели"
 python3 - <<'PY'
 p = "scripts/data/battle_spell_bridge.gd"
 s = open(p).read()
-s = s.replace('		var dmg: int = sp * int(spell.params.get("amount", 1))',
-              '		var dmg: int = sp')
+s = s.replace('\t\t\tvar dmg: int = sp * int(spell.params.get("amount", 0))',
+              '\t\t\tvar dmg: int = sp')
 open(p, "w").write(s)
 PY
 run_red "M12 множитель урона игнорируется"
@@ -158,8 +167,7 @@ run_red "M13 лечение = 5 × сила"
 python3 - <<'PY'
 p = "scripts/data/battle_spell_bridge.gd"
 s = open(p).read()
-s = s.replace('		result.revive_count = max(1, min(int(sp * 20 / hp), target.max_count))',
-              '		result.revive_count = max(1, int(sp * 20 / hp))')
+s = s.replace('\t\t\t\trevived = min(revived, target.max_count)\n', '')
 open(p, "w").write(s)
 PY
 run_red "M14 подъём без ограничения стеком"
@@ -168,8 +176,7 @@ run_red "M14 подъём без ограничения стеком"
 python3 - <<'PY'
 p = "scripts/data/battle_spell_bridge.gd"
 s = open(p).read()
-s = s.replace('		result.revive_count = max(1, min(int(sp * 20 / hp), target.max_count))',
-              '		result.revive_count = min(int(sp * 20 / hp), target.max_count)')
+s = s.replace('\t\t\t\trevived = max(1, revived)\n', '')
 open(p, "w").write(s)
 PY
 run_red "M15 нулевой подъём принят"
