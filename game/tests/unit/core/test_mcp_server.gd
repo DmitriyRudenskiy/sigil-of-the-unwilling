@@ -34,6 +34,7 @@ func after_test() -> void:
 	_server = null
 	OS.set_environment(_Srv.ENABLE_ENV, "")
 	OS.set_environment("MCP_PORT", "")
+	OS.set_environment(_Srv.BOOT_TRACE_ENV, "")
 
 
 func test_handlers_registered() -> void:
@@ -219,6 +220,95 @@ func test_endpoint_stays_closed_without_opt_in() -> void:
 	# Команды при этом зарегистрированы — закрыт транспорт, а не реестр.
 	assert_bool(_server._dispatcher.has("os_info")).is_true()
 	OS.set_environment("MCP_PORT", "")
+
+
+# --- T-172: отказ bind() перестал быть финальным; старт оставляет трейс ------
+# До правки `listen()` с ошибкой = порт не поднимается никогда: `_process`
+# возвращал управление на `if not _started`, а стенд 180 с ждал соединения и
+# терял тест (жертва каждый прогон своя, изолированно тот же тест — 3 с).
+
+const _RETRY_PORT := 9778
+
+
+func test_bind_failure_is_recorded_and_retried_when_port_frees() -> void:
+	if not OS.is_debug_build():
+		return
+	OS.set_environment("MCP_PORT", str(_RETRY_PORT))
+	OS.set_environment(_Srv.ENABLE_ENV, "1")
+	var blocker := TCPServer.new()
+	assert_int(blocker.listen(_RETRY_PORT, "127.0.0.1")).is_equal(OK)
+	_server.set_process(true)
+	assert_bool(_server.start()).is_false()
+	assert_bool(_server.is_started()).is_false()
+	assert_that(_server.bind_attempts()).is_equal(1)
+	assert_int(_server.last_bind_error()).is_equal(ERR_ALREADY_IN_USE)
+	blocker.stop()
+	# Интервал ретрая 1 с; ждём кадром, а не sleep(), чтобы шёл `_process`.
+	var deadline: int = Time.get_ticks_msec() + 8000
+	while not _server.is_started() and Time.get_ticks_msec() < deadline:
+		await await_millis(100)
+	assert_bool(_server.is_started()).is_true()
+	assert_that(_server.bind_attempts()).is_greater(1)
+	assert_int(_server.last_bind_error()).is_equal(OK)
+	# blocker — RefCounted: освобождается ссылкой, не free().
+
+
+func test_process_drives_the_bind_retry() -> void:
+	if not OS.is_debug_build():
+		return
+	OS.set_environment("MCP_PORT", str(_RETRY_PORT))
+	OS.set_environment(_Srv.ENABLE_ENV, "1")
+	# Симулированное состояние «первая попытка сорвалась, срок повторить настал».
+	_server._bind_attempts = 1
+	_server._retry_due_msec = 0
+	_server._process(0.0)
+	# Без вызова ретрая из `_process` порт не поднялся бы никогда.
+	assert_bool(_server.is_started()).is_true()
+
+
+func test_bind_retry_stops_at_the_attempt_cap() -> void:
+	OS.set_environment(_Srv.ENABLE_ENV, "1")
+	_server._bind_attempts = _Srv.MAX_BIND_ATTEMPTS
+	_server._retry_due_msec = 0
+	_server._process(0.0)
+	assert_that(_server._bind_attempts).is_equal(_Srv.MAX_BIND_ATTEMPTS)
+	assert_bool(_server.is_started()).is_false()
+
+
+func test_explicit_stop_is_not_undone_by_the_retry_loop() -> void:
+	if not OS.is_debug_build():
+		return
+	OS.set_environment("MCP_PORT", str(_RETRY_PORT))
+	OS.set_environment(_Srv.ENABLE_ENV, "1")
+	_server._retry_due_msec = 0
+	_server.start()
+	assert_bool(_server.is_started()).is_true()
+	_server.stop()
+	_server._retry_due_msec = 0
+	_server._process(0.0)
+	assert_bool(_server.is_started()).is_false()
+	assert_bool(_server._started).is_false()
+
+
+func test_boot_trace_records_ready_and_listen_attempt() -> void:
+	if not OS.is_debug_build():
+		return
+	var path := OS.get_user_data_dir() + "/t172_boot_trace.log"
+	DirAccess.remove_absolute(path)
+	OS.set_environment(_Srv.BOOT_TRACE_ENV, path)
+	OS.set_environment("MCP_PORT", str(_RETRY_PORT))
+	OS.set_environment(_Srv.ENABLE_ENV, "1")
+	var srv := _Srv.new()
+	add_child(srv)
+	assert_bool(FileAccess.file_exists(path)).is_true()
+	var f := FileAccess.open(path, FileAccess.READ)
+	var text := f.get_as_text()
+	f.close()
+	assert_that(text).contains("ready:")
+	assert_that(text).contains("listen attempt=1")
+	srv.stop()
+	srv.free()
+	DirAccess.remove_absolute(path)
 
 
 func test_opt_in_opens_the_endpoint_and_stop_closes_it() -> void:

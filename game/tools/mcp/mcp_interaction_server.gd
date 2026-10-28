@@ -37,9 +37,65 @@ const BUSY_TIMEOUT: float = 120.0
 const AUTH_TOKEN_ENV := "MCP_AUTH_TOKEN"
 var _auth_token: String = ""
 
+# T-172: отказ bind() был необратим. `start()` возвращал false, `_process`
+# молчал (`if not _started: return`), порт не поднимался НИКОГДА, а тестовый
+# стенд/wait_ready ждал 180 с и терял тест. Два следствия:
+#   1) наблюдаемость — boot-трейс в файл (env MCP_BOOT_TRACE), который стенд
+#      печатает в текст отказа: «Godot не дошёл до автозагрузки» и «listen
+#      вернул 4096» были неотличимы ни друг от друга, ни от медленного старта;
+#   2) обратимость — limited retry: порт, который держит умирающий Godot
+#      предыдущего теста, освобождается за десятки мс, повторная попытка
+#      дешёвая и прекращается по лимиту попыток.
+const BOOT_TRACE_ENV := "MCP_BOOT_TRACE"
+const RETRY_INTERVAL_MSEC := 1000
+const MAX_BIND_ATTEMPTS := 30
+
 var _dispatcher: McpCommandDispatcher
 var _groups: Array[McpCommandsBase] = []
 var _started: bool = false
+var _bind_attempts: int = 0
+var _last_bind_error: int = OK
+var _retry_due_msec: int = 0
+var _gave_up_traced: bool = false
+# T-172: retry-цикл живёт в `_process`, поэтому явная `stop()` не может быть
+# отменена им ничем — ни включённым `_process`, ни истёкшим сроком повторной
+# попытки. Флаг — инвариант, а не следствие `set_process(false)`.
+var _stop_requested: bool = false
+
+
+static func boot_trace_path() -> String:
+	return OS.get_environment(BOOT_TRACE_ENV)
+
+
+## Строка boot-трейса: миллисекунды движка + pid (в прогоне несколько Godot).
+## Пишет только debug-сборка и только когда стенд назвал путь; отсутствие
+## файла после успешного старта = механизм трейса сломан, а не «Godot молчал».
+func _trace(msg: String) -> void:
+	var path := boot_trace_path()
+	if path.is_empty() or not OS.is_debug_build():
+		return
+	var f := FileAccess.open(path, FileAccess.READ_WRITE)
+	if f == null:
+		# READ_WRITE не создаёт файл (проверено на 4.7): первая строка пишется WRITE.
+		f = FileAccess.open(path, FileAccess.WRITE)
+	if f == null:
+		return
+	f.seek_end()
+	f.store_line("%d pid=%d %s" % [Time.get_ticks_msec(), OS.get_process_id(), msg])
+	f.close()
+
+
+# --- T-172: читаемое состояние транспорта (для тестов и диагностики) ---------
+func is_started() -> bool:
+	return _started
+
+
+func bind_attempts() -> int:
+	return _bind_attempts
+
+
+func last_bind_error() -> int:
+	return _last_bind_error
 
 func _ready() -> void:
 	# SECURITY: MCP-сервер — инструмент разработки. В релизных сборках TCP-эндпоинт
@@ -59,6 +115,8 @@ func _ready() -> void:
 	_dispatcher.clear()
 	for group in _groups:
 		_dispatcher.register(group)
+	_trace("ready: enabled=%s port=%d debug=%s" % [
+		str(enabled_by_env()), port(), str(OS.is_debug_build())])
 	start()
 
 
@@ -83,10 +141,18 @@ func start() -> bool:
 		return false
 	# Ensure MCP server keeps processing even when game is paused
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_stop_requested = false
+	# T-172: `_process` — единственный исполнитель bind-ретраев, и он обязан быть
+	# включён до первой попытки (иначе отказ listen остался бы финальным).
+	set_process(true)
 	_auth_token = OS.get_environment(AUTH_TOKEN_ENV)
 	_server = TCPServer.new()
 	var port_ := port()
 	var err: int = _server.listen(port_, "127.0.0.1")
+	_bind_attempts += 1
+	_last_bind_error = err
+	_retry_due_msec = Time.get_ticks_msec() + RETRY_INTERVAL_MSEC
+	_trace("listen attempt=%d port=%d err=%d" % [_bind_attempts, port_, err])
 	if err == ERR_ALREADY_IN_USE:
 		# EADDRINUSE: понятная ошибка + чистое состояние (без утечки peers).
 		push_error(
@@ -103,9 +169,36 @@ func start() -> bool:
 	return true
 
 
+## T-172: вторая (и далее) попытка bind для отказа, который живёт меньше
+## секунды — порт отпускает умирающий Godot предыдущего теста. Лимит попыток
+## обязателен: вечный ретрай превратил бы «порт занят соседом» в бесконечное
+## ожидание вместо диагноза в трейсе.
+func _retry_bind_if_due() -> void:
+	if _stop_requested:
+		return
+	if not OS.is_debug_build() or not enabled_by_env():
+		return
+	if _bind_attempts >= MAX_BIND_ATTEMPTS:
+		if not _gave_up_traced:
+			_gave_up_traced = true
+			_trace("gave up after %d attempts, last err=%d" % [_bind_attempts, _last_bind_error])
+			push_error(
+				"McpInteractionServer: bind retry exhausted after %d attempts (last err=%d)"
+				% [_bind_attempts, _last_bind_error])
+		return
+	if Time.get_ticks_msec() < _retry_due_msec:
+		return
+	_trace("bind retry scheduled after %d ms" % RETRY_INTERVAL_MSEC)
+	start()
+
+
 ## R2 explicit lifecycle: idempotent stop. Releases all transport state and
 ## lets groups free their resources (debug meshes etc.) via shutdown().
 func stop() -> void:
+	# T-172: явная остановка не должна быть отменена retry-циклом: `_process`
+	# иначе увидел бы `_started == false` и поднял порт заново.
+	_stop_requested = true
+	set_process(false)
 	if _client != null:
 		_client.disconnect_from_host()
 		_client = null
@@ -123,7 +216,10 @@ func stop() -> void:
 
 
 func _process(_delta: float) -> void:
-	if not _started or _server == null:
+	if not _started:
+		_retry_bind_if_due()
+		return
+	if _server == null:
 		return
 
 	# TASK_20: тик групп (debug-меша и пр.) — frames_left декрементируется.

@@ -68,6 +68,14 @@ SERVER_ENV["MCP_PORT"] = str(_worker_port())
 # включает его здесь; spawn node-сервера наследует env, Godot-сторона читает его.
 SERVER_ENV["MCP_ENABLE"] = "1"
 
+# T-172: отказ readiness должен называть причину. Стенд даёт каждому Godot свой
+# boot-трейс (игра пишет в него «ready», каждую попытку bind и её код ошибки),
+# а wait_ready печатает его хвост + снимок среды в тексте падения. Без этого
+# «Godot не стартовал», «Godot медленно стартовал из-за global OOM» и «порту не
+# дали открыться» выглядели в отчёте одинаково.
+BOOT_TRACE_DIR = GAME_DIR / "tmp" / "mcp_boot"
+_trace_seq = [0]
+
 # CI-4: карантин флейков — файл quarantine.txt, по записи на тест:
 #   <nodeid подстрока>	<ГГГГ-ММ-ДД>	<причина>
 # Запись с истёкшим сроком НЕ молчит: тест возвращается в свит, а просроченная
@@ -142,13 +150,23 @@ def mcp(_server_env: dict = None):
     ready = threading.Event()
     done = threading.Event()
 
+    # Каждый тест — свой Godot, значит и свой трейс (в общий файл разные прогоны
+    # пишется разное: хвост чужого теста выдал бы чужую причину).
+    BOOT_TRACE_DIR.mkdir(parents=True, exist_ok=True)
+    _trace_seq[0] += 1
+    trace_path = BOOT_TRACE_DIR / f"boot_{os.getpid()}_{_trace_seq[0]}.log"
+    trace_path.unlink(missing_ok=True)
+    server_env = dict(_server_env or {})
+    server_env["MCP_BOOT_TRACE"] = str(trace_path)
+
     async def main() -> None:
         try:
-            async with stdio_client(_server_params(_server_env)) as (read, write):
+            async with stdio_client(_server_params(server_env)) as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
                     box["client"] = GodotMCPClient(
-                        portal, session, str(GAME_DIR), port=_worker_port()
+                        portal, session, str(GAME_DIR), port=_worker_port(),
+                        boot_trace=str(trace_path),
                     )
                     stop_evt = anyio.Event()
                     box["stop"] = stop_evt
@@ -160,6 +178,7 @@ def mcp(_server_env: dict = None):
             ready.set()
         finally:
             _restore_project_godot_if_dirty()
+            trace_path.unlink(missing_ok=True)
             done.set()
 
     with start_blocking_portal() as portal:

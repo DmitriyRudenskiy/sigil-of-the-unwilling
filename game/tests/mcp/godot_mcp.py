@@ -5,6 +5,7 @@ import json
 import os
 import socket
 import time
+from pathlib import Path
 from typing import Any
 
 import inspect
@@ -30,6 +31,112 @@ PORT_FREE_TIMEOUT = 60.0
 
 class MCPError(RuntimeError):
     pass
+
+
+# --- T-172: отказ readiness обязан называть причину, а не только дедлайн -------
+# До правки жертва прогона выглядела одинаково при трёх разных бедах: Godot не
+# стартовал, Godot стартовал медленно (машина в global OOM), и `listen()`
+# однажды отказал. Всё, что видел отчёт, — «игра не готова за 180 с».
+# Теперь к тексту отказа прилагается снимок среды и boot-трейс самой игры
+# (пишет tools/mcp/mcp_interaction_server.gd, env MCP_BOOT_TRACE).
+
+MEMINFO_PATH = "/proc/meminfo"
+LOADAVG_PATH = "/proc/loadavg"
+PSI_MEMORY_PATH = "/proc/pressure/memory"
+
+
+def _read_text(path: str) -> str:
+    try:
+        return Path(path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+
+
+def read_meminfo_kb(path: str = MEMINFO_PATH) -> dict[str, int]:
+    """/proc/meminfo → {ключ: КиБ}; пустой словарь там, где /proc нет (macOS)."""
+    out: dict[str, int] = {}
+    for line in _read_text(path).splitlines():
+        fields = line.split()
+        if len(fields) >= 2 and fields[1].isdigit():
+            out[fields[0].rstrip(":")] = int(fields[1])
+    return out
+
+
+def read_loadavg(path: str = LOADAVG_PATH) -> float | None:
+    fields = _read_text(path).split()
+    if not fields:
+        return None
+    try:
+        return float(fields[0])
+    except ValueError:
+        return None
+
+
+def read_psi_some(path: str = PSI_MEMORY_PATH) -> str:
+    """Первая строка PSI-памяти (`some avg10=…`); пусто, если ядро без PSI."""
+    for line in _read_text(path).splitlines():
+        if line.startswith("some"):
+            return line.strip()
+    return ""
+
+
+def count_processes(needle: str = "godot", proc_root: str = "/proc") -> int:
+    """Сколько godot-процессов живёт прямо сейчас (в т.ч. чужие прогоны)."""
+    n = 0
+    try:
+        entries = os.listdir(proc_root)
+    except OSError:
+        return 0
+    for pid in entries:
+        if not pid.isdigit():
+            continue
+        if needle in _read_text(f"{proc_root}/{pid}/cmdline").lower():
+            n += 1
+    return n
+
+
+def env_snapshot(
+    meminfo_path: str = MEMINFO_PATH,
+    loadavg_path: str = LOADAVG_PATH,
+    psi_path: str = PSI_MEMORY_PATH,
+    proc_root: str = "/proc",
+) -> dict[str, Any]:
+    """Снимок того, что окружение могло отнять у старта Godot (T-172)."""
+    mem = read_meminfo_kb(meminfo_path)
+    return {
+        "mem_available_mb": round(mem.get("MemAvailable", 0) / 1024) or None,
+        "swap_free_mb": round(mem.get("SwapFree", 0) / 1024) or None,
+        "swap_total_mb": round(mem.get("SwapTotal", 0) / 1024) or None,
+        "load1": read_loadavg(loadavg_path),
+        "psi_memory": read_psi_some(psi_path) or None,
+        "godot_processes": count_processes("godot", proc_root),
+    }
+
+
+def boot_trace_tail(trace_path: str, lines: int = 8) -> str:
+    """Хвост boot-трейса игры; отдельный текст, если файла нет или он пуст."""
+    if not trace_path:
+        return "трейс не запрошен (MCP_BOOT_TRACE не задан)"
+    text = _read_text(trace_path)
+    if not text.strip():
+        return (
+            f"файл трейса {trace_path} пуст или не создан — Godot не дошёл до "
+            "автозагрузки McpInteractionServer (не стартовал/умер на старте)"
+        )
+    body = text.strip().splitlines()[-lines:]
+    return f"{len(body)} строк из {trace_path}:\n    " + "\n    ".join(body)
+
+
+def readiness_evidence(trace_path: str = "", snapshot: dict[str, Any] | None = None) -> str:
+    """Текст к исключению readiness: среда + последние шаги самой игры."""
+    snap = env_snapshot() if snapshot is None else snapshot
+    return (
+        "среда в момент отказа: "
+        f"mem_available={snap['mem_available_mb']}MB "
+        f"swap_free={snap['swap_free_mb']}/{snap['swap_total_mb']}MB "
+        f"load1={snap['load1']} godot_procs={snap['godot_processes']} "
+        f"psi_memory={snap['psi_memory']}\n  boot-трейс: {boot_trace_tail(trace_path)}"
+    )
 
 # Новый mcp SDK ожидает timedelta в read_timeout_seconds, старый — float.
 try:
@@ -81,11 +188,14 @@ async def wait_port_free(
 class GodotMCPClient:
 
     def __init__(self, portal, session: ClientSession, project_path: str,
-                 port: int = MCP_INTERACTION_PORT) -> None:
+                 port: int = MCP_INTERACTION_PORT,
+                 boot_trace: str = "") -> None:
         self._portal = portal
         self._session = session
         self._project_path = project_path
         self._port = port  # ci-speedup: порт воркера (gwN → 9090+N)
+        # T-172: путь boot-трейса этого Godot (env MCP_BOOT_TRACE тем же значением).
+        self.boot_trace = boot_trace
         self._running = False
 
     def execute_code(self, code: str, timeout: float = DEFAULT_TIMEOUT) -> Any:
@@ -169,7 +279,10 @@ class GodotMCPClient:
             except (MCPError, _SdkMCPError) as e:
                 last = str(e)
             time.sleep(interval)
-        raise MCPError(f"игра не готова за {timeout:.0f} с (последняя ошибка: {last})")
+        raise MCPError(
+            f"игра не готова за {timeout:.0f} с (последняя ошибка: {last})\n  "
+            + readiness_evidence(self.boot_trace)
+        )
 
     async def _call(self, name: str, args: dict, timeout: float) -> Any:
         try:
