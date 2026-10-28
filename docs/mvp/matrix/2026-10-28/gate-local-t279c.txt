@@ -1,0 +1,11 @@
+# гейт 2026-10-29 после f3f670b3 (T-279 первая сводка + §6.2 CampaignArt + Q-M117, база origin/main e2216377) — выключка run_tests.sh
+# GdUnit 3587/0/0 (гард состава кадра T-280 в счётчике); MCP collected=110, passed=107 skipped=2 failed=0 errors=1 → YELLOW:
+# 1 error с подпиской readiness (среда, не регрессия, D-265) — та же жертва, что в gate-local-t279.txt/t279b.txt;
+# READINESS-CLASSIFIER selftest GREEN; doc_gates GREEN (аудит 127 = базлайн 127).
+Overall Summary: 3587 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+PYTEST LEDGER: passed=107 skipped=2 failed=0 errors=1 collected=110
+MCP JUNIT: passed=107 skipped=2 failed=0 errors=1
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за): среда, не регрессия (D-265); тесты обязан переснять владелец либо повторный прогон:
+MCP VERDICT: YELLOW
+MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265)
+READINESS-CLASSIFIER: selftest GREEN
