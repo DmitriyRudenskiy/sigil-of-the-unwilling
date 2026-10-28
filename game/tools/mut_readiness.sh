@@ -80,8 +80,8 @@ run_pytest_cases() {
     GODOT_PROJECT_PATH="$ROOT" \
     GODOT_MCP_SERVER="$ROOT/addons/godot-mcp/build/index.js" \
     GODOT_PATH="${GODOT_PATH:-godot}" \
-    "$PYTEST_PY" -m pytest tests/mcp/test_readiness_evidence.py -q \
-      -p no:cacheprovider --timeout=900 2>&1) || true
+    "$PYTEST_PY" -m pytest tests/mcp/test_readiness_evidence.py \
+      tests/mcp/test_godot_launcher.py -q -p no:cacheprovider --timeout=900 2>&1) || true
 }
 
 cp "$H" /tmp/godot_mcp_readiness.bak
@@ -98,4 +98,24 @@ PYEOF
 victims="$(run_pytest_cases | sed -n 's/^FAILED tests\/mcp\/test_readiness_evidence\.py::\([a-z_0-9]*\).*/\1/p' | sort -u | tr '\n' ' ')"
 if [ -z "$victims" ]; then echo "MUT6: SURVIVED (тесты зелёные — защита не покрыта)"
 else echo "MUT6: killed -> $victims"; fi
+cp /tmp/godot_mcp_readiness.bak "$H"
+
+# MUT7 — хвост лога запуска выключен: «почему игра не дошла» снова неизвестно.
+cp /tmp/godot_mcp_readiness.bak "$H"
+python3 - "$H" <<'PYEOF'
+import sys
+from pathlib import Path
+p = Path(sys.argv[1])
+s = p.read_text()
+old = '        return "лог запуска не собирался (MCP_GODOT_LOG не задан)"'
+assert s.count(old) == 1, s.count(old)
+s = s.replace(old, '        return ""', 1)
+old2 = '            f"лог запуска {log_path} пуст — Godot не напечатал ни байта "'
+assert s.count(old2) == 1, s.count(old2)
+s = s.replace(old2, '            ""', 1)
+p.write_text(s)
+PYEOF
+victims="$(run_pytest_cases | sed -n 's/^FAILED tests\/mcp\/test_\([a-z_]*\)\.py::\([a-z_0-9]*\).*/\2/p' | sort -u | tr '\n' ' ')"
+if [ -z "$victims" ]; then echo "MUT7: SURVIVED (тесты зелёные — защита не покрыта)"
+else echo "MUT7: killed -> $victims"; fi
 cp /tmp/godot_mcp_readiness.bak "$H"

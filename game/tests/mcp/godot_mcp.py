@@ -162,8 +162,31 @@ def boot_trace_tail(trace_path: str, lines: int = 8) -> str:
     return f"{len(body)} строк из {trace_path}:\n    " + "\n    ".join(body)
 
 
-def readiness_evidence(trace_path: str = "", snapshot: dict[str, Any] | None = None) -> str:
-    """Текст к исключению readiness: среда + последние шаги самой игры."""
+def launch_log_tail(log_path: str, lines: int = 12) -> str:
+    """Хвост лога запуска Godot — того, что движок напечатал до отказа.
+
+    Boot-трейс отвечает «дошла ли игра до автозагрузки»; на «почему нет» он нем,
+    потому что до автозагрузки игра — только движок. Его слова (баннер, `-d`
+    подробный лог, внятный краш) видны лишь извне — см. `godot_launcher.sh`.
+    """
+    if not log_path:
+        return "лог запуска не собирался (MCP_GODOT_LOG не задан)"
+    text = _read_text(log_path)
+    if not text.strip():
+        return (
+            f"лог запуска {log_path} пуст — Godot не напечатал ни байта "
+            "(spawn не состоялся или процесс умер до первой строки)"
+        )
+    body = [l for l in text.strip().splitlines() if l.strip()][-lines:]
+    return f"{len(body)} строк из {log_path}:\n    " + "\n    ".join(body)
+
+
+def readiness_evidence(
+    trace_path: str = "",
+    snapshot: dict[str, Any] | None = None,
+    launch_log: str = "",
+) -> str:
+    """Текст к исключению readiness: среда + шаги игры + лог движка."""
     snap = env_snapshot() if snapshot is None else snapshot
     return (
         "среда в момент отказа: "
@@ -172,6 +195,7 @@ def readiness_evidence(trace_path: str = "", snapshot: dict[str, Any] | None = N
         f"load1={snap['load1']} godot_procs={snap['godot_processes']}"
         f"(rss={snap['godot_rss_mb']}MB, state={snap['godot_states']}) "
         f"psi_memory={snap['psi_memory']}\n  boot-трейс: {boot_trace_tail(trace_path)}"
+        f"\n  лог запуска: {launch_log_tail(launch_log)}"
     )
 
 # Новый mcp SDK ожидает timedelta в read_timeout_seconds, старый — float.
@@ -225,13 +249,15 @@ class GodotMCPClient:
 
     def __init__(self, portal, session: ClientSession, project_path: str,
                  port: int = MCP_INTERACTION_PORT,
-                 boot_trace: str = "") -> None:
+                 boot_trace: str = "", launch_log: str = "") -> None:
         self._portal = portal
         self._session = session
         self._project_path = project_path
         self._port = port  # ci-speedup: порт воркера (gwN → 9090+N)
-        # T-172: путь boot-трейса этого Godot (env MCP_BOOT_TRACE тем же значением).
+        # T-172: путь boot-трейса этого Godot (env MCP_BOOT_TRACE тем же значением)
+        # и путь лога запуска того же движка (env MCP_GODOT_LOG, см. godot_launcher.sh).
         self.boot_trace = boot_trace
+        self.launch_log = launch_log
         self._running = False
 
     def execute_code(self, code: str, timeout: float = DEFAULT_TIMEOUT) -> Any:
@@ -317,7 +343,7 @@ class GodotMCPClient:
             time.sleep(interval)
         raise MCPError(
             f"игра не готова за {timeout:.0f} с (последняя ошибка: {last})\n  "
-            + readiness_evidence(self.boot_trace)
+            + readiness_evidence(self.boot_trace, launch_log=self.launch_log)
         )
 
     async def _call(self, name: str, args: dict, timeout: float) -> Any:

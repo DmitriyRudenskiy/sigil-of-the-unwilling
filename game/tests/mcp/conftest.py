@@ -29,7 +29,17 @@ PROJECT_GODOT = GAME_DIR / "project.godot"
 
 # mcp SDK наследует только DEFAULT_INHERITED_ENV_VARS (без DISPLAY) — передаём явно,
 # иначе Godot без дисплея умирает сразу после spawn (найдено бисекцией, 2026-10-03).
-SERVER_ENV = {"GODOT_PATH": GODOT_BIN}
+# T-172: для MCP-стенда Godot запускается через обёртку godot_launcher.sh — она
+# пишет stdout/stderr движка в файл теста и замещает себя движком (`exec`), поэтому
+# kill от node-сервера по-прежнему убивает Godot, а не shell-посредника. Настоящий
+# бинарь уезжает в MCP_GODOT_REAL; если обёртки нет (частичный checkout) — стенд
+# прозрачен, лог просто не собирается.
+GODOT_LAUNCHER = Path(__file__).resolve().parent / "godot_launcher.sh"
+_LAUNCHER = GODOT_LAUNCHER if (GODOT_LAUNCHER.exists() and os.access(GODOT_LAUNCHER, os.X_OK)) else None
+
+SERVER_ENV = {"GODOT_PATH": str(_LAUNCHER) if _LAUNCHER else GODOT_BIN}
+if _LAUNCHER:
+    SERVER_ENV["MCP_GODOT_REAL"] = GODOT_BIN
 if os.environ.get("DISPLAY"):
     SERVER_ENV["DISPLAY"] = os.environ["DISPLAY"]
 
@@ -155,9 +165,13 @@ def mcp(_server_env: dict = None):
     BOOT_TRACE_DIR.mkdir(parents=True, exist_ok=True)
     _trace_seq[0] += 1
     trace_path = BOOT_TRACE_DIR / f"boot_{os.getpid()}_{_trace_seq[0]}.log"
+    launch_path = BOOT_TRACE_DIR / f"launch_{os.getpid()}_{_trace_seq[0]}.log"
     trace_path.unlink(missing_ok=True)
+    launch_path.unlink(missing_ok=True)
     server_env = dict(_server_env or {})
     server_env["MCP_BOOT_TRACE"] = str(trace_path)
+    if _LAUNCHER:
+        server_env["MCP_GODOT_LOG"] = str(launch_path)
 
     async def main() -> None:
         try:
@@ -167,6 +181,7 @@ def mcp(_server_env: dict = None):
                     box["client"] = GodotMCPClient(
                         portal, session, str(GAME_DIR), port=_worker_port(),
                         boot_trace=str(trace_path),
+                        launch_log=str(launch_path) if _LAUNCHER else "", 
                     )
                     stop_evt = anyio.Event()
                     box["stop"] = stop_evt
@@ -179,6 +194,7 @@ def mcp(_server_env: dict = None):
         finally:
             _restore_project_godot_if_dirty()
             trace_path.unlink(missing_ok=True)
+            launch_path.unlink(missing_ok=True)
             done.set()
 
     with start_blocking_portal() as portal:

@@ -37,3 +37,31 @@ run 2: PYTEST LEDGER: passed=81 skipped=2 failed=0 errors=3 collected=86  (же�
 сам pytest-стенд (`.venv/godot-mcp-tests/…`) и node-сервер (`godot-mcp/build/index.js`).
 Переписан на имя исполняемого файла + RSS + состояние процесса (батарея `mut_readiness.sh`,
 MUT6 убивает этот регресс). Вывод артефакта это не меняет: у обеих жертв boot-трейс пуст.
+
+=== Постскриптум 3 (тот же день, третий гейт): канал лога запуска поймал отказ ===
+
+Третий прогон того же дерева (GdUnit: 3584/0/0; MCP: 99 passed, 2 skipped, 0 failed, 1 error →
+YELLOW по D-265; collected=102). Жертва — `test_campaign_carrier::test_second_press_closes_city_screen`
+(setup, 180.18 с), изолированно проходит за 3.54 с.
+
+Снимок из текста отказа (новые каналы наблюдаемости, срез godot_launcher.sh):
+
+  среда в момент отказа: mem_available=23MB swap_free=2775/20479MB load1=0.66
+    godot_procs=1(rss=171MB, state=S:1) psi_memory=some avg10=0.00 avg60=0.00 avg300=0.55 total=5166365813
+  boot-трейс: файл трейса … пуст или не создан — Godot не дошёл до автозагрузки
+  лог запуска: 4 строк из …/launch_1426736_9.log:
+    Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+    WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+         at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:372)
+    OpenGL API 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2 - Compatibility -
+      Using Device: Mesa — llvmpipe (LLVM 20.1.2, 256 bits)
+
+Вывод: гипотеза «порт не связан» (и «процесс не стартовал») неверна. Движок стартует,
+печатает баннер, инициализирует софтверный рендерер llvmpipe и дальше не идёт: процесс жив
+(`S`, RSS 171 MB), а доступной памяти на машине 23 MB при 2775 MB свободного свопа из 20479.
+Тот же тест в одиночестве проходит за 3.54 с — узкое место не игра, а память машины
+(сосед — чужой `strata --serve`, ~28.7 GB RSS).
+
+Что это меняет: retry bind остаётся нужным (детерминированный путь закрыт), но остаток
+тикета — не код, а политика запуска. Вопрос владельцу заведён: Q-M115 (ждать ли MemAvailable
+перед `run_project`, или жёлтый readiness узакнен как норма этой среды).
