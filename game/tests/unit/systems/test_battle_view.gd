@@ -59,8 +59,8 @@ func test_fit_camera_centers_on_field() -> void:
 	_view.fit_camera()
 	var cam: Camera2D = _view.get_node("Camera")
 	var tm: TileMapLayer = _view._tile_map
-	var expected: Vector2 = (tm.map_to_local(Vector2i.ZERO)
-		+ tm.map_to_local(Vector2i(BattleState.BW - 1, BattleState.BH - 1))) / 2.0
+	var expected: Vector2 = (BattleView.project(tm, Vector2i.ZERO)
+		+ BattleView.project(tm, Vector2i(BattleState.BW - 1, BattleState.BH - 1))) / 2.0
 	assert_bool(cam.position.distance_to(expected) < 0.01).is_true().override_failure_message(
 		"камера не в центре поля %d×%d (%s против %s)"
 		% [BattleState.BW, BattleState.BH, str(cam.position), str(expected)]
@@ -68,8 +68,8 @@ func test_fit_camera_centers_on_field() -> void:
 	# Проверка того, что сравнение не пустышка: пока обводка залита, центр used_rect
 	# обязан ОТЛИЧАТЬСЯ — иначе возврат к старой мере проходил бы незамеченным.
 	var used: Rect2i = tm.get_used_rect()
-	var ring_centre: Vector2 = (tm.map_to_local(used.position)
-		+ tm.map_to_local(used.position + used.size - Vector2i(1, 1))) / 2.0
+	var ring_centre: Vector2 = (BattleView.project(tm, used.position)
+		+ BattleView.project(tm, used.position + used.size - Vector2i(1, 1))) / 2.0
 	assert_bool(used.position.x < 0 and used.position.y < 0).is_true().override_failure_message(
 		"обводки в поле нет — старая и новая мера совпали, проверка ничего не стоит"
 	)

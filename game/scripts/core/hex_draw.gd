@@ -19,9 +19,12 @@ static func points(radius: float) -> PackedVector2Array:
 static func reset_cache() -> void:
 	_points_cache.clear()
 
-static func points_at(center: Vector2, radius: float) -> PackedVector2Array:
+## Полигон соты с центром в `center`. `tilt` укорачивает соту по вертикали —
+## тот же наклон плоскости поля, что у тайлмапа (BattleView.TILT), иначе
+## подсветка не совпадает с клеткой.
+static func points_at(center: Vector2, radius: float, tilt: float = 1.0) -> PackedVector2Array:
 	var raw := points(radius)
 	var result := PackedVector2Array()
 	for p in raw:
-		result.append(center + p)
+		result.append(center + Vector2(p.x, p.y * tilt))
 	return result

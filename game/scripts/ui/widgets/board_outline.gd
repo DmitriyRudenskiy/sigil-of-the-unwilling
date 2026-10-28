@@ -31,7 +31,8 @@ func _outer_edges() -> PackedVector2Array:
 	var seen := {}
 	var out := PackedVector2Array()
 	for c in cells:
-		var pts := HexDraw.points_at(tm.map_to_local(c), BattleView.HEX_OUTLINE_RADIUS)
+		var pts := HexDraw.points_at(BattleView.project(tm, c),
+			BattleView.HEX_OUTLINE_RADIUS, BattleView.TILT)
 		for i in 6:
 			var a: Vector2 = pts[i]
 			var b: Vector2 = pts[i + 1]
