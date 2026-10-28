@@ -1,0 +1,74 @@
+# док-гейты — T-279 сводка 5 (scripts/city/ + scripts/core/, §3в)
+# команда: ./scripts/doc_gates.sh, дата 2026-10-29, локально
+# опись 68 → 46 (20 предметов + 2 попутных имени), allowlist 220 → 218,
+# dead_paths держится на базлайне 5 (в своде 4 рэтчет ловил мою же прозу).
+
+=== wikilinks, имена файлов, словарь статусов ===
+OK: docs/ links consistent (108 notes checked)
+OK: wikilinks, имена файлов, словарь статусов
+
+=== индекс документации не устарел ===
+OK: 00-INDEX.md актуален (110 заметок)
+OK: индекс документации не устарел
+
+=== доки ↔ код (автолоады, сцены, классы, save-ключи) ===
+факты кода: autoload=15, input_action=5, scene=51, class_name=412, save_key=10
+
+ЕСТЬ В КОДЕ, НЕ УПОМИНАЕТСЯ В ДОКАХ (0):
+
+ДОК ССЫЛАЕТСЯ, ФАЙЛА НЕТ (0):
+
+НАЗВАНО ТОЛЬКО В РЕЕСТРАХ И ЖУРНАЛАХ (46), базлайн 46:
+  [class_name] AdventurerRole
+  [class_name] ArchetypeResolver
+  [class_name] BalanceProbe
+  [class_name] BattleActionResolver
+  [class_name] BattleDamageResolver
+  [class_name] BattleFlow
+  [class_name] BattleTerrain
+  [class_name] BattleTurnExecutor
+  [class_name] BuilderRole
+  [class_name] CampaignBattle
+  [class_name] CampaignTrainingService
+  [class_name] CharacterFrames
+  [class_name] CharismaEvents
+  [class_name] DNDAbilityCheck
+  [class_name] DNDAbilityScores
+  [class_name] DNDDeathSaves
+  [class_name] DestMarker
+  [class_name] EconomicTurnProcessor
+  [class_name] EthicsSystem
+  [class_name] FactionReputation
+  … ещё 26
+OK: доки ↔ код (автолоады, сцены, классы, save-ключи)
+
+=== карта hero-экрана ↔ таблица BLOCKS (адреса, узлы, потребители) ===
+HERO-LAYOUT-MAP: блоков 19, адресных строк карты 18
+  расхождений нет
+OK: карта hero-экрана ↔ таблица BLOCKS (адреса, узлы, потребители)
+
+=== контур фаз GDD (состояния, поля реестров, ratchet) ===
+бэклог (только сокращается, D-272):
+  q_without_type: 97 (базлайн 97) OK
+  q_without_priority: 115 (базлайн 115) OK
+  d_without_rejected: 170 (базлайн 170) OK
+  risks_without_number: 10 (базлайн 10) OK
+  dead_paths: 5 (базлайн 5) OK
+  q_ghost_rows: 0 (базлайн 0) OK
+
+GDD-GATE: GREEN
+OK: контур фаз GDD (состояния, поля реестров, ratchet)
+
+=== тесты самих проверщиков ===
+........................................................................ [ 67%]
+...................................                                      [100%]
+107 passed in 2.47s
+OK: тесты самих проверщиков (9 файлов, 9.1.1)
+=== сведённые спеки: структура (T-274) ===
+OPENSPEC SPECS: OK (проверено 87 сведённых спек)
+
+=== карта тестов: рэтчет покрытия и оскопления (T-227) ===
+TESTMAP OK: дыр 82, файлов в группах слияния 145, дублей 0
+
+==========================================
+DOC GATES: GREEN

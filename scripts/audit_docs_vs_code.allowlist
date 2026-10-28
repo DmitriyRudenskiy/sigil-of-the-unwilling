@@ -9,7 +9,6 @@
 # что», поимённый список классов знанием не является).
 ArenaClusterSystem
 ArenaHexCell
-ArenaRingSystem
 ArenaStorm
 ArtifactChest
 ArtifactChestDialog
@@ -38,7 +37,6 @@ CharacterCreationUI
 CharacterRegistry
 CityArenaView
 CityBuildingService
-CityCheck
 CityEvents
 CityEventsProcessor
 CityFactory

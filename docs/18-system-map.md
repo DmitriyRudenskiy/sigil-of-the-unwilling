@@ -175,6 +175,58 @@ preload пишет `_Classes = preload("…/canon_classes.gd")`, и по име�
 зовёт никто, кроме теста.
 
 
+## 3в. Городской слой `scripts/city/` и ядро `scripts/core/`
+
+Пятый свод T-279. Два слоя в одной таблице-паре намеренно: `core/` — то, чем
+городской цикл и бой пользуются не глядя (планировщик фаз, контекст хода,
+геометрия гексов, логгер), а `city/` — то, что крутится внутри этого планировщика.
+Колонка «кто зовёт» снималась двумя грепами (имя класса и путь `preload`), иначе
+половина ядра выглядела бы мёртвой — см. сноску про `Platform`.
+
+### Городской цикл `scripts/city/`
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `CityTurnProcessor` | оркестратор городского хода: запускает под-процессоры из `processors/` в фиксированном порядке и наружу пробрасывает их сигналы (смена масштаба, нарушение зонирования, репутация, миграция, найм, уровень, рейд, событие) | мировой путь — `world/world_bootstrap.gd:389`; живой путь — `city/arena_turn_runner.gd:43` (арена) |
+| `CampaignCityProgression` | уровень города → потолок застроенных клеток (`CELL_LIMITS`, 11 уровней) и разбор занятости | `ui/city_screen.gd`, `city/campaign_building_construction_service.gd`, баланс-сценарий |
+| `CampaignBuildingPlacement` | куда вообще можно поставить здание: клетки города из колец (`ArenaRingSystem.ARENA_CENTER` + `CITY_RING_MAX`), соседние модификаторы, `CityCheck` с причиной | `ui/campaign_city_board.gd`, `ui/city_screen.gd`, `economy/economic_turn_processor.gd`, `city/campaign_building_merger.gd` |
+| `CampaignBuildingConstructionService` | заявка на стройку одним вызовом: `explain_request` (каталог → размещение → прогрессия) → списание ресурсов транзакцией с поток-тегом `construction:<id>` → экземпляр здания в очереди или сразу активный; отказа без причины не бывает | `ui/city_screen.gd` (кнопка стройки), баланс-сценарий |
+| `CampaignConstructionProcessor` | фазовый процессор кампанийной стройки (`&"campaign_construction"`, приоритет 9): двигает очередь, доводит завершённые | `campaign/campaign_composition.gd:318` — вызывает `process(ctx)` **напрямую**, не через планировщик |
+| `ProsperitySystem` | пересчёт благосостояния города: база + еда − голод + промышленность + вклад зданий | `city/processors/prosperity_processor.gd`, `city/processors/level_up_processor.gd`, `ui/city_screen.gd` |
+| `ReputationSystem` | репутация и её полосы (`REBELLION … GOLDEN_AGE`); проверка лидерства через `systems/leadership_check.gd` | `city/raid_system.gd`, `city/city_events.gd`, процессоры благосостояния, `ui/city_screen.gd` |
+| `ZoningSystem` | можно ли повесить зону на клетку; причины — живым текстом в `CityCheck`: «Центр города недоступен для застройки», «Производство — не ближе N клеток от центра», «Требуется специальная площадка», «Неизвестный тип зоны» | `city/processors/zoning_processor.gd` |
+| `ScaleShiftManager` | полоска масштаба по населению (`SCALE_TIERS` → «Селение/Деревня/Город/Метрополия») | `city/processors/scale_processor.gd` |
+| `ArenaTurnRunner` | демо-прогон города без игрока: кольцо, кластеры, шторм, экономика, городской процессор — по оборотам | `world/city_arena_view.gd` (сцена `scenes/city_arena.tscn`, вход из главного меню) |
+| `ArenaDemoScenario` | функция оценки для этого прогона: золото, промышленность, благосостояние, уровень, население, запас еды минус дни голода | `world/city_arena_view.gd`, тюнер `build/tune_city_arena.gd` |
+
+### Ядро `scripts/core/`
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `TurnPhaseProcessor` | базовый класс фазы: `get_phase_id()`, `get_priority()`, `process(ctx) → Dictionary` | наследники в `city/processors/` и `economy/`; контракт — тип в сигнатурах планировщика |
+| `TurnContext` | контекст оборота: номер хода, дата, сезон, погода, флаг кампании, словарь-перехватчик между фазами | планировщик, `city/city_turn_processor.gd`, экономические процессоры |
+| `TurnScheduler` | порядок фаз по приоритету, сигналы `turn_started`/`phase_completed`/`turn_completed` | мировой путь — `world/world_bootstrap.gd:362`; баланс-разбор — `balance/campaign_city_balance_scenario.gd:84`. Кампанийный ход им **не** пользуется (см. ниже) |
+| `HexUtils` | осевые координаты гексов: соседи по чётности, расстояния, ядро и кольца, конверсии в экранные координаты | `ui/campaign_city_board.gd`, `ui/marker_layer.gd`, `autoload/battle_emulator.gd`, роли пробника, городской цикл — всего 57 файлов ссылаются на него или на путь `preload` |
+| `BattleRules` | разрешение боя по лестнице перевеса (02d v1.2 §3.2, K2): кубиков нет, исход = эффективная атака − эффективная защита, Удача сдвигает пороги зон; полностью детерминировано | `systems/battle_attack_sequence.gd`, `systems/battle_action_resolver.gd`, `systems/battle_input.gd`, `ui/battle_ui.gd` |
+| `BattleFX` | эффекты поля боя: каст, попадание, смерть — рисует поверх `BattleView` | `systems/battle_controller.gd` (`setup(view)`) |
+| `GameLogger` | цветной лог с ровной колонкой тегов (`TAG_WIDTH`); в headless тег печатается без color-разметки, чтобы не засорять вывод тестов | `autoload/settings.gd`, `autoload/spellbook_registry.gd`, `autoload/template_bootstrap.gd`, `ui/save_load_screen.gd`, `ui/artifact_chest_dialog.gd` |
+| `Platform` | три вопроса про окружение: headless ли, автоквита ли, тестовый ли прогон | только через `preload`-алиас `_Platform`: `autoload/settings.gd`, `autoload/sound_manager.gd`, `entities/hero_controller.gd`, `core/game_logger.gd`, `world/world_controller.gd` |
+| `SaveData` | форма сейва: `CURRENT_VERSION = 10`, версия генератора карты (`CURRENT_GENERATOR_VERSION = 2` — старые сейвы играют старым правилом, добыча не теряется), сериализация секций | `world/world_save_load_service.gd`, `ui/main_menu.gd`, `ui/save_load_screen.gd`, `world/map_spawner.gd` |
+
+**Планировщик — не общий.** Кампанийный ход (тот, что двигает кнопка HUD) идёт
+через `TurnDriver` и `CampaignComposition`, а городской цикл мирового режима —
+через `TurnScheduler`. Один и тот же процессор стройки исполняют оба: мировой путь
+регистрирует его в планировщике, кампанийный вызывает `process(ctx)` напрямую
+(`campaign/campaign_composition.gd:318`, комментарий там же называет это
+сознательным). Пока это держится на одном процессе, расхождение не видно; оно
+виднó будет в тот день, когда процессор начнёт читать что-то, кроме `ctx`.
+
+**`Platform` не находится грепом по имени.** Все пять потребителей берут его
+строкой `const _Platform = preload("res://scripts/core/platform.gd")`, и в
+тексте файла слова `Platform` нет вообще. Это тот же урок, что и с `CanonClasses`
+в §3б: греп по имени класса находит соседей, а не вызовы, и «никого не зовёт»
+после одного грепа — не вывод, а недоказанное утверждение.
+
 ## 4. Событийная шина `GameEventBus`
 
 38 сигналов (все — `scripts/autoload/game_event_bus.gd`), по группам:
