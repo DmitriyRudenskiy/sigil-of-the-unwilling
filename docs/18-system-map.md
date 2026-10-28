@@ -151,7 +151,7 @@ preload пишет `_Classes = preload("…/canon_classes.gd")`, и по име�
 | `RaceEconomy` | `race_economy.gd` | 7 расовых экономических профилей из `assets/data/race_economy.json`; хуки production/synergy/conflict/needs; анти-имба: `best_production_mult` берёт **максимум**, а не сумму нескольких рас в здании | `economy/economic_turn_processor.gd`, `world/city_service.gd` |
 | `ResourceType` | `resource_type.gd` | `enum ID` ресурсов (WOOD…GOLD и далее) + `all_ids()`, `classic_ids()`, `is_valid(id)`, имена и количества подбора (`pickup_amount`) | `ui/resource_bar.gd`, `ui/resources_panel.gd`, `autoload/resource_registry.gd`, `economy/economic_turn_processor.gd`, `entities/resource_node.gd` |
 | `ResourceAtlas` | `resource_atlas.gd` | ASSET-1: иконка ресурса — свой файл 32×32 `assets/ui/icons/resources/icon_resource_<id>.png`, продукт `tools/gen_resource_icons.py` по формуле art-bible §7.1; в классе только кэш `load()` и `TYPE_TO_ID` (порядок = `ResourceType.ID`). До ASSET-1 здесь кроили чужую ячейку HoMM III (102 px, 4×4) | `ui/city_screen.gd`, `ui/resources_panel.gd`, `theme/IconRegistry.gd`, `entities/resource_node.gd`, `core/static_caches.gd`, `world/world_spawner.gd` |
-| `ResourceIcons` | `resource_icons.gd` | предшественник: `DATA` по `ResourceType.ID`, но все семь полей `texture` — пустые строки, то есть `get_texture()` возвращает null всегда; живой смысл класса — `res_type_id`/`res_type_amount` (обёртки над `ResourceType`). Расхождение со слоем иконок — T-284 | `ui/resource_collect_popup.gd` (там же заглушка `PlaceholderTexture.circle`), `probe/ScenarioPilot.gd`, `probe/balance_probe.gd`, `core/static_caches.gd` |
+| `ResourceIcons` | `resource_icons.gd` | фасад над `ResourceType` и `ThemeConfig`: `res_type_id`/`res_type_amount` (обёртки подбора), `get_color`, кэш реестра ресурсов. `get_texture()` **для классических 7 возвращает null намеренно** — ветка унаследована из времени, когда своих иконок не было («классические — null: попап рисует кружок из get_color»), и закреплена тестами; для остальных id делегирует `ResourceAtlas`. `DATA` с семью пустыми `texture` — остаток прежнего носителя иконок. Предпосылка ветки умерла в ASSET-1 (`aaa2a4aa`, 2026-10-14): свои `icon_resource_wood…gold.png` лежат в репо, и `tests/unit/assets/test_resource_icons_asset1.gd` требует, что они грузятся. Открытый вопрос — T-284 | `ui/resource_collect_popup.gd` (на null рисует `PlaceholderTexture.circle`), `probe/ScenarioPilot.gd`, `probe/balance_probe.gd`, `core/static_caches.gd` |
 | `ScenarioTargets` | `scenario_targets.gd` | const-таблица целей автопилота (D3 autopilot-scenario-matrix): `ROLES` (collector/traveler/builder/survival/adventurer) с `max_turns` и целями, `role_ids()`, `survival_seeds()`; калибровка — правкой этих чисел по отчётам, не кодом. Не игровой контент | `probe/ScenarioPilot.gd`, `tools/matrix_report.gd`, `tools/survival_report.gd` |
 | `Signs` | `signs.gd` | каталог 8 Знаков (T-002, docs/02c-signs.md, финальная редакция автора 2026-09-30, имена и девизы verbatim); выбор 1 из 8 на всю игру, Престиж косметический; числа и имена живут только в `data/signs.json` (K-M15) — здесь `all()`, `ids()`, `by_id()` | `ui/sign_choice_ui.gd`, `campaign/campaign_composition.gd` |
 | `StatusEffects` | `status_effects.gd` | `enum Effect` из 13 эффектов (HASTE…BLIND) и классификаторы `is_debuff`, `is_stun`, `get_name` | `autoload/spell_registry.gd`, `systems/battle_turn_executor.gd`, `core/battle_fx.gd` |
@@ -160,12 +160,20 @@ preload пишет `_Classes = preload("…/canon_classes.gd")`, и по име�
 | `TemplateEngine` | `template_engine.gd` | реестр обработчиков шаблонов: `register_handler(template, handler)`, `execute`, `reset`; 19 обработчиков `data/templates/T01…T19` регистрирует autoload `TemplateBootstrap` | `autoload/template_bootstrap.gd` |
 | `SpellResolver` | `spell_resolver.gd` | **старый фасад разрешения заклинаний: в production не вызывается никем.** Замер: `grep -rn` по имени и по пути preload — вызовы только в `tests/unit/data/test_spell_system.gd`. Живой путь боя — `SpellCaster.cast()` из `systems/battle_action_resolver.gd` и `autoload/battle_emulator.gd` | тесты: `tests/unit/data/test_spell_system.gd` (писатель без читателя — T-283) |
 
-**Что разбор делает видимым.** В слое два писателя без читателя нового вида: у
-`SpellResolver` читатель только в тесте (T-283); у `ResourceIcons` читатель есть,
-но читает он пустую таблицу, и попап сбора ресурса поэтому всегда рисует
-заглушку, хотя тот же ресурс уже нарисован настоящим рядом через `ResourceAtlas`
-(T-284). Оба случая — не «дописать строчку», а сведение на канонического
-носителя.
+**Что разбор делает видимым.** Он поймал и собственную ошибку: первая версия
+этой таблицы утверждала, что `get_texture()` возвращает null всегда, — вывод по
+пустой таблице `DATA`, сделанный до того, как дочитан метод. На деле у null-ветки
+есть авторское обоснование, а потеряно оно было не эволюцией кода, а правкой
+`520a5ae8` (2026-09-09, «strip all comments from scripts/ and tests/»), которая
+срезала единственную строку, объяснявшую ветку. Дальше сработали тесты: они
+закрепили поведение, и следующий читатель уже не отличает «так задумано» от
+«так вышло». Отсюда правило слоя: **обоснование ветки живёт в коде или в тикете,
+но не в памяти автора**; T-284 — именно про то, что ASSET-1 сделал прежний
+вердикт устаревшим, а отменить его никто не сел.
+
+Настоящий писатель без читателя в слое один: `SpellResolver` (T-283) — его не
+зовёт никто, кроме теста.
+
 
 ## 4. Событийная шина `GameEventBus`
 

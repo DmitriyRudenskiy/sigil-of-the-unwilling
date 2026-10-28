@@ -26,6 +26,13 @@ static func _entry_for(resource_id: StringName) -> Dictionary:
 	return DATA.get(_RT.from_name(resource_id), {})
 
 static func get_texture(resource_id: StringName) -> Texture2D:
+	# Ветка не промах, а унаследованное решение (его комментарий срезан `520a5ae8`,
+	# 2026-09-09, «strip all comments»): «классические — null: попап рисует кружок
+	# из get_color; теренные ресурсы — фолбэк в спрайт-лист». Поведение закреплено
+	# тестами (tests/functional/test_resource_collect_popup.gd, test_perf_resource_icons.gd).
+	# Предпосылка ветки устарела: ASSET-1 (`aaa2a4aa`, 2026-10-14) нарисовал
+	# классическим ресурсам свои icon_resource_*.png. Открытый вопрос (а)/(б) — T-284;
+	# менять ветку молча нельзя, сначала акт.
 	var entry := _entry_for(resource_id)
 	var path: String = str(entry.get("texture", ""))
 	if path != "" and ResourceLoader.exists(path):

@@ -1,0 +1,51 @@
+# гейт локальный — сводка T-279 (сводка 3) + комментарий к ветке ResourceIcons
+# команда: ./run_tests.sh (game/), дата 2026-10-29, машина шарится
+# пометка: local (head_sha до коммита = 7b4cf7d3)
+
+## GdUnit4 (headless)
+Overall Summary: 3587 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+LINT: SKIPPED (нет gdtoolkit у python3 или нет .gdlintrc в game/) — жёлтый уровень, не падение
+
+## MCP e2e (pytest + godot-mcp, Xvfb поднимал гейт)
+1 failed, 108 passed, 2 skipped in 463.39s (0:07:43)
+PYTEST LEDGER: passed=108 skipped=2 failed=1 errors=0 collected=111
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://...
+MCP JUNIT: passed=108 skipped=2 failed=1 errors=0
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за): среда, не регрессия (D-265)
+  - test_disabled_reason_tooltip::test_disabled_button_tooltip_reaches_the_screen ::
+    godot_mcp.MCPError: игра не готова за 180 с (game_eval: Not connected to game interaction server.)
+MCP VERDICT: YELLOW
+
+## Подпись среды в момент отказа (печатает сам T-172/T-281, не дописана задним числом)
+среда в момент отказа: mem_available=0MB из 47242MB swap_free=1383/20479MB load1=1.04
+  godot_procs=1(rss=171MB, state=S:1) psi_memory=some avg10=0.00 avg60=0.16 avg300=0.52
+порт: 127.0.0.1:9090 — порта нет (bind не случился)
+boot-трейс: файл трейса tmp/mcp_boot/boot_1635829_22.log пуст или не создан —
+  Godot не дошёл до автозагрузки McpInteractionServer (не стартовал/умер на старте)
+лог запуска: OpenGL API 4.5 (Core Profile) Mesa 25.2.8 — llvmpipe (LLVM 20.1.2, 256 bits)
+
+## Изолированный перезапуск жертвы (тот же файл, чистый порт и дисплей)
+DISPLAY=:97 GODOT_PATH=/home/user/.local/bin/godot MCP_PORT=9097 \
+  python -m pytest tests/mcp/test_disabled_reason_tooltip.py -q -rs --timeout=900
+→ 1 passed in 5.32s
+CAPTURED ~/.local/share/sigil-reserve/menu-tooltip-d252/menu_continue_hover.png (1920, 1080)
+
+## Состояние машины во время прогона (замер free -m, второй прогон)
+Память: 47241 всего | 46545 занято | 696 доступно — 98.5% занято чужими процессами;
+чужие процессы не трогались (протокол зависших процессов), Xvfb :97 поднимался свой и
+снят своим же PID.
+
+## Док-гейты того же среза
+DOC GATES: GREEN; тесты проверщиков 107 passed; OPENSPEC 87 сведённых спек;
+TESTMAP дыр 82, файлов в группах слияния 145, дублей 0;
+audit_docs_vs_code: не упоминается 0, файла нет 0, allowlist устарел 0, опись 85 = базлайн 85.
+
+## Вердикт
+GdUnit зелёный (3587/0/0), MCP — жёлтый по классификатору репозитория: единственный
+красный снят как readiness-среда (нулевой mem_available при старте Godot, пустой
+boot-трейс) и зелёный в изоляции за 5.32 с. Ослаблений проверок нет: ни один assertion
+не изменён, в диффе — комментарий к ветке `ResourceIcons.get_texture` и доки.
