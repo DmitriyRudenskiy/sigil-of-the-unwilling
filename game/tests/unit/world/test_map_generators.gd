@@ -282,6 +282,26 @@ func test_forest_density_and_type_agree() -> void:
 	assert_that(wrong).is_empty()
 
 
+func test_cluster_density_formula_holds_on_the_reachable_bounds() -> void:
+	# Единственные достижимые концы формулы плотности: одиночная клетка (кластер,
+	# у которого `clearings` съели всё, кроме центра) и растянутый кластер, где
+	# 1 − средняя_дистанция/√n уходит в минус и его прибивает нижним клампом.
+	var gen := MapForestGenerator.new(_flat(10, 10, 0.5, _Hex.Terrain.GRASS))
+	var one = MapForestGenerator.ForestCluster.new()
+	one.center = Vector2i(3, 3)
+	one.tiles = [Vector2i(3, 3)]
+	gen._calculate_density(one)
+	assert_that(one.density).is_equal(1.0)
+	assert_that(one.type).is_equal("dense")
+
+	var sprawl = MapForestGenerator.ForestCluster.new()
+	sprawl.center = Vector2i(0, 0)
+	sprawl.tiles = [Vector2i(0, 0), Vector2i(9, 0), Vector2i(0, 9)]
+	gen._calculate_density(sprawl)
+	assert_that(sprawl.density).is_equal(0.3)
+	assert_that(sprawl.type).is_equal("sparse")
+
+
 func test_forest_never_grows_on_water_or_rock() -> void:
 	var run: Dictionary = _pipeline(42)
 	var m: MapModel = run["model"]
