@@ -44,6 +44,9 @@ def world(tmp_path, monkeypatch):
     monkeypatch.setattr(audit, "GAME", game)
     monkeypatch.setattr(audit, "DOCS", docs)
     monkeypatch.setattr(audit, "_allowlist", lambda: set())
+    # Базлайн репозитория (146 имён) тестам неизвестен: пусть метрика стартует с нуля,
+    # иначе рост нельзя ни разогнать, ни проверить.
+    monkeypatch.setattr(audit, "_baseline", lambda: {"named_only_in_registries": 0})
     return tmp_path
 
 
@@ -114,3 +117,38 @@ def test_allowlist_entry_that_became_documented_is_stale(world, monkeypatch):
     res = audit.audit()
     assert res["allowlist_stale"] == ["ServiceHolder"], res
     assert audit.main_for() == 1
+
+
+def test_name_named_only_in_a_ticket_is_not_documented(world):
+    """Упоминание в TICKETS — не документация (T-278).
+
+    Аудит читал весь `docs/`, включая реестры и журналы, поэтому класс мог стать
+    «задокументированным» одним упоминанием в теле тикета: зелёный вместо носителя.
+    Такое имя не красится (реестр — не ложь), но попадает в отдельную опись.
+    """
+    _write_doc(world / "docs" / "map.md", "Services, camera_up, battle_ui.tscn, campaign.")
+    _write_doc(world / "docs" / "mvp" / "TICKETS.md",
+               "### T-9 · Про ServiceHolder\nносителю не место в тикете\n")
+    res = audit.audit()
+    assert res["undocumented"] == [], res
+    assert [r["name"] for r in res["named_only_in_registries"]] == ["ServiceHolder"], res
+
+
+def test_registry_only_count_is_a_ratchet(world, monkeypatch):
+    """Рост описи красен, стагнация — нет: 146 чужих имён вычищаются не этим срезом."""
+    _write_doc(world / "docs" / "map.md", "Services, camera_up, battle_ui.tscn, campaign.")
+    _write_doc(world / "docs" / "mvp" / "TICKETS.md", "ServiceHolder назван здесь и больше нигде.")
+    assert audit.main_for() == 1, "базлайн 0 и одно новое имя — гейт обязан краснеть"
+    monkeypatch.setattr(audit, "_baseline", lambda: {"named_only_in_registries": 1})
+    assert audit.main_for() == 0, "унаследованное имя не новый грех"
+
+
+def test_allowlist_entry_named_only_in_a_ticket_is_not_stale(world, monkeypatch):
+    """Allowlist чистится по живой заметке, иначе имя уходит из списка в никуда."""
+    _write_doc(world / "docs" / "map.md", "Services, camera_up, battle_ui.tscn, campaign.")
+    _write_doc(world / "docs" / "mvp" / "TICKETS.md", "ServiceHolder")
+    monkeypatch.setattr(audit, "_allowlist", lambda: {"ServiceHolder"})
+    res = audit.audit()
+    assert res["allowlist_stale"] == [], res
+    assert res["named_only_in_registries"] == [], res
+    assert audit.main_for() == 0

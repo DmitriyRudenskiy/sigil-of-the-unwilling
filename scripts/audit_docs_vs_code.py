@@ -82,6 +82,20 @@ def _allowlist() -> set[str]:
     return {ln.strip() for ln in f.read_text(encoding="utf-8").splitlines() if ln.strip() and not ln.startswith("#")}
 
 
+def _baseline() -> dict:
+    """Рэтчет метрик, которые нельзя обнулить одним срезом (тот же приём, что у gdd_gate)."""
+    f = pathlib.Path(__file__).with_suffix(".baseline.json")
+    try:
+        return json.loads(f.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _is_registry(doc: pathlib.Path) -> bool:
+    """Реестр/журнал: append-only история, а не описание игры."""
+    return str(doc.relative_to(ROOT)).startswith(REGISTRY_PREFIXES)
+
+
 def _facts() -> dict:
     return {
         "autoload": autoloads(),
@@ -131,28 +145,39 @@ def save_keys() -> list[str]:
 def audit() -> dict:
     """Собрать расхождения. Отдельно от печати — чтобы поведение тестировалось."""
     docs = _doc_texts()
+    # Реестры и журналы (TICKETS, матрицы прогонов, CHANGELOG) называют имена, но
+    # не описывают игру: «в TICKETS есть слово HeroLayout» — не документация, а
+    # следствие того, что кто-то заводил тикет. Такие имена уходят в отдельную
+    # опись и рэтчет, а не в «зелено» (T-278).
+    live = [(d, t) for d, t in docs if not _is_registry(d)]
     facts = _facts()
     strict_kinds = {"autoload", "input_action", "scene", "save_key"}
     allowlist = _allowlist()
     undocumented: list[dict] = []
+    registry_only: list[dict] = []
     stale: list[str] = []
     missing_in_code: list[dict] = []
     for kind, names in facts.items():
         for n in names:
             pat = re.compile(rf"\b{re.escape(n)}\b" + (r"(\.tscn)?" if kind == "scene" else ""))
-            hit = any(pat.search(t) for _, t in docs)
+            in_live = any(pat.search(t) for _, t in live)
             if kind not in strict_kinds and n in allowlist:
-                if hit:
+                # Устаревание allowlist решают только живые заметки: иначе имя
+                # «зачищается» из позора, которого в доках нет.
+                if in_live:
                     stale.append(n)
                 continue
-            if hit:
+            if in_live:
+                continue
+            if any(pat.search(t) for _, t in docs):
+                registry_only.append({"kind": kind, "name": n})
                 continue
             undocumented.append({"kind": kind, "name": n})
     ref_re = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*\.(?:gd|tscn))\b")
     existing = {q.name for q in GAME.rglob("*.gd")} | {q.name for q in GAME.rglob("*.tscn")}
     for doc, t in docs:
         rel = str(doc.relative_to(ROOT))
-        if rel.startswith(REGISTRY_PREFIXES):
+        if _is_registry(doc):
             # Реестры и логи — исторические акты: они вправе называть файлы,
             # удалённые позже; переписать их под текущий код = фальсификация.
             continue
@@ -166,6 +191,8 @@ def audit() -> dict:
     return {
         "facts": {k: len(v) for k, v in facts.items()},
         "undocumented": undocumented,
+        "named_only_in_registries": registry_only,
+        "baseline": _baseline(),
         "allowlist_stale": sorted(set(stale)),
         "doc_refs_absent_in_code": missing_in_code,
     }
@@ -175,6 +202,8 @@ def main_for() -> int:
     """Вердикт + печать. 0 — расхождений нет, 1 — есть (change docs-code-sync)."""
     res = audit()
     und, missing, stale = res["undocumented"], res["doc_refs_absent_in_code"], res["allowlist_stale"]
+    only = res["named_only_in_registries"]
+    base = int(res["baseline"].get("named_only_in_registries", 0))
     print("факты кода:", ", ".join(f"{k}={v}" for k, v in res["facts"].items()))
     print(f"\nЕСТЬ В КОДЕ, НЕ УПОМИНАЕТСЯ В ДОКАХ ({len(und)}):")
     for row in und:
@@ -186,7 +215,15 @@ def main_for() -> int:
         print(f"\nALLOWLIST УСТАРЕЛ, имена уже задокументированы, убери их ({len(stale)}):")
         for n in stale[:40]:
             print(f"  {n}")
-    bad = bool(missing) or bool(stale) or bool(und)
+    print(f"\nНАЗВАНО ТОЛЬКО В РЕЕСТРАХ И ЖУРНАЛАХ ({len(only)}), базлайн {base}:")
+    for row in only[:20]:
+        print(f"  [{row['kind']}] {row['name']}")
+    if len(only) > 20:
+        print(f"  … ещё {len(only) - 20}")
+    if len(only) > base:
+        print("  РАСТЁТ: новое имя по-прежнему не описано ни в одной живой заметке — "
+              "или задокументируй его, или назови в реестре осознанно и подними базлайн")
+    bad = bool(missing) or bool(stale) or bool(und) or len(only) > base
     return 1 if bad else 0
 
 
