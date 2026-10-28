@@ -28,11 +28,16 @@ run() { # run "<название>" <команда...>
 run "wikilinks, имена файлов, словарь статусов" "$PY" scripts/check_docs_links.py
 run "индекс документации не устарел" "$PY" scripts/gen_docs_index.py --check
 run "доки ↔ код (автолоады, сцены, классы, save-ключи)" "$PY" scripts/audit_docs_vs_code.py
+# Карта hero-экрана и таблица геометрии обязаны сверяться машиной, а не только
+# ux-review: GdUnit-тест не годится (res:// не читает docs/), поэтому сверщик
+# здесь (T-277).
+run "карта hero-экрана ↔ таблица BLOCKS (адреса, узлы, потребители)" "$PY" scripts/check_hero_layout_map.py
 run "контур фаз GDD (состояния, поля реестров, ratchet)" "$PY" scripts/gdd_gate.py
 
 TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 	scripts/test_classify_mcp_junit.py scripts/test_gdd_gate.py scripts/test_gdd_grounding.py
 	scripts/test_gen_map_art.py scripts/test_testmap.py
+	scripts/test_check_hero_layout_map.py
 	scripts/test_check_openspec_specs.py)
 # Отсутствующий файл списка — КРАСНЫЙ, а не «молча не досчитались»: ровно так список
 # и жил, пока в нём значился test_check_docs_links.py, которого никогда не было
