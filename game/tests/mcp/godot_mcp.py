@@ -50,6 +50,19 @@ def _mb(value: Any) -> str:
     return f"{value}MB" if value is not None else "не прочитано"
 
 
+def _kb_to_mb(mem: dict[str, int], key: str) -> int | None:
+    """КиБ → МБ без подмены «ноль» в «нет данных».
+
+    Прежний `round(kb / 1024) or None` сливал 0 КиБ и отсутствующий ключ в один
+    `None`, а отчёт печатал «не прочитано». Первый же прогон канала на машине с
+    `swap_free=403/20479MB` дал ровно эту строку на том самом номере, который и
+    решал гипотезу о нехватке памяти (T-172): «памяти ноль» — подозреваемый,
+    «памяти не видно» — слепое пятно канала.
+    """
+    kb = mem.get(key)
+    return None if kb is None else round(kb / 1024)
+
+
 def _read_text(path: str) -> str:
     try:
         return Path(path).read_text(encoding="utf-8", errors="replace")
@@ -163,9 +176,10 @@ def env_snapshot(
     for p in procs:
         states[p["state"]] = states.get(p["state"], 0) + 1
     return {
-        "mem_available_mb": round(mem.get("MemAvailable", 0) / 1024) or None,
-        "swap_free_mb": round(mem.get("SwapFree", 0) / 1024) or None,
-        "swap_total_mb": round(mem.get("SwapTotal", 0) / 1024) or None,
+        "mem_total_mb": _kb_to_mb(mem, "MemTotal"),
+        "mem_available_mb": _kb_to_mb(mem, "MemAvailable"),
+        "swap_free_mb": _kb_to_mb(mem, "SwapFree"),
+        "swap_total_mb": _kb_to_mb(mem, "SwapTotal"),
         "load1": read_loadavg(loadavg_path),
         "psi_memory": read_psi_some(psi_path) or None,
         "godot_processes": len(procs),
@@ -244,12 +258,13 @@ def readiness_evidence(
     snap = env_snapshot() if snapshot is None else snapshot
     return (
         "среда в момент отказа: "
-        f"mem_available={_mb(snap['mem_available_mb'])} "
+        f"mem_available={_mb(snap['mem_available_mb'])} из "
+        f"{_mb(snap.get('mem_total_mb'))} "
         f"swap_free={snap['swap_free_mb']}/{snap['swap_total_mb']}MB "
         f"load1={snap['load1']} godot_procs={snap['godot_processes']}"
         f"(rss={snap['godot_rss_mb']}MB, state={snap['godot_states']}) "
         f"psi_memory={snap['psi_memory']}\n"
-        f"  где стоит движок: {snap.get('godot_blockage') or 'неизвестно (нет /proc)'}\n"
+        f"  где стоит движок: {snap.get('godot_blockage') or 'ни одного Godot-процесса (или /proc недоступен)'}\n"
         f"  порт: {probe_listen(port)}\n"
         f"  boot-трейс: {boot_trace_tail(trace_path)}"
         f"\n  лог запуска: {launch_log_tail(launch_log)}"

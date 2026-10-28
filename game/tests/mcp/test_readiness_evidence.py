@@ -91,6 +91,7 @@ def test_meminfo_and_loadavg_parse_absent_files_as_none(tmp_path: Path) -> None:
 def test_env_snapshot_reads_memory_load_and_godot_processes(tmp_path: Path) -> None:
     snap = env_snapshot(**_fake_proc(tmp_path))
     assert snap["mem_available_mb"] == 3418          # 3 500 000 КиБ
+    assert snap["mem_total_mb"] == 46875             # 48 000 000 КиБ — масштаб «мало»
     assert snap["swap_free_mb"] == 7812              # 8 000 000 КиБ → 7812.5 → round
     assert snap["swap_total_mb"] == 18555
     assert snap["load1"] == 4.25
@@ -104,6 +105,31 @@ def test_env_snapshot_reads_memory_load_and_godot_processes(tmp_path: Path) -> N
     blockage = snap["godot_blockage"]
     assert "pid=111 R wchan=poll_schedule_timeout syscall=7 fd=5" in blockage
     assert "pid=444 D wchan=0 syscall=running fd=2" in blockage
+
+
+def test_zero_mem_available_is_not_rendered_as_unread(tmp_path: Path) -> None:
+    """«Памяти ноль» и «памяти не видно» — разные новости, и вторая была ложной.
+
+    Прогон гейта 2026-10-28 на машине с `swap_free=403/20479MB` напечатал
+    «mem_available=не прочитано» — при том что MemAvailable в /proc был и мог
+    быть нулевым. `round(kb / 1024) or None` терял ноль, и единственный номер,
+    способный подтвердить или снять гипотезу нехватки памяти (T-172, Q-M115),
+    превращался в слепое пятно.
+    """
+    src = _fake_proc(tmp_path)
+    (tmp_path / "meminfo").write_text(
+        "MemTotal: 19000000 kB\nMemAvailable: 0 kB\n"
+        "SwapTotal: 19000000 kB\nSwapFree: 0 kB\n",
+        encoding="utf-8",
+    )
+    snap = env_snapshot(**src)
+    assert snap["mem_available_mb"] == 0
+    assert snap["swap_free_mb"] == 0
+    text = readiness_evidence(snapshot=snap)
+    assert "mem_available=0MB" in text
+    assert "из 18555MB" in text
+    assert "не прочитано" not in text
+    assert "swap_free=0/18555MB" in text  # 19 000 000 КиБ = 18555 МБ, не 19000
 
 
 def test_godot_processes_ignores_processes_with_godot_in_path(tmp_path: Path) -> None:
@@ -125,6 +151,25 @@ def test_blockage_degrades_without_kernel_files(tmp_path: Path) -> None:
     by_pid = {p["pid"]: p for p in procs}
     assert (by_pid[444]["wchan"], by_pid[444]["syscall"], by_pid[444]["fds"]) == ("0", "running", 2)
     assert by_pid[111]["fds"] == 5
+
+
+def test_evidence_names_absent_godot_instead_of_blaming_proc() -> None:
+    """Строка «нет /proc» наврёт, если /proc на месте, а движок уже умер.
+
+    Readiness-отказ наступает и после завершения Godot; винить /proc — значит
+    отправить расследование искать примонтированный /proc вместо правды «никого
+    нет» (тот же класс лжи, что и «не прочитано» вместо нуля).
+    """
+    empty = {
+        "mem_available_mb": 1200, "mem_total_mb": 47242,
+        "swap_free_mb": 9000, "swap_total_mb": 20479,
+        "load1": 1.0, "psi_memory": None,
+        "godot_processes": 0, "godot_rss_mb": 0, "godot_states": None,
+        "godot_blockage": "",
+    }
+    text = readiness_evidence(snapshot=empty)
+    assert "ни одного Godot-процесса" in text
+    assert "нет /proc" not in text
 
 
 def test_boot_trace_tail_separates_missing_from_empty(tmp_path: Path) -> None:
@@ -173,13 +218,15 @@ def test_readiness_evidence_names_memory_and_trace(tmp_path: Path) -> None:
     trace = tmp_path / "boot.log"
     trace.write_text("12 pid=7 ready: enabled=true port=9090 debug=true\n", encoding="utf-8")
     snap = {
-        "mem_available_mb": 311, "swap_free_mb": 0, "swap_total_mb": 19000,
+        "mem_available_mb": 311, "mem_total_mb": 47242,
+        "swap_free_mb": 0, "swap_total_mb": 19000,
         "load1": 9.9, "psi_memory": "some avg10=88.00",
         "godot_processes": 2, "godot_rss_mb": 1563, "godot_states": "D:1,S:1",
         "godot_blockage": "pid=711 S wchan=poll_schedule_timeout syscall=7 fd=41",
     }
     text = readiness_evidence(str(trace), snapshot=snap)
     assert "mem_available=311MB" in text
+    assert "из 47242MB" in text, "без MemTotal «311MB» нераспознаваемо: мало это или много"
     assert "swap_free=0/19000MB" in text
     assert "godot_procs=2(rss=1563MB, state=D:1,S:1)" in text
     assert "где стоит движок: pid=711 S wchan=poll_schedule_timeout syscall=7 fd=41" in text

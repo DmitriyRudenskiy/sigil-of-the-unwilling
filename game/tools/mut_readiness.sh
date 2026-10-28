@@ -10,6 +10,7 @@
 #   3. `_trace()` ничего не пишет → отказ снова невидим.
 #   4. код ошибки listen не запоминается → «почему не поднялся» неизвестно.
 #   5. явная stop() не защищена от retry-цикла.
+#  10. «ноль» в снимке среды печатается как «не прочитано» (см. MUT10 ниже).
 set -u
 G="${GODOT_BIN:-$HOME/.local/bin/godot}"
 S=tools/mcp/mcp_interaction_server.gd
@@ -153,4 +154,23 @@ PYEOF
 victims="$(run_pytest_cases | sed -n 's/^FAILED tests\/mcp\/test_\([a-z_]*\)\.py::\([a-z_0-9]*\).*/\2/p' | sort -u | tr '\n' ' ')"
 if [ -z "$victims" ]; then echo "MUT9: SURVIVED (тесты зелёные — защита не покрыта)"
 else echo "MUT9: killed -> $victims"; fi
+cp /tmp/godot_mcp_readiness.bak "$H"
+
+# MUT10 — `round(kb / 1024) or None`: ноль доступной памяти сливается с отсутствием
+# данных, и отчёт печатает «не прочитано» ровно на том номере, который и решает
+# гипотезу «среда отняла память» (замер гейта 2026-10-28: swap_free=403/20479MB).
+cp /tmp/godot_mcp_readiness.bak "$H"
+python3 - "$H" <<'PYEOF'
+import sys
+from pathlib import Path
+p = Path(sys.argv[1])
+s = p.read_text()
+old = '    kb = mem.get(key)\n    return None if kb is None else round(kb / 1024)'
+assert s.count(old) == 1, s.count(old)
+s = s.replace(old, '    return round(mem.get(key, 0) / 1024) or None', 1)
+p.write_text(s)
+PYEOF
+victims="$(run_pytest_cases | sed -n 's/^FAILED tests\/mcp\/test_\([a-z_]*\)\.py::\([a-z_0-9]*\).*/\2/p' | sort -u | tr '\n' ' ')"
+if [ -z "$victims" ]; then echo "MUT10: SURVIVED (тесты зелёные — защита не покрыта)"
+else echo "MUT10: killed -> $victims"; fi
 cp /tmp/godot_mcp_readiness.bak "$H"
