@@ -47,6 +47,27 @@ EXCLUDED_PREFIXES = (
 _FUNC_RE = re.compile(r"^func\s+(test_\w+)\s*\(", re.M)
 _CLASS_RE = re.compile(r"^class_name\s+(\w+)", re.M)
 _COMMENT_RE = re.compile(r"#.*")
+_AUTOLOAD_RE = re.compile(r'^(\w+)="\*?(res://[^"]+)"', re.M)
+
+
+def autoload_names() -> dict[str, str]:
+    """`res://…` → имя синглтона из `[autoload]` `project.godot`.
+
+    У автозагрузок без `class_name` это имя — единственное, чем тест может их
+    назвать: `PauseController.acquire()` не содержит ни `res://…/pause_controller.gd`,
+    ни `class_name`. Без этого правила такие носители оставались бы вечными
+    «дырами», а гонка за зелёным рэтчетом толкала бы дописывать `class_name` ради
+    метрики.
+    """
+    pg = GAME / "project.godot"
+    if not pg.exists():
+        return {}
+    text = pg.read_text(encoding="utf-8", errors="ignore")
+    m = re.search(r"^\[autoload\]\n(.*?)(?=^\[|\Z)", text, re.M | re.S)
+    if not m:
+        return {}
+    return {path: name for name, path in _AUTOLOAD_RE.findall(m.group(1))}
+
 
 
 def _read(p: pathlib.Path) -> str:
@@ -79,7 +100,7 @@ def is_excluded(p: pathlib.Path) -> bool:
     return any(rel.startswith(x) for x in EXCLUDED_PREFIXES)
 
 
-def _patterns(cname: str | None, stem: str) -> list[re.Pattern]:
+def _patterns(cname: str | None, stem: str, aname: str | None = None) -> list[re.Pattern]:
     pats = [
         r"res://scripts/[\w/.]*" + re.escape(stem) + r"\.gd",
         r"res://scenes/[\w/.]*" + re.escape(stem) + r"\.tscn",
@@ -87,17 +108,25 @@ def _patterns(cname: str | None, stem: str) -> list[re.Pattern]:
     ]
     if cname:
         pats.append(r"\b" + re.escape(cname) + r"\b")
+    if aname:
+        pats.append(r"\b" + re.escape(aname) + r"\b")
     return [re.compile(x) for x in pats]
+
+
+def _carrier_patterns(p: pathlib.Path, autoloads: dict[str, str]) -> list[re.Pattern]:
+    t = _read(p)
+    m = _CLASS_RE.search(t)
+    rel = "res://" + p.relative_to(GAME).as_posix()
+    return _patterns(m.group(1) if m else None, p.stem, autoloads.get(rel))
 
 
 def coverage() -> dict:
     """Сколько production-носителей названы тестами; дыры считаются без исключений."""
     prods = production_files()
+    autoloads = autoload_names()
     pats = {}
     for p in prods:
-        t = _read(p)
-        m = _CLASS_RE.search(t)
-        pats[p] = _patterns(m.group(1) if m else None, p.stem)
+        pats[p] = _carrier_patterns(p, autoloads)
     corpus = "\n".join(_read(p) for p in TESTS.rglob("*.gd"))
     corpus += "\n".join(_read(p) for p in TESTS.rglob("*.py"))
     holes, covered = [], 0

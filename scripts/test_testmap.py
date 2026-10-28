@@ -49,6 +49,28 @@ def test_coverage_finds_holes_and_skips_service_paths(monkeypatch, tmp_path):
     assert cov["production_files"] == 3
 
 
+def test_autoload_singleton_is_named_by_its_registered_name(monkeypatch, tmp_path):
+    """У автозагрузки без `class_name` имя из `project.godot` — единственное, чем её
+    может назвать тест: `HexGrid.shift_right()` не содержит ни `res://…/hex_grid.gd`,
+    ни `class_name`. Без этого правила четыре синглтона выглядели вечно открытыми
+    дырами (T-227 С-5)."""
+    game = _mk(tmp_path, {
+        "game/project.godot":
+            '[application]\nconfig/name="x"\n\n[autoload]\n\n'
+            'HexGrid="*res://scripts/autoload/hex_grid.gd"\n'
+            'CursorController="*res://scripts/autoload/cursor_controller.gd"\n'
+            '\n[rendering]\n',
+        "game/scripts/autoload/hex_grid.gd": "extends Node\nfunc shift_right() -> void:\n\tpass\n",
+        "game/scripts/autoload/cursor_controller.gd": "extends Node\nfunc f() -> void:\n\tpass\n",
+        "game/tests/unit/core/test_static_caches.gd":
+            "extends BaseTest\nfunc test_grid() -> void:\n\tHexGrid.shift_right()\n",
+    })
+    _patch(monkeypatch, game)
+    cov = tm.coverage()
+    assert tm.autoload_names()["res://scripts/autoload/hex_grid.gd"] == "HexGrid"
+    assert cov["holes"] == ["scripts/autoload/cursor_controller.gd"]
+
+
 def test_merge_group_needs_three_files_and_the_most_specific_carrier(monkeypatch, tmp_path):
     files = {
         "game/scripts/world/foo.gd": "func x() -> void:\n\tpass\n",
