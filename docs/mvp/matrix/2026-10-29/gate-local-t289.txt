@@ -1,0 +1,21 @@
+# гейт — T-289 (GEN_PY: перебор кандидатов вместо «python3»)
+# команда: SKIP_GDUNIT=1 bash game/run_tests.sh, локально 2026-10-29, exit снят явно (`echo $?`)
+# GdUnit-стадия пропущена намеренно (SKIP_GDUNIT=1, D-166-семья: правка только в python-секции
+# раннера); тот же свит зелёным прошёл полным прогоном получасом ранее — gate-local-t285.txt.
+# До правки уровень печатал «GENART: SKIPPED (нет pytest или PIL в python3)» и не запускался.
+
+PYTEST LEDGER: passed=109 skipped=2 failed=0 errors=0 collected=111
+MCP JUNIT: passed=109 skipped=2 failed=0 errors=0
+MCP VERDICT: GREEN
+GENART: интерпретатор /home/user/.venv/map-art/bin/python
+11 passed in 2.36s
+READINESS-CLASSIFIER: selftest GREEN
+EXIT=0
+
+# дельта линтера по T-285 (gdtoolkit, адхок /tmp/gdlint_probe):
+#   до: 49 находок | после: 49 | правила идентичны
+#        29 (class-definitions-order)
+#         1 (function-variable-name)
+#         4 (load-constant-name)
+#        13 (max-line-length)
+#         2 (max-public-methods)

@@ -356,12 +356,26 @@ fi
 # и кратность MAP_FOG_DIM проверялись бы только руками. Секция не молчит: нет pytest/PIL —
 # явная строка SKIPPED (конвенция MCP-секции).
 echo "=== python: генератор арта карты (scripts/test_gen_map_art.py) ==="
-GEN_PY="${GEN_PY:-python3}"
-if "$GEN_PY" -c 'import pytest, PIL' 2>/dev/null; then
+# T-289 (D-166-семья): уровень желтел на этой машине, хотя интерпретатор с pytest+PIL
+# установлен — `/home/user/.venv/map-art` (замер 2026-10-29: pytest 9.1.1, PIL 13.0.0,
+# 11 тестов уровня проходят за 2.3 с). Проверка `import pytest, PIL` отвечала честно
+# про не тот интерпретатор: дефолт был `python3`. Перебираем кандидатов и ПЕЧАТАЕМ
+# выбранного — жёлтый обязан называть причину, а не прикрываться дефолтом.
+GEN_CANDIDATES=("${GEN_PY:-}" "/home/user/.venv/map-art/bin/python" "python3")
+GEN_PY=""
+for gen_cand in "${GEN_CANDIDATES[@]}"; do
+	[ -n "$gen_cand" ] || continue
+	if "$gen_cand" -c 'import pytest, PIL' 2>/dev/null; then
+		GEN_PY="$gen_cand"
+		break
+	fi
+done
+if [ -n "$GEN_PY" ]; then
+	echo "GENART: интерпретатор $GEN_PY"
 	"$GEN_PY" -m pytest ../scripts/test_gen_map_art.py -q --tb=short 2>&1 | tail -5
 	[ "${PIPESTATUS[0]}" -ne 0 ] && MCP_RC=1
 else
-	echo "GENART: SKIPPED (нет pytest или PIL в $GEN_PY — pip install pytest pillow)"
+	echo "GENART: SKIPPED (ни один кандидат не импортирует pytest+PIL: ${GEN_CANDIDATES[*]} — pip install pytest pillow)"
 fi
 
 # Сами-тест классификатора (D-265): тот решает, что считать жёлтым, и обязан краснеть сам,
