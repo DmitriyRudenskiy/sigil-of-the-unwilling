@@ -343,3 +343,22 @@ def test_new_duplicate_ticket_reds_the_ratchet(world, capsys, monkeypatch):
     monkeypatch.setattr("sys.argv", ["gdd_gate.py"])
     assert gate.main() == 1
     assert "t_duplicate_headers" in capsys.readouterr().out
+
+
+def test_two_status_footers_in_one_ticket_are_measured(world):
+    """Два футера `Зависит … Статус` в одном тикете = один лишние «статус» (T-292).
+
+    Так выглядит закрытие, дописанное новым футером поверх прежнего: в блоке
+    живёт и «открыт», и «закрыт», а счётчик открытых тикетов врёт.
+    """
+    docs, _ = world
+    (docs / "mvp" / "TICKETS.md").write_text(
+        "### T-5 · тикет\n\nТело.\n\n"
+        "**Зависит:** нет · **Блокирует:** нет · **Владелец:** агент · **Статус:** открыт\n\n"
+        "Позже: закрыто.\n\n"
+        "**Зависит:** нет · **Блокирует:** нет · **Владелец:** агент · **Статус:** закрыт\n\n"
+        "### T-6 · порядок\n\nОдин футер.\n\n"
+        "**Зависит:** нет · **Блокирует:** нет · **Владелец:** агент · **Статус:** открыт\n",
+        encoding="utf-8")
+    assert gate.t_multi_footer() == 1
+    assert gate.measure()["t_multi_footer"] == 1

@@ -30,8 +30,12 @@
    `blocked-on: D-xxx` — иначе связь «ждёт решения» теряется.
 10. Номер тикета в `docs/mvp/TICKETS.md` принадлежит одной записи: заголовок
     `T-###` встречается один раз. Метрика считается по **лишним** заголовкам
-    (на 2026-10-29: 213 заголовка − 206 номеров = 7 лишних, шесть номеров живут
-    по два-три заголовка); старые коллизии — базлайн, новые красят прогон. Номера вопросов сюда не входят: там две строки под одним
+    (на 2026-10-29: 215 заголовков − 208 номеров = 7 лишних, шесть номеров живут
+    по два-три заголовка; замер снят после регистрации тикетов T-290/T-291,
+    которые сами добавили по заголовку); старые коллизии — базлайн, новые красят
+    прогон.
+    Там же — число тикетов с двумя футерами `Статус` (`t_multi_footer`, T-292):
+    закрытие дописывали новым футером, прежний оставался «открыт». Номера вопросов сюда не входят: там две строки под одним
     номером — документированный приём (ре-опен, «технический дубль», п. 8).
 
 Выход: 0 — зелено, 1 — нарушения, 2 — базлайн отсутствует/битый.
@@ -56,7 +60,7 @@ PRIO_RE = "🔴|🟡|🟢"
 
 BACKLOG_KEYS = ("q_without_type", "q_without_priority", "d_without_rejected",
                 "risks_without_number", "dead_paths", "q_ghost_rows",
-                "t_duplicate_headers")
+                "t_duplicate_headers", "t_multi_footer")
 
 
 def strip_code(line: str) -> str:
@@ -111,6 +115,18 @@ def risk_rows() -> list[str]:
     return rows
 
 
+TICKET_SPLIT = r"(?m)^(?=#{2,4} (?:Тикет )?T-\d+(?:[ ·.]|$))"
+
+
+def ticket_sections() -> list[str]:
+    """Реестр, нарезанный по заголовкам тикетов (по одному заголовку на кусок)."""
+    f = DOCS / "mvp" / "TICKETS.md"
+    if not f.exists():
+        return []
+    return [s for s in re.split(TICKET_SPLIT, f.read_text(encoding="utf-8"))
+            if re.match(r"^#{2,4} ", s)]
+
+
 def ticket_headers() -> list[str]:
     """Заголовки тикетов реестра, в обеих исторических формах.
 
@@ -122,11 +138,8 @@ def ticket_headers() -> list[str]:
     вместо настоящих 7 — ровно тот класс ошибки, из-за которого D-224 перенумеровывал
     реестры вручную.
     """
-    f = DOCS / "mvp" / "TICKETS.md"
-    if not f.exists():
-        return []
-    return re.findall(r"(?m)^#{2,4} (?:Тикет )?(T-\d+)(?:[ ·.]|$)",
-                      f.read_text(encoding="utf-8"))
+    return [re.match(r"^#{2,4} (?:Тикет )?(T-\d+)", s).group(1)
+            for s in ticket_sections()]
 
 
 def t_duplicate_headers() -> int:
@@ -138,6 +151,18 @@ def t_duplicate_headers() -> int:
     """
     h = ticket_headers()
     return len(h) - len(set(h))
+
+
+def t_multi_footer() -> int:
+    """Сколько тикетов несут два футера `Зависит … Статус` (T-292).
+
+    Закрывая тикет, агенты дописывали новый футер, не убирая прежний, и в одном
+    блоке оказывалось «открыт» и «закрыт» подряд. Это тот же класс, что и
+    строки-призраки в реестре вопросов (п. 8): счётчик открытых тикетов врёт,
+    а «тикет открыт» перестаёт быть утверждением.
+    """
+    return sum(1 for s in ticket_sections()
+               if len(re.findall(r"(?m)^\*\*Зависит:\*\*.*?\*\*Статус:\*\*[^\n]*", s)) > 1)
 
 
 def measure() -> dict[str, int]:
@@ -152,6 +177,7 @@ def measure() -> dict[str, int]:
         "dead_paths": len(dead_paths()),
         "q_ghost_rows": ghost_rows(),
         "t_duplicate_headers": t_duplicate_headers(),
+        "t_multi_footer": t_multi_footer(),
     }
 
 

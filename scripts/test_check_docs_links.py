@@ -106,3 +106,33 @@ def test_bank_zone_is_excluded(vault):
         "---\ntitle: Банк\nstatus: kakoj-to\n---\n\n[[09-net-chto-takogo]]\n", encoding="utf-8")
     files = chk.doc_files()
     assert not any("/bank/" in p for p in files)
+
+
+def test_cjk_in_docs_is_reported(tmp_path, capsys):
+    """Иероглиф в доке — красный: это смесь раскладки, а не содержание (T-293)."""
+    d = tmp_path / "docs"
+    d.mkdir()
+    (d / "01-x.md").write_text("---\ntitle: X\nstatus: draft\n---\n\n任何人ый счётчик\n",
+                               encoding="utf-8")
+    files = [str(d / "01-x.md")]
+    bad = chk.check_cjk(files)
+    assert len(bad) == 1 and bad[0][0] == "01-x.md" and bad[0][2] == "任"
+    assert bad[0][1] == 6  # номер строки: отчёт обязан указывать на место, а не на файл
+
+
+def test_cjk_inside_inline_code_is_still_red(tmp_path):
+    """Иероглиф в бэктиках красит так же: исключение для «примера» = дыра правила."""
+    d = tmp_path / "docs"
+    d.mkdir()
+    f = d / "03-z.md"
+    f.write_text("---\ntitle: Z\nstatus: draft\n---\n\nпример: `任意`\n", encoding="utf-8")
+    assert len(chk.check_cjk([str(f)])) == 1
+
+
+def test_cyrillic_and_latin_are_not_cjk(tmp_path):
+    d = tmp_path / "docs"
+    d.mkdir()
+    f = d / "02-y.md"
+    f.write_text("---\ntitle: Y\nstatus: draft\n---\n\nобычный текст с Latin и `code`\n",
+                 encoding="utf-8")
+    assert chk.check_cjk([str(f)]) == []

@@ -150,6 +150,34 @@ def check_statuses(files):
     return bad
 
 
+CJK_RE = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff"
+                    r"\uff01-\uff60\u3000-\u303f]")
+
+
+def check_cjk(files):
+    """CJK-иероглифы в доках — это опечатка набора, а не текст.
+
+    Русская строка, набранная на азиатской раскладке, даёт смесь, которую
+    человек читает как мусор, а кириллица+латиница-скан не ловит: 2026-10-29 в
+    CHANGELOG появился «任何人ый счётчик» вместо «любой». Тот же след найден в
+    `scripts/check_hero_layout_map.py` («几何рии») и в двух комментариях
+    `crisis_event_system.gd` (для них — T-293, доки чисты).
+    """
+    bad = []
+    for path in files:
+        if not path.endswith(".md") or os.path.basename(path) in ARCHIVE_LOGS:
+            continue
+        for n, line in enumerate(open(path, encoding="utf-8").read().splitlines(), 1):
+            # Без исключения для инлайн-кода (в отличие от `gdd_gate.strip_code`):
+            # правило, разрешающее вставить запрещённое в пример, очень быстро
+            # начинает разрешать себя само. Реестр описывает дефект словами —
+            # так и написано в T-293.
+            hit = CJK_RE.search(line)
+            if hit:
+                bad.append((os.path.basename(path), n, hit.group(0), line.strip()[:70]))
+    return bad
+
+
 def main():
     files = doc_files()
     sources = source_files(files)
@@ -176,6 +204,13 @@ def main():
         print("UNKNOWN FRONTMATTER STATUS:")
         for f, s in statuses:
             print(f"  {f}: status: {s} (allowed: {', '.join(sorted(ALLOWED_STATUSES))})")
+
+    cjk = check_cjk(files)
+    if cjk:
+        failed = True
+        print("CJK В ДОКАХ (смесь раскладки, читать как мусор):")
+        for f, n, ch, line in cjk:
+            print(f"  {f}:{n}: {ch} — {line}")
 
     races = check_races_table()
     if races:
