@@ -45,6 +45,11 @@ LOADAVG_PATH = "/proc/loadavg"
 PSI_MEMORY_PATH = "/proc/pressure/memory"
 
 
+def _mb(value: Any) -> str:
+    """Мегабайты в отчёте: «не прочитано» и «ноль» — разные новости, `NoneMB` — ни одна."""
+    return f"{value}MB" if value is not None else "не прочитано"
+
+
 def _read_text(path: str) -> str:
     try:
         return Path(path).read_text(encoding="utf-8", errors="replace")
@@ -112,8 +117,29 @@ def godot_processes(proc_root: str = "/proc", needle: str = "godot") -> list[dic
             elif line.startswith("State:"):
                 rest = line.split()[1:]
                 state = rest[0] if rest else "?"
-        out.append({"pid": int(pid), "exe": name, "rss_mb": round(rss_kb / 1024), "state": state})
+        out.append({"pid": int(pid), "exe": name, "rss_mb": round(rss_kb / 1024),
+                    "state": state, **_proc_blockage(proc_root, pid)})
     return out
+
+
+def _proc_blockage(proc_root: str, pid: str) -> dict[str, Any]:
+    """Где именно стоит процесс: точка блокировки в ядре, номер syscall, число fd.
+
+    Два замера отказа readiness (2026-10-28) сошлись на одном хвосте лога при
+    разной памяти (MemAvailable 23 MB и 1189 MB) и при процессе в состоянии `S`
+    с RSS ~170 MB: движок не крутил CPU и не тонул в подкачке — он ждал. Чем?
+    `wchan`+`syscall` отвечают: `0`/read — сокет X11, `202`/futex — внутреннее
+    ожидание, `7`/poll и `43`/accept — собственное listen(), т.е. игра уже
+    готова и виноват не старт (x86-64).
+    """
+    wchan = _read_text(f"{proc_root}/{pid}/wchan").strip().strip("\x00") or "?"
+    fields = _read_text(f"{proc_root}/{pid}/syscall").split()
+    syscall = fields[0] if fields else "?"
+    try:
+        fds = len(os.listdir(f"{proc_root}/{pid}/fd"))
+    except OSError:
+        fds = -1
+    return {"wchan": wchan, "syscall": syscall, "fds": fds}
 
 
 def _proc_exe_name(proc_root: str, pid: str) -> str:
@@ -145,6 +171,9 @@ def env_snapshot(
         "godot_processes": len(procs),
         "godot_rss_mb": sum(p["rss_mb"] for p in procs),
         "godot_states": ",".join(f"{k}:{v}" for k, v in sorted(states.items())) or None,
+        "godot_blockage": "; ".join(
+            f"pid={p['pid']} {p['state']} wchan={p['wchan']} syscall={p['syscall']} fd={p['fds']}"
+            for p in procs) or None,
     }
 
 
@@ -181,20 +210,48 @@ def launch_log_tail(log_path: str, lines: int = 12) -> str:
     return f"{len(body)} строк из {log_path}:\n    " + "\n    ".join(body)
 
 
+def probe_listen(port: int | None, host: str = "127.0.0.1", timeout: float = 1.0) -> str:
+    """Слушается ли порт и принимает ли игра соединение — различие, которого не хватало.
+
+    Три жертвы гейта 2026-10-28 дали boot-трейс `listen attempt=1 … err=0`: игра
+    **забиндилась**, но узел-сервер так и не получил соединения. Разница между
+    «порта нет» и «порт есть, а accept не случился» — это разница между «среда»
+    и «главный цикл игры не крутится», т.е. между жёлтым и красным вердиктом.
+    TCP-хендшейк доигрывает ядро (backlog), поэтому connect проходит и при
+    висящем цикле — отсюда честная формулировка «ядро приняло, игра — нет».
+    """
+    if not port:
+        return "не проверялся (порт не задан)"
+    try:
+        with socket.create_connection((host, int(port)), timeout=timeout):
+            return (
+                f"{host}:{port} — ядро приняло соединение, игра его не забрала "
+                "(главный цикл не крутится: accept вызывается из _process)"
+            )
+    except ConnectionRefusedError:
+        return f"{host}:{port} — порта нет (bind не случился)"
+    except OSError as exc:
+        return f"{host}:{port} — не проверено ({exc})"
+
+
 def readiness_evidence(
     trace_path: str = "",
     snapshot: dict[str, Any] | None = None,
     launch_log: str = "",
+    port: int | None = None,
 ) -> str:
     """Текст к исключению readiness: среда + шаги игры + лог движка."""
     snap = env_snapshot() if snapshot is None else snapshot
     return (
         "среда в момент отказа: "
-        f"mem_available={snap['mem_available_mb']}MB "
+        f"mem_available={_mb(snap['mem_available_mb'])} "
         f"swap_free={snap['swap_free_mb']}/{snap['swap_total_mb']}MB "
         f"load1={snap['load1']} godot_procs={snap['godot_processes']}"
         f"(rss={snap['godot_rss_mb']}MB, state={snap['godot_states']}) "
-        f"psi_memory={snap['psi_memory']}\n  boot-трейс: {boot_trace_tail(trace_path)}"
+        f"psi_memory={snap['psi_memory']}\n"
+        f"  где стоит движок: {snap.get('godot_blockage') or 'неизвестно (нет /proc)'}\n"
+        f"  порт: {probe_listen(port)}\n"
+        f"  boot-трейс: {boot_trace_tail(trace_path)}"
         f"\n  лог запуска: {launch_log_tail(launch_log)}"
     )
 
@@ -343,7 +400,7 @@ class GodotMCPClient:
             time.sleep(interval)
         raise MCPError(
             f"игра не готова за {timeout:.0f} с (последняя ошибка: {last})\n  "
-            + readiness_evidence(self.boot_trace, launch_log=self.launch_log)
+            + readiness_evidence(self.boot_trace, launch_log=self.launch_log, port=self.port)
         )
 
     async def _call(self, name: str, args: dict, timeout: float) -> Any:

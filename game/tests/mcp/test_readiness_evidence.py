@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import socket
 from pathlib import Path
 
 import pytest
@@ -26,6 +27,7 @@ from godot_mcp import (
     read_loadavg,
     read_meminfo_kb,
     read_psi_some,
+    probe_listen,
     readiness_evidence,
 )
 
@@ -54,11 +56,23 @@ def _fake_proc(tmp_path: Path) -> dict:
          "State:\tS (sleeping)\nVmRSS:\t  60000 kB\n"),
         ("444", "/usr/bin/godot_headless --headless", "State:\tD (disk)\nVmRSS:\t 400000 kB\n"),
     )
+    # Точка, в которой процесс стоит: wchan + syscall + набор fd (у «чужого» 222
+    # и у соседа 333 файлов нет намеренно — проверка не должна на них спотыкаться).
+    wait = {"111": ("poll_schedule_timeout", "7 0x7 0x1 0xffffffff 0x0 0x0 0x0 0x7ffd 0x7f8"),
+            "444": ("0", "running")}
     for pid, cmd, status in fake:
         d = root / pid
         d.mkdir(parents=True)
         (d / "cmdline").write_text(cmd.replace(" ", "\0") + "\0", encoding="utf-8")
         (d / "status").write_text(status, encoding="utf-8")
+        if pid in wait:
+            wchan, syscall = wait[pid]
+            (d / "wchan").write_text(wchan, encoding="utf-8")
+            (d / "syscall").write_text(syscall + "\n", encoding="utf-8")
+            for n in range(5 if pid == "111" else 2):
+                fd = d / "fd" / str(n)
+                fd.parent.mkdir(parents=True, exist_ok=True)
+                fd.write_text("", encoding="utf-8")
     return {
         "meminfo_path": str(mem),
         "loadavg_path": str(load),
@@ -85,6 +99,11 @@ def test_env_snapshot_reads_memory_load_and_godot_processes(tmp_path: Path) -> N
     assert snap["godot_processes"] == 2
     assert snap["godot_rss_mb"] == 1172 + 391        # 1 200 000 и 400 000 КиБ
     assert snap["godot_states"] == "D:1,R:1"
+    # Где стоит каждый движок — то, чего не хватало второму замеру T-172: процесс
+    # в состоянии S при 1189 MB свободной памяти ждёт, но чего именно — из state не видно.
+    blockage = snap["godot_blockage"]
+    assert "pid=111 R wchan=poll_schedule_timeout syscall=7 fd=5" in blockage
+    assert "pid=444 D wchan=0 syscall=running fd=2" in blockage
 
 
 def test_godot_processes_ignores_processes_with_godot_in_path(tmp_path: Path) -> None:
@@ -97,6 +116,15 @@ def test_godot_processes_ignores_processes_with_godot_in_path(tmp_path: Path) ->
 
 def test_godot_processes_survives_missing_proc(tmp_path: Path) -> None:
     assert godot_processes(str(tmp_path / "absent")) == []
+
+
+def test_blockage_degrades_without_kernel_files(tmp_path: Path) -> None:
+    """Без `wchan`/`syscall`/`fd` (чужие pid, macOS, урезанный /proc) отчёт обязан
+    остаться читаемым: «?» лучше, чем исключение в тексте другой ошибки."""
+    procs = godot_processes(str(_fake_proc(tmp_path)["proc_root"]))
+    by_pid = {p["pid"]: p for p in procs}
+    assert (by_pid[444]["wchan"], by_pid[444]["syscall"], by_pid[444]["fds"]) == ("0", "running", 2)
+    assert by_pid[111]["fds"] == 5
 
 
 def test_boot_trace_tail_separates_missing_from_empty(tmp_path: Path) -> None:
@@ -118,6 +146,29 @@ def test_boot_trace_tail_keeps_the_last_lines(tmp_path: Path) -> None:
     assert "attempt=8" not in tail
 
 
+def test_probe_listen_tells_backlog_from_no_port() -> None:
+    """«Порта нет» и «порт есть, но игра не приняла» — разные вердикты.
+
+    Первый чинит среда, второй — наш главный цикл. Без этой развилки три жертвы
+    гейта выглядели как «среда», хотя игра отбиндилась успешно.
+    """
+    listener = socket.socket()
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)  # accept не вызывается — ровно то состояние, что у зависшей игры
+    port = listener.getsockname()[1]
+    try:
+        assert "ядро приняло" in probe_listen(port)
+        assert "не забрала" in probe_listen(port)
+    finally:
+        listener.close()
+    dead = socket.socket()
+    dead.bind(("127.0.0.1", 0))
+    dead_port = dead.getsockname()[1]
+    dead.close()
+    assert "порта нет" in probe_listen(dead_port)
+    assert "не проверялся" in probe_listen(None)
+
+
 def test_readiness_evidence_names_memory_and_trace(tmp_path: Path) -> None:
     trace = tmp_path / "boot.log"
     trace.write_text("12 pid=7 ready: enabled=true port=9090 debug=true\n", encoding="utf-8")
@@ -125,11 +176,16 @@ def test_readiness_evidence_names_memory_and_trace(tmp_path: Path) -> None:
         "mem_available_mb": 311, "swap_free_mb": 0, "swap_total_mb": 19000,
         "load1": 9.9, "psi_memory": "some avg10=88.00",
         "godot_processes": 2, "godot_rss_mb": 1563, "godot_states": "D:1,S:1",
+        "godot_blockage": "pid=711 S wchan=poll_schedule_timeout syscall=7 fd=41",
     }
     text = readiness_evidence(str(trace), snapshot=snap)
     assert "mem_available=311MB" in text
     assert "swap_free=0/19000MB" in text
     assert "godot_procs=2(rss=1563MB, state=D:1,S:1)" in text
+    assert "где стоит движок: pid=711 S wchan=poll_schedule_timeout syscall=7 fd=41" in text
+    assert "порт: не проверялся" in text, "порт в снимок не передан — молчание о порте запрещено"
+    assert "mem_available=не прочитано" in readiness_evidence(
+        snapshot={**snap, "mem_available_mb": None})
     assert "ready: enabled=true" in text
 
 

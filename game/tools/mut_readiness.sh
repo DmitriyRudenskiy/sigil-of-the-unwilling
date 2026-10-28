@@ -119,3 +119,38 @@ victims="$(run_pytest_cases | sed -n 's/^FAILED tests\/mcp\/test_\([a-z_]*\)\.py
 if [ -z "$victims" ]; then echo "MUT7: SURVIVED (тесты зелёные — защита не покрыта)"
 else echo "MUT7: killed -> $victims"; fi
 cp /tmp/godot_mcp_readiness.bak "$H"
+
+# MUT8 — точка блокировки движка превращается в «?»: отчёт снова нем про «чем он стоит».
+cp /tmp/godot_mcp_readiness.bak "$H"
+python3 - "$H" <<'PYEOF'
+import sys
+from pathlib import Path
+p = Path(sys.argv[1])
+s = p.read_text()
+old = '    return {"wchan": wchan, "syscall": syscall, "fds": fds}'
+assert s.count(old) == 1, s.count(old)
+s = s.replace(old, '    return {"wchan": "?", "syscall": "?", "fds": -1}', 1)
+p.write_text(s)
+PYEOF
+victims="$(run_pytest_cases | sed -n 's/^FAILED tests\/mcp\/test_\([a-z_]*\)\.py::\([a-z_0-9]*\).*/\2/p' | sort -u | tr '\n' ' ')"
+if [ -z "$victims" ]; then echo "MUT8: SURVIVED (тесты зелёные — защита не покрыта)"
+else echo "MUT8: killed -> $victims"; fi
+cp /tmp/godot_mcp_readiness.bak "$H"
+
+# MUT9 — зонд порта всегда «не проверялся»: развилка «порта нет» / «accept не случился»
+# исчезает из отчёта, и жертва снова выглядит как «среда».
+cp /tmp/godot_mcp_readiness.bak "$H"
+python3 - "$H" <<'PYEOF'
+import sys
+from pathlib import Path
+p = Path(sys.argv[1])
+s = p.read_text()
+old = '    if not port:\n        return "не проверялся (порт не задан)"'
+assert s.count(old) == 1, s.count(old)
+s = s.replace(old, '    if port is not None:\n        return "не проверялся (порт не задан)"', 1)
+p.write_text(s)
+PYEOF
+victims="$(run_pytest_cases | sed -n 's/^FAILED tests\/mcp\/test_\([a-z_]*\)\.py::\([a-z_0-9]*\).*/\2/p' | sort -u | tr '\n' ' ')"
+if [ -z "$victims" ]; then echo "MUT9: SURVIVED (тесты зелёные — защита не покрыта)"
+else echo "MUT9: killed -> $victims"; fi
+cp /tmp/godot_mcp_readiness.bak "$H"

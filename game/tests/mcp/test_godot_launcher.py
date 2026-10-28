@@ -122,3 +122,4 @@ def test_readiness_error_keeps_signature_and_adds_launch_log(tmp_path: Path) -> 
     assert text.startswith("среда в момент отказа:"), "подпись D-265 не должна съезжать"
     assert "godot_procs=1(rss=512MB, state=D:1)" in text
     assert "лог запуска" in text and "не напечатал ни байта" in text
+    assert "где стоит движок: неизвестно" in text, "ключа нет в снапшоте — не падай"
