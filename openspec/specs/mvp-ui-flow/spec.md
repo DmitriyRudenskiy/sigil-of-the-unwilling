@@ -2,7 +2,9 @@
 
 ## Purpose
 Канон UI post-pivot (07-ui-ux): 8 экранов MVP (K-M8), SM навигации, туториал-оверлей, панель целей 3 первых дней (M3), инварианты UI (≤2 клика до причины, правила D&D видны без подсказок). Источник: GDD 07-ui-ux, MVP-scope (UI), K-канон (K-M8, K-M15), решения (Q18, M3, D4, C-3, C-10).
+
 ## Requirements
+
 ### Requirement: Eight MVP screens
 The MVP SHALL have 8 screens (K-M8): pregame, menu, map, city, battle, party, chronicle, settings, plus a tutorial overlay (first turns, not a scene). "Report" as a separate screen SHALL be deprecated (battle results are the battle screen's finale; turn events are the chronicle).
 
@@ -51,12 +53,30 @@ Any modifier SHALL be reachable to its cause in <= 2 clicks (pillar 1). In battl
 - **AND** no tooltip is required
 
 ### Requirement: Low resolution support
-The MVP SHALL support 1280x720 minimum resolution. The grid SHALL scale; main screens SHALL have no scroll. The battle field at 720p SHALL use scale x0.8 (C-10: field size — 07-balance#4, "8x8-12x12" deprecated).
+The MVP SHALL support 1280x720 minimum resolution. The grid SHALL scale; main screens SHALL have no scroll. The battle field SHALL be fitted into the viewport minus the HUD bands it is drawn under (top hero-card/initiative band, bottom action bar) and centred in that band, not in the viewport. At 1280x720 the field SHALL occupy at most 0.8 of the frame height. The reserve SHALL be read from the HUD panels themselves, not from a resolution-threshold constant.
 
 #### Scenario: 720p scaling
 - **WHEN** the game runs at 1280x720
 - **THEN** the grid scales
 - **AND** main screens have no scroll
+
+#### Scenario: Field clears the action bar at Full HD
+- **WHEN** a battle runs at 1920x1080
+- **THEN** the bottom edge of the field lies above the top edge of the bottom action bar
+- **AND** the field occupies no more than 0.8 of the frame height
+
+#### Scenario: Editing a HUD panel moves the reserve
+- **WHEN** the height of the bottom action bar changes in `scenes/ui/battle_ui.tscn`
+- **THEN** the fitted field band changes by the same amount
+- **AND** no code constant is edited
+
+#### Scenario: No reserve keeps the tight fit
+- **WHEN** the HUD reserve is zero
+- **THEN** the field is fitted into the whole viewport and centred on the field centre
+
+> Замена формулировки C-10 («the battle field at 720p SHALL use scale x0.8»): множитель
+> по порогу разрешения не помогает на 1920x1080, где поле занимало 1.000 кадра, а панель
+> действий рисовалась поверх последних рядов — T-220/D-279.
 
 ### Requirement: Party screen slot hint
 The party screen SHALL show "what frees a slot" (link to battle/death) when the training queue is empty and the party is full, not emptiness.
@@ -65,4 +85,3 @@ The party screen SHALL show "what frees a slot" (link to battle/death) when the 
 - **WHEN** the training queue is empty and the party is full
 - **THEN** the party screen shows "what frees a slot"
 - **AND** the hint links to battle/death
-
