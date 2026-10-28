@@ -185,7 +185,9 @@
       прогон `scripts/concept_art/generate.py`, манифест `image-clone/campaign_ui/`
       (seed, чекпойнт, слои промпта на каждый кадр).
 - [x] 4.2 Пост-процессинг и провенанс каждого файла; партия воспроизводится тем
-      же прогоном.
+      же прогоном. Контактный лист партии — в git (`sheet_u2_slate_brass.webp`,
+      `sheet_u2b_chromatic.webp`, `git add -f`: `/image-clone/campaign_ui/*`
+      игнорируется, а лист — доказательство вердикта, D-192 §2).
       Доказательство: `scripts/ui_kit/place_campaign_art.py` — альфа-фон и вписка
       общими функциями кита «Герой» (`place_hero_art.keyed/trim/fit`), второй
       реализации ключа нет; бокс = пропорция клетки строки реестра.
