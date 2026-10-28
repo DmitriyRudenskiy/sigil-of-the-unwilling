@@ -242,7 +242,8 @@ PERF_IGNORE=()
 [ "$PERF_SERIAL" -eq 1 ] && PERF_IGNORE=(--ignore=tests/mcp/test_hexutils_perf.py)
 GODOT_PATH="$GODOT" \
 GODOT_BIN="$GODOT" \
-"$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short --durations=25 \
+# -rs (T-281): причины пропуска в коротком резюме — см. блок PYTEST SKIPPED ниже.
+"$PYTEST_PY" -m pytest tests/mcp/ -v -rs --timeout=900 --tb=short --durations=25 \
 	--junitxml="$JUNIT_MCP" \
 	${PERF_IGNORE[@]+"${PERF_IGNORE[@]}"} ${PYTEST_WORKER_ARGS[@]+"${PYTEST_WORKER_ARGS[@]}"} 2>&1 | tee "$MCP_LOG"
 MCP_RC=${PIPESTATUS[0]}
@@ -250,7 +251,7 @@ if [ "$PERF_SERIAL" -eq 1 ]; then
 	echo "MCP: perf-стадия — serial (test_hexutils_perf.py; D-177: свободный CPU)"
 	GODOT_PATH="$GODOT" \
 	GODOT_BIN="$GODOT" \
-	"$PYTEST_PY" -m pytest tests/mcp/test_hexutils_perf.py -v --timeout=900 --tb=short \
+	"$PYTEST_PY" -m pytest tests/mcp/test_hexutils_perf.py -v -rs --timeout=900 --tb=short \
 		--junitxml="$JUNIT_PERF" \
 		2>&1 | tee -a "$MCP_LOG"
 	RC2=${PIPESTATUS[0]}
@@ -290,6 +291,20 @@ read -r P S F E COLLECTED <<< "$LEDGER"
 P=${P:-0}; S=${S:-0}; F=${F:-0}; E=${E:-0}; COLLECTED=${COLLECTED:-0}
 SUM=$((P + S + F + E))
 echo "PYTEST LEDGER: passed=$P skipped=$S failed=$F errors=$E collected=$COLLECTED"
+
+# T-281: «не мерили» обязано быть видно. Пропуск не красный, но молчание о причине
+# стоит тому же, что и красный от среды: тест молча перестаёт что-либо доказывать,
+# а читатель строки skipped=3 не узнаёт, какой уровень выпал и почему. Причина —
+# из -rs; пустой список при ненулевом skipped = дефект отчётности, о нём ниже.
+if [ "$S" -gt 0 ]; then
+	SKIPS="$(grep -aE '^SKIPPED([ [:[])' "$MCP_LOG" | sed 's/^[[:space:]]*//' | sort -u)"
+	if [ -n "$SKIPS" ]; then
+		echo "PYTEST SKIPPED ($S — уровень ничего не измерил, причина обязательна):"
+		printf '%s\n' "$SKIPS" | sed 's/^/  /'
+	else
+		echo "PYTEST SKIPPED: skipped=$S, причин в логе нет — прогон собран без -rs (дефект отчётности)"
+	fi
+fi
 LEDGER_OK=1
 [ "$SUM" -ne "$COLLECTED" ] && LEDGER_OK=0
 if [ "$MCP_RC" -eq 0 ] && [ "$LEDGER_OK" -eq 0 ]; then

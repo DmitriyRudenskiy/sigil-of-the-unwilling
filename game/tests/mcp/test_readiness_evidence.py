@@ -207,19 +207,24 @@ def test_boot_trace_tail_keeps_the_last_lines(tmp_path: Path) -> None:
     assert "attempt=8" not in tail
 
 
-def test_probe_listen_tells_backlog_from_no_port() -> None:
-    """«Порта нет» и «порт есть, но игра не приняла» — разные вердикты.
+def test_probe_listen_never_calls_a_live_port_absent() -> None:
+    """Инвариант, а не поведение платформы: слушающий порт не бывает «порта нет».
 
-    Первый чинит среда, второй — наш главный цикл. Без этой развилки три жертвы
-    гейта выглядели как «среда», хотя игра отбиндилась успешно.
+    На Linux хендшейк доигрывает ядром в accept-очередь, и вердикт — «ядро приняло,
+    игра не забрала». На darwin (замер смены T-280, 3/3 падения) соединение в
+    заполненную очередь не приводит к ожидаемому исходу: зонд уходит в свой таймаут.
+    Это тоже правильный ответ — «не измерено средой», но никогда не «порта нет»:
+    именно эту пару путали три жертвы гейта, пока «игра отбиндилась» не стало
+    отличием жёлтого от красного.
     """
     listener = socket.socket()
     listener.bind(("127.0.0.1", 0))
     listener.listen(1)  # accept не вызывается — ровно то состояние, что у зависшей игры
     port = listener.getsockname()[1]
     try:
-        assert "ядро приняло" in probe_listen(port)
-        assert "не забрала" in probe_listen(port)
+        verdict = probe_listen(port)
+        assert "порта нет" not in verdict, verdict
+        assert ("не забрала" in verdict) or ("не проверено (среда" in verdict), verdict
     finally:
         listener.close()
     dead = socket.socket()
@@ -228,6 +233,26 @@ def test_probe_listen_tells_backlog_from_no_port() -> None:
     dead.close()
     assert "порта нет" in probe_listen(dead_port)
     assert "не проверялся" in probe_listen(None)
+
+
+def test_probe_timeout_is_reported_as_environment_not_as_silence(monkeypatch) -> None:
+    """Ветка таймаута проверяется без платформы: ядро имитирует молчание.
+
+    На Linux её нечем поймать вживую (хендшейк доигрывает ядро), а именно она на
+    darwin превращала тест в красный код, которого нет (T-281). Вердикт обязан
+    назвать среду и длительность ожидания — «не проверено» без причины читается
+    как ещё одна необъяснённая тишина канала.
+    """
+    import godot_mcp
+
+    def silent(*args, **kwargs):
+        raise socket.timeout("timed out")
+
+    monkeypatch.setattr(godot_mcp.socket, "create_connection", silent)
+    verdict = probe_listen(9090, timeout=2.0)
+    assert "не проверено (среда" in verdict, verdict
+    assert "ждал 2 с" in verdict, verdict
+    assert "порта нет" not in verdict and "не забрала" not in verdict, verdict
 
 
 def test_readiness_evidence_names_memory_and_trace(tmp_path: Path) -> None:

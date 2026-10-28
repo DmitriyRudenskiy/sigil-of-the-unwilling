@@ -244,6 +244,16 @@ def probe_listen(port: int | None, host: str = "127.0.0.1", timeout: float = 1.0
             )
     except ConnectionRefusedError:
         return f"{host}:{port} — порта нет (bind не случился)"
+    except (socket.timeout, TimeoutError):
+        # Таймаут зонда — не «порта нет» и не «игра не приняла»: ядро не ответило ни
+        # SYN/ACK, ни RST. На darwin порт с заполненной accept-очередью ведёт себя
+        # именно так, и тест, требующий «не забрала», краснеет машиной, а не кодом
+        # (T-281). Формулировка обязана называть среду: иначе «не проверено» читается
+        # как ещё одна необъяснённая тишина.
+        return (
+            f"{host}:{port} — не проверено (среда: зонд ждал {timeout:.0f} с, ядро не ответило; "
+            "на darwin так ведёт себя порт с заполненной accept-очередью)"
+        )
     except OSError as exc:
         return f"{host}:{port} — не проверено ({exc})"
 

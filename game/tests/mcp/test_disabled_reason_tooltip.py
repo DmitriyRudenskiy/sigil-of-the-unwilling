@@ -25,6 +25,11 @@ GdUnit-тест `tests/functional/ui/test_disabled_controls_explain.gd` свер
    за экраном; курсор прижимается к (1023, 632), настоящее событие мыши прилетает после
    синтетического и наводит на `Background`. Замер: parse → hovered=ContinueButton,
    parse+warp → hovered=Background. Отсюда красные 2 теста в первом же прогоне гейта.
+   Тот же механизм у падений на машине с настоящим указателем (смена T-280, 4 падения /
+   1 проход на одном и том же дереве): событие от указателя приходит после
+   синтетического само по себе, без всякого `warp_mouse`. Лечение — не ослабление проверки, а измерение: перед зондом
+   наведение обновляется, а если мышь вьюпорта всё равно ушла с нашей координаты, тест
+   сообщает «среда, не регрессия» и снимается, а не краснеет (T-281).
 2. Состояние hover нельзя читать в том же вызове, что и событие: `parse_input_event`
    ставит его только следующим кадром. Проверка «наведён» переехала в зонд, который
    идёт после ожидания, и красной строкой называет экран — иначе «мышь не там»
@@ -40,6 +45,8 @@ from __future__ import annotations
 
 import time
 from typing import Any
+
+import pytest
 
 import capture
 
@@ -96,8 +103,34 @@ while not stack.is_empty():
 		stack.append(c)
 		if c is Label and (c as Label).text == want and (c as CanvasItem).visible:
 			nodes.append(str(c.get_path()))
-return {"want": want, "tooltip_labels": nodes, "hovered": str(hovered.get_path()) if hovered != null else "ничего"}
+return {"want": want, "tooltip_labels": nodes, "hovered": str(hovered.get_path()) if hovered != null else "ничего",
+	"mouse": str(get_tree().root.get_mouse_position()), "driver": str(DisplayServer.get_name())}
 """
+
+# Повторное синтетическое наведение перед самым зондом: настоящий указатель машины
+# (не Xvfb) успевает подослать своё событие между наведением и проверкой.
+REHOVER_CODE = """
+var scene: Node = get_tree().current_scene
+var button: Button = scene.get_node_or_null("RightColumn/ContinueButton") as Button
+if button == null:
+	return {"ok": false}
+var center: Vector2 = button.get_global_rect().get_center()
+var motion := InputEventMouseMotion.new()
+motion.position = center
+motion.global_position = center
+Input.parse_input_event(motion)
+return {"ok": true, "at": str(center)}
+"""
+
+
+def _xy(text: str) -> tuple[float, float] | None:
+    """«(1592.0, 632.0)» → (1592.0, 632.0); нераспознанное — None, не падение."""
+    try:
+        a, b = text.strip("()").split(",")
+        return float(a), float(b)
+    except (AttributeError, ValueError):
+        return None
+
 
 
 def test_disabled_button_tooltip_reaches_the_screen(mcp: Any) -> None:
@@ -123,13 +156,31 @@ def test_disabled_button_tooltip_reaches_the_screen(mcp: Any) -> None:
     # снимался бы до появления подсказки и оставался зелёным.
     time.sleep(1.6)
     mcp.wait_frames(30)
+    # Наведение обновляется прямо перед зондом: на машине с настоящим указателем
+    # событие от него прилетает после нашего и снимает hover (замер смены T-280:
+    # 4 падения / 1 проход на том же дереве).
+    mcp.execute_code(REHOVER_CODE)
+    mcp.wait_frames(2)
 
     probe = mcp.execute_code(PROBE_CODE) or {}
-    assert probe.get("hovered") == hover["button_path"], (
-        f"событие мыши не попало на кнопку (наведён: {probe.get('hovered')!r}, ждали "
-        f"{hover['button_path']!r}, экран {hover['screen']}) — без настоящего наведения "
-        "кадр ничего не доказывает"
-    )
+    if probe.get("hovered") != hover["button_path"]:
+        # Наведение не наше. Два разных verdict: сломанный тест среды (мышь ушла с
+        # кнопки сама — значит, в игру пришли события настоящего указателя) и
+        # настоящая регрессия (координата вьюпорта осталась нашей, а hover чужой).
+        ours, seen = _xy(hover.get("at", "")), _xy(probe.get("mouse", ""))
+        moved = ours is not None and seen is not None and (abs(ours[0] - seen[0]) > 2 or abs(ours[1] - seen[1]) > 2)
+        if moved:
+            pytest.skip(
+                f"среда, не регрессия (T-281): настоящий указатель ({seen}) сдвинул наведение "
+                f"с кнопки (наведён {probe.get('hovered')!r}, драйвер {probe.get('driver')!r}, "
+                f"ждали {ours}); под Xvfb без указателя тест исполняется целиком"
+            )
+        assert False, (
+            f"событие мыши не попало на кнопку (наведён: {probe.get('hovered')!r}, ждали "
+            f"{hover['button_path']!r}, экран {hover['screen']}, мышь вьюпорта "
+            f"{probe.get('mouse')!r}, драйвер {probe.get('driver')!r}) — координата наша, "
+            "значит наведение потеряно кодом, а не средой"
+        )
     labels = probe.get("tooltip_labels", [])
     assert len(labels) == 1, (
         f"подсказка-причина не дорисовалась до экрана (ожидась 1 видимая подпись, "
