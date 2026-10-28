@@ -42,7 +42,7 @@ SEAM_GAP = 0.003            # разрыв от 4 px (0,3 % высоты) — э
                             # кадру калибровки и 12 кроям эталона пустых полос нет вовсе (0.0),
                             # а два настоящих листа-обманки дают 0.005 и 0.012
 LUMA_RANGE = (25, 235)    # средняя яркость кадров без требования белого фона (экраны UI)
-ISOLATED = ("units", "buildings", "signs", "cursors", "resources", "plates", "emblems")
+ISOLATED = ("units", "buildings", "signs", "cursors", "resources", "plates", "emblems", "glyphs")
 TERMINAL_BAD = ("error", "not_found", "canceled")
 
 

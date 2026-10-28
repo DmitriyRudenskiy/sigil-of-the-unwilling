@@ -14,12 +14,12 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (20)
+## Реестры и процессы (21)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
 | [[BANK]] | Банк контента | reference | 2026-10-03 |
-| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-10-27 |
+| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-10-29 |
 | [[DECISIONS]] | Реестр решений и открытых вопросов | canon | 2026-10-21 |
 | [[QUESTIONS]] | Открытые вопросы — Фаза 4 (MVP и тикеты) | reference | 2026-10-24 |
 | [[ACTOR-ARMY]] | Актёрная модель армии (K-канон) | canon | 2026-10-11 |
@@ -38,8 +38,9 @@ date: 2026-10-14
 | [[f-plan]] | F-план — приёмка Д1/Д2 и сведение расхождений | draft | 2026-10-04 |
 | [[README]] | Снимок матрицы автопилота 2026-10-26 | reference | 2026-10-26 |
 | [[README]] | — | — | — |
+| [[ux-battle-99]] | UX-review поля боя 11×9 (battle-99-hex-clean-hud) | reference | 2026-10-28 |
 
-## GDD и стиль (85)
+## GDD и стиль (87)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -80,13 +81,15 @@ date: 2026-10-14
 | [[10-appendix-a-races]] | Приложение А — A6-R-таблица каталога 54 | canon | 2026-10-13 |
 | [[12-asset-audit]] | Asset Audit — game/assets | snapshot | 2026-10-13 |
 | [[13-art-bible]] | Art Bible — визуальная идентичность | deepened | 2026-10-18 |
-| [[14-ux-battle-hud]] | UX-спека — боевой HUD (UI-2) | draft | 2026-10-27 |
+| [[14-ux-battle-hud]] | UX-спека — боевой HUD (UI-2) | draft | 2026-10-28 |
 | [[15-asset-spec-artifacts]] | Asset-spec — 29 иконок артефактов (UI-4) | draft | 2026-10-13 |
 | [[16-ux-review-battle-hud]] | UX-ревью боевого HUD (UI-3, шаг 3) | draft | 2026-10-13 |
 | [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-10-18 |
 | [[18-lora-style-groups]] | Теги стилей обучающей нарезки — измерено, а не на глаз | reference | 2026-10-27 |
 | [[18-system-map]] | Карта систем | reference | 2026-10-26 |
 | [[19-gdd-workflow]] | Контур фаз GDD | reference | 2026-10-27 |
+| [[20-ux-hero-screen]] | Экран «Герой» — карта элементов макета 12 | draft | 2026-10-28 |
+| [[21-ux-map-screen]] | Экран «Карта кампании» — карта элементов макета 10 | draft | 2026-10-29 |
 | [[CONFLICTS_REPORT]] | — | архив (вне графа) | — |
 | [[MVP-scope]] | MVP Scope — доказательство, что core loop fun | deepened | 2026-10-21 |
 | [[NORMALIZATION_REPORT]] | — | архив (вне графа) | — |
