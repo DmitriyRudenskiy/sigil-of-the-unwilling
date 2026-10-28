@@ -195,6 +195,45 @@ def test_bank_is_exempt_from_question_citations(world):
     assert [b for b in bad if "НЕВЕДОМЫЙ ВОПРОС" in b] == [], bad
 
 
+def test_duplicate_decision_number_is_red(world):
+    """Две строки реестра под одним номером — красные: ссылка теряет адресата.
+
+    Дефект жил на `main` молча: `D-259` означал то полосу стиля, то полосу единиц
+    замера, и тикет ссылался на обе.
+    """
+    docs, _ = world
+    reg = docs / "DECISIONS.md"
+    reg.write_text(reg.read_text(encoding="utf-8")
+                   + "| D-1 | 2026-10-27 | Вторая строка под занятым номером. "
+                     "Контекст: Q-M2. Отвергнутые: нет. Статус: ✅. |\n", encoding="utf-8")
+    bad, _ = gate.check()
+    hits = [b for b in bad if "ДВОЙНОЙ НОМЕР РЕШЕНИЯ" in b]
+    assert len(hits) == 1 and "D-1" in hits[0] and "2 строки" in hits[0], bad
+
+
+def test_decision_citation_outside_registry_is_red(world):
+    docs, _ = world
+    (docs / "01-core-loop.md").write_text(
+        (docs / "01-core-loop.md").read_text(encoding="utf-8") + "\nСм. D-900.\n",
+        encoding="utf-8")
+    bad, _ = gate.check()
+    hits = [b for b in bad if "НЕВЕДОМОЕ РЕШЕНИЕ" in b]
+    assert len(hits) == 1 and "D-900" in hits[0], bad
+    reg = docs / "DECISIONS.md"
+    reg.write_text(reg.read_text(encoding="utf-8")
+                   + "| D-900 | 2026-10-27 | Заведённое задним числом. "
+                     "Контекст: Q-M2. Отвергнутые: нет. Статус: ✅. |\n", encoding="utf-8")
+    assert [b for b in gate.check()[0] if "НЕВЕДОМОЕ РЕШЕНИЕ" in b] == []
+
+
+def test_bank_is_exempt_from_decision_citations(world):
+    docs, _ = world
+    (docs / "bank").mkdir()
+    (docs / "bank" / "K-2.md").write_text("D-999\n", encoding="utf-8")
+    bad, _ = gate.check()
+    assert [b for b in bad if "НЕВЕДОМОЕ РЕШЕНИЕ" in b] == [], bad
+
+
 def test_baseline_key_set_must_match_the_metrics(world, tmp_path, monkeypatch):
     """Ключ базлайна не совпадает с метриками → exit 2, а не «нулевой допуск по умолчанию».
 

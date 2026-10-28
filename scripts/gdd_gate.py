@@ -201,6 +201,29 @@ def question_citations() -> list[str]:
     return bad
 
 
+def decision_citations() -> list[str]:
+    """Двойные номера решений и ссылки `D-###` вне реестра (T-229).
+
+    Зеркало `question_citations`: у реестра решений не было ни проверки коллизий,
+    ни проверки призрачных номеров — аудит решал «номер встречается», а не «номер
+    один». На `main` две строки жили под номером `D-259`: ссылка из тикета была
+    неоднозначной, а молчаливый переименованный дубль никто не ловил.
+    """
+    nums = [m.group(1) for l in d_rows() if (m := re.match(r"^\| (D-\d+)", l))]
+    known = set(nums)
+    bad = [f"ДВОЙНОЙ НОМЕР РЕШЕНИЯ: {n} в `docs/DECISIONS.md` {nums.count(n)} строки"
+           for n in sorted(known) if nums.count(n) > 1]
+    for f in sorted(DOCS.rglob("*.md")):
+        rel = f.relative_to(DOCS).as_posix()
+        if rel.startswith("bank/"):
+            continue  # зона без гейта — как у вопросов
+        for did in sorted({d for d in re.findall(r"\bD-\d+\b",
+                                                 f.read_text(encoding="utf-8"))
+                           if d not in known}):
+            bad.append(f"ССЫЛКА НА НЕВЕДОМОЕ РЕШЕНИЕ: {rel}: {did} нет в реестре")
+    return bad
+
+
 def check() -> tuple[list[str], dict[str, int]]:
     errors: list[str] = []
     sec = gdd_sections()
@@ -252,6 +275,7 @@ def check() -> tuple[list[str], dict[str, int]]:
                     errors.append(f"ТИКЕТ {head.group(1)} ждёт {dnum}, а `blocked-on` не несёт")
 
     errors += question_citations()
+    errors += decision_citations()
 
     return errors, measure()
 
