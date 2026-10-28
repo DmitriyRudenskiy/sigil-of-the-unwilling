@@ -240,8 +240,13 @@ JUNIT_MCP="$(mktemp)"
 JUNIT_PERF="$(mktemp)"
 PERF_IGNORE=()
 [ "$PERF_SERIAL" -eq 1 ] && PERF_IGNORE=(--ignore=tests/mcp/test_hexutils_perf.py)
-GODOT_PATH="$GODOT" \
-GODOT_BIN="$GODOT" \
+# GODOT_PATH/GODOT_BIN — export'ом, а не префиксом команды (T-281). Префикс
+# `VAR=value \` рвётся от любой строки между ним и командой — в том числе от
+# комментария (урок 2026-10-05 ниже), и pytest тогда молча берёт путь по умолчанию
+# (/Applications/…), а пять life-cycle тестов «закрашиваются» пропуском. Export
+# нечего рвать: проверка «env дошёл» осталась отдельным уровнем ниже.
+export GODOT_PATH="$GODOT"
+export GODOT_BIN="$GODOT"
 # -rs (T-281): причины пропуска в коротком резюме — см. блок PYTEST SKIPPED ниже.
 "$PYTEST_PY" -m pytest tests/mcp/ -v -rs --timeout=900 --tb=short --durations=25 \
 	--junitxml="$JUNIT_MCP" \
@@ -249,8 +254,6 @@ GODOT_BIN="$GODOT" \
 MCP_RC=${PIPESTATUS[0]}
 if [ "$PERF_SERIAL" -eq 1 ]; then
 	echo "MCP: perf-стадия — serial (test_hexutils_perf.py; D-177: свободный CPU)"
-	GODOT_PATH="$GODOT" \
-	GODOT_BIN="$GODOT" \
 	"$PYTEST_PY" -m pytest tests/mcp/test_hexutils_perf.py -v -rs --timeout=900 --tb=short \
 		--junitxml="$JUNIT_PERF" \
 		2>&1 | tee -a "$MCP_LOG"
@@ -297,7 +300,7 @@ echo "PYTEST LEDGER: passed=$P skipped=$S failed=$F errors=$E collected=$COLLECT
 # а читатель строки skipped=3 не узнаёт, какой уровень выпал и почему. Причина —
 # из -rs; пустой список при ненулевом skipped = дефект отчётности, о нём ниже.
 if [ "$S" -gt 0 ]; then
-	SKIPS="$(grep -aE '^SKIPPED([ [:[])' "$MCP_LOG" | sed 's/^[[:space:]]*//' | sort -u)"
+	SKIPS="$(sed 's/\x1b\[[0-9;]*m//g' "$MCP_LOG" | grep -aE '^SKIPPED( |\[)' | sed 's/^[[:space:]]*//' | sort -u)"
 	if [ -n "$SKIPS" ]; then
 		echo "PYTEST SKIPPED ($S — уровень ничего не измерил, причина обязательна):"
 		printf '%s\n' "$SKIPS" | sed 's/^/  /'
@@ -315,10 +318,22 @@ fi
 # junit-журнал целиком состоит из readiness-ошибок (подпись «игра не готова за», единственный
 # источник — wait_ready в tests/mcp/godot_mcp.py). Неполный прогон, неразобранный журнал и
 # любой другой error красный не снимают; жёлтый печатается поимённо.
+# «Godot не найден» при живом бинаре = pytest не получил GODOT_PATH: уровень,
+# который ничего не мерил, не имеет права ни краснеть кодом, ни тем более зелёнеть
+# (T-281 — тот же день, когда комментарий между env-префиксом и командой убрал
+# из прогона пять тестов, а readiness-ошибку заодно).
+MCP_ENV_BROKEN=0
+if [ -x "$GODOT" ] && sed 's/\x1b\[[0-9;]*m//g' "$MCP_LOG" | grep -qaE 'Godot не найден|нет бинаря Godot'; then
+	MCP_ENV_BROKEN=1
+	echo "MCP: RED — тесты объявили отсутствие Godot при наличии $GODOT: путь прогона до pytest не дошёл, тесты сняли пропуском вместо замера"
+	MCP_RC=1
+fi
 CLS="../scripts/classify_mcp_junit.py"
 JUNIT_ARGS=("$JUNIT_MCP")
 [ "$PERF_SERIAL" -eq 1 ] && JUNIT_ARGS+=("$JUNIT_PERF")
-if [ ! -f "$CLS" ]; then
+if [ "$MCP_ENV_BROKEN" -eq 1 ]; then
+	echo "MCP VERDICT: RED (путь до pytest не дошёл — readiness-жёлтым это не снимается)"
+elif [ ! -f "$CLS" ]; then
 	echo "MCP READINESS: SKIPPED (нет $CLS — readiness-error остаётся красным)"
 elif [ "$LEDGER_OK" -eq 0 ]; then
 	echo "MCP READINESS: SKIPPED (прогон неполный — красный не снимается)"
