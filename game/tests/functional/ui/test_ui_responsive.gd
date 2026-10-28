@@ -56,12 +56,29 @@ extends BaseTest
 ##   иначе замеры ловят позицию посреди tween.
 
 const _RESOLUTIONS: Array[Vector2i] = [
+	# T-248:除了 16:9-ряд добавлены неровные пропорции — 4:3 и 16:10. Смысл:
+	# stretch=canvas_items + aspect=expand держит базовый канв 1920×1080
+	# минимальной безопасной зоной, поэтому на любом 16:9 макет просто масштабируется,
+	# а вот неровная пропорция проверяет, что композиция не держится на одном размере.
+	Vector2i(1024, 768),   # 4:3 — объявленный минимум (_MIN_SUPPORTED)
+	Vector2i(1280, 800),   # 16:10
 	Vector2i(1280, 720),
-	Vector2i(1920, 1080),
+	Vector2i(1600, 900),   # канва макета экрана «Герой» (hero_layout.CANVAS)
+	Vector2i(1920, 1080),  # базовый канв проекта (project.godot)
 	Vector2i(2560, 1440),
 	Vector2i(3440, 1440),
 	Vector2i(3840, 2160),
 ]
+
+## Минимальный размер окна, на котором экран обязан помещаться целиком (T-248).
+## Замер 2026-10-28: все 9 экранов проходят границы/пересечения/прокрутку и на
+## 1024×768, и на 1280×800, и на 1600×900 — то есть «не влезает на 1280×720»
+## (исходная формулировка тикета) не воспроизводится: под expand layout-вьюпорт
+## не меньше базовых 1920×1080 по обеим осям. Объявленный минимум — наименьший
+## из замеряемых размеров; он закреплен проверками, чтобы не мог разойтись со
+## списком. Чего он НЕ гарантирует: читаемости — «вписанность» меряется по
+## layout-вьюпорту, который у expand только растёт.
+const _MIN_SUPPORTED := Vector2i(1024, 768)
 
 const _TOLERANCE_PX := 2.0
 const _OVERLAP_LIMIT := 0.2
@@ -165,14 +182,14 @@ const _BLEED_ALLOWED := {
 ## (min-высота кнопки 48 > шаг строк 36). Живой носитель: main_menu
 ## HeroModelWindow + world_ui WorldUILayer/ArtifactInventoryScreen.
 const _KNOWN_VIOLATIONS := {
-	"artifact_inventory_screen": [
-		"Center/Window/Bottom/ArmySlot_",
-		"Center/Window/Bottom/Formations",
-	],
-	# world_ui: вложенный WorldUILayer/ArtifactInventoryScreen в сцене
-	# visible=false — гейт меряет начальное состояние, нарушений нет;
-	# дефект того же окна покрывается standalone-записями выше.
 }
+# 2026-10-28 (T-248): записей больше нет. Две записи экрана «Герой»
+# («Center/Window/Bottom/ArmySlot_», «Center/Window/Bottom/Formations», T-154)
+# не воспроизводились ни на одном из размеров — их снял переезд нижней строки на
+# доли (T-255). Раньше устаревшая запись только печаталась предупреждением и
+# молча обрастала allowlist; теперь она краснеет (test_no_stale_known_violations).
+# world_ui: вложенный WorldUILayer/ArtifactInventoryScreen в сцене visible=false —
+# гейт меряет начальное состояние, нарушений нет.
 
 ## Осознанные прокручиваемые области (T-173): нормализованные пути (см.
 ## _norm_path: автоимена `@VBoxContainer@89` → `@VBoxContainer@*`). Каждая
@@ -262,9 +279,12 @@ func _check_screen(id: String, opener: Callable = Callable()) -> void:
 		await get_tree().process_frame
 	if known.size() > 0:
 		print("responsive %s: %d известных нарушений (T-154), не краснят гейт:\n%s" % [id, known.size(), "\n".join(known)])
+	var stale: Array[String] = []
 	for prefix in _KNOWN_VIOLATIONS.get(id, []):
 		if not matched_prefixes.has(prefix):
-			print("responsive %s: T-154 — известное нарушение '%s' не воспроизводится; запись устарела, удалить" % [id, prefix])
+			stale.append(prefix)
+	var msg := ("адаптив %s: %d записей _KNOWN_VIOLATIONS не воспроизводится ни на одном размере" % [id, stale.size()]) + " — allowlist протух, записи надо удалить: %s" % ", ".join(stale)
+	assert_bool(stale.is_empty()).override_failure_message(msg).is_true()
 	assert_bool(unknown.is_empty()) \
 		.override_failure_message(
 			"адаптив %s: %d нарушений:\n%s" % [id, unknown.size(), "\n".join(unknown)]
@@ -461,6 +481,65 @@ func _path(root: Node, n: Node) -> String:
 		parts.push_front(cur.name)
 		cur = cur.get_parent()
 	return "/".join(parts)
+
+
+## T-248: «минимальный размер, на котором экран обязан помещаться» — это
+## объявление, а не ощущение. Оно не имеет права расходиться с фактическим
+## набором замеряемых размеров: иначе AC1 «весь экран целиком» снова значит
+## «проверено на одном кадре».
+
+## Объявленный минимум обязан замеряться.
+func test_declared_minimum_size_is_measured() -> void:
+	var measured := false
+	for res in _RESOLUTIONS:
+		if res == _MIN_SUPPORTED:
+			measured = true
+	assert_bool(measured).override_failure_message(
+		"объявленный минимум %s отсутствует в замеряемых размерах — экран на нём никто не меряет"
+		% str(_MIN_SUPPORTED)
+	).is_true()
+
+
+## Объявленный минимум обязан быть наименьшим из замеряемых (по площади):
+## завысить его — значит молча перестать мерить то, что обещано игроку. Площадью,
+## а не по осям: при expand-стретче неровные пропорции дают разную пару осей
+## (1024×768 и 1280×720 несравнимы по высоте, и обе обязаны остаться в наборе).
+func test_declared_minimum_is_the_smallest_measured() -> void:
+	var raised: Array[String] = []
+	for res in _RESOLUTIONS:
+		if res.x * res.y < _MIN_SUPPORTED.x * _MIN_SUPPORTED.y:
+			raised.append(str(res))
+	assert_bool(raised.is_empty()).override_failure_message(
+		"размеры %s меньше объявленного минимума %s по площади: объявление завышено относительно замера"
+		% [", ".join(raised), str(_MIN_SUPPORTED)]
+	).is_true()
+
+
+## Базовый канв проекта обязан быть в наборе: он и есть тот размер, за пределами
+## которого expand-стретч добавляет пустоту, а не содержимое.
+func test_project_base_size_is_measured() -> void:
+	var base := Vector2i(
+		int(ProjectSettings.get_setting("display/window/size/viewport_width")),
+		int(ProjectSettings.get_setting("display/window/size/viewport_height"))
+	)
+	var measured := false
+	for res in _RESOLUTIONS:
+		if res == base:
+			measured = true
+	assert_bool(measured).override_failure_message(
+		"базовый размер проекта %s не замеряется — вписанность в канв никто не проверяет"
+		% str(base)
+	).is_true()
+
+
+## Устаревшая запись allowlistа краснее, а не печатается (смысл проверки — в том,
+## что список нельзя нарастить «на всякий случай»).
+func test_no_stale_known_violations() -> void:
+	for id in _KNOWN_VIOLATIONS:
+		var recorded: Array = _KNOWN_VIOLATIONS[id]
+		assert_bool(not recorded.is_empty()).override_failure_message(
+			"экран %s: пустой список записей _KNOWN_VIOLATIONS — ключ надо снять целиком" % id
+		).is_true()
 
 
 func test_main_menu_responsive() -> void:
