@@ -227,6 +227,57 @@ preload пишет `_Classes = preload("…/canon_classes.gd")`, и по име�
 в §3б: греп по имени класса находит соседей, а не вызовы, и «никого не зовёт»
 после одного грепа — не вывод, а недоказанное утверждение.
 
+## 3г. Боевой слой `scripts/systems/`, `scripts/battle/` и экономика `scripts/economy/`
+
+Шестой свод T-279: то, что происходит внутри боя, и то, что происходит между
+боями в городском обороте. Колонка «кто зовёт» — два грепа (имя класса и путь
+`preload`), иначе треть слоя выглядела бы мёртвой: алиасы вида
+`const _BattleTerrain = preload(...)` не содержат имени класса.
+
+### Бой
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `BattleFlow` | узел-владелец живой сцены боя: `_BATTLE_SCENE` под `root`, сигналы `battle_started`/`battle_completed`, держит ссылку до оверлея «Продолжить» (иначе следующая авто-битва оставила бы сироту под root) | `battle/dnd/battle_factory.gd`, `systems/battle_handoff.gd`, `world/world_battle_coordinator.gd` |
+| `BattleTurnExecutor` | порядок ходов: инициатива, смена фазы, перемещение и атака активного юнита — всё наружу сигналами (`execute_move`, `execute_attack`, `pulse_unit`, `floating_text`), UI только слушает | `systems/battle_controller.gd`, `systems/battle_retreat_policy.gd`, `systems/battle_attack_sequence.gd`, пробник баланса |
+| `BattleActionResolver` | разрешение действий по лестнице перевеса (T17/D2, 02d v1.2): атака, спасение умирающего (`RESCUE_DC = 10`), захват, толчок; детерминированно, без ГСЧ | `systems/battle_attack_sequence.gd`, `autoload/battle_emulator.gd`, `probe/balance_probe.gd`, `systems/battle_retreat_policy.gd` |
+| `BattleDamageResolver` | урон по той же лестнице: все проки (petrify/blind/крит rogue) срабатывают на Триумфе, местность даёт множители защиты и «удар вниз» | `systems/battle_action_resolver.gd` (единственный вызывающий — так и задумано: урон считается в одном месте) |
+| `BattleTerrain` | модификатели местности боя (plain/forest/hill/water/fort): лес +30%, холм +50%, форт +75%, вода блокирует, с холма +20% атаки; строится поверх `TerrainCostTable` (`world_to_battle`) | `battle/battle_line_of_sight.gd`, `systems/battle_ai.gd`, `systems/battle_view.gd`, `systems/battle_state.gd` |
+| `DNDAbilityScores` | шесть характеристик и модификаторы по таблице (0 → −5 … 20 → +5) | `ui/battle_ui.gd` (HUD), `battle/dnd/battle_factory.gd`, `battle/dnd/battle_bridge.gd`, `battle/dnd/combatant_profile.gd` |
+| `DNDAbilityCheck` | d20-проверка с модификатором и преимуществом/помехой; переиспользуется для соперничающих проверок (захват, толчок), спасбросков, Stealth/Perception | `battle/dnd/{grapple,shove,vertical_movement,ability_check}.gd` и живое спасение умирающего в `systems/battle_action_resolver.gd:405` |
+| `DNDDeathSaves` | спасброски смерти: 10+ успех, 9− провал, натуральная 20 → 1 HP, натуральная 1 → два провала, 3/3 → стабилен/смерть | `systems/battle_state.gd` (состояние юнита), `systems/battle_turn_executor.gd`, `systems/battle_action_resolver.gd` |
+| `RelationshipSystem` | связи команды (team-romance-roleplay D4/D5): bond/trust/romance, стадии, тик хода; `process_turn()` чистый — последствия применяет `HeroRelationshipsComponent.end_turn` | `ui/hero_status_panel.gd`, `systems/TeamDialogSystem.gd`, `entities/hero/components/HeroRelationshipsComponent.gd`, мировой бутстрап |
+| `CharismaEvents` | события низкой харизмы лидера: cha 6–7 — стимулы, cha 4–5 — мораль −1, cha 1–3 — d20 против 18 (побег/дезертирство/отказ приказа); детерминизм через `set_rng` на session seed | `city/processors/migration_processor.gd`, `systems/RelationshipSystem.gd` |
+| `FactionReputation` | репутация героя с 6 фракциями (−100…+100), полосы и история последних 20 изменений с причиной | `ui/faction_screen.gd`, `systems/quest_system.gd`, `entities/hero/components/hero_stats_component.gd` |
+| `WeaponCatalog` | 5 этапов оружия (дерево/камень/железо/сталь/редкое-магия) с весом, прочностью и уроном | `autoload/artifact_registry.gd`, `systems/weapon_tech_service.gd` |
+| `LawManager` | ветви законов (Order/Faith/Survival), дерево по `requires`, пассивные модификаторы активных законов, `to_dict`/`from_dict` | **продом — никем.** `LawManager.new()` вызывается только из `tests/unit/systems/test_law_manager.gd`; канал `unlock_law` снят (Q-M81 → (а), D-200), ключ сейва `"law"` из старых сохранений игнорируется явно (`crisis_event_system.gd:310`). Возврат — только с носителем пассивных эффектов: **T-130** |
+
+### Экономика оборота
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `EconomicTurnProcessor` | фаза экономики: производственные цепочки, содержание зданий, истощение ресурсов, еда на резидента (`CAMPAIGN_RESIDENT_FOOD_PER_PERSON = 0.1`) | мировая сборка (`world/world_bootstrap.gd`), арена (`city/arena_turn_runner.gd`), баланс-разбор |
+| `ProductionChain` | одна цепочка: входы, выходы, нужные работники, эффект здания → `calculate_output(workers, logistics)` | `economy/economic_turn_processor.gd`, `world/city_building_service.gd`, арена |
+| `ResourceContext` | реестр ресурсов города с ёмкостями и строгим режимом: `transact(costs, {}, "construction:<id>")` — транзакция с поток-тегом, сигналы `resource_changed`/`capacity_reached`/`transaction_committed` | `economy/production_chain.gd`, `economy/economic_turn_processor.gd`, `city/processors/scale_processor.gd`, заявка стройки (`City.ensure_resource_ctx`) |
+
+**d20 живёт точечно, а не «легаси целиком».** Комментарий в
+`systems/battle_action_resolver.gd` говорит, что d20-путь (`battle/dnd/`) выключен
+из основного флоу, — и про **атаку** это правда (T17/D2: атака идёт по лестнице
+перевеса). Но три класса того же каталога вызываются живым боем напрямую:
+`DNDAbilityCheck` — бросок спасателя (`battle_action_resolver.gd:405`),
+`DNDDeathSaves` — состояния DYING/STABLE (`battle_state.gd:423`),
+`DNDAbilityScores` — модификаторы в HUD (`battle_ui.gd:211`). Читать
+«легаси» как «мёртвый код» здесь значит собрать не тот тикет.
+
+**Имя файла врёт, и греп верит файлу.** `scripts/systems/BattleTerrain.gd`
+содержит класс **`HexTerrain`**: при слиянии двух боевых систем класс
+переименовали, а файл оставили как был (сноска в шапке об этом говорит).
+Живой `BattleTerrain` лежит в `battle/battle_terrain.gd`. Оба живые, но греп по
+имени класса находит не тот файл, а две строки `preload` в
+`systems/battle_state.gd` и `systems/battle_damage_resolver.gd` маскируют
+различие алиасом `_BattleTerrain`. Файл стоит переименовать в имя по классу
+(правится вместе с двумя `preload` и `.uid`) — **T-285**.
+
 ## 4. Событийная шина `GameEventBus`
 
 38 сигналов (все — `scripts/autoload/game_event_bus.gd`), по группам:
