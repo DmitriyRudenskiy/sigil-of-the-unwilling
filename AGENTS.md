@@ -227,8 +227,15 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
   `scenes/battle.tscn`, `scenes/main_menu.tscn`).
 - Таймаут: 900 c на тест (`--timeout=900`); без X-дисплея тесты таймаутят
   по одному (симптом: «No active Godot process» в цикле).
-- Вендорный MCP-сервер инжектит `mcp_interaction_server.gd` + autoload в
-  project.godot; гейт чистит после прогона (rm + git checkout).
+- Вендорный MCP-сервер инжектит `mcp_interaction_server.gd` (в **корень** проекта) +
+  autoload в project.godot **только если строки автозагрузки нет**; в `main` строка есть
+  (`McpInteractionServer="*res://tools/mcp/mcp_interaction_server.gd"`, D-285) — это
+  домашний форк с `MCP_PORT`/`MCP_AUTH_TOKEN`/явным `start()/stop()`, и при ней вендор
+  проект не трогает. Снимать строку нельзя: подставится вендорный монолит без `MCP_PORT`
+  (столкновение воркеров, падает `test_port_in_use_reports_clear_error`). TCP-эндпоинт
+  открывается только по `MCP_ENABLE=1` (его ставит тестовый стенд: `tests/mcp/conftest.py`,
+  Popen-env в `test_mcp_server_lifecycle.py`) — запуск игры без него порта не поднимает
+  (T-240). Артефакты инжекта гейт чистит после прогона (rm + git checkout).
 
 ### Stuck-process protocol (раунд 13 §4)
 
