@@ -1,8 +1,8 @@
 {
-  "_comment": "Носители элементов экрана кампании (openspec: map-screen-full-copy; T-259/T-246/T-244/T-245/T-243/T-248). Список сюжетов = реестр элементов game/scripts/ui/campaign_screen_map.gd, у которого нет рисунка. Эталон signs/emblems — семейство медальонных сигилов макета, эталон plates — интерфейс-кадр. Слои запроса: style категории -> style варианта -> frame категории -> subject. campaign-ui-2: палитра снята с макета 10 полосой кадра (тёмный сине-серый сланец + латунь + бирюза + золотое письмо), а не с тёплого пергамента, как в u1: пергаментные плашки u1 были расхождением с макетом. Составные предметы идут в emblems (рамка «embossed picture, not a letter, not a rune»), простые силуэты — в signs.",
+  "_comment": "Носители элементов экрана кампании (openspec: map-screen-full-copy; T-259/T-246/T-244/T-245/T-243/T-248). Список сюжетов = реестр элементов game/scripts/ui/campaign_screen_map.gd, у которого нет рисунка. Эталон signs/emblems — семейство медальонных сигилов макета, эталон plates — интерфейс-кадр. Слои запроса: style категории -> style варианта -> frame категории -> subject. campaign-ui-2: палитра снята с макета 10 полосой кадра (тёмный сине-серый сланец + латунь + бирюза + золотое письмо), а не с тёплого пергамента, как в u1: пергаментные плашки u1 были расхождением с макетом. Составные предметы идут в emblems (рамка «embossed picture, not a letter, not a rune»), простые силуэты — в signs. glyphs: плоские золотые глифы без подложки — иконки валют счётной полосы (T-159) и глифы тайлов правого столбца (T-259); девятый счётчик (T-243) берёт подложку camp_medallion_badge, нового сюжета нет. v2 (2026-10-28, D-284): эталоны — кропы самого макета 10 (etalons_campaign/), а не семейство «Знак»: прежний эталон привносил рунное кольцо, в макете 10 ободки гладкие латунные, рун нет ни на медальоне, ни на кольце. Иконки валют вынесены в категорию icons с настоящим локальным цветом (в макете капля красная, кристалл зелёный, монеты золотые), глифы тайлов названы по полю mockup реестра: башня, руна, шеврон.",
   "comfy": "http://192.168.0.230:8188",
   "out_dir": "image-clone/campaign_ui",
-  "references_dir": "image-clone/etalons",
+  "references_dir": "scripts/concept_art/etalons_campaign",
   "export": {
     "format": "WEBP",
     "quality": 90,
@@ -37,8 +37,8 @@
         1024
       ],
       "count": 6,
-      "reference": "1791970213325-01a139be-d2ce-786a-9d3b-1f9bbd4cd245.png",
-      "style": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view",
+      "reference": "campaign_medallion.png",
+      "style": "circular interface medallion, dark iron disc with a smooth polished brass rim, plain dark slate-blue field, one luminous gold emblem at the centre, strong contrast of dark metal and bright symbol, flat front view, no runes, no letters, no engraved symbols, no monogram",
       "frame": "one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design",
       "items": [
         {
@@ -73,13 +73,13 @@
         1024
       ],
       "count": 9,
-      "reference": "1791999397246-01a13b7a-0abb-7b89-a0aa-4d39e5f5f207.jpeg",
+      "reference": "campaign_plates.png",
       "style": "carved dark blue-grey slate interface plates framed in thin brass filigree with teal inlay lines, matte painted rendering, engraved edges, empty recessed centres meant to hold content, flat front view",
       "frame": "one single interface plate, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, empty plaque with no text and no icons inside",
       "items": [
         {
           "id": "camp_plate_ability",
-          "subject": "rectangular plaque frame divided by thin brass bars into eight empty square slots in two rows of four"
+          "subject": "rectangular plaque frame divided by thin brass bars into a grid of eight empty square slots, four across and two down"
         },
         {
           "id": "camp_plate_minimap",
@@ -87,7 +87,7 @@
         },
         {
           "id": "camp_plate_party",
-          "subject": "two separate blocks of empty square slots framed in brass, one block of four slots in two rows and one block of one slot, a gap between the blocks"
+          "subject": "two separate square blocks of empty slots side by side with a gap between them, each block a grid of four slots two across and two down"
         },
         {
           "id": "camp_plate_counter",
@@ -121,8 +121,8 @@
         1024
       ],
       "count": 10,
-      "reference": "1791970213325-01a139be-d2ce-786a-9d3b-1f9bbd4cd245.png",
-      "style": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous raised picture embossed at the centre, strong contrast of dark metal and bright embossed object, flat front view",
+      "reference": "campaign_medallion.png",
+      "style": "circular interface medallion, dark iron disc with a smooth polished brass rim and a teal progress arc, plain dark slate-blue field, one luminous raised picture embossed at the centre, strong contrast of dark metal and bright embossed object, flat front view, no runes, no letters, no engraved symbols, no monogram",
       "frame": "one circular medallion, its disc filled by an embossed picture of the subject, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, the picture is an object not a letter, not a rune, not a monogram, not a cross",
       "items": [
         {
@@ -164,6 +164,54 @@
         {
           "id": "camp_turn_big",
           "subject": "a round button disc with four triangular points at north, east, south and west and a plain empty centre"
+        }
+      ]
+    },
+    "glyphs": {
+      "size": [
+        512,
+        512
+      ],
+      "count": 3,
+      "reference": "campaign_glyphs.png",
+      "style": "flat angular pictograph inlaid in warm gold on dark slate, matte painted gold leaf with dark bronze outline, straight cuts and sharp corners, crisp silhouette readable at small size",
+      "frame": "one single glyph, whole glyph with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, no plate, no disc, no frame, no border, no text, no numbers",
+      "items": [
+        {
+          "id": "camp_glyph_tower",
+          "subject": "a tall angular tower pictograph with two short side turrets"
+        },
+        {
+          "id": "camp_glyph_rune",
+          "subject": "an angular rune built of one vertical stroke and two short diagonals"
+        },
+        {
+          "id": "camp_glyph_chevron",
+          "subject": "a thick angular chevron pointing right"
+        }
+      ]
+    },
+    "icons": {
+      "size": [
+        512,
+        512
+      ],
+      "count": 3,
+      "reference": "campaign_icons.png",
+      "style": "hand-painted game resource icon, one small loose object with true local colour, soft warm rim light, matte painted, crisp silhouette, no plate, no tablet, no background, no frame, no base",
+      "frame": "one single object, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, no plate, no disc, no frame, no border, no text, no numbers",
+      "items": [
+        {
+          "id": "camp_icon_drop_red",
+          "subject": "a single drop of thick glossy red resin"
+        },
+        {
+          "id": "camp_icon_gem_green",
+          "subject": "a faceted green gemstone"
+        },
+        {
+          "id": "camp_icon_coins",
+          "subject": "a stack of three round gold coins"
         }
       ]
     }
