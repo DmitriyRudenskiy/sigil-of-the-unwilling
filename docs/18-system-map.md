@@ -278,6 +278,52 @@ preload пишет `_Classes = preload("…/canon_classes.gd")`, и по име�
 различие алиасом `_BattleTerrain`. Файл стоит переименовать в имя по классу
 (правится вместе с двумя `preload` и `.uid`) — **T-285**.
 
+## 3д. Кампанийный слой `scripts/campaign/` и герой `scripts/entities/`
+
+Седьмой свод T-279: системы, которые живут между боями (население, снабжение,
+угрозы, этика), и то, чем в кампании играют — герой-координатор с компонентами.
+Почти весь этот слой собирается в одном месте — `campaign/campaign_composition.gd`
+— и это не случайность, а способ держать порядок инициализации (см. сноску).
+
+### Кампания
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `CampaignBattle` | бой K-канона кампании: единичные комбатанты (стэков нет), лестница 02d через `BattleRules` с трассировкой ступеней, инициатива «Удача + Ловкость» один раз на бой, Долг судьбы по таблице Б.4, лимит 20 раундов с ничьёй (D-128); без ГСЧ — те же входы дают `battle_report` байт в байт | `campaign/campaign_composition.gd` (сборка и вызов), `ui/battle_info_model.gd` (что показать), баланс-метрики |
+| `PopulationSystem` | реестр жителей города вместо счётчика: возрастная модель (трудоспособные 16–60, наставники 60+, `lifespan = 60 + Удача`), рождения по схеме k_pop с аккумулятором дробей, порядок — по uid | `campaign/campaign_composition.gd`, `managers/game_manager.gd`, баланс-метрики |
+| `SupplySystem` | еда в походе: ёмкость 10, расход 1/персонаж/переход, >50% ёмкости → +2 к первому спасброску, голод → −2 к атакам до пополнения в городе | `campaign/campaign_composition.gd` (единственный владелец — снабжение нельзя «подключить» откуда-то ещё) |
+| `ThreatSystem` | фаза угроз: давление `Base × Wealth × Anomalies × Region_History × Global_Phase`, аккумулятор города, пороги тиров 1–3 → волны, динамические лагеря (D-130), директивы K-R3 | `campaign/campaign_composition.gd`, `campaign/region_map.gd` (лагеря на карте) |
+| `EthicsSystem` | этический минимум: журнал событий, оси «Порядок/Свобода · Роскошь/Аскеза · Открытость/Изоляция», сверка на ходах 10 и 20 → репутация; события не пересчитываются при загрузке (I1) | `campaign/campaign_composition.gd`, `campaign/settlement_processor.gd`, `managers/game_manager.gd` |
+| `CampaignTrainingService` | тренировка и найм: стоимость по составу партии, «10 жителей на юнит» как предложение (ждёт вердикта автора, носитель — `campaign.json → training.population_per_unit`), alive-модель лимита (D-221: DEAD не занимают слот) | `ui/party_screen.gd` и `ui/party_screen_model.gd` (экран), `ui/campaign_hud.gd`, `campaign/campaign_composition.gd` |
+
+### Герой
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `HeroController` | тонкий координатор героя (481 строка): регистрирует компоненты из `entities/hero/components/`, маршрутизирует их сигналы, делегирует сериализацию, держит обратную совместимость аксессорами (`hero.magic`, `hero.inventory`, `hero.path_id`); компоненты создаются в `_init`, чтобы аксессоры работали до `_ready` | почти весь UI и бой: `ui/hero_model_factory.gd`, `ui/battle_ui.gd`, `ui/info_panel.gd`, `ui/city_screen.gd`, `ui/artifact_inventory_screen.gd`, мировой контроллер |
+| `HeroArmyController` | армия героя: `army: Array[UnitStack]`, реестр юнитов через `Services.resolve(&"units")`, новая партия начинается с пустой армии (`start_empty`) | `entities/hero_controller.gd`, `entities/hero/components/hero_army_component.gd`, `ui/artifact_inventory_screen.gd` |
+| `HeroMagic` | мана и книжка: `mana_current`/`mana_max` (по умолчанию 20), школы, список `spellbook`, сигнал `changed` | `ui/battle_ui.gd`, `ui/battle_spellbook_panel.gd`, `systems/battle_action_resolver.gd`, `systems/battle_controller.gd` |
+| `HeroResources` | карман классических ресурсов героя: стартовые количества по `ResourceType.classic_ids()`, подбор (`pickup_resource`), вклад модификаторов инвентаря; всё наружу одним `resources_changed` | `entities/hero_controller.gd`, `entities/hero/components/hero_resources_component.gd` |
+| `HeroRelationshipsComponent` | состояние отношений команды (team-romance-roleplay D1): `pairs` герой↔последователь (bond 0, trust 50, romance 0), `duos` последователь↔последователь (ревность), `last_*_stage` — кэш для детекта переходов | `entities/hero_controller.gd` (как компонент), `systems/RelationshipSystem.gd` (считает стадии из этих чисел) |
+| `HeroVisualController` | как герой выглядит на карте: листы персонажа (`scenes/entities/hero_visuals.tscn`, единственный путь — константа, эвристика скана `assets/raw` удалена), маркер цели, орб статуса | `entities/hero_controller.gd`, `entities/hero/components/hero_visual_component.gd`; сам лист превращает в `SpriteFrames` сосед `core/knight_frames_builder.gd` (нормализация кадра по alpha-bbox, иначе анимация дрожит) |
+| `Follower` | данные последователя: uid, имя, раса, путь, архетип, черты, модификаторы, способности | `entities/follower_system.gd` (`Follower.new()` при генерации), `entities/hero/components/hero_followers_component.gd` (загрузка из сейва) |
+| `CharacterFrames` | анимированные фигурки на поле боя: комплект `battle-demo` (холст 512×512, ступни в (256, 448), дорожки `idle/walk/attack/hit/turn`); таблица — не «все юниты», а только те, кому кадр подходит силуэтом | `systems/battle_view.gd` (единственный рисующий) |
+
+**Слой собирается в одном месте — и это носитель, а не дублирование.**
+`campaign/campaign_composition.gd` держит конструкторы `CampaignBattle`,
+`PopulationSystem`, `SupplySystem`, `ThreatSystem`, `EthicsSystem`,
+`CampaignTrainingService`: у этих систем нет состояния до инициализации, и
+единственный владелец порядка их создания — композиция. Исключения видны в
+колонке «кто зовёт» и они осмысленны: `ThreatSystem` нужен ещё и `region_map`
+(лагеря), `EthicsSystem` — processor'у поселения, тренировка — экрану партии.
+
+**`HeroController` — координатор, а не бог.** Про «бога-героя» судят по 481
+строке, но внутри только регистрация компонентов, маршрутизация сигналов,
+делегирование сериализации и аксессоры обратной совместности; логика живёт в
+`entities/hero/components/` (армия, инвентарь, магия, движение, нужды, крафт,
+последователи, отношения, визуал). Снимать этот класс «как лишний» — значит
+вернуть 481 строку в девять файлов, где она и была.
+
 ## 4. Событийная шина `GameEventBus`
 
 38 сигналов (все — `scripts/autoload/game_event_bus.gd`), по группам:
