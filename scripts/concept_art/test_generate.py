@@ -14,7 +14,23 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import generate as g                                            # noqa: E402
 
-SPEC = g.load_spec()
+try:
+    SPEC = g.load_spec()
+except SystemExit as exc:
+    # T-291: пиксели эталонов намеренно не в git (`.gitignore` → `/image-clone/etalons/*`,
+    # в репо только manifest.json), поэтому `load_spec()` на чистой машине обязан
+    # не найти первый же эталон. Отсюда шёл SystemExit **на уровне импорта модуля**,
+    # а файл называется `test_*.py` → pytest собирал его в INTERNALERROR и ронял
+    # ВЕСЬ прогон `pytest scripts/`, не показав ни одного другого набора (замер
+    # 2026-10-29: 9 файлов, 111 тест проходят поодиночке, вместе — «no tests ran»).
+    # Отсутствие машинного ассета — это skip с причиной, а не падение и не «прошёл».
+    _why = f"эталонный набор недоступен: {exc}"
+    try:
+        import pytest
+    except ImportError:
+        print(f"SKIP: {_why}")
+        raise SystemExit(0)
+    pytest.skip(_why, allow_module_level=True)
 N = 64
 checks = 0
 

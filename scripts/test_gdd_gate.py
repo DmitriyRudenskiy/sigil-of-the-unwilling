@@ -293,3 +293,53 @@ def test_duplicate_risk_number_is_red(world):
     r.write_text(text, encoding="utf-8")
     errors, _ = gate.check()
     assert any("ДВОЙНОЙ НОМЕР РИСКА" in e for e in errors)
+
+
+def test_ticket_headers_read_both_registry_forms(world):
+    """Старая (`## T-141.`) и новая (`### T-7 ·`) формы — один пространственный ряд номеров.
+
+    45 заголовков репо живут в старой форме; гейт, который читает только новую,
+    посчитал бы их отсутствующими тикетами, а коллизии — по урезанному множеству.
+    """
+    docs, _ = world
+    (docs / "mvp" / "TICKETS.md").write_text(
+        "## T-141. старая форма с точкой\n\n### T-7 · новая форма с медианой\n\n"
+        "#### Тикет T-9 · форма со словом\n\n### T-100 · граница номера\n", encoding="utf-8")
+    assert gate.ticket_headers() == ["T-141", "T-7", "T-9", "T-100"]
+
+
+def test_suffixed_id_and_status_subheader_are_not_tickets(world):
+    """`T-111-full` — соседний id, `T-143, круг 18b` — подзаголовок статуса, не тикеты.
+
+    Замер на `` считал и то и другое занятыми номерами и рапортовал 10 коллизий
+    там, где их семь. Мера обязана быть уже, чем «номер встречается в строке».
+    """
+    docs, _ = world
+    (docs / "mvp" / "TICKETS.md").write_text(
+        "### T-111. основной тикет\n\n### T-111-full. суффиксный сосед\n\n"
+        "## T-143 — тикет\n\n### T-143, круг 18b (мера направления)\n", encoding="utf-8")
+    assert gate.ticket_headers() == ["T-111", "T-143"]
+    assert gate.t_duplicate_headers() == 0
+
+
+def test_duplicate_ticket_number_is_measured(world):
+    """Два заголовка под одним номером = один лишний заголовок в замере."""
+    docs, _ = world
+    (docs / "mvp" / "TICKETS.md").write_text(
+        "### T-227 · первая запись\n\n### T-241 · другая\n\n"
+        "### T-227 · вторая запись на занятом номере\n", encoding="utf-8")
+    assert gate.t_duplicate_headers() == 1
+    assert gate.measure()["t_duplicate_headers"] == 1
+
+
+def test_new_duplicate_ticket_reds_the_ratchet(world, capsys, monkeypatch):
+    """Рост коллизий красит прогон: реестр не имеет права плодить неоднозначные номера."""
+    docs, baseline = world
+    (docs / "mvp" / "TICKETS.md").write_text(
+        "### T-1 · первый\n\n### T-1 · второй на том же номере\n", encoding="utf-8")
+    bl = dict(gate.measure())
+    bl["t_duplicate_headers"] = 0
+    baseline.write_text(json.dumps(bl), encoding="utf-8")
+    monkeypatch.setattr("sys.argv", ["gdd_gate.py"])
+    assert gate.main() == 1
+    assert "t_duplicate_headers" in capsys.readouterr().out
