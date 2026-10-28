@@ -65,6 +65,8 @@ date: 2026-10-29
   `party_system.gd`, `population_system.gd`, `threat_system.gd`,
   `chronicle_log.gd`, `sign_system.gd`, `save/`.
 - **`city/`** — город: строительство, районы, обучение, экономика хода.
+- **`data/`** — справочники и реестры контента (каноны рас и классов, типы
+  ресурсов, Знаки, шаблоны заклинаний): §3б.
 - **`world/`** — карта и мировой режим: `map_generator.gd`, `map_renderer.gd`,
   `map_roads.gd`, `map_threat.gd`, `world_camera.gd`, `world_persistence.gd`;
   разбор 19 живущих здесь имён — §3а.
@@ -129,6 +131,41 @@ date: 2026-10-29
 не осталось ни одного production-потребителя, — кандидат не в «дописать строчку»,
 а в акт заморозки/удаления (Q-M117), иначе опись T-279 врёт: имя по-прежнему
 названо, но назвать его некому.
+
+## 3б. Слой данных `scripts/data/`: каноны, справочники, таблицы
+
+Правило слоя: **числа и имена — в JSON, код — только доступ** (K-M15 для Знаков,
+`mvp_catalog.json` для канонов). Отсюда и род проверок: у класса данных спрашивают
+не «что он посчитал», а «чей JSON он читает и кто этот JSON зовёт». Потребитель
+замерен `grep -rl` по `scripts/`, `scenes/`, `tools/` плюс поиск по пути preload:
+preload пишет `_Classes = preload("…/canon_classes.gd")`, и по имени класса такое
+не находится.
+
+| Имя | Файл | Ответственность (проверено по коду) | Кто зовёт |
+| --- | --- | --- | --- |
+| `CanonClasses` | `canon_classes.gd` | канон-каталог классов (T-113, K1) из `assets/data/mvp_catalog.json`: 11 классов, Колдуна нет, «mage» = Волшебник; `classes()`, `hireable()` — маска MVP-наёма (6), `by_id`; кэш `_cache` | `ui/character_creation_ui.gd` (preload под именем `_Classes`) |
+| `CanonRaces` | `canon_races.gd` | канон-каталог рас (Q-M100 → (а), D-239), тот же JSON: первый эшелон 7 по флагу `first_tier`, `races()`, `by_id`, `name_for`. Чисел здесь нет намеренно: `modifiers` каталога читает не кто, носитель — T-176 | `ui/pregame_flow_model.gd` |
+| `HeroRaces` | `hero_races.gd` | легаси-таблица 6 рас пре-пивота (human/elf/dwarf/aumaua/orlan/godlike) с бонусами и подрасами; фолбэк подписи и бонусов для легаси-идов, диспозиция — Q-M44 (корзина B, T-128) | `ui/character_creation_ui.gd`, `data/hero_build_profile.gd` |
+| `HeroFactions` | `hero_factions.gd` | `const FACTIONS`: 6 фракций по расам, id фракции = id расы (родная раса даёт +10 к репутации своей фракции), `faction_name(id)` | `ui/quest_journal_screen.gd`, `ui/faction_screen.gd`, `systems/faction_reputation.gd` |
+| `RaceClassRegistry` | `race_class_registry.gd` | реестр `assets/data/races_classes.json` по доменам: `_races` (`RaceDef`), `_classes` (`ClassDef`), кровные линии, домены, престиж, черты; `ensure()` / `reset()` | `entities/follower_system.gd` |
+| `RaceEconomy` | `race_economy.gd` | 7 расовых экономических профилей из `assets/data/race_economy.json`; хуки production/synergy/conflict/needs; анти-имба: `best_production_mult` берёт **максимум**, а не сумму нескольких рас в здании | `economy/economic_turn_processor.gd`, `world/city_service.gd` |
+| `ResourceType` | `resource_type.gd` | `enum ID` ресурсов (WOOD…GOLD и далее) + `all_ids()`, `classic_ids()`, `is_valid(id)`, имена и количества подбора (`pickup_amount`) | `ui/resource_bar.gd`, `ui/resources_panel.gd`, `autoload/resource_registry.gd`, `economy/economic_turn_processor.gd`, `entities/resource_node.gd` |
+| `ResourceAtlas` | `resource_atlas.gd` | ASSET-1: иконка ресурса — свой файл 32×32 `assets/ui/icons/resources/icon_resource_<id>.png`, продукт `tools/gen_resource_icons.py` по формуле art-bible §7.1; в классе только кэш `load()` и `TYPE_TO_ID` (порядок = `ResourceType.ID`). До ASSET-1 здесь кроили чужую ячейку HoMM III (102 px, 4×4) | `ui/city_screen.gd`, `ui/resources_panel.gd`, `theme/IconRegistry.gd`, `entities/resource_node.gd`, `core/static_caches.gd`, `world/world_spawner.gd` |
+| `ResourceIcons` | `resource_icons.gd` | предшественник: `DATA` по `ResourceType.ID`, но все семь полей `texture` — пустые строки, то есть `get_texture()` возвращает null всегда; живой смысл класса — `res_type_id`/`res_type_amount` (обёртки над `ResourceType`). Расхождение со слоем иконок — T-284 | `ui/resource_collect_popup.gd` (там же заглушка `PlaceholderTexture.circle`), `probe/ScenarioPilot.gd`, `probe/balance_probe.gd`, `core/static_caches.gd` |
+| `ScenarioTargets` | `scenario_targets.gd` | const-таблица целей автопилота (D3 autopilot-scenario-matrix): `ROLES` (collector/traveler/builder/survival/adventurer) с `max_turns` и целями, `role_ids()`, `survival_seeds()`; калибровка — правкой этих чисел по отчётам, не кодом. Не игровой контент | `probe/ScenarioPilot.gd`, `tools/matrix_report.gd`, `tools/survival_report.gd` |
+| `Signs` | `signs.gd` | каталог 8 Знаков (T-002, docs/02c-signs.md, финальная редакция автора 2026-09-30, имена и девизы verbatim); выбор 1 из 8 на всю игру, Престиж косметический; числа и имена живут только в `data/signs.json` (K-M15) — здесь `all()`, `ids()`, `by_id()` | `ui/sign_choice_ui.gd`, `campaign/campaign_composition.gd` |
+| `StatusEffects` | `status_effects.gd` | `enum Effect` из 13 эффектов (HASTE…BLIND) и классификаторы `is_debuff`, `is_stun`, `get_name` | `autoload/spell_registry.gd`, `systems/battle_turn_executor.gd`, `core/battle_fx.gd` |
+| `SpellbookDef` | `spellbook_def.gd` | домен карты и книги заклинания: `id`, `template`, `speed`, `cost`, `color`, `influence_req`, `from_dict` / `to_dict` — граница между JSON реестра и кодом боя | `autoload/spellbook_registry.gd`, `data/battle_spell_bridge.gd` |
+| `BattleSpellBridge` | `battle_spell_bridge.gd` | мост «ключевое слово карты → эффект статуса» (`KEYWORD_TO_EFFECT`) и имена шаблонов (`T_DIRECT_DAMAGE`, `T_KEYWORD_BUFF`, …) | `autoload/battle_emulator.gd` — сам не autoload, его поднимают `battle/dnd/battle_factory.gd` и `tools/winrate_baseline.gd` |
+| `TemplateEngine` | `template_engine.gd` | реестр обработчиков шаблонов: `register_handler(template, handler)`, `execute`, `reset`; 19 обработчиков `data/templates/T01…T19` регистрирует autoload `TemplateBootstrap` | `autoload/template_bootstrap.gd` |
+| `SpellResolver` | `spell_resolver.gd` | **старый фасад разрешения заклинаний: в production не вызывается никем.** Замер: `grep -rn` по имени и по пути preload — вызовы только в `tests/unit/data/test_spell_system.gd`. Живой путь боя — `SpellCaster.cast()` из `systems/battle_action_resolver.gd` и `autoload/battle_emulator.gd` | тесты: `tests/unit/data/test_spell_system.gd` (писатель без читателя — T-283) |
+
+**Что разбор делает видимым.** В слое два писателя без читателя нового вида: у
+`SpellResolver` читатель только в тесте (T-283); у `ResourceIcons` читатель есть,
+но читает он пустую таблицу, и попап сбора ресурса поэтому всегда рисует
+заглушку, хотя тот же ресурс уже нарисован настоящим рядом через `ResourceAtlas`
+(T-284). Оба случая — не «дописать строчку», а сведение на канонического
+носителя.
 
 ## 4. Событийная шина `GameEventBus`
 

@@ -47,7 +47,6 @@ CityIncomeProcessor
 CitySubProcessor
 CityYieldCalculator
 CityYieldTable
-ClassDef
 CraftingSystem
 CursorControllerAutoload
 CursorOverlay
@@ -146,13 +145,11 @@ MvpInvariants
 NeedStrategy
 NeedType
 ParticlePresets
-PlaceholderTexture
 ProbeFastMode
 ProsperityProcessor
 QuestJournalScreen
 QuestSystem
 QuestTemplates
-RaceDef
 RaidProcessor
 ReputationProcessor
 ResourceChainService
