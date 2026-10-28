@@ -32,6 +32,7 @@
 Область: game/assets/ui/widgets/ (buttons/panels/sliders/progress_bars;
 классификация — MANIFEST.json, kind "9-slice"/"иконка") +
 game/assets/ui/hero/ (кит экрана «Герой», D-278; свой MANIFEST) +
+game/assets/ui/campaign_screen/ (кит экрана «Карта», T-262; свой MANIFEST) +
 game/assets/ui/icons/.
 
 Exit: 0 — чистый набор; 1 — перечень нарушений; 2 — ошибка среды
@@ -356,6 +357,11 @@ def main():
     if os.path.isfile(hero_manifest):
         with open(hero_manifest, encoding="utf-8") as f:
             manifest.update(json.load(f)["files"])
+    # Экран «Карта» (T-262, D-281) — третий кит кадра, те же правила.
+    campaign_manifest = os.path.join(UI_ROOT, "campaign_screen", "MANIFEST.json")
+    if os.path.isfile(campaign_manifest):
+        with open(campaign_manifest, encoding="utf-8") as f:
+            manifest.update(json.load(f)["files"])
 
     violations = []
     checked = 0
@@ -379,6 +385,7 @@ def main():
 
     areas = [(os.path.join(UI_ROOT, "widgets", d), "widgets/%s" % d) for d in WIDGET_DIRS]
     areas.append((os.path.join(UI_ROOT, "hero"), "hero"))
+    areas.append((os.path.join(UI_ROOT, "campaign_screen"), "campaign_screen"))
     for dd, prefix in areas:
         if not os.path.isdir(dd):
             continue

@@ -1,0 +1,300 @@
+{
+ "mockup": "design/single_window_layout/all_screens_ui.png (экран «Карта») + реестр docs/21-ux-map-screen.md",
+ "generator": "krea2 (ComfyUI) / qwen-image-text-to-image",
+ "variants": [
+  "u2_slate_brass (отбор)",
+  "u2b_chromatic (3 плитки)"
+ ],
+ "method": "контурный генератор scripts/concept_art/generate.py; фон срезан альфа-ключом кита «Герой», обрезка по контенту, вписка в бокс пропорции строки реестра",
+ "note": "отбор кадров — ux-review кадрового листа (T-262, D-281); пиксели в git не идут без .import (D-185)",
+ "files": {
+  "campaign_screen/medallion_ring.png": {
+   "kind": "иконка",
+   "size": [
+    256,
+    256
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1075529891, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/signs",
+   "note": "строка реестра: medallion_ring"
+  },
+  "campaign_screen/button_swords.png": {
+   "kind": "иконка",
+   "size": [
+    80,
+    80
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1330579080, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/signs",
+   "note": "строка реестра: turn_swords"
+  },
+  "campaign_screen/button_globe.png": {
+   "kind": "иконка",
+   "size": [
+    88,
+    88
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1430561400, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/signs",
+   "note": "строка реестра: turn_globe"
+  },
+  "campaign_screen/gear_date.png": {
+   "kind": "иконка",
+   "size": [
+    48,
+    48
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 2051691101, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/signs",
+   "note": "строка реестра: date_gear"
+  },
+  "campaign_screen/tile_reset.png": {
+   "kind": "иконка",
+   "size": [
+    80,
+    80
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 289660839, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/signs",
+   "note": "строка реестра: tile_reset"
+  },
+  "campaign_screen/chip_food.png": {
+   "kind": "иконка",
+   "size": [
+    48,
+    48
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2b_chromatic, seed 920691095, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/signs",
+   "note": "строка реестра: sign_food"
+  },
+  "campaign_screen/medallion.png": {
+   "kind": "иконка",
+   "size": [
+    256,
+    256
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1549262283, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
+   "note": "строка реестра: medallion"
+  },
+  "campaign_screen/medallion_badge.png": {
+   "kind": "иконка",
+   "size": [
+    80,
+    80
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 751503953, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
+   "note": "строка реестра: medallion_badge"
+  },
+  "campaign_screen/chip_coins.png": {
+   "kind": "иконка",
+   "size": [
+    48,
+    48
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 296253207, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
+   "note": "строка реестра: sign_coins"
+  },
+  "campaign_screen/chip_house.png": {
+   "kind": "иконка",
+   "size": [
+    48,
+    48
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 2029831519, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
+   "note": "строка реестра: sign_house"
+  },
+  "campaign_screen/chip_apple.png": {
+   "kind": "иконка",
+   "size": [
+    48,
+    48
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 906439826, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
+   "note": "строка реестра: sign_apple"
+  },
+  "campaign_screen/cart_button.png": {
+   "kind": "иконка",
+   "size": [
+    96,
+    96
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 301517048, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
+   "note": "строка реестра: cart_button"
+  },
+  "campaign_screen/hero_marker.png": {
+   "kind": "иконка",
+   "size": [
+    80,
+    80
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1244401215, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
+   "note": "строка реестра: hero_marker"
+  },
+  "campaign_screen/button_book.png": {
+   "kind": "иконка",
+   "size": [
+    80,
+    80
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 613739958, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
+   "note": "строка реестра: button_book"
+  },
+  "campaign_screen/button_gear.png": {
+   "kind": "иконка",
+   "size": [
+    80,
+    80
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1681202460, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
+   "note": "строка реестра: button_gear"
+  },
+  "campaign_screen/turn_button.png": {
+   "kind": "иконка",
+   "size": [
+    192,
+    192
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 999573128, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
+   "note": "строка реестра: turn_button"
+  },
+  "campaign_screen/tile_city.png": {
+   "kind": "иконка",
+   "size": [
+    80,
+    80
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 755765676, кадр 512×512, эталон — кропы макета 10 etalons_campaign/glyphs",
+   "note": "строка реестра: tile_city"
+  },
+  "campaign_screen/tile_party.png": {
+   "kind": "иконка",
+   "size": [
+    80,
+    80
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1260997212, кадр 512×512, эталон — кропы макета 10 etalons_campaign/glyphs",
+   "note": "строка реестра: tile_party"
+  },
+  "campaign_screen/tile_menu.png": {
+   "kind": "иконка",
+   "size": [
+    80,
+    80
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 105183672, кадр 512×512, эталон — кропы макета 10 etalons_campaign/glyphs",
+   "note": "строка реестра: tile_menu"
+  },
+  "campaign_screen/icon_drop_red.png": {
+   "kind": "иконка",
+   "size": [
+    48,
+    48
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2b_chromatic, seed 478836416, кадр 512×512, эталон — кропы макета 10 etalons_campaign/icons",
+   "note": "строка реестра: counter_drop_red"
+  },
+  "campaign_screen/icon_gem_green.png": {
+   "kind": "иконка",
+   "size": [
+    48,
+    48
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2b_chromatic, seed 1168935727, кадр 512×512, эталон — кропы макета 10 etalons_campaign/icons",
+   "note": "строка реестра: counter_gem_green"
+  },
+  "campaign_screen/icon_gold.png": {
+   "kind": "иконка",
+   "size": [
+    48,
+    48
+   ],
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2b_chromatic, seed 1634735443, кадр 512×512, эталон — кропы макета 10 etalons_campaign/icons",
+   "note": "строка реестра: counter_gold"
+  },
+  "campaign_screen/plate_ability.png": {
+   "kind": "9-slice",
+   "size": [
+    229,
+    192
+   ],
+   "margin": 24,
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 916148767, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
+   "note": "строка реестра: ability_frame"
+  },
+  "campaign_screen/plate_minimap.png": {
+   "kind": "9-slice",
+   "size": [
+    192,
+    194
+   ],
+   "margin": 24,
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1466045158, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
+   "note": "строка реестра: minimap"
+  },
+  "campaign_screen/plate_party.png": {
+   "kind": "9-slice",
+   "size": [
+    346,
+    192
+   ],
+   "margin": 24,
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1874909225, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
+   "note": "строка реестра: party_frame"
+  },
+  "campaign_screen/plate_counter.png": {
+   "kind": "9-slice",
+   "size": [
+    192,
+    192
+   ],
+   "margin": 24,
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1115039835, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
+   "note": "строка реестра: counter_frame"
+  },
+  "campaign_screen/plate_slot.png": {
+   "kind": "9-slice",
+   "size": [
+    192,
+    194
+   ],
+   "margin": 24,
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 449112104, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
+   "note": "строка реестра: party_block_left"
+  },
+  "campaign_screen/plate_sign.png": {
+   "kind": "9-slice",
+   "size": [
+    210,
+    192
+   ],
+   "margin": 24,
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 699685297, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
+   "note": "строка реестра: sign_plaque"
+  },
+  "campaign_screen/plate_date.png": {
+   "kind": "9-slice",
+   "size": [
+    640,
+    127
+   ],
+   "margin": 24,
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 475332405, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
+   "note": "строка реестра: date_plaque"
+  },
+  "campaign_screen/plate_strip.png": {
+   "kind": "9-slice",
+   "size": [
+    192,
+    283
+   ],
+   "margin": 24,
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1226297836, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
+   "note": "строка реестра: tile_city"
+  },
+  "campaign_screen/plate_panel.png": {
+   "kind": "9-slice",
+   "size": [
+    519,
+    192
+   ],
+   "margin": 24,
+   "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1157121478, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
+   "note": "строка реестра: —"
+  }
+ }
+}

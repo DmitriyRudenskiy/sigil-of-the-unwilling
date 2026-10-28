@@ -28,6 +28,12 @@
       "name": "u2_slate_brass",
       "style": "hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark blue-grey slate stone inlaid with tarnished brass and teal, bright gold lettering and gold glyphs, limited palette of slate #2b3a44 #3d4f5a, brass #a97f3f #d8a954, teal #2f7f92, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders",
       "negative": "photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants"
+    },
+    {
+      "id": "u2b_chromatic",
+      "name": "u2b_chromatic",
+      "style": "hand-painted game item icon, one small object painted in its true local colour, matte painted with visible brush texture, soft warm key light from the upper left, crisp readable silhouette, no stone, no plaque, no tablet, no metal plate, no frame, no lettering, no photorealism, no glossy shaders",
+      "negative": "photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants"
     }
   ],
   "categories": {
