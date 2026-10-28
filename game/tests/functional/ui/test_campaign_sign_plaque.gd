@@ -195,7 +195,10 @@ func test_plaque_resolves_from_theme_roles() -> void:
 	var sign_name := main.get_node(SIGN_NAME_PATH) as Label
 	var rank := main.get_node(SIGN_RANK_PATH) as Label
 	var prestige := main.get_node(SIGN_PRESTIGE_PATH) as Label
-	assert_str(str(plaque.theme_type_variation)).is_equal("PanelCard")
+	# Роль плиты — `PanelCard` с надетым кадром кита: `CampaignArt.mount` дописывает
+	# к роли имя кадра из реестра (T-280), поэтому эталон — полный вариант, а не
+	# голое имя роли.
+	assert_str(str(plaque.theme_type_variation)).is_equal("PanelCard_plate_sign")
 	assert_str(str(sign_name.theme_type_variation)).is_equal("LabelStrong")
 	assert_str(str(rank.theme_type_variation)).is_equal("LabelSecondary")
 	assert_str(str(prestige.theme_type_variation)).is_equal("LabelNumber")

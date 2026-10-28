@@ -50,6 +50,9 @@ var _selected: String = ""
 var _sheet: Texture2D = null
 var _centers: Dictionary = {}  # region -> Vector2, пиксели внутри `size`
 var _radius := 0.0
+## Знак показанной партии (T-280) — кадр атласа носителей. Узел, а не `draw_*`:
+## гард кадра видит то, что лежит в дереве, и носитель обязан быть в нём.
+var _hero_marker: Control = null
 
 
 func _ready() -> void:
@@ -225,6 +228,25 @@ func _layout() -> void:
 	var offset := (size - bounds.size * scale_min) / 2.0 - bounds.position * scale_min
 	for region in pixels:
 		_centers[region] = (pixels[region] as Vector2) * scale_min + offset
+	_place_hero_marker()
+
+
+## В макете герой — фигура всадника, а не цветная точка: знак берётся из атласа
+## носителей экрана и стоит по центру своего гекса, масштабированный тем же
+## `_radius`, что и решётка. Круг в `_draw` остаётся запасным рисунком на случай
+## отсутствующего кадра — без носителя экран обязан остаться читаемым.
+func _place_hero_marker() -> void:
+	if not CampaignArt.has(&"hero_marker"):
+		return
+	if _hero_marker == null:
+		_hero_marker = CampaignArt.overlay(self, &"hero_marker")
+	var hero := "" if _map == null else _map.hero_region
+	_hero_marker.visible = _map != null and _centers.has(hero)
+	if not _hero_marker.visible:
+		return
+	var side := _radius * 0.8
+	_hero_marker.size = Vector2.ONE * side
+	_hero_marker.position = (_centers[hero] as Vector2) - Vector2.ONE * (side / 2.0)
 
 
 func _draw() -> void:
@@ -261,7 +283,7 @@ func _draw() -> void:
 			draw_string(get_theme_font("font", "LabelCaption"),
 				_centers[region] as Vector2 + Vector2(-glyph / 4.0, glyph / 3.0),
 				"?", HORIZONTAL_ALIGNMENT_LEFT, -1, glyph, Color(0.6, 0.58, 0.54))
-		if String(region) == _map.hero_region:
+		if String(region) == _map.hero_region and _hero_marker == null:
 			draw_circle(_centers[region] as Vector2, _radius * 0.28, COLOR_HERO)
 		if String(region) == _selected:
 			_draw_caption(region, pts)

@@ -2,8 +2,8 @@
  "mockup": "design/single_window_layout/all_screens_ui.png (экран «Карта») + реестр docs/21-ux-map-screen.md",
  "generator": "krea2 (ComfyUI) / qwen-image-text-to-image",
  "variants": [
-  "u2_slate_brass (отбор)",
-  "u2b_chromatic (3 плитки)"
+  "u2_slate_brass (отбор: 27 кадров)",
+  "u2b_chromatic (4 плитки)"
  ],
  "method": "контурный генератор scripts/concept_art/generate.py; фон срезан альфа-ключом кита «Герой», обрезка по контенту, вписка в бокс пропорции строки реестра",
  "note": "отбор кадров — ux-review кадрового листа (T-262, D-281); пиксели в git не идут без .import (D-185)",
@@ -149,6 +149,7 @@
     192,
     192
    ],
+   "mount": "stylebox",
    "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 999573128, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/emblems",
    "note": "строка реестра: turn_button"
   },
@@ -212,7 +213,7 @@
     229,
     192
    ],
-   "margin": 24,
+   "margin": 12,
    "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 916148767, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
    "note": "строка реестра: ability_frame"
   },
@@ -222,7 +223,7 @@
     192,
     194
    ],
-   "margin": 24,
+   "margin": 12,
    "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1466045158, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
    "note": "строка реестра: minimap"
   },
@@ -232,7 +233,7 @@
     346,
     192
    ],
-   "margin": 24,
+   "margin": 12,
    "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1874909225, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
    "note": "строка реестра: party_frame"
   },
@@ -242,7 +243,7 @@
     192,
     192
    ],
-   "margin": 24,
+   "margin": 12,
    "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1115039835, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
    "note": "строка реестра: counter_frame"
   },
@@ -252,7 +253,7 @@
     192,
     194
    ],
-   "margin": 24,
+   "margin": 12,
    "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 449112104, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
    "note": "строка реестра: party_block_left"
   },
@@ -262,7 +263,7 @@
     210,
     192
    ],
-   "margin": 24,
+   "margin": 12,
    "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 699685297, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
    "note": "строка реестра: sign_plaque"
   },
@@ -272,7 +273,7 @@
     640,
     127
    ],
-   "margin": 24,
+   "margin": 12,
    "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 475332405, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
    "note": "строка реестра: date_plaque"
   },
@@ -282,7 +283,7 @@
     192,
     283
    ],
-   "margin": 24,
+   "margin": 12,
    "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1226297836, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
    "note": "строка реестра: tile_city"
   },
@@ -292,9 +293,9 @@
     519,
     192
    ],
-   "margin": 24,
+   "margin": 12,
    "source": "krea2 (ComfyUI) / qwen-image-text-to-image, спек campaign_ui_spec.json, вариант u2_slate_brass, seed 1157121478, кадр 1024×1024, эталон — кропы макета 10 etalons_campaign/plates",
-   "note": "строка реестра: —"
+   "note": "строка реестра: counter_frame (плита полосы)"
   }
  }
 }

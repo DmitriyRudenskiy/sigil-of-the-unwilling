@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Укладка кадров контура на носители экрана «Карта» (T-262, D-281).
+"""Укладка кадров контура на носители экрана «Карта» (T-274, D-281).
 
 Кадры рисует `scripts/concept_art/generate.py` по спеке
 `campaign_ui_spec.json` (отбор — ux-review кадрового листа, 2026-07-29: вариант
@@ -70,8 +70,11 @@ TARGETS: dict[str, tuple[str, str, tuple[int, int], str, str]] = {
     "camp_plate_sign": ("u2_slate_brass", "plate_sign", (256, 48), "9-slice", "sign_plaque"),
     "camp_plate_date": ("u2_slate_brass", "plate_date", (256, 48), "9-slice", "date_plaque"),
     "camp_plate_strip": ("u2_slate_brass", "plate_strip", (96, 256), "9-slice", "tile_city"),
-    "camp_plate_panel": ("u2_slate_brass", "plate_panel", (640, 128), "9-slice", "—"),
+    "camp_plate_panel": ("u2_slate_brass", "plate_panel", (640, 128), "9-slice", "counter_frame (плита полосы)"),
 }
+# Носитель, который едет ФОНОМ узла (stylebox), а не иконкой рядом с подписью:
+# диск узла хода — это сама кнопка (пустой центр под надписью «ХОД»), а не знак.
+STYLEBOX = {"turn_button"}
 MARGIN = {"9-slice": 24}
 PLATE_SHORT = 192    # короткая сторона плиты: margin 24 + центр, который тянется
 PLATE_LONG = 640     # потолок длинной стороны (бюджет [[17-ui-style-guide]] §6.1)
@@ -123,6 +126,7 @@ def main() -> int:
             "kind": kind,
             "size": [box[0], box[1]],
             **({"margin": MARGIN[kind]} if kind in MARGIN else {}),
+            **({"mount": "stylebox"} if name in STYLEBOX else {}),
             "source": (
                 f"{GENERATOR}, спек campaign_ui_spec.json, вариант {variant}, "
                 f"seed {rec.get('seed', '?')}, кадр {'×'.join(map(str, rec.get('size', ['?', '?'])))}, "
@@ -142,11 +146,11 @@ def main() -> int:
                 {
                     "mockup": "design/single_window_layout/all_screens_ui.png (экран «Карта») + реестр docs/21-ux-map-screen.md",
                     "generator": GENERATOR,
-                    "variants": ["u2_slate_brass (отбор)", "u2b_chromatic (3 плитки)"],
+                    "variants": ["u2_slate_brass (отбор: 27 кадров)", "u2b_chromatic (4 плитки)"],
                     "method": "контурный генератор scripts/concept_art/generate.py; "
                     "фон срезан альфа-ключом кита «Герой», обрезка по контенту, "
                     "вписка в бокс пропорции строки реестра",
-                    "note": "отбор кадров — ux-review кадрового листа (T-262, D-281); "
+                    "note": "отбор кадров — ux-review кадрового листа (T-274, D-281); "
                     "пиксели в git не идут без .import (D-185)",
                     "files": files,
                 },

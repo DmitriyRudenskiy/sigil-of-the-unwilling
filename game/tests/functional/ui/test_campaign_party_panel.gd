@@ -210,7 +210,15 @@ func test_hud_elements_resolve_from_theme_roles() -> void:
 	# резолвится в 16 — ровно те 16, от которых 7.17 и уходит).
 	var base := load("res://assets/theme/game_theme.tres") as Theme
 	# Счётчики — «числа/статы» гайда §2: `LabelNumber` (20, PT Mono, пергамент).
-	var value := main.get_node(COUNTER_BAR_PATH).get_child(0).get_node("Value") as Label
+	# Ячейка ищется по имени: первым ребёнком полосы стоит плита-носитель (T-280).
+	var bar := main.get_node(COUNTER_BAR_PATH) as Control
+	var first := ""
+	for child in bar.get_children():
+		if String(child.name).begins_with("Counter_"):
+			first = String(child.name)
+			break
+	assert_str(first).is_not_empty()
+	var value := bar.get_node(NodePath(first)).get_node("Value") as Label
 	assert_str(str(value.theme_type_variation)).is_equal("LabelNumber")
 	assert_int(value.get_theme_font_size("font_size")).is_equal(
 		int(base.get_font_size(&"font_size", &"LabelNumber")))
@@ -220,14 +228,15 @@ func test_hud_elements_resolve_from_theme_roles() -> void:
 	assert_str(str(date.theme_type_variation)).is_equal("LabelSecondary")
 	assert_int(date.get_theme_font_size("font_size")).is_equal(
 		int(base.get_font_size(&"font_size", &"LabelSecondary")))
-	# Полоса кнопок и слоты — роль `ButtonAction`, а не дефолт `Button`.
+	# Полоса кнопок и слоты — роль `ButtonAction` с плитой кита (носитель дописан
+	# к роли именем варианта темы, T-280), а не дефолт `Button`.
 	var turn := main.get_node(TOP_BUTTONS_PATH + "/TurnButton") as Button
-	assert_str(str(turn.theme_type_variation)).is_equal("ButtonAction")
+	assert_str(str(turn.theme_type_variation)).is_equal("ButtonAction_turn_button")
 	for slot in _slots(main):
-		assert_str(str(slot.theme_type_variation)).is_equal("ButtonAction")
-	# Панель отряда — та же карточка поля, что панель целей.
+		assert_str(str(slot.theme_type_variation)).is_equal("ButtonAction_plate_slot")
+	# Панель отряда — та же карточка поля, что панель целей, только с плитой кита.
 	var panel := main.get_node(PARTY_PANEL_PATH) as PanelContainer
-	assert_str(str(panel.theme_type_variation)).is_equal("PanelCard")
+	assert_str(str(panel.theme_type_variation)).is_equal("PanelCard_plate_party")
 
 
 ## ── 7.16 — чекер состава кадра ──────────────────────────────────────────────

@@ -148,6 +148,9 @@ var _party_slots: Array[Button] = []
 ## (K-M16), слой только печатает её числа (D-200).
 var _composition: CampaignComposition = null
 var _sign_plaque: PanelContainer = null
+## Чипы плашки имени (T-280): рисунки без контролов, живут у корня слоя и
+## прячутся вместе с плашкой — иначе голые иконки остались бы на пустом кадре.
+var _sign_chips: Array[Control] = []
 var _sign_name: Label = null
 var _sign_rank: Label = null
 var _sign_prestige: Label = null
@@ -259,7 +262,12 @@ func is_turn_enabled() -> bool:
 
 func _build() -> void:
 	name = "CampaignHud"
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# `set_anchors_and_offsets_preset`, а не `set_anchors_preset`: второй сохраняет
+	# текущий прямоугольник, а он у узла под `CanvasLayer` — размер на момент
+	# создания, не кадр. Квадрат 1920×1920 при окне 1920×1080 опускал нижнюю полосу
+	# (0.85·1920 = 1632) за нижний край кадра; ловит
+	# `test_frame_composition_coverage_is_complete`.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	# Слой не имеет права перехватывать ввод кампании: клики проходят сквозь
 	# HUD, а кнопки (дети) берут своё как обычно.
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -377,6 +385,40 @@ func _build() -> void:
 	_build_minimap()
 	_build_reset_tile()
 	_build_tutorial_overlay()
+	# Носители рисунка — последний шаг: блок должен стоять на своей клетке, а
+	# фон надевается на готовый узел (T-280).
+	_apply_atlas()
+
+
+## Носители рисунка (T-280, D-281 4.4): строка `art` реестра и есть id кадра
+## атласа — экран надевает то, что объявлено в реестре, а не список носителей,
+## переписанный в коде руками. Строки без кадра в этом ките (`IconRegistry`,
+## тайлы карты) проходят мимо. Строки-контейнеры (`PartySlots`, ячейки полосы)
+## в проходе не участвуют: ребёнок контейнера стал бы его ячейкой, — их носит
+## тот, кто строит содержимое (`_rebuild_party_slots`, `_build_counter_bar`).
+func _apply_atlas() -> void:
+	for row in CampaignScreenMap.ROWS:
+		var art_id: StringName = row.get("art", &"")
+		if not CampaignArt.has(art_id):
+			continue
+		var node_name := String(row.get("node", ""))
+		if node_name == "":
+			# Строка без узла: чипы плашки, шестерня даты и знак героя — рисунки,
+			# их вешает тот, кто строит свой блок (`_build_sign_plaque`,
+			# `_build_date_label`, `_place_hero_marker`).
+			continue
+		var node := find_child(node_name, true, false) as Control
+		# `PanelContainer` — контейнер, но фона он не теряет: свой stylebox `panel`
+		# и есть его плита. Чистые контейнеры макета (`PartySlots`, ячейки полосы)
+		# в проходе не участвуют: их носит тот, кто строит содержимое.
+		if node != null and (not node is Container or node is PanelContainer):
+			CampaignArt.mount(node, art_id)
+	# Плита столбца тайлов своей строки не имеет: её клетка — объединение четырёх
+	# тайлов, и лежит она под ними, иначе закрыла бы глифы.
+	var strip := CampaignArt.overlay(_top_row, &"plate_strip")
+	CampaignScreenMap.apply_rect_union(
+		strip, [&"tile_city", &"tile_party", &"tile_menu", &"tile_reset"])
+	_top_row.move_child(strip, 0)
 
 
 ## Место блока по карте элементов макета (D-281): координаты берутся из реестра,
@@ -411,6 +453,7 @@ func _build_counter_bar() -> void:
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bar)
 	_place(bar, &"counter_frame")
+	CampaignArt.mount(bar, &"plate_panel")
 	for row in CounterRegistry.rendered_rows():
 		var box := HBoxContainer.new()
 		box.name = "Counter_%s" % String(row.get("id", &""))
@@ -420,14 +463,19 @@ func _build_counter_bar() -> void:
 		# строки своё место в полосе, и сосед не едет, когда счётчик скрыт.
 		# Идентификатор строки счётчика в реестре экрана с префиксом (`counter_food`),
 		# в реестре счётчиков — без (`food`): узел и ячейка ищутся по одному имени.
-		_place_in(box, &"counter_%s" % String(row.get("id", &"")), &"counter_frame")
+		var cell_id := &"counter_%s" % String(row.get("id", &""))
+		_place_in(box, cell_id, &"counter_frame")
+		# Плита ячейки — ребёнок полосы, а не ячейки: внутри `HBoxContainer` она
+		# стала бы третьей колонкой и раздвинула иконку с числом.
+		var plate := CampaignArt.overlay(bar, &"plate_counter")
+		_place_in(plate, cell_id, &"counter_frame")
 		box.alignment = BoxContainer.ALIGNMENT_CENTER
 		var icon := TextureRect.new()
 		icon.name = "Icon"
 		icon.custom_minimum_size = Vector2(24, 24)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.texture = CounterRegistry.icon(row)
+		icon.texture = _counter_icon(row, cell_id)
 		box.add_child(icon)
 		var value := Label.new()
 		value.name = "Value"
@@ -439,6 +487,15 @@ func _build_counter_bar() -> void:
 		box.add_child(value)
 		bar.add_child(box)
 		_counters[row.get("id", &"")] = box
+
+
+## Иконка счётчика: кадр кита, если строка реестра экрана его называет, иначе —
+## процедурная иконка реестра счётчиков (`IconRegistry`): часть ресурсов кадра
+## ещё не имеет, и полоса не имеет права показывать пустоту вместо них.
+func _counter_icon(row: Dictionary, cell_id: StringName) -> Texture2D:
+	var art_id: StringName = CampaignScreenMap.row_by_id(cell_id).get("art", &"")
+	return CampaignArt.texture(art_id) if CampaignArt.has(art_id) \
+		else CounterRegistry.icon(row)
 
 
 ## 7.11 — дата макета. В макете она живёт в панели миникарты (левый нижний
@@ -454,6 +511,10 @@ func _build_date_label() -> void:
 	date.name = DATE_LABEL_NAME
 	add_child(date)
 	_place(date, &"date_plaque")
+	# Шестерня даты — строка реестра без узла: это рисунок плашки, а не контрол,
+	# нажимать на неё нечего.
+	var gear := CampaignArt.overlay(self, &"gear_date")
+	_place(gear, &"date_gear")
 	date.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	date.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# Дата — вторичная строка (гайд §2, `LabelSecondary` 16): она не счётчик, но
@@ -578,6 +639,9 @@ func _rebuild_party_slots(capacity: int) -> void:
 		# подписывает их `_refresh_party_panel`.
 		slot.disabled = true
 		slot.pressed.connect(_on_party_slot_pressed)
+		# Плита слота (T-280): строка `party_block_*` называет носитель, а слоты
+		# пересоздаются при смене ёмкости партии, поэтому вешаются здесь.
+		CampaignArt.mount(slot, &"plate_slot")
 		# Первые четыре слота — левый блок 2×2, остальные — правый (D-281).
 		(_party_slots_row if i < PARTY_BLOCK_LEFT_SLOTS else _party_slots_right).add_child(slot)
 		_party_slots.append(slot)
@@ -652,6 +716,15 @@ func _build_sign_plaque() -> void:
 	panel.visible = false
 	add_child(panel)
 	_place(panel, &"sign_plaque")
+	# Чипы ресурсов плашки — строки реестра без узлов: рисунки, стоящие по своим
+	# клеткам поверх плашки. Числа у них нет, поэтому и контрола нет (D-200).
+	for chip_row in [
+		[&"sign_coins", &"chip_coins"], [&"sign_house", &"chip_house"],
+		[&"sign_food", &"chip_food"], [&"sign_apple", &"chip_apple"],
+	]:
+		var chip := CampaignArt.overlay(self, chip_row[1])
+		_place(chip, chip_row[0])
+		_sign_chips.append(chip)
 	var column := VBoxContainer.new()
 	column.name = "SignColumn"
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -710,6 +783,8 @@ func _refresh_sign_plaque() -> void:
 		return
 	var sign_id := "" if _composition == null else str(_composition.sign_id)
 	_sign_plaque.visible = _composition != null and sign_id != ""
+	for chip in _sign_chips:
+		chip.visible = _sign_plaque.visible
 	if not _sign_plaque.visible:
 		return
 	_sign_name.text = _composition.sign_display_name(sign_id)

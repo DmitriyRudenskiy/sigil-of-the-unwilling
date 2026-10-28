@@ -22,6 +22,15 @@
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/checkbox_unchecked.png" id="15_cb_unchecked"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/progress_bars/fill_mana.png" id="24_fill_mana"]
 
+; Носители экрана «Карта» (T-262, D-281 группа 4) — кадр кита
+; `assets/ui/campaign_screen/`, нарезанный скриптом (не макет). Тот же атлас
+; `MANIFEST.json` читает `scripts/ui/campaign_screen_atlas.py` и `CampaignArt`.
+[ext_resource type="Texture2D" path="res://assets/ui/campaign_screen/turn_button.png" id="25_camp_turn"]
+[ext_resource type="Texture2D" path="res://assets/ui/campaign_screen/plate_slot.png" id="26_camp_slot"]
+[ext_resource type="Texture2D" path="res://assets/ui/campaign_screen/plate_party.png" id="27_camp_party"]
+[ext_resource type="Texture2D" path="res://assets/ui/campaign_screen/plate_sign.png" id="28_camp_sign"]
+[ext_resource type="Texture2D" path="res://assets/ui/campaign_screen/plate_ability.png" id="29_camp_ability"]
+
 [ext_resource type="FontFile" path="res://assets/fonts/PT_Serif-Regular.ttf" id="8_serif"]
 [ext_resource type="FontFile" path="res://assets/fonts/PT_Serif-Bold.ttf" id="9_serif_bold"]
 [ext_resource type="FontFile" path="res://assets/fonts/PT_Mono-Regular.ttf" id="10_mono"]
@@ -1105,6 +1114,64 @@ texture_margin_top = 6.0
 texture_margin_right = 6.0
 texture_margin_bottom = 6.0
 
+; --- плиты экрана «Карта» (T-262, D-281 группа 4) ---
+; `texture_margin_*` и `content_margin_*` = поле 9-slice из атласа (`margin: 24` в
+; `campaign_screen/MANIFEST.json`): подпись не должна лечь на латунный кант, а
+; растягивать кант нельзя (К-8 для плит кита — тот же приём, что `panel_bg`).
+; Диск хода — не плита (`kind: иконка`, `mount: stylebox`): у него нет канта,
+; поэтому маржа взята четвертью носителя (192×192): круглая фаска угла остаётся
+; целой, а экватор растягивается симметрично (К-8b требует ненулевой 9-slice и у круга).
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_camp_turn"]
+texture = ExtResource("25_camp_turn")
+texture_margin_left = 48.0
+texture_margin_top = 48.0
+texture_margin_right = 48.0
+texture_margin_bottom = 48.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_camp_slot"]
+texture = ExtResource("26_camp_slot")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_camp_party"]
+texture = ExtResource("27_camp_party")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_camp_sign"]
+texture = ExtResource("28_camp_sign")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_camp_ability"]
+texture = ExtResource("29_camp_ability")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+
 [resource]
 Panel/styles/panel = SubResource("StyleBoxTexture_panel")
 Panel/styles/window = SubResource("StyleBoxFlat_window")
@@ -1561,3 +1628,28 @@ FormRow/constants/separation = 8
 ; и не «секция» (24), а соседние элементы одной секции.
 FormStack/base_type = "VBoxContainer"
 FormStack/constants/separation = 16
+
+; --- носители экрана «Карта» (T-262, D-281 группа 4) ---
+; Имя варианта = `<Роль>_<кадр>`: `CampaignArt.mount` дописывает к роли узла имя
+; кадра из атласа, поэтому в экране нет ни одного `add_theme_stylebox_override`
+; (override сильнее варианта и делает узел недосягаемым для кита — T-147).
+; Состояния кнопки объявлены одной текстурой: у `StyleBoxTexture` нет тонировки,
+; признаком состояния остаётся цвет подписи (его даёт базовая роль).
+ButtonAction_turn_button/base_type = "ButtonAction"
+ButtonAction_turn_button/styles/normal = SubResource("StyleBoxTexture_camp_turn")
+ButtonAction_turn_button/styles/hover = SubResource("StyleBoxTexture_camp_turn")
+ButtonAction_turn_button/styles/pressed = SubResource("StyleBoxTexture_camp_turn")
+ButtonAction_turn_button/styles/hover_pressed = SubResource("StyleBoxTexture_camp_turn")
+ButtonAction_turn_button/styles/disabled = SubResource("StyleBoxTexture_camp_turn")
+ButtonAction_plate_slot/base_type = "ButtonAction"
+ButtonAction_plate_slot/styles/normal = SubResource("StyleBoxTexture_camp_slot")
+ButtonAction_plate_slot/styles/hover = SubResource("StyleBoxTexture_camp_slot")
+ButtonAction_plate_slot/styles/pressed = SubResource("StyleBoxTexture_camp_slot")
+ButtonAction_plate_slot/styles/hover_pressed = SubResource("StyleBoxTexture_camp_slot")
+ButtonAction_plate_slot/styles/disabled = SubResource("StyleBoxTexture_camp_slot")
+PanelCard_plate_party/base_type = "PanelCard"
+PanelCard_plate_party/styles/panel = SubResource("StyleBoxTexture_camp_party")
+PanelCard_plate_sign/base_type = "PanelCard"
+PanelCard_plate_sign/styles/panel = SubResource("StyleBoxTexture_camp_sign")
+PanelCard_plate_ability/base_type = "PanelCard"
+PanelCard_plate_ability/styles/panel = SubResource("StyleBoxTexture_camp_ability")

@@ -38,6 +38,26 @@ const _THEME_PATH := "res://assets/theme/game_theme.tres"
 const _ORPHAN_SECTIONS_USED := {}
 
 var _nodes: Array[Node] = []
+var _roots := {}
+
+
+## Класс, на котором стоит узел варианта. `base_type` темы обязан быть либо
+## классом движка, либо другим вариантом: Godot 4 умеет цепочки (`base_type`
+## указывает на вариант, а движок идёт по ней до конца), так устроены носители
+## кита экрана «Карта» — `ButtonAction_plate_slot` наследует токены `ButtonAction`
+## (T-280). Цепочка обязана кончаться классом-Control; цикл или висячий вариант —
+## пустая строка, то есть провал.
+func _root_class(base_type: String) -> String:
+	if _roots.is_empty():
+		_roots = _bases()
+	var current := base_type
+	for _step in _roots.size() + 2:
+		if ClassDB.class_exists(current):
+			return current if ClassDB.is_parent_class(current, "Control") else ""
+		if not _roots.has(current):
+			return ""
+		current = String(_roots[current])
+	return ""
 
 
 func after_test() -> void:
@@ -77,13 +97,14 @@ func _styles() -> Dictionary:
 
 
 func _node(base_type: String, variation: String) -> Control:
-	assert_bool(ClassDB.class_exists(base_type)).is_true() \
-		.override_failure_message("тема объявляет базовый тип %s, которого нет в ClassDB" % base_type)
-	assert_bool(ClassDB.is_parent_class(base_type, "Control")).is_true() \
-		.override_failure_message("вариант %s объявлен на %s — не Control" % [variation, base_type])
-	var node := ClassDB.instantiate(base_type) as Control
+	var root := _root_class(base_type)
+	assert_bool(root != "").is_true() \
+		.override_failure_message(
+			"тема объявляет базовый тип %s (секция %s), а в конце цепочки нет класса-Control"
+			% [base_type, variation])
+	var node := ClassDB.instantiate(root) as Control
 	assert_object(node).is_not_null() \
-		.override_failure_message("не инстанцируется %s (секция %s)" % [base_type, variation])
+		.override_failure_message("не инстанцируется %s (секция %s)" % [root, variation])
 	_nodes.append(node)
 	node.theme = _THEME
 	if variation != "":
@@ -109,11 +130,9 @@ func test_theme_sections_are_types_or_variations() -> void:
 	var orphans := PackedStringArray()
 	for name in bases.keys():
 		var base_type: String = bases[name]
-		if not ClassDB.class_exists(base_type):
-			bad.append("%s: базовый тип %s не существует" % [name, base_type])
-			continue
-		if not ClassDB.is_parent_class(base_type, "Control"):
-			bad.append("%s: базовый тип %s не Control" % [name, base_type])
+		if _root_class(base_type) == "":
+			bad.append("%s: базовый тип %s — ни класс движка, ни вариант с классом в конце" % [
+				name, base_type])
 			continue
 		var declared := String(_THEME.get_type_variation_base(StringName(name)))
 		if declared != base_type:

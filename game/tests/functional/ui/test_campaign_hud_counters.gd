@@ -80,9 +80,16 @@ func test_counter_bar_is_built_from_registry() -> void:
 	var bar := _main.get_node_or_null(COUNTER_BAR_PATH) as Control
 	assert_object(bar).is_not_null()
 	var rendered := Counters.rendered_rows()
-	assert_int(bar.get_child_count()).is_equal(rendered.size())
+	# Дети полосы — ячейки реестра и носители рисунка (плита полосы и плита
+	# каждой ячейки, T-280): ряд сверяется по ячейкам, рисунок строкой реестра
+	# не является и в порядок ряда не вмешивается.
+	var cells: Array[Node] = []
+	for child in bar.get_children():
+		if String(child.name).begins_with("Counter_"):
+			cells.append(child)
+	assert_int(cells.size()).is_equal(rendered.size())
 	for i in rendered.size():
-		var box := bar.get_child(i)
+		var box := cells[i]
 		assert_str(String(box.name)).is_equal("Counter_%s" % String(rendered[i].get("id", &"")))
 		# Иконка — из реестра ресурсов, а не эмодзи в тексте: макет рисует иконки.
 		assert_object(box.get_node("Icon") as TextureRect).is_not_null()
