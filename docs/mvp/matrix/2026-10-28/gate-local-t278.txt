@@ -1,0 +1,12 @@
+# гейт 2026-10-28 после 37ae853e (T-278, опись «только в реестрах») — выключка полного run_tests.sh
+# GdUnit 3584/0/0; MCP collected=110, passed=108 skipped=2 failed=0 errors=0 → VERDICT GREEN (ни одной readiness-жертвы);
+# GENART SKIPPED (нет PIL), READINESS-CLASSIFIER selftest GREEN; doc_gates GREEN до коммита.
+Overall Summary: 3584 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+================== 108 passed, 2 skipped in 287.08s (0:04:47) ==================
+PYTEST LEDGER: passed=108 skipped=2 failed=0 errors=0 collected=110
+MCP JUNIT: passed=108 skipped=2 failed=0 errors=0
+MCP VERDICT: GREEN
+GENART: SKIPPED (нет pytest или PIL в python3 — pip install pytest pillow)
+READINESS-CLASSIFIER: selftest GREEN
