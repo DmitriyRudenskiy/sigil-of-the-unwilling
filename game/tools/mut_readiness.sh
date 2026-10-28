@@ -20,12 +20,14 @@ cd "$(dirname "$0")/.."
 cp "$S" /tmp/mcp_srv_readiness.bak
 trap 'cp /tmp/mcp_srv_readiness.bak "$S"' EXIT
 
-fail_cases() {  # ожидаемые падение теста; печатает FAILED-имена
+# Прогон на мутант ОДИН и имена берутся из него же: второй прогон того же
+# мутанта добавлял в список тесты, упавшие по соседству (живые порты), и
+# «кто убит» переставало быть фактом об этом мутанте.
+run_cases() {  # имена упавших тестов одного прогона (T — целевой файл)
   "$G" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd \
       --ignoreHeadlessMode -c -a "res://$T" 2>&1 \
     | sed 's/\x1b\[[0-9;]*m//g' | grep "FAILED" | sed 's/.*> //' | cut -d' ' -f1 | sort -u
 }
-green() { [ -z "$(fail_cases)" ]; }
 
 apply() {
 python3 - "$1" <<'PY'
@@ -57,7 +59,11 @@ PY
 }
 
 for m in 1 2 3 4 5; do
+  # Откат перед КАЖДЫМ мутантом: иначе мутант 2 применяется поверх мутанта 1 и
+  # «убитые» тесты рассказывают историю уже несуществующей правки.
+  cp /tmp/mcp_srv_readiness.bak "$S"
   if ! apply "$m"; then echo "MUT$m: APPLY FAILED"; continue; fi
-  if green; then echo "MUT$m: SURVIVED (тесты зелёные — защита не покрыта)"
-  else echo "MUT$m: killed -> $(fail_cases | tr '\n' ' ')"; fi
+  victims="$(run_cases)"
+  if [ -z "$victims" ]; then echo "MUT$m: SURVIVED (тесты зелёные — защита не покрыта)"
+  else echo "MUT$m: killed -> $(echo "$victims" | tr '\n' ' ')"; fi
 done
