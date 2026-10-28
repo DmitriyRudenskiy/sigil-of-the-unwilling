@@ -13,11 +13,21 @@ const _UnitSprite = preload("res://scenes/ui/unit_sprite.tscn")
 const _HeroFigure = preload("res://scenes/ui/hero_figure.tscn")
 const _RetaliationArrow = preload("res://scenes/ui/retaliation_arrow.tscn")
 
-## Задний план и биом поля выбираются по мировой местности клетки врага
-## (`BattleState.background_terrain`), а не по типу боевой местности: ключи
-## «snow»/«swamp» — биомы мирового атласа, которых в перечне `HexTerrain` нет.
-## Местность без кадра = штатный вид (clear color + тайлы grass), а не пустой кадр.
-const BACKGROUNDS := {
+## Ключ мировой местности выбирает и носитель, и режим поля (T-269 → (б),
+## `alpha-battle-field`). Выбор делает сам носитель, а не флаг.
+##
+## `FIELD_ART` — кадр, который СТАНОВИТСЯ ПОЛЕМ: у него нет собственной
+## гекс-сетки, поэтому он вписывается в многоугольник доски, а тайлы гаснут
+## (`uses_art_field`). Претензия T-269 «у арта своя сетка, она расходится с
+## нашей» снята самим носителем: луг владельца сетки не имеет.
+##
+## `BACKDROP_ART` — пейзаж ЗА краями поля: у него своя нарисованная сетка и
+## декор внутри кадра, поэтому полем правит плитка. Местность без утверждённого
+## кадра идёт тем же путём автоматически — пустой путь = clear color + тайлы.
+const FIELD_ART := {
+	"grass": "res://assets/ui/backgrounds/battle_meadow.png",
+}
+const BACKDROP_ART := {
 	"snow": "res://assets/ui/backgrounds/battle_snow.png",
 	"swamp": "res://assets/ui/backgrounds/battle_swamp.png",
 }
@@ -25,12 +35,6 @@ const BIOMES := {
 	"snow": TileAtlas.Biome.SNOW,
 	"swamp": TileAtlas.Biome.SWAMP,
 }
-
-## Промежуточный вид до тех пор, пока у носителя нет кадра местности без
-## собственной гекс-сетки: `true` — кадр поля боя становится самим полем (тайлы
-## гаснут, границу рисует `BoardOutline`), `false` — штатный вид тайлами, кадр
-## виден только за краями поля. Решение по кадру — за владельцем (ux-review).
-const ART_AS_FIELD := false
 
 ## Наклон плоскости поля: 1.0 — соты лежат плашмя (вид до alpha-battle-field),
 ## меньше — поле читается скошенной плоскостью. Это только рисунок: правила боя
@@ -83,10 +87,10 @@ func setup() -> void:
 	if not get_viewport().size_changed.is_connected(fit_camera):
 		get_viewport().size_changed.connect(fit_camera)
 
-## Поле «кадр вместо тайлов» имеет смысл только когда кадр выбранной местности
-## действительно под полем.
+## Поле рисует арт выбранной местности (`FIELD_ART`) — тайлы и обводка доски
+## тогда только спорят с кадром.
 func uses_art_field() -> bool:
-	return ART_AS_FIELD and _background != null and _background.texture != null
+	return FIELD_ART.has(_background_terrain) and _background != null and _background.texture != null
 
 
 func paint_field() -> void:
@@ -101,11 +105,10 @@ func paint_field() -> void:
 	if variants.is_empty():
 		push_error("TileAtlas: у биома %s нет базовых тайлов" % TileAtlas.BIOME_NAMES[biome])
 		return
-	# Два вида поля под выбранным кадром местности, переключаются одной константой
-	# `ART_AS_FIELD` (кадр вместо тайлов / тайлы поверх кадра) — см. вердикт
-	# ux-review: кадр владельца несёт собственную гекс-сетку, она расходится с
-	# нашей. Геометрия поля в обоих случаях остаётся на тайлмапе: `field_size()`
-	# и `fit_camera` считают её по залитым клеткам.
+	# Два вида поля выбирает ключ местности: `FIELD_ART` — кадр становится полем
+	# и тайлы гаснут, `BACKDROP_ART` (или местность без кадра) — полем правит
+	# плитка, кадр остаётся пейзажем за краями. Геометрия поля в обоих случаях на
+	# тайлмапе: `field_size()` и `fit_camera` считают её по залитым клеткам.
 	var art_field := uses_art_field()
 	_tile_map.modulate.a = 0.0 if art_field else 1.0
 	# Декоративная обводка ±RING нужна, когда вокруг поля только clear color: она
@@ -198,7 +201,7 @@ func field_center() -> Vector2:
 
 func set_background(terrain: String) -> void:
 	_background_terrain = terrain
-	var path: String = str(BACKGROUNDS.get(terrain, ""))
+	var path: String = str(FIELD_ART.get(terrain, BACKDROP_ART.get(terrain, "")))
 	var tex: Texture2D = null
 	if path != "" and ResourceLoader.exists(path):
 		tex = load(path) as Texture2D
