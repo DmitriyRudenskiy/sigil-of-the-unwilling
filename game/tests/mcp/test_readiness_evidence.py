@@ -170,6 +170,22 @@ def test_evidence_names_absent_godot_instead_of_blaming_proc() -> None:
     text = readiness_evidence(snapshot=empty)
     assert "ни одного Godot-процесса" in text
     assert "нет /proc" not in text
+    # Третье состояние — снапшот вообще без измерения: «никого нет» наврёт и тут.
+    partial = {k: v for k, v in empty.items() if k != "godot_blockage"}
+    assert "не измерено" in readiness_evidence(snapshot=partial)
+
+
+def test_evidence_survives_an_empty_snapshot() -> None:
+    """Канал не имеет права быть второй поломкой: пустой снапшот — отчёт, не KeyError.
+
+    `readiness_evidence` вызывается из текста другой ошибки; исключение здесь
+    съело бы и причину, и подпись классификатора D-265 — ровно та цена, которую
+    заплатили за `port=self.port` (T-275).
+    """
+    text = readiness_evidence(snapshot={})
+    assert text.startswith("среда в момент отказа:")
+    assert "None" not in text
+    assert "не прочитано" in text
 
 
 def test_boot_trace_tail_separates_missing_from_empty(tmp_path: Path) -> None:

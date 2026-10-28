@@ -248,6 +248,29 @@ def probe_listen(port: int | None, host: str = "127.0.0.1", timeout: float = 1.0
         return f"{host}:{port} — не проверено ({exc})"
 
 
+def _val(value: Any, suffix: str = "") -> str:
+    """Значение снимка в отчёте: отсутствующий ключ не имеет права печатать «None».
+
+    Отказ readiness собирается в момент, когда ломаться уже некуда: канал
+    наблюдал за чужой бедой и обязан переживать любой снапшот. Урок `self.port`
+    (T-275) — наблюдатель не имеет права быть второй поломкой.
+    """
+    return "не прочитано" if value is None else f"{value}{suffix}"
+
+
+def _blockage_line(snap: dict[str, Any]) -> str:
+    """«Где стоит движок» — три разных новости, а не одна строка.
+
+    Список точек · «ни одного Godot-процесса» (движок уже умер — винить /proc
+    значит искать его руками) · «не измерено» (снапшот пришёл не из /proc).
+    """
+    if snap.get("godot_blockage"):
+        return str(snap["godot_blockage"])
+    if "godot_blockage" not in snap:
+        return "не измерено (снапшот без точки стояния)"
+    return "ни одного Godot-процесса (или /proc недоступен)"
+
+
 def readiness_evidence(
     trace_path: str = "",
     snapshot: dict[str, Any] | None = None,
@@ -258,13 +281,13 @@ def readiness_evidence(
     snap = env_snapshot() if snapshot is None else snapshot
     return (
         "среда в момент отказа: "
-        f"mem_available={_mb(snap['mem_available_mb'])} из "
+        f"mem_available={_mb(snap.get('mem_available_mb'))} из "
         f"{_mb(snap.get('mem_total_mb'))} "
-        f"swap_free={snap['swap_free_mb']}/{snap['swap_total_mb']}MB "
-        f"load1={snap['load1']} godot_procs={snap['godot_processes']}"
-        f"(rss={snap['godot_rss_mb']}MB, state={snap['godot_states']}) "
-        f"psi_memory={snap['psi_memory']}\n"
-        f"  где стоит движок: {snap.get('godot_blockage') or 'ни одного Godot-процесса (или /proc недоступен)'}\n"
+        f"swap_free={_val(snap.get('swap_free_mb'))}/{_val(snap.get('swap_total_mb'), 'MB')} "
+        f"load1={_val(snap.get('load1'))} godot_procs={_val(snap.get('godot_processes'))}"
+        f"(rss={_val(snap.get('godot_rss_mb'), 'MB')}, state={_val(snap.get('godot_states'))}) "
+        f"psi_memory={_val(snap.get('psi_memory'))}\n"
+        f"  где стоит движок: {_blockage_line(snap)}\n"
         f"  порт: {probe_listen(port)}\n"
         f"  boot-трейс: {boot_trace_tail(trace_path)}"
         f"\n  лог запуска: {launch_log_tail(launch_log)}"
