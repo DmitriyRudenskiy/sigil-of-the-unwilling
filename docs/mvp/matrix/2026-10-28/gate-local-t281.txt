@@ -1,0 +1,17 @@
+# гейт 2026-10-29 (смена T-281, база origin/main e2216377 + фиксы канала readiness) — выключка run_tests.sh
+# GdUnit 3587/0/0. MCP: passed=106 skipped=2 failed=1 errors=2 collected=111 → YELLOW (среда, не регрессия, D-265).
+# Три жертвы — подпись «игра не готова за 180 с» (семья T-172), в изоляции на свободном
+# дисплее все три проходят за 7.68 с: DISPLAY=:94 MCP_PORT=9094 pytest test_fog_memory_visual.py::test_explored_but_unseen_terrain_stays_drawn_dimmed
+#   test_settings_menu.py::test_settings_change_persists test_shard_pruning.py::test_prune_shards_no_crash → 3 passed in 7.68s.
+# Пропуски напечатаны по причине (-rs → PYTEST SKIPPED): уровень не молчит ни о чём.
+# Первый прогон смены был НЕВАЛИДЕН (skipped=7, зелёный): комментарий оборвал env-префикс
+# GODOT_PATH → 5 life-cycle тестов пропустились по /Applications/…; см. T-281 и этот фикс.
+Overall Summary: 3587 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://... (см. docs/mvp/CAPTURE-HELPER.md)
+PYTEST LEDGER: passed=106 skipped=2 failed=1 errors=2 collected=111
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+MCP READINESS: YELLOW — 3 error с подпиской readiness (игра не готова за): среда, не регрессия (D-265); тесты обязан переснять владелец либо повторный прогон:
+MCP VERDICT: YELLOW
+MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265)
+READINESS-CLASSIFIER: selftest GREEN
