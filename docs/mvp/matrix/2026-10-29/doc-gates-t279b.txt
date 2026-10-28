@@ -1,0 +1,75 @@
+# doc gates — срез T-279 (сводка 2, мировой слой scripts/world/)
+# команда: bash scripts/doc_gates.sh
+# дата: 2026-10-29; game-гейт не запускался: в диффе нет ни одного .gd/.tscn/.json игры
+
+=== wikilinks, имена файлов, словарь статусов ===
+OK: docs/ links consistent (108 notes checked)
+OK: wikilinks, имена файлов, словарь статусов
+
+=== индекс документации не устарел ===
+OK: 00-INDEX.md актуален (110 заметок)
+OK: индекс документации не устарел
+
+=== доки ↔ код (автолоады, сцены, классы, save-ключи) ===
+факты кода: autoload=15, input_action=5, scene=51, class_name=412, save_key=10
+
+ЕСТЬ В КОДЕ, НЕ УПОМИНАЕТСЯ В ДОКАХ (0):
+
+ДОК ССЫЛАЕТСЯ, ФАЙЛА НЕТ (0):
+
+НАЗВАНО ТОЛЬКО В РЕЕСТРАХ И ЖУРНАЛАХ (102), базлайн 102:
+  [class_name] AdventureUI
+  [class_name] AdventurerRole
+  [class_name] ArchetypeResolver
+  [class_name] ArenaDemoScenario
+  [class_name] ArenaTurnRunner
+  [class_name] ArtifactInventoryScreen
+  [class_name] BalanceProbe
+  [class_name] BattleActionResolver
+  [class_name] BattleDamageResolver
+  [class_name] BattleFX
+  [class_name] BattleFlow
+  [class_name] BattleRules
+  [class_name] BattleSpellBridge
+  [class_name] BattleTerrain
+  [class_name] BattleTurnExecutor
+  [class_name] BoardOutline
+  [class_name] BuilderRole
+  [class_name] CampaignBattle
+  [class_name] CampaignBuildingConstructionService
+  [class_name] CampaignBuildingPlacement
+  … ещё 82
+OK: доки ↔ код (автолоады, сцены, классы, save-ключи)
+
+=== карта hero-экрана ↔ таблица BLOCKS (адреса, узлы, потребители) ===
+HERO-LAYOUT-MAP: блоков 19, адресных строк карты 18
+  расхождений нет
+OK: карта hero-экрана ↔ таблица BLOCKS (адреса, узлы, потребители)
+
+=== контур фаз GDD (состояния, поля реестров, ratchet) ===
+бэклог (только сокращается, D-272):
+  q_without_type: 97 (базлайн 97) OK
+  q_without_priority: 115 (базлайн 115) OK
+  d_without_rejected: 170 (базлайн 170) OK
+  risks_without_number: 10 (базлайн 10) OK
+  dead_paths: 5 (базлайн 5) OK
+  q_ghost_rows: 0 (базлайн 0) OK
+
+GDD-GATE: GREEN
+OK: контур фаз GDD (состояния, поля реестров, ratchet)
+
+=== тесты самих проверщиков ===
+........................................................................ [ 67%]
+...................................                                      [100%]
+107 passed in 2.44s
+OK: тесты самих проверщиков (9 файлов, 9.1.1)
+=== сведённые спеки: структура (T-274) ===
+OPENSPEC SPECS: OK (проверено 87 сведённых спек)
+
+=== карта тестов: рэтчет покрытия и оскопления (T-227) ===
+TESTMAP OK: дыр 82, файлов в группах слияния 145, дублей 0
+
+==========================================
+DOC GATES: GREEN
+
+# exit=0

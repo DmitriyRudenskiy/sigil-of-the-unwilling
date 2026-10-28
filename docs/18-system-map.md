@@ -4,7 +4,7 @@ tags:
   - reference
   - architecture
 status: reference
-date: 2026-10-26
+date: 2026-10-29
 ---
 
 # Карта систем
@@ -65,8 +65,9 @@ date: 2026-10-26
   `party_system.gd`, `population_system.gd`, `threat_system.gd`,
   `chronicle_log.gd`, `sign_system.gd`, `save/`.
 - **`city/`** — город: строительство, районы, обучение, экономика хода.
-- **`world/`** — карта: `map_generator.gd`, `map_renderer.gd`, `map_roads.gd`,
-  `map_threat.gd`, `world_camera.gd`, `world_persistence.gd`.
+- **`world/`** — карта и мировой режим: `map_generator.gd`, `map_renderer.gd`,
+  `map_roads.gd`, `map_threat.gd`, `world_camera.gd`, `world_persistence.gd`;
+  разбор 19 живущих здесь имён — §3а.
 - **`ui/`** — экраны и панели; **`ui_kit/`** пуст (0 `.gd`) — общие виджеты живут in
   `ui/` (FormRow/FormStack) и в теме.
 - **`probe/`** — балансовые роли-разведчики (`CollectorRole.gd`, `SurvivalRole.gd`,
@@ -74,6 +75,60 @@ date: 2026-10-26
 - **`build/`** — генераторы ассетов и сцен; сгенерированные сцены обязаны правиться
   здесь же (T-219: `gen_inventory_scene.gd` — носитель
   `artifact_inventory_screen.tscn`).
+
+## 3а. Мировой слой `scripts/world/`: карта, город, герой
+
+Каталог `world/` — самый большой по числу незамеченных имён (19 из описи T-279),
+и у него двусмысленный статус, который надо называть прямо:
+
+- **Точка входа мирового режима заморожена** (D-157): `scenes/archive/world.tscn`.
+  Замер 2026-10-29 по `grep -rn "archive/world.tscn"` по `.gd`/`.tscn`: сцену
+  грузят **только тесты** (`tests/functional/test_world_bootstrap.gd`,
+  `test_world_scenario.gd`, `test_scene_boot.gd`, `tests/unit/probe/test_trader_role.gd`,
+  `tests/unit/data/test_audio_world_entry.gd`) — из production ни одна кнопка
+  к ней не ведёт. Судьба слоя (удаление vs носитель) — [[QUESTIONS]] Q-M117.
+- **Но сам слой не мёртв:** у **15 из 19** есть production-потребитель вне
+  собственного каталога (замер: `grep -rl "\bИмя\b"` по `scripts/` и `scenes/`,
+  без `scripts/world/`), а стек карты переиспользуется живым экраном —
+  `ui/campaign_hud.gd` держит `MapGenerator`/`MapRenderer`. Сильнее всех
+  привязаны к кампании: `WorldPersistence` (сессия и дата для `main/main.gd` и
+  всего претейна), `CitySerializer` (сейв города в `campaign_composition.gd`),
+  `CityService` (`ui/city_screen.gd`), `PopUnit` (житель в экономике хода,
+  репутации, обучении), `Season` (`campaign_calendar.gd`), `WorkerAssignment`
+  (`economic_turn_processor.gd`). У четырёх — `Borough`, `MapModel`,
+  `WorldInput`, `WorldSpawner` — такого потребителя нет: их держат только
+  мировой слой, тесты и балансовые зонды (`probe/`). Поэтому строка
+  «замороженный мировой режим» относится к **точке входа**, а не к классу:
+  у класса обязан быть живой потребитель, иначе это писатель без читателя.
+
+| Имя | Файл | Ответственность (проверено по коду) | Кто зовёт |
+| --- | --- | --- | --- |
+| `WorldBootstrap` | `world_bootstrap.gd` | статический `run()` сборки мирового режима: `_assert_core_services()`, подъём `scenes/world/map_generator.tscn`, создание `World`, роутера событий, наследования и жизненного цикла героя | `world_controller.gd`, `world_save_load_service.gd`, `world_event_router.gd`, `autoload/services.gd`, `probe/ScenarioPilot.gd` |
+| `WorldController` | `world_controller.gd` | `Node2D`-корень мирового режима: `_ready` вызывает бутстрап, держит `CityManager`, `WorldUIManager`, `WorldStateDelta`, `ShardManager`, обновляет туман (`_on_fog_refreshed`) | `ui/marker_layer.gd`, `entities/hero_controller.gd`, `entities/hero_visual_controller.gd` |
+| `WorldInput` | `world_input.gd` | 28 строк: `_unhandled_input` мира (клик по карте/герою); молчит, если не собраны `map`/`hero`/`camera` или мир в терминальном состоянии (`world.is_terminal()`) | `world_bootstrap.gd`, `map_generator.gd` |
+| `WorldSpawner` | `world_spawner.gd` | расстановка сущностей карты (`village_entity`, `resource_entity`, `enemy_entity`, `chest_entity`, `scroll_entity`), затемнение невидимого (`apply_fog_visibility`), кэш текстур (`_cached_texture`) | `world_bootstrap.gd`, `world_load_context.gd`, `world_interaction_controller.gd`, `probe/*`, `tools/diag_recruit_block.gd` |
+| `WorldPersistence` | `world_persistence.gd` | **живой носитель сессии**: `SaveManager`, `GameSession`, `Chronicle`, дата `{month,week,day}`, `WorldStateDelta`, карта видимости, `reset_session_state()` | `main/main.gd`, `ui/main_menu.gd`, `ui/save_load_screen.gd`, `ui/character_creation_ui.gd`, `campaign/campaign_calendar.gd`, `autoload/services.gd` |
+| `WorldBattleCoordinator` | `world_battle_coordinator.gd` | передача боя (`battle_handoff.gd`), сигналы `battle_world_hide/show_requested`, `enemy_stack_defeated(enemy_cell, army)`; `_create_battle_flow()` | `systems/BattleRewards.gd`, `battle/dnd/battle_factory.gd`, `probe/ScenarioRole.gd`, `world_bootstrap.gd` |
+| `HeroLifecycleSystem` | `hero_lifecycle_system.gd` | смерть и наследник героя, подъём `scenes/ui/death_sequence.tscn` и `chronicle_screen.tscn`, состояние легенды (`get_legend_state()` через `LegendTracker`); ссылки на мир — `WeakRef`, чтобы не держать сцену | `entities/hero_visual_controller.gd`, `world_persistence.gd`, `world_hero_manager.gd`, `world_save_load_service.gd` |
+| `CityManager` | `city_manager.gd` | реестр городов и славы: `register_city(city, make_capital)`, `set_capital`, `add_glory`, сигналы `city_updated`, `cities_changed` (кэш тайл→город, city-hex-layout 4.1), `reputation_changed`, `relocation_completed` | `systems/endgame_controller.gd`, `systems/enemy_growth_system.gd`, `systems/enemy_turn_processor.gd`, мировой слой, `balance/campaign_city_balance_fixture.gd` |
+| `CityData` | `city_data.gd` | данные города и их сигналы (`population_changed`, `boroughs_changed`, `buildings_changed`, `storage_changed`, `relocation_completed`), `enum Faction`, `SERIALIZATION_VERSION = 6`, `ensure_resource_ctx()`, `invalidate_yield()` | **база класса `City`** (`world/city.gd`) — кампанийный город живёт через неё; напрямую — `world/city_service.gd`, `data/race_economy.gd` |
+| `CitySerializer` | `city_serializer.gd` | `serialize`/`deserialize` города и `_migrate_city_data(data, from_version)` — сейв-контракт версии 6 | `campaign/campaign_training_service.gd`, `campaign/campaign_composition.gd`, мировой слой |
+| `CityService` | `city_service.gd` | статические операции над городом: наём (`pop_total`, `_recruit_difficulty(city_level)`, `LeadershipCheck`), оборона (`CampaignDefenseResolver`), воспроизводимость через `set_rng` | `ui/city_screen.gd` (экран города кампании), `systems/weapon_tech_service.gd`, мировой слой |
+| `Borough` | `borough.gd` | район города: `cell`, `level`, `uid`, `net_approval()` по `GameNumbers.APPROVAL_NET_PER_BOROUGH_LEVEL` (вне диапазона уровня — 0, а не падение) | `world/borough_rules.gd`, `world/city_arena_view.gd`, `world/city_building_service.gd`, `world/city_data.gd`, `world/city_serializer.gd` |
+| `PopUnit` | `pop_unit.gd` | житель как единица состояния: `enum State { WORKER, FOLLOWER, MILITIA, SCHOLAR }`, `request_switch` (запросы состояния/тайла применяются не мгновенно), `is_available`, `is_free_follower` | шире всех: `campaign/campaign_training_service.gd`, `campaign/campaign_city.gd`, `city/reputation_system.gd`, `economy/economic_turn_processor.gd`, `entities/follower_system.gd`, `demographics/*`, `data/needs/*` |
+| `WorkerAssignment` | `worker_assignment.gd` | расстановка работников по производственным цепям зданий (`assign_all(city)` читает `chain.required_workers`), приоритеты кампанийных рецептов (`campaign_recipe_priority`, `sort_campaign_recipes`) | `economy/economic_turn_processor.gd`, `city/processors/worker_assignment_processor.gd` |
+| `Season` | `season.gd` | месяц → сезон (`from_month`: 12, 1–2 — зима; невалидный месяц → `push_warning` + весна) и `growth_modifier(season)` | `campaign/campaign_calendar.gd`, `systems/crisis_event_system.gd`, `constants/game_text.gd` |
+| `MapModel` | `map_model.gd` | модель карты: `generate_noise()`, `get_biome_terrain_id(height, temp, moist)` по порогам `WATER_THRESHOLD 0.35` / `SAND_THRESHOLD 0.40`, `is_walkable(cell)` | `world/map_generator.gd`, `world/map_spawner.gd`, `tools/diag_biome_resources.gd` |
+| `MapObjects` | `map_objects.gd` | лист изолированных объектов карты: пиксели `assets/objects/world_map_objects.webp` и раскладка `world_map_objects.json` — продукты `scripts/gen_map_art.py`; координаты читаются **только из манифеста**, отдельного реестра в скрипте нет (такой реестр уже умирал в `tile_atlas.gd`) | `world/map_generator.gd`, `world/map_renderer.gd`, `world/map_roads.gd`, `world/map_spawner.gd`, `entities/resource_node.gd` |
+| `MapSpawner` | `map_spawner.gd` | расстановка по `MapModel` (`place_villages()` и далее), реестр юнитов подставляется извне (`setup_registry`) | `world/map_generator.gd`, `world_bootstrap.gd`, `world_spawner.gd`, `systems/enemy_growth_system.gd`, `probe/balance_probe.gd` |
+| `ResourceNodeManager` | `resource_node_manager.gd` | узлы ресурсов на карте (`Node`): заводит `scenes/entities/resource_node.tscn`, читает `ResourceDef` и скрытые по биому ресурсы, работает через `Resources`-реестр и переданный `map_to_local`-callable | `world_bootstrap.gd`, `world_load_context.gd`, `world/resource_chain_service.gd`, `systems/extract_rules.gd`, `probe/*` |
+
+**Как сверять слой при правке.** Точка входа одна — `scenes/archive/world.tscn`
+(тесты `tests/functional/test_world_*.gd`), кампанийная точка — `main/main.gd`
+для `WorldPersistence` и `ui/campaign_hud.gd` для стека карты. Класс, у которого
+не осталось ни одного production-потребителя, — кандидат не в «дописать строчку»,
+а в акт заморозки/удаления (Q-M117), иначе опись T-279 врёт: имя по-прежнему
+названо, но назвать его некому.
 
 ## 4. Событийная шина `GameEventBus`
 

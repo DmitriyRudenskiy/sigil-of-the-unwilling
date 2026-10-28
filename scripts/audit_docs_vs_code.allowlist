@@ -24,7 +24,6 @@ BattleInfoModel
 BattleInput
 BattleLineOfSight
 BattleRetreatPolicy
-BattleRewards
 BattleStateBuilder
 BattleTrophyService
 BoroughRules
@@ -122,8 +121,6 @@ HighlightOverlay
 InfoPanel
 InspirationStrategy
 KnightFramesBuilder
-LeadershipCheck
-LegendTracker
 LevelUpProcessor
 LoadCalculator
 LogisticsCalculator
@@ -160,7 +157,6 @@ RaidProcessor
 ReputationProcessor
 ResourceChainService
 ResourceCollectPopup
-ResourceDef
 ResourceNode
 ResourcesPanel
 RestStrategy
@@ -171,7 +167,6 @@ SerializationUtils
 ServiceRegistry
 SettingsAutoload
 SettlementBuildings
-ShardManager
 ShardState
 SkillsPanel
 SocialStrategy
@@ -226,5 +221,4 @@ WorldInteractionController
 WorldLoadContext
 WorldSaveLoadService
 WorldShortcuts
-WorldStateDelta
 ZoningProcessor

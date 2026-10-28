@@ -88,7 +88,7 @@ date: 2026-10-14
 | [[16-ux-review-battle-hud]] | UX-ревью боевого HUD (UI-3, шаг 3) | draft | 2026-10-13 |
 | [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-10-18 |
 | [[18-lora-style-groups]] | Теги стилей обучающей нарезки — измерено, а не на глаз | reference | 2026-10-27 |
-| [[18-system-map]] | Карта систем | reference | 2026-10-26 |
+| [[18-system-map]] | Карта систем | reference | 2026-10-29 |
 | [[19-gdd-workflow]] | Контур фаз GDD | reference | 2026-10-27 |
 | [[20-ux-hero-screen]] | Экран «Герой» — карта элементов макета 12 | draft | 2026-10-28 |
 | [[21-ux-map-screen]] | Экран «Карта кампании» — карта элементов макета 10 | draft | 2026-10-29 |
