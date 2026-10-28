@@ -96,7 +96,17 @@ func setup_path_visual() -> void:
 		# вызова, — всегда срабатывала ветка `root`, а сироту под `root` не снимал никто.
 		# Мёртвый сетёр снят вместе с веткой; если слой оверлеев появится, он возвращается
 		# вместе с обязательством на снятие (`teardown_path_visual`).
-		get_tree().root.add_child(_marker)
+		var _root := get_tree().root
+		_root.add_child(_marker)
+		if _marker.get_parent() == null:
+			# `add_child` не прерывает работу: при «Parent node is busy setting up
+			# children» он печатает ERROR и продолжает, оставляя `_marker` созданным
+			# вне дерева. Так происходит в живом потоке: мир ставится под `root` тем же
+			# вызовом (`change_scene_to_file`), и цепочка `WorldController._ready` →
+			# `WorldBootstrap.run` → `_init_hero` → сюда попадает внутрь окна занятости
+			# родителя. Без отложенной повторной попытки маркер не появлялся никогда
+			# (живой прогон MCP: `_marker != null`, `is_inside_tree() == false`).
+			_root.add_child.call_deferred(_marker)
 	if _status_orb == null:
 		_status_orb = StatusOrbScene.instantiate()
 		_status_orb.name = "StatusOrb"

@@ -205,3 +205,34 @@ def test_live_game_writes_boot_trace(battle_scene) -> None:
     text = path.read_text(encoding="utf-8")
     assert "ready:" in text
     assert "listen attempt=1" in text
+
+
+def test_wait_ready_failure_carries_the_evidence_block(tmp_path) -> None:
+    """Отказ readiness обязан дойти до отчёта блоком «среда в момент отказа», а не
+    traceback'ом из конструктора сообщения.
+
+    Прецедент: в сообщении стояло `port=self.port` при атрибуте `_port` — и вместо
+    наблюдаемости T-172 получатель видел `AttributeError: 'GodotMCPClient' object
+    has no attribute 'port'`. Тест держит именно склейку `wait_ready` →
+    `readiness_evidence`: мокается только транспорт (`portal.call`), путь трейса и
+    лог — настоящие временные файлы.
+    """
+    trace = tmp_path / "boot_trace.log"
+    trace.write_text("1 pid=1 ready: enabled=true port=9090 debug=true\n", encoding="utf-8")
+    launch = tmp_path / "launch.log"
+    launch.write_text("[World] Scene ready\n", encoding="utf-8")
+
+    class StubPortal:
+        def call(self, _fn, *_args):
+            raise godot_mcp.MCPError("Not connected to game interaction server")
+
+    client = godot_mcp.GodotMCPClient(
+        StubPortal(), None, ".", port=9099,
+        boot_trace=str(trace), launch_log=str(launch))
+    with pytest.raises(godot_mcp.MCPError) as exc:
+        client.wait_ready(timeout=0.6, interval=0.2)
+    text = str(exc.value)
+    assert "игра не готова за" in text, "подписи D-265 нет — жёлтый перестанет сниматься"
+    assert "среда в момент отказа" in text, "среда не приложена — причина снова неизвестна"
+    assert "ready: enabled=true" in text, "boot-трейс этого Godot не приложен"
+    assert "AttributeError" not in text

@@ -400,7 +400,7 @@ class GodotMCPClient:
             time.sleep(interval)
         raise MCPError(
             f"игра не готова за {timeout:.0f} с (последняя ошибка: {last})\n  "
-            + readiness_evidence(self.boot_trace, launch_log=self.launch_log, port=self.port)
+            + readiness_evidence(self.boot_trace, launch_log=self.launch_log, port=self._port)
         )
 
     async def _call(self, name: str, args: dict, timeout: float) -> Any:
