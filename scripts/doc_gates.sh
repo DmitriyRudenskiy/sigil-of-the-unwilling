@@ -32,7 +32,8 @@ run "контур фаз GDD (состояния, поля реестров, rat
 
 TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 	scripts/test_classify_mcp_junit.py scripts/test_gdd_gate.py scripts/test_gdd_grounding.py
-	scripts/test_gen_map_art.py scripts/test_testmap.py)
+	scripts/test_gen_map_art.py scripts/test_testmap.py
+	scripts/test_check_openspec_specs.py)
 # Отсутствующий файл списка — КРАСНЫЙ, а не «молча не досчитались»: ровно так список
 # и жил, пока в нём значился test_check_docs_links.py, которого никогда не было
 # (T-223). Проверщик без теста и проверщик, которого нет, — один и тот же класс.
@@ -79,6 +80,18 @@ fi
 # только ухудшение; легитимное улучшение фиксируется --write-baseline в том же диффе.
 # Уровень намеренно здесь, а не в game/run_tests.sh: метрика чистый Python, а гейт игры
 # поднимает Godot (минус 13 минут на прогон ради строки, не зависящей от движка).
+# Сведённые спеки (openspec/specs/) обязаны быть спеками, а не дельтами: заголовок
+# `## ADDED Requirements` — язык changes/<смена>/specs/, в носителе он ломает
+# `openspec validate --strict`. Проверка нулевая, не рэтчет: приехавшая из архива
+# дельта — факт, а не степень (12 таких файлов сведены 2026-10-27, T-274).
+echo "=== сведённые спеки: структура (T-274) ==="
+if python3 scripts/check_openspec_specs.py; then
+	: ; else
+	echo "  план сведения: python3 scripts/check_openspec_specs.py; дельта-заголовки допустимы только в openspec/changes/"
+	FAIL=1
+fi
+echo ""
+
 echo "=== карта тестов: рэтчет покрытия и оскопления (T-227) ==="
 if python3 scripts/testmap.py --check; then
 	: ; else
