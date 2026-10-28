@@ -324,6 +324,69 @@ preload пишет `_Classes = preload("…/canon_classes.gd")`, и по име�
 последователи, отношения, визуал). Снимать этот класс «как лишний» — значит
 вернуть 481 строку в девять файлов, где она и была.
 
+## 3е. Хвост: пробник, числа, синглтоны, поселение и тестовая инфраструктура
+
+Восьмой свод T-279 закрывает опись: сюда легло всё, что не вошло в тематические
+слои — роли автопилота, три «домена» чисел, четыре синглтона, две системы
+поселения и три класса, которые существуют только для того, чтобы тесты были
+честными.
+
+### Пробник автопилота (`scripts/probe/`, `scripts/demographics/`)
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `AdventurerRole` | политика «Приключенец»: охота на отряды второго кольца (12–24 клетки от старта), ресурсов не собирает, город защищают базовые циклы; ведёт `_tracked_unit` и список неудачных целей | `probe/ScenarioPilot.gd` (матрица сценариев), `probe/TravelerRole.gd` (переиспользует проверку кольца) |
+| `BuilderRole` | политика «Городостроитель»: держаться у города (сбор только в радиусе 3), стройка по `BUILD_QUEUE`, рекрутка и уровень; цель — `city_level ≥ 2` и `buildings ≥ 4` | `probe/ScenarioPilot.gd` |
+| `TravelerRole` | политика «Путешественник»: разово выбирает дальнюю цель (`distance_goal`), идёт к ней, доживая ходами, считает пройденные биомы; город — реквери | `probe/ScenarioPilot.gd`, `probe/balance_probe.gd` |
+| `BalanceProbe` | автопрогон ранней игры через MCP: сбор → выгрузка → стройка → рекрутка → бой, `MAX_TURNS = 60`, `BUILD_QUEUE = barracks/market/farm/range`; hard-fail только на техсбоях, пороги метрик — warnings | **базовый класс автопилота:** от него наследуется `probe/ScenarioPilot.gd` (`extends BalanceProbe`), роли (`TraderRole`, `SurvivalRole`, …) переопределяют его цикл; поднят сценой `scenes/probe/balance_probe.tscn`, `tools/matrix_report.gd` читает его `BUILD_QUEUE` |
+| `ArchetypeResolver` | по `assets/data/mvp_catalog.json` разрешает архетип жителя в набор способностей/ролей | `ui/city_screen.gd`, `economy/economic_turn_processor.gd`, `world/city_growth_service.gd` |
+
+### Числа (`scripts/constants/`)
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `GameNumbersBattle` | геометрия и тайминги боя: поле 11×9 = 99 гексов, обводка 38 px, лундж 26 px, твины 0.15/0.3/0.35 c | `battle/battle_line_of_sight.gd`, `battle/battle_flanking.gd`, `systems/battle_ai.gd`, `systems/spell_caster.gd` и др.; сами размеры поля потребители читают из `BattleState.BW/BH` |
+| `GameNumbersCity` | числа города: стройка, зоны, содержание, репутация | `constants/game_numbers.gd` (фасад), `tests/unit/city/test_game_numbers_city.gd` (страж констант), тулза съёмки |
+| `GameNumbersMap` | числа карты: тайл 82 px, затемнение тумана `MAP_FOG_DIM = 0.45`, размеры карты 40–70, восемь деревень, 25 ресурсов | **только фасад** `constants/game_numbers.gd` — он перекладывает их в `GameNumbers.MAP_*`, а дальше читают `systems/enemy_growth_system.gd`, `world/map_spawner.gd` и остальные |
+
+### Поселение (`scripts/settlement/`)
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `SettlementReputation` | Demand/Decadence, враждебность (Hostility: рост за год/поселенца/поляну/лагерь), штормы, победа и поражение поселения (фаза 4) | **продом — никем.** Единственный не-тестовый след — комментарий в `managers/game_manager.gd:167` («репутация канона — EthicsSystem/SettlementReputation»); грузит класс только `tests/unit/settlement/test_settlement_reputation.gd` |
+| `SettlementResolve` | цикл поселения: разрешение потребностей, голод, перерывы, уход (фаза 2); бонусы за удовлетворённые потребности | **продом — никем.** Только `tests/unit/settlement/test_settlement_core.gd` и `test_settlement_advanced.gd` (через `preload`-алиас `Resolve`) |
+
+### Синглтоны и данные
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `SpellbookRegistry` | реестр заклинаний: читает `assets/data/spells.json`, при отсутствии — `spells_fallback.json`, держит индексы по id и по шаблону | autoload зарегистрирован **под именем `Spellbook`**, и прод-читатель берёт его через DI: `Services.resolve(&"spellbook")` (`autoload/battle_emulator.gd:311` и `:342`). Ни `SpellbookRegistry.`, ни `Spellbook.` в грепе не всплывают |
+| `TemplateContext` | контекст исполнения шаблона заклинания: условия (`target_hp_max`, `hand_max`, …), подсчёт доски и союзников, поиск оппонента, размер руки | все шаблоны `data/templates/` (`t05_combat_trick.gd`, `t07_spell_draw.gd`, …) — то есть каждый бой, где кастуется шаблон |
+| `DestMarker` | маркер цели героя на карте: пульсация по `_process`, отрисовка через `core/hex_draw.gd`, флаг `active` | `entities/hero_visual_controller.gd` (наследник держит `DestMarkerScene`), сцена `scenes/entities/dest_marker.tscn`; посадка на героя — T-275 |
+
+### Тестовая инфраструктура
+
+| Класс | Что делает | Кто зовёт |
+| --- | --- | --- |
+| `TestFactories` | конструкторы подопытных объектов (`make_city`, отряды, жители) — чтобы тесты не лепили `Dictionary` вручную | десятки тестов, от `tests/integration/test_hero_resurrection.gd` до `test_battle_input.gd` |
+| `ThemeCarrierGuard` | общий предикат семейства гардов темы-носителя: обход темы считается по трём механизмам (`add_theme_stylebox_override` в `.gd`, `theme_override_styles/*` в `.tscn`, любой из двух во вложенной чужой сцене) | `tests/unit/ui/test_battle_theme_carrier.gd`, `test_army_panel_theme_carrier.gd`, `test_settings_theme_carrier.gd`, `test_kitchen_sink_theme_carrier.gd` и всё семейство |
+| `McpCommandsSystem` | команды MCP-сервера поверх `McpCommandsBase` + чёрный список для eval (`OS.execute`, `FileAccess.open`, `load(`, `get_tree().quit`, …) — TASK_18 R3 | `tools/mcp/mcp_interaction_server.gd` (autoload `McpInteractionServer`), тесты `tests/unit/core/test_mcp_server.gd` |
+
+**Поселение — не «мёртвый код», а невызванный слой.** Формулировка важна: у
+`scripts/settlement/` шесть классов, пять тестовых файлов и зелёная история (в
+D-172 там даже чинили off-by-one перерыва) — но ни одна сцена и ни один
+прод-файл репозитория не грузит ни один из этих путей, а в `docs/MVP-scope.md`
+слой не значится (поиск даёт только «NPC-поселения» как объект карты). При этом
+D-200 называет `SettlementReputation` каноном репутации. Либо слой подключается,
+либо выводится из канона явным актом — решать владельцу, это **T-287**; агент
+scope не сокращает.
+
+**Три способа обратиться к синглтону, и греп знает один.** `SpellbookRegistry`
+— autoload с другим именем (`Spellbook`), а читают его через `Services.resolve`.
+Отсюда правило для колонок «кто зовёт» в этом документе: искать надо (1) имя
+класса, (2) путь `preload`, (3) имя autoload и DI-ключ. Два грепа — минимум, три
+— дисциплина.
+
 ## 4. Событийная шина `GameEventBus`
 
 38 сигналов (все — `scripts/autoload/game_event_bus.gd`), по группам:

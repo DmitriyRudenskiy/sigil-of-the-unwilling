@@ -129,7 +129,6 @@ MapThreat
 MarketSystem
 McpCanvasDrawNode
 McpCommandDispatcher
-McpCommandsBase
 McpCommandsInput
 McpCommandsRender
 McpCommandsUI
@@ -198,7 +197,6 @@ TestWait
 TimeSystem
 ToolType
 ToolsPanel
-TraderRole
 TraitDef
 TraitRegistry
 TurnTimer
