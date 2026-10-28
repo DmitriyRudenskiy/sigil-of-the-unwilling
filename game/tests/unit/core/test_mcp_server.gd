@@ -21,13 +21,19 @@ class _TestServer extends _Srv:
 var _server: _TestServer
 
 func before_test() -> void:
+	# T-240: opt-in сбрасывается до add_child(), чтобы _ready() прошёл по закрытой
+	# ветке и тесты не поднимали TCP-порт молча.
+	OS.set_environment(_Srv.ENABLE_ENV, "")
 	_server = _TestServer.new()
 	add_child(_server)
 
 func after_test() -> void:
 	if _server != null and is_instance_valid(_server):
+		_server.stop()
 		_server.free()
 	_server = null
+	OS.set_environment(_Srv.ENABLE_ENV, "")
+	OS.set_environment("MCP_PORT", "")
 
 
 func test_handlers_registered() -> void:
@@ -171,3 +177,68 @@ func test_eval_and_script_debug_only() -> void:
 	else:
 		assert_bool(_server._dispatcher.has("eval")).is_false()
 		assert_bool(_server._dispatcher.has("script")).is_false()
+
+
+# --- T-240: автозагрузка в `main` не означает «слушает порт» --------------
+# Порт поднимает только тот процесс, которому приказал тестовый стенд
+# (MCP_ENABLE=1 в tests/mcp/conftest.py). До этой правки любой
+# `godot --path game` разработчика поднимал TCP-эндпоинт с полным доступом
+# к игре, а unit-прогон GdUnit занимал 9090 (класс флейков EADDRINUSE).
+
+const _OPTIN_PORT := 9777
+
+
+func _port_is_free(p: int) -> bool:
+	var probe := TCPServer.new()
+	var err := probe.listen(p, "127.0.0.1")
+	probe.stop()
+	return err == OK
+
+
+func test_autoload_is_the_repo_fork_not_the_vendor_monolith() -> void:
+	# Строка автозагрузки в project.godot — осознанная (домашний форк: MCP_PORT,
+	# MCP_AUTH_TOKEN, явный лайфцикл, R2-разделение на группы). Подмена на
+	# вендорский res://mcp_interaction_server.gd молча вернула бы монолит без
+	# MCP_PORT — параллельные воркеры столкнулись бы на 9090.
+	var line: Variant = ProjectSettings.get_setting("autoload/McpInteractionServer")
+	assert_that(String(line)).is_equal("*res://tools/mcp/mcp_interaction_server.gd")
+
+
+func test_endpoint_stays_closed_without_opt_in() -> void:
+	OS.set_environment(_Srv.ENABLE_ENV, "")
+	OS.set_environment("MCP_PORT", str(_OPTIN_PORT))
+	assert_bool(_Srv.enabled_by_env()).is_false()
+	# _ready() уже прошёл (add_child в before_test) — порта быть не должно.
+	assert_bool(_server._started).is_false()
+	assert_bool(_server.is_processing()).is_false()
+	assert_bool(_port_is_free(_OPTIN_PORT)).is_true()
+	# Явный start() без opt-in тоже отказывается (а не «полуинициализируется»).
+	assert_bool(_server.start()).is_false()
+	assert_bool(_server._started).is_false()
+	assert_bool(_port_is_free(_OPTIN_PORT)).is_true()
+	# Команды при этом зарегистрированы — закрыт транспорт, а не реестр.
+	assert_bool(_server._dispatcher.has("os_info")).is_true()
+	OS.set_environment("MCP_PORT", "")
+
+
+func test_opt_in_opens_the_endpoint_and_stop_closes_it() -> void:
+	OS.set_environment("MCP_PORT", str(_OPTIN_PORT))
+	OS.set_environment(_Srv.ENABLE_ENV, "1")
+	if not OS.is_debug_build():
+		# Релизный сборки guard сильнее opt-in: отладочный эндпоинт не открывается.
+		assert_bool(_server.start()).is_false()
+		assert_bool(_server._started).is_false()
+		OS.set_environment(_Srv.ENABLE_ENV, "")
+		OS.set_environment("MCP_PORT", "")
+		return
+	assert_bool(_Srv.enabled_by_env()).is_true()
+	assert_bool(_server.start()).is_true()
+	assert_bool(_server._started).is_true()
+	assert_bool(_port_is_free(_OPTIN_PORT)).is_false()
+	# Идемпотентность: второй start не лупит порт заново.
+	assert_bool(_server.start()).is_true()
+	_server.stop()
+	assert_bool(_server._started).is_false()
+	assert_bool(_port_is_free(_OPTIN_PORT)).is_true()
+	OS.set_environment(_Srv.ENABLE_ENV, "")
+	OS.set_environment("MCP_PORT", "")

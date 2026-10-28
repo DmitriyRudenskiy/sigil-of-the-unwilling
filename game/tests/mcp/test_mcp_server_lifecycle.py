@@ -79,7 +79,9 @@ def godot_mcp():
     port = _free_port()
     proc = subprocess.Popen(
         [GODOT_BIN, "--headless", "--path", str(GAME_DIR), "--quit-after", "1800"],
-        env={**os.environ, "MCP_PORT": str(port)},
+        # T-240: TCP-эндпоинт открывается только по явному opt-in — стенд включает
+        # его сам (в main-конфигурации это делает tests/mcp/conftest.py).
+        env={**os.environ, "MCP_PORT": str(port), "MCP_ENABLE": "1"},
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
@@ -104,7 +106,9 @@ def godot_mcp_second(godot_mcp):
     port = godot_mcp
     proc = subprocess.Popen(
         [GODOT_BIN, "--headless", "--path", str(GAME_DIR), "--quit-after", "600"],
-        env={**os.environ, "MCP_PORT": str(port)},
+        # T-240: TCP-эндпоинт открывается только по явному opt-in — стенд включает
+        # его сам (в main-конфигурации это делает tests/mcp/conftest.py).
+        env={**os.environ, "MCP_PORT": str(port), "MCP_ENABLE": "1"},
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,

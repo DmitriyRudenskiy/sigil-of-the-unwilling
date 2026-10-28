@@ -21,6 +21,18 @@ static func port() -> int:
 		return env.to_int()
 	return int(ProjectSettings.get_setting("mcp/port", 9090))
 
+
+# T-240: явный opt-in. Автозагрузка в `main` нужна тестовой инфраструктуре, но
+# «автозагрузка включена» не должна означать «слушает порт»: любой запуск игры
+# разработчика (`godot --path game`) поднимал TCP-эндпоинт с полным доступом к
+# игре. Слушает только тот процесс, которому это явно приказали (env MCP_ENABLE=1
+# ставит tests/mcp/conftest.py — единственный легитимный хозяин сервера).
+const ENABLE_ENV := "MCP_ENABLE"
+
+
+static func enabled_by_env() -> bool:
+	return OS.get_environment(ENABLE_ENV) == "1"
+
 const BUSY_TIMEOUT: float = 120.0
 const AUTH_TOKEN_ENV := "MCP_AUTH_TOKEN"
 var _auth_token: String = ""
@@ -30,8 +42,9 @@ var _groups: Array[McpCommandsBase] = []
 var _started: bool = false
 
 func _ready() -> void:
-	# SECURITY: MCP-сервер — инструмент разработки. В релизных сборках
-	# TCP-эндпоинт с полным доступом к игре должен быть полностью отключён.
+	# SECURITY: MCP-сервер — инструмент разработки. В релизных сборках TCP-эндпоинт
+	# с полным доступом к игре отключён (OS.is_debug_build), а в debug-сборке он всё
+	# равно молчит, пока его явно не включит тестовый стенд (MCP_ENABLE, T-240).
 	# TASK_19 L1: McpCommandsNetwork (пустая заглушка) удалён.
 	_dispatcher = McpCommandDispatcher.new()
 	_groups = [
@@ -40,12 +53,20 @@ func _ready() -> void:
 		McpCommandsSystem.new(self),
 		McpCommandsRender.new(self),
 	]
+	# T-240: реестр команд отделён от транспорта. Закрытый порт не должен превращать
+	# диспетчер в пустой (eval/script при этом остаются gated внутри
+	# McpCommandsSystem по OS.is_debug_build, TASK_19 H1).
+	_dispatcher.clear()
+	for group in _groups:
+		_dispatcher.register(group)
 	start()
 
 
 ## R2 explicit lifecycle: idempotent start. Returns false in release builds
 ## or when the port is busy (EADDRINUSE) — the server stays in a clean
 ## not-started state instead of half-initialised globals.
+## T-240: returns false и без opt-in (MCP_ENABLE=1) — в любом debug-запуске
+## порта не будет, пока его явно не поднял тестовый стенд.
 func start() -> bool:
 	if _started:
 		return true
@@ -53,12 +74,16 @@ func start() -> bool:
 		push_warning("McpInteractionServer: dev tool, disabled in release builds")
 		set_process(false)
 		return false
+	if not enabled_by_env():
+		push_warning(
+			"McpInteractionServer: autoload is present but the TCP endpoint stays "
+			+ "closed without %s=1 (T-240). Set it only in the MCP test harness."
+			% ENABLE_ENV)
+		set_process(false)
+		return false
 	# Ensure MCP server keeps processing even when game is paused
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_auth_token = OS.get_environment(AUTH_TOKEN_ENV)
-	_dispatcher.clear()
-	for group in _groups:
-		_dispatcher.register(group)
 	_server = TCPServer.new()
 	var port_ := port()
 	var err: int = _server.listen(port_, "127.0.0.1")
