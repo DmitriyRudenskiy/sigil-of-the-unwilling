@@ -195,7 +195,6 @@ T16MarketNiche
 T17HealClear
 T18Revive
 T19Portal
-TerrainCostTable
 TerrainResourceManager
 TestMarkerLayerFog
 TestWait

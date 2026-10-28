@@ -4,7 +4,7 @@ tags:
   - gdd
   - mechanic
 status: deepened
-date: 2026-10-13
+date: 2026-10-29
 ---
 
 ## UI/UX flow
@@ -101,6 +101,44 @@ date: 2026-10-13
 трёхисходному правилу исхода (a) (тот же акт, что и архив сцены), и этот раздел —
 место, где их назначение перестаёт быть тайной для следующего, кто увидит их в
 списке «названо только в реестрах».
+
+## Классы интерфейса: кто их поднимает
+
+Зеркало предыдущего раздела на один уровень ниже: не сцена, а скрипт-класс.
+Заведён третьим сводом T-279 по тому же правилу — имя `class_name` в реестре
+документом не считается ([[DECISIONS]] D-291). Колонка «кто поднимает» снята
+двумя грепами: по имени класса и по пути `preload`/`.tscn` (класс мог быть
+присвоен локальным именем, и по имени он тогда не находится).
+
+| Класс | Файл | Что делает | Кто поднимает |
+| --- | --- | --- | --- |
+| `MainMenu` | `main_menu.gd` | корень `scenes/main_menu.tscn`: «Новая игра»/«Продолжить»/«Арена»/«Настройки»; цель «Продолжить» — `scenes/main/main.tscn`, названа константой, чтобы тест проверял существование сцены, а не строку | сцена `scenes/main_menu.tscn` (автозагрузка проекта) |
+| `SaveLoadScreen` | `save_load_screen.gd` | 5 слотов (`SLOT_COUNT`), режимы load/save, сигналы `load_requested`/`delete_requested`/`closed`; выключенный слот обязан назвать причину | `scenes/main_menu.tscn`, монтируется `main_menu.gd` |
+| `SignChoiceUI` | `sign_choice_ui.gd` | экран выбора 1 из 8 Знаков на всю игру (T-002, Q18/D12); выбор кладётся в `WorldPersistence.pending_sign_id` и уходит в кампанию | `scenes/ui/sign_choice.tscn`, поднимается `character_creation_ui.gd`; `main/main.gd` читает результат |
+| `CampaignUIManager` | `campaign_ui_manager.gd` | проводка конечного автомата навигации к слоям-экранам: show/hide по решению SM, инвариант «≤2 клика до причины» (`can_show → {available, reason}`), сигналы `screen_changed`/`tutorial_requested` | узел `$CampaignUIManager` кампанийной сцены, берёт `main/main.gd:31`, подключается к HUD через `bind_ui_manager` |
+| `CampaignNavigation` | `campaign_navigation.gd` | чистый SM восьми экранов (K-M8): `PREGAME → MENU → MAP → (CITY/BATTLE/PARTY/CHRONICLE/SETTINGS) → MAP`, `BATTLE → MAP` только, инвариант «закрыть в никуда отсутствует»; headless-тестируется без сцены | `campaign_ui_manager.gd` (владеет им), читают `campaign_hud.gd`, `tutorial_overlay.gd` |
+| `CampaignMapField` | `campaign_map_field.gd` | поле карты кампании в игровом пути (T-194, D-281): биомы и туман из `RegionMap`, карточка и причины недоступности из `MapScreenModel`, гексы из листа `TileAtlas`; своего состояния нет, кроме выбранного региона | `campaign_hud.gd` создаёт поле (`campaign_hud.gd:943`) и отдаёт его миникарте (`bind_map_field`); экран карты — `campaign_screen_map.gd` |
+| `CampaignMinimap` | `campaign_minimap.gd` | второй вид того же носителя: точки берутся у `CampaignMapField` в его координатах и пересчитываются в размер плашки — у миникарты со своим раскладчиком расхождение с полем неизбежно | `campaign_hud.gd` (`campaign_hud.gd:945`); экран карты знает её только по имени узла |
+| `RingProgress` | `ring_progress.gd` | кольцо доли месяца на медальоне нижней полосы: одно `_draw`, состояния нет, долю считает вызывающий из `CampaignCalendar` (носитель длины месяца — календарь); резного ободка нет, потому что носитель рисунка не произведён (T-259) | `campaign_hud.gd` (`campaign_hud.gd:849`) |
+| `TutorialOverlay` | `tutorial_overlay.gd` | оверлей первых ходов, не экран: без своего состояния и места в списке восьми; содержимое — `campaign.json → tutorial.day_N` (раньше блок был писателем без читателя) | `campaign_hud.gd` (`_build_tutorial_overlay`, `campaign_hud.gd:996`) по сигналу SM `tutorial_requested` |
+| `PartyScreenModel` | `party_screen_model.gd` | view model экрана партии: строит строки из `party_system` (id, класс, раса, уровень, xp, статы, luck, READY/DEAD) и подсказку «что освободит слот», когда очередь пуста, а партия полна | `party_screen.gd` (visual-слой), читает `campaign_hud.gd` |
+| `ArtifactInventoryScreen` | `artifact_inventory_screen.gd` | экран героя и сумки 10×5: наведение показывает предмет, клик выбирает его для «Equip»/«Dispose» (раньше кнопки действовали на «первый попавшийся»); кэш текстур, слоты экипировки | `scenes/main_menu.tscn` (живой путь), `scenes/ui/world_ui.tscn` (легаси-копия), генератор сцены `scripts/build/gen_inventory_scene.gd` |
+| `HeroLayout` | `hero_layout.gd` | единственная таблица геометрии экрана «Герой» (макет 12, канва съёмки 1600×900): сцена получает из неё доли якорей, скрипт — пиксели; композиция держится на любом окне без прокрутки | `artifact_inventory_screen.gd`; согласованность таблицы с узлами сцены проверяет `scripts/check_hero_layout_map.py` (гейт `doc_gates.sh`) |
+| `BoardOutline` | `widgets/board_outline.gd` | рамка боевого поля: рисует только внешние рёбра (общее ребро двух пограничных гексов дало бы двойную линию), тёмная подложка + светлая линия, потому что кадр бывает снежным и болотным | `systems/battle_view.gd` — нужна, когда под гексами кадр местности и тайлы прозрачны |
+| `AdventureUI` | `adventure_ui.gd` | раскладка приключения легаси-мира: семь панелей (миникарта, армия, ресурсы, инфо), сигналы хода/даты/миникамеры | `scenes/ui/adventure_ui.tscn`, сама монтируется только `scenes/ui/world_ui.tscn` → замороженная линия |
+| `MarkerLayer` | `marker_layer.gd` | маркеры движения на hex-карте: зелёный/жёлтый/красный по стоимости хода (`TerrainCostTable`), сигналы наведения и клика, клик по городской метке | узел `$MarkerLayer` сцены `scenes/ui/world_ui.tscn`, им управляет `ui/world_ui_manager.gd` (`setup`/`show_markers`/`hide_markers`) → замороженная линия |
+| `MinimapPanel` | `minimap_panel.gd` | миникарта легаси-раскладки, геометрия 1:1 с `prototype_map.html`; урок бисекции: `custom_minimum_size` нельзя менять после первого layout-прохода — поздний рост min-высоты ломает окно | `scenes/ui/minimap_panel.tscn`, монтируется `adventure_ui.gd` → замороженная линия |
+| `DecisionPanel` | `decision_panel.gd` | панель события/кризиса: пауз-токены, severity, таймер кризиса, сигнал `decision_made` | **никем.** Ни одной сцены панели в репо нет — ни `decision_panel.tscn`, ни `crisis_panel.tscn`, preload'а тоже нет (носитель не выбран: Q-M83 / T-132); работает фолбэк-окно `UIManager._create_simple_decision_panel` / `_create_simple_crisis_panel`, в него же приходит `crisis_event_system.gd` через `show_decision_panel` |
+
+**Три исхода, и все три уже названы.** 13 классов живёт кампанийным контуром
+(`main_menu → character_creation → main.tscn`). Три (`AdventureUI`,
+`MarkerLayer`, `MinimapPanel`) висят на цепочке
+`archive/world.tscn → world_ui.tscn → adventure_ui.tscn`, то есть на том же
+замороженном входе, чья диспозиция — [[QUESTIONS]] Q-M117; это не кандидаты
+«дописать строчку», а часть одного акта. Один (`DecisionPanel`) — класс без
+носителя: он пережил своего создателя и сцену, и его судьба уже ведётся отдельным
+тикетом (Q-M83 / T-132), где носитель панели не выбран; второй путь молча не
+изобретается.
 
 ## Управление (по input map)
 
