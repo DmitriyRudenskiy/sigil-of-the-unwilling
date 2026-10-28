@@ -2,7 +2,7 @@ class_name BattleState
 extends RefCounted
 
 const _StatusEffects = preload("res://scripts/data/status_effects.gd")
-const _BattleTerrain = preload("res://scripts/systems/BattleTerrain.gd")
+const _HexTerrain = preload("res://scripts/systems/hex_terrain.gd")
 
 
 var attacker_units: Array[BattleUnit] = []
@@ -703,13 +703,13 @@ func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictio
 	for o in obstacles:
 		b[o] = true
 	for c in terrain_grid:
-		if _BattleTerrain.is_blocking(int(terrain_grid[c])):
+		if _HexTerrain.is_blocking(int(terrain_grid[c])):
 			b[c] = true
 	return b
 
 
 func get_hex_terrain(cell: Vector2i) -> int:
-	return int(terrain_grid.get(cell, _BattleTerrain.TerrainType.PLAIN))
+	return int(terrain_grid.get(cell, _HexTerrain.TerrainType.PLAIN))
 
 func set_terrain(cell: Vector2i, t: int) -> void:
 	terrain_grid[cell] = t
@@ -721,7 +721,7 @@ func clear_terrain() -> void:
 
 
 func generate_terrain(rng: RandomNumberGenerator, density: float = 0.1) -> void:
-	terrain_grid = _BattleTerrain.generate(rng, BW, BH, density)
+	terrain_grid = _HexTerrain.generate(rng, BW, BH, density)
 	invalidate_board_cache()
 
 # --- Phase 6: flanking (фланг/тыл) -----------------------------------------

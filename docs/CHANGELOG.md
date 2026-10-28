@@ -9,6 +9,26 @@ date: 2026-10-29
 
 # CHANGELOG — docs/
 
+## 2026-10-29 — T-285: файл назван классом, алиасы — тоже
+
+* **Адрес.** `scripts/systems/BattleTerrain.gd` → `scripts/systems/hex_terrain.gd`
+  (класс внутри — `HexTerrain`, имя файла — чужого класса); `.uid` перенесён,
+  значимость `uid://bb06eqr70teqa` та же, сценами не используется.
+* **Алиасы.** В `systems/battle_state.gd` и `systems/battle_damage_resolver.gd`
+  `const _BattleTerrain = preload(...)` → `_HexTerrain`. Это не косметика: в
+  одном файле рядом стояли `_BattleTerrain.defense_multiplier(...)` (на самом
+  деле `HexTerrain`) и `BattleTerrain.defense_bonus(...)` (настоящий
+  `BattleTerrain`) — читатель диффа не мог понять, какая из двух местностей
+  решает исход боя.
+* **Проверено, а не заявлено.** `BattleTerrain` (`battle/battle_terrain.gd`) и
+  `HexTerrain` — разные классы с разными контрактами (строка местности против
+  типизированной `terrain_grid`); оба остались живые, поведение не менялось, в
+  тесте правится только путь `preload`. Гейт: GdUnit 3587 / 0 / 0,
+  MCP 109 passed / 2 skipped / 0 failed (collected 111).
+* **Последствие для T-286.** Счётчик файлов с заглавной буквы под `scripts/`
+  упал 24 → 23; каталог `scripts/settlement/` (6 файлов) помечен зависящим от
+  вердикта **T-287** и до него не трогается.
+
 ## 2026-10-29 — T-279 закрыт: опись 146 → 0, хвост описан в §3е
 
 * **Срез (сводка 8).** `docs/18-system-map.md` §3е — последние 16 имён: роли

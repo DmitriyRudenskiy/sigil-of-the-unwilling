@@ -2,7 +2,7 @@ class_name BattleDamageResolver
 extends RefCounted
 
 const _StatusEffects = preload("res://scripts/data/status_effects.gd")
-const _BattleTerrain = preload("res://scripts/systems/BattleTerrain.gd")
+const _HexTerrain = preload("res://scripts/systems/hex_terrain.gd")
 
 ## Разрешение урона по лестнице (T17/D2, 02d v1.2). Без ГСЧ:
 ## все проки (petrify/blind/крит rogue) срабатывают на Триумфе.
@@ -46,9 +46,9 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 	# REMOTE (tactical-battle-system Phase 5/6/9): int-terrain multipliers,
 	# elevation, flanking aspect, hero class/race tactics.
 	var terrain_atk_mult: float = 1.0
-	var terrain_def_mult: float = _BattleTerrain.defense_multiplier(state.get_hex_terrain(def.cell))
-	if _BattleTerrain.elevation(state.get_hex_terrain(atk.cell)) > _BattleTerrain.elevation(state.get_hex_terrain(def.cell)):
-		terrain_atk_mult = _BattleTerrain.DOWNHILL_ATTACK_MULT
+	var terrain_def_mult: float = _HexTerrain.defense_multiplier(state.get_hex_terrain(def.cell))
+	if _HexTerrain.elevation(state.get_hex_terrain(atk.cell)) > _HexTerrain.elevation(state.get_hex_terrain(def.cell)):
+		terrain_atk_mult = _HexTerrain.DOWNHILL_ATTACK_MULT
 	# Единая классификация позиции (facade-based) — и для перевеса, и для
 	# флага flank в результате (T17/D2).
 	var flank_aspect: int = BattleFlanking.classify(state, atk, def)

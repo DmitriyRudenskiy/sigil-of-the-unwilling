@@ -9,7 +9,7 @@ extends BaseTest
 ## T17/D2: местность больше не влияет на урон (лестница перевеса, 02d v1.2);
 ## её роль — стоимость движения и блокировка (вода).
 
-const _BT := preload("res://scripts/systems/BattleTerrain.gd")
+const _BT := preload("res://scripts/systems/hex_terrain.gd")
 const T := _BT.TerrainType
 
 func _make_state(atk_key: String, def_key: String, atk_count: int, def_count: int) -> BattleState:

@@ -3,6 +3,9 @@ extends RefCounted
 ## Боевая местность (tactical-battle-system, фаза 5).
 ## NOTE: переименовано с BattleTerrain -> HexTerrain при merge двух боевых
 ## систем (local String-terrain battle_terrain.gd сохранил имя BattleTerrain).
+## T-285 (2026-10-29): файл назван по классу (был BattleTerrain.gd); алиасы
+## preload у потребителей — _HexTerrain. Не путать с BattleTerrain из
+## battle/battle_terrain.gd: это другой класс, строковая местность боя.
 ##
 ## Каждый гекс боевой доски имеет тип местности. Тип влияет на:
 ##   * защиту юнита на этом гексе (лес/холм/укрепление),

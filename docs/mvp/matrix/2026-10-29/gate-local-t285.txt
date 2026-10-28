@@ -1,0 +1,28 @@
+# гейт — T-285 (rename BattleTerrain.gd → hex_terrain.gd + алиасы)
+# команда: bash game/run_tests.sh (локально, 2026-10-29), пиксели и логи в git не идут (D-185)
+# Запуск был фоновым, `echo $?` не снят. Код выхода выведен из скрипта и лога, а не угадан:
+#   * GdUnit-стадия при красном делает `exit "$RC"` сразу (run_tests.sh:75-77) — прогон
+#     прошёл дальше, к MCP-секции, значит стадия не красная; сводка: 3587 / 0 errors / 0 failures.
+#   * шесть мест `MCP_RC=1` (261, 315, 329, 350, 362, 378): 261 — только при PERF_SERIAL=1
+#     (в логе нет «perf-стадия»); 315 — печатает «PYTEST: RED (неполный прогон…» (нет,
+#     равенство леджера 109+2=111 держится); 329 — «MCP: RED — ... Godot» (нет);
+#     350 — ветка `1)` классификатора, у нас напечатано «MCP VERDICT: GREEN»;
+#     362 — ветка `then` генератора арта, у нас исполнена ветка `else` («GENART: SKIPPED»);
+#     378 — selftest классификатора напечатал GREEN.
+#   Итог: MCP_RC не менялся с 0 → `exit "$MCP_RC"` = 0. Единственная жёлтая строка —
+#   GENART: SKIPPED (в системном python3 нет pytest/PIL; D-265: жёлтый ≠ красный).
+
+Statistics: 3 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans | PASSED 118ms
+Statistics: 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans | PASSED 297ms
+Statistics: 8 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans | PASSED 180ms
+Statistics: 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans | PASSED 335ms
+Statistics: 8 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans | PASSED 118ms
+Overall Summary: 3587 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+================== 109 passed, 2 skipped in 287.93s (0:04:47) ==================
+PYTEST LEDGER: passed=109 skipped=2 failed=0 errors=0 collected=111
+MCP JUNIT: passed=109 skipped=2 failed=0 errors=0
+MCP VERDICT: GREEN
+GENART: SKIPPED (нет pytest или PIL в python3 — pip install pytest pillow)
+READINESS-CLASSIFIER: selftest GREEN
