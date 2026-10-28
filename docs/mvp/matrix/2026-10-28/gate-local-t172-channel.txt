@@ -1,0 +1,15 @@
+# гейт 2026-10-28 после 7181c7ac (канал наблюдаемости, T-172) — выключка полного run_tests.sh
+# полная версия: /tmp/gate_t172b.log на машине агента; здесь — строки вердикта
+# GdUnit 3584/0/0; MCP collected=110 (+3 теста канала); YELLOW — одна readiness-жертва (среда).
+Overall Summary: 3584 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test cases : (3584/3584)
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+============= 107 passed, 2 skipped, 1 error in 464.52s (0:07:44) ==============
+PYTEST LEDGER: passed=107 skipped=2 failed=0 errors=1 collected=110
+MCP JUNIT: passed=107 skipped=2 failed=0 errors=1
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за): среда, не регрессия (D-265); тесты обязан переснять владелец либо повторный прогон:
+MCP VERDICT: YELLOW
+MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265)
+GENART: SKIPPED (нет pytest или PIL в python3 — pip install pytest pillow)
+READINESS-CLASSIFIER: selftest GREEN
