@@ -80,7 +80,7 @@ date: 2026-10-14
 | [[10-appendix-a-races]] | Приложение А — A6-R-таблица каталога 54 | canon | 2026-10-13 |
 | [[12-asset-audit]] | Asset Audit — game/assets | snapshot | 2026-10-13 |
 | [[13-art-bible]] | Art Bible — визуальная идентичность | deepened | 2026-10-18 |
-| [[14-ux-battle-hud]] | UX-спека — боевой HUD (UI-2) | draft | 2026-10-13 |
+| [[14-ux-battle-hud]] | UX-спека — боевой HUD (UI-2) | draft | 2026-10-27 |
 | [[15-asset-spec-artifacts]] | Asset-spec — 29 иконок артефактов (UI-4) | draft | 2026-10-13 |
 | [[16-ux-review-battle-hud]] | UX-ревью боевого HUD (UI-3, шаг 3) | draft | 2026-10-13 |
 | [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-10-18 |
