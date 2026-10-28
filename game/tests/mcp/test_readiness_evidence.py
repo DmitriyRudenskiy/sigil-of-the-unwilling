@@ -21,8 +21,8 @@ import pytest
 import godot_mcp  # noqa: F401  (sys.path для соседних модулей стенда настраивает conftest)
 from godot_mcp import (
     boot_trace_tail,
-    count_processes,
     env_snapshot,
+    godot_processes,
     read_loadavg,
     read_meminfo_kb,
     read_psi_some,
@@ -45,10 +45,20 @@ def _fake_proc(tmp_path: Path) -> dict:
     psi = tmp_path / "psi"
     psi.write_text("some avg10=12.34 avg60=5.60 avg300=1.20 total=99\nfull avg10=0.00\n", encoding="utf-8")
     root = tmp_path / "proc"
-    for pid, cmd in (("111", "/usr/bin/godot --path game"), ("222", "node index.js")):
+    fake = (
+        ("111", "/usr/bin/godot --path game", "State:\tR (running)\nVmRSS:\t 1200000 kB\n"),
+        ("222", "node index.js", "State:\tS (sleeping)\nVmRSS:\t  90000 kB\n"),
+        # Сосед по имени, которым предыдущая версия счётчика звала Godot'ом:
+        # python-стенд и node-сервер содержат «godot» в пути, но движком не являются.
+        ("333", "/home/user/.venv/godot-mcp-tests/bin/python -m pytest tests/mcp",
+         "State:\tS (sleeping)\nVmRSS:\t  60000 kB\n"),
+        ("444", "/usr/bin/godot_headless --headless", "State:\tD (disk)\nVmRSS:\t 400000 kB\n"),
+    )
+    for pid, cmd, status in fake:
         d = root / pid
         d.mkdir(parents=True)
-        (d / "cmdline").write_text(cmd.replace(" ", "\0"), encoding="utf-8")
+        (d / "cmdline").write_text(cmd.replace(" ", "\0") + "\0", encoding="utf-8")
+        (d / "status").write_text(status, encoding="utf-8")
     return {
         "meminfo_path": str(mem),
         "loadavg_path": str(load),
@@ -64,18 +74,29 @@ def test_meminfo_and_loadavg_parse_absent_files_as_none(tmp_path: Path) -> None:
     assert read_psi_some(str(missing)) == ""
 
 
-def test_env_snapshot_reads_memory_load_and_godot_count(tmp_path: Path) -> None:
+def test_env_snapshot_reads_memory_load_and_godot_processes(tmp_path: Path) -> None:
     snap = env_snapshot(**_fake_proc(tmp_path))
     assert snap["mem_available_mb"] == 3418          # 3 500 000 КиБ
     assert snap["swap_free_mb"] == 7812              # 8 000 000 КиБ → 7812.5 → round
     assert snap["swap_total_mb"] == 18555
     assert snap["load1"] == 4.25
     assert snap["psi_memory"].startswith("some avg10=12.34")
-    assert snap["godot_processes"] == 1
+    # godot и godot_headless — движки; pytest с «godot» в пути и node — нет.
+    assert snap["godot_processes"] == 2
+    assert snap["godot_rss_mb"] == 1172 + 391        # 1 200 000 и 400 000 КиБ
+    assert snap["godot_states"] == "D:1,R:1"
 
 
-def test_count_processes_survives_missing_proc(tmp_path: Path) -> None:
-    assert count_processes("godot", str(tmp_path / "absent")) == 0
+def test_godot_processes_ignores_processes_with_godot_in_path(tmp_path: Path) -> None:
+    """Счётчик по подстроке командной строки врал про `godot_procs=3` там, где был
+    один движок: «godot» носят в себе pytest-венв и node-сервер."""
+    procs = godot_processes(str(_fake_proc(tmp_path)["proc_root"]))
+    assert sorted(p["exe"] for p in procs) == ["godot", "godot_headless"]
+    assert {p["state"] for p in procs} == {"R", "D"}
+
+
+def test_godot_processes_survives_missing_proc(tmp_path: Path) -> None:
+    assert godot_processes(str(tmp_path / "absent")) == []
 
 
 def test_boot_trace_tail_separates_missing_from_empty(tmp_path: Path) -> None:
@@ -102,12 +123,13 @@ def test_readiness_evidence_names_memory_and_trace(tmp_path: Path) -> None:
     trace.write_text("12 pid=7 ready: enabled=true port=9090 debug=true\n", encoding="utf-8")
     snap = {
         "mem_available_mb": 311, "swap_free_mb": 0, "swap_total_mb": 19000,
-        "load1": 9.9, "psi_memory": "some avg10=88.00", "godot_processes": 3,
+        "load1": 9.9, "psi_memory": "some avg10=88.00",
+        "godot_processes": 2, "godot_rss_mb": 1563, "godot_states": "D:1,S:1",
     }
     text = readiness_evidence(str(trace), snapshot=snap)
     assert "mem_available=311MB" in text
     assert "swap_free=0/19000MB" in text
-    assert "godot_procs=3" in text
+    assert "godot_procs=2(rss=1563MB, state=D:1,S:1)" in text
     assert "ready: enabled=true" in text
 
 

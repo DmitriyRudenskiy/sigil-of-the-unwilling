@@ -80,19 +80,48 @@ def read_psi_some(path: str = PSI_MEMORY_PATH) -> str:
     return ""
 
 
-def count_processes(needle: str = "godot", proc_root: str = "/proc") -> int:
-    """Сколько godot-процессов живёт прямо сейчас (в т.ч. чужие прогоны)."""
-    n = 0
+def godot_processes(proc_root: str = "/proc", needle: str = "godot") -> list[dict[str, Any]]:
+    """Живые процессы движка: имя исполняемого файла, RSS, состояние.
+
+    Ищется по имени бинаря (`/proc/<pid>/exe`, в край — argv[0]), а не по подстроке
+    всей командной строки: подстрока «godot» ловит и сам pytest
+    (`.venv/godot-mcp-tests/…`), и node-сервер (`godot-mcp/build/index.js`), и этот
+    самый модуль — первая версия счётчика докладывала `godot_procs=3` там, где был
+    один Godot. Состояние и RSS — потому что «три Godot» и «один Godot в D на
+    подкачке» объясняют медленный старт по-разному.
+    """
+    out: list[dict[str, Any]] = []
     try:
         entries = os.listdir(proc_root)
     except OSError:
-        return 0
+        return out
     for pid in entries:
         if not pid.isdigit():
             continue
-        if needle in _read_text(f"{proc_root}/{pid}/cmdline").lower():
-            n += 1
-    return n
+        name = _proc_exe_name(proc_root, pid)
+        if not name.startswith(needle):
+            continue
+        status = _read_text(f"{proc_root}/{pid}/status")
+        rss_kb = 0
+        state = "?"
+        for line in status.splitlines():
+            if line.startswith("VmRSS:"):
+                fields = line.split()
+                if len(fields) > 1 and fields[1].isdigit():
+                    rss_kb = int(fields[1])
+            elif line.startswith("State:"):
+                rest = line.split()[1:]
+                state = rest[0] if rest else "?"
+        out.append({"pid": int(pid), "exe": name, "rss_mb": round(rss_kb / 1024), "state": state})
+    return out
+
+
+def _proc_exe_name(proc_root: str, pid: str) -> str:
+    try:
+        return Path(os.readlink(f"{proc_root}/{pid}/exe")).name
+    except OSError:
+        argv0 = _read_text(f"{proc_root}/{pid}/cmdline").split("\0")[0]
+        return Path(argv0).name if argv0 else ""
 
 
 def env_snapshot(
@@ -103,13 +132,19 @@ def env_snapshot(
 ) -> dict[str, Any]:
     """Снимок того, что окружение могло отнять у старта Godot (T-172)."""
     mem = read_meminfo_kb(meminfo_path)
+    procs = godot_processes(proc_root)
+    states: dict[str, int] = {}
+    for p in procs:
+        states[p["state"]] = states.get(p["state"], 0) + 1
     return {
         "mem_available_mb": round(mem.get("MemAvailable", 0) / 1024) or None,
         "swap_free_mb": round(mem.get("SwapFree", 0) / 1024) or None,
         "swap_total_mb": round(mem.get("SwapTotal", 0) / 1024) or None,
         "load1": read_loadavg(loadavg_path),
         "psi_memory": read_psi_some(psi_path) or None,
-        "godot_processes": count_processes("godot", proc_root),
+        "godot_processes": len(procs),
+        "godot_rss_mb": sum(p["rss_mb"] for p in procs),
+        "godot_states": ",".join(f"{k}:{v}" for k, v in sorted(states.items())) or None,
     }
 
 
@@ -134,7 +169,8 @@ def readiness_evidence(trace_path: str = "", snapshot: dict[str, Any] | None = N
         "среда в момент отказа: "
         f"mem_available={snap['mem_available_mb']}MB "
         f"swap_free={snap['swap_free_mb']}/{snap['swap_total_mb']}MB "
-        f"load1={snap['load1']} godot_procs={snap['godot_processes']} "
+        f"load1={snap['load1']} godot_procs={snap['godot_processes']}"
+        f"(rss={snap['godot_rss_mb']}MB, state={snap['godot_states']}) "
         f"psi_memory={snap['psi_memory']}\n  boot-трейс: {boot_trace_tail(trace_path)}"
     )
 

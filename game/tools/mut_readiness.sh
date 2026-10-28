@@ -14,11 +14,14 @@ set -u
 G="${GODOT_BIN:-$HOME/.local/bin/godot}"
 S=tools/mcp/mcp_interaction_server.gd
 T=tests/unit/core/test_mcp_server.gd
-cd "$(dirname "$0")/.."
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+# PORT — порт MCP-стенда для pytest-мутанта (GdUnit-мутанты порт выбирают сами).
+PORT="${MCP_PORT:-9477}"
 # Единственный снапшот — /tmp-копия и trap на ней; `git checkout --` здесь
 # стёр бы незакоммиченную реализацию (урок зафиксирован в AGENTS.md).
 cp "$S" /tmp/mcp_srv_readiness.bak
-trap 'cp /tmp/mcp_srv_readiness.bak "$S"' EXIT
+trap 'cp /tmp/mcp_srv_readiness.bak "$S"; [ -f /tmp/godot_mcp_readiness.bak ] && cp /tmp/godot_mcp_readiness.bak tests/mcp/godot_mcp.py; true' EXIT
 
 # Прогон на мутант ОДИН и имена берутся из него же: второй прогон того же
 # мутанта добавлял в список тесты, упавшие по соседству (живые порты), и
@@ -67,3 +70,32 @@ for m in 1 2 3 4 5; do
   if [ -z "$victims" ]; then echo "MUT$m: SURVIVED (тесты зелёные — защита не покрыта)"
   else echo "MUT$m: killed -> $(echo "$victims" | tr '\n' ' ')"; fi
 done
+
+# MUT6 — счётчик живых движков в стенде. Мутация живёт не в GD-файле, а в
+# godot_mcp.py, и проверяется не GdUnit, а pytest-файлом про саму наблюдаемость.
+H=tests/mcp/godot_mcp.py
+PYTEST_PY="${PYTEST_PY:-/home/user/.venv/godot-mcp-tests/bin/python}"
+run_pytest_cases() {
+  (cd "$ROOT" && DISPLAY="${DISPLAY:-:96}" MCP_PORT="$PORT" \
+    GODOT_PROJECT_PATH="$ROOT" \
+    GODOT_MCP_SERVER="$ROOT/addons/godot-mcp/build/index.js" \
+    GODOT_PATH="${GODOT_PATH:-godot}" \
+    "$PYTEST_PY" -m pytest tests/mcp/test_readiness_evidence.py -q \
+      -p no:cacheprovider --timeout=900 2>&1) || true
+}
+
+cp "$H" /tmp/godot_mcp_readiness.bak
+python3 - "$H" <<'PYEOF'
+import sys
+from pathlib import Path
+p = Path(sys.argv[1])
+s = p.read_text()
+old = "if not name.startswith(needle):"
+new = 'if needle in _read_text(f"{proc_root}/{pid}/cmdline").lower():'
+assert s.count(old) == 1, s.count(old)
+p.write_text(s.replace(old, new))
+PYEOF
+victims="$(run_pytest_cases | sed -n 's/^FAILED tests\/mcp\/test_readiness_evidence\.py::\([a-z_0-9]*\).*/\1/p' | sort -u | tr '\n' ' ')"
+if [ -z "$victims" ]; then echo "MUT6: SURVIVED (тесты зелёные — защита не покрыта)"
+else echo "MUT6: killed -> $victims"; fi
+cp /tmp/godot_mcp_readiness.bak "$H"
