@@ -140,8 +140,9 @@ func test_zone_d_empty_slots_and_log_controls() -> void:
 	if right == null:
 		return
 	assert_int(right.get_child_count()).override_failure_message(
-		"правый ряд: два пустых слота + пять команд макета"
-	).is_equal(7)
+		"правый ряд: два пустых слота + шесть команд (книга/отмена/ждать/защита + "
+		"атака и пропуск, у которых носитель механики есть)"
+	).is_equal(8)
 	for slot_name: String in ["slot_empty_1", "slot_empty_2"]:
 		var slot := right.get_node_or_null(slot_name)
 		assert_bool(slot != null).override_failure_message("нет слота %s" % slot_name).is_true()
@@ -155,8 +156,11 @@ func test_zone_d_empty_slots_and_log_controls() -> void:
 		).is_equal(Control.MOUSE_FILTER_IGNORE)
 	assert_bool(right.get_child(0) == right.get_node_or_null("slot_empty_1")).is_true() \
 		.override_failure_message("слоты — первыми в ряду, как в макете")
-	assert_bool(ui.get_node_or_null("bottom_bar/info_box/log_row/history_nav") == null) \
-		.override_failure_message("кластер ▲▼ макет не задумывал").is_true()
+	# ▲▼ окна сообщений вернуло НОВОЕ описание владельца (alpha-battle-field 4.2);
+	# прежняя строка «кластер ▲▼ макет не задумывал» относилась к макету 11 и
+	# снята вместе с ним — окно сообщений со стрелками теперь требование спеки.
+	assert_object(ui.get_node_or_null("bottom_bar/info_box/log_row/log_up_btn")).is_not_null()
+	assert_object(ui.get_node_or_null("bottom_bar/info_box/log_row/log_down_btn")).is_not_null()
 	assert_bool(ui.get_node_or_null("bottom_bar/info_box/log_row/history_btn") != null) \
 		.override_failure_message("☰ — единственная кнопка входа в историю боя").is_true()
 	# До первой записи лога смотреть нечего — ☰ не висит сиротским табом.
