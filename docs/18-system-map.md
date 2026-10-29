@@ -308,7 +308,7 @@ preload пишет `_Classes = preload("…/canon_classes.gd")`, и по име�
 | `SupplySystem` | еда в походе: ёмкость 10, расход 1/персонаж/переход, >50% ёмкости → +2 к первому спасброску, голод → −2 к атакам до пополнения в городе | `campaign/campaign_composition.gd` (единственный владелец — снабжение нельзя «подключить» откуда-то ещё) |
 | `ThreatSystem` | фаза угроз: давление `Base × Wealth × Anomalies × Region_History × Global_Phase`, аккумулятор города, пороги тиров 1–3 → волны, динамические лагеря (D-130), директивы K-R3 | `campaign/campaign_composition.gd`, `campaign/region_map.gd` (лагеря на карте) |
 | `EthicsSystem` | этический минимум: журнал событий, оси «Порядок/Свобода · Роскошь/Аскеза · Открытость/Изоляция», сверка на ходах 10 и 20 → репутация; события не пересчитываются при загрузке (I1) | `campaign/campaign_composition.gd`, `campaign/settlement_processor.gd`, `managers/game_manager.gd` |
-| `CampaignTrainingService` | тренировка и найм: стоимость по составу партии, «10 жителей на юнит» как предложение (ждёт вердикта автора, носитель — `campaign.json → training.population_per_unit`), alive-модель лимита (D-221: DEAD не занимают слот) | `ui/party_screen.gd` и `ui/party_screen_model.gd` (экран), `ui/campaign_hud.gd`, `campaign/campaign_composition.gd` |
+| `CampaignTrainingService` | тренировка и найм: стоимость по составу партии, «10 жителей на юнит» как предложение (ждёт вердикта автора, носитель — `campaign.json → training.population_per_unit`), alive-модель лимита (D-221: DEAD не занимают слот) | `campaign/campaign_composition.gd` (единственный прод-читатель — `advance_training_turn`); экран партии опции не рисует и получает `[]`, заявку заказать нечем — носитель точки входа у `T-308` (замер 2026-10-29) |
 
 ### Герой
 
