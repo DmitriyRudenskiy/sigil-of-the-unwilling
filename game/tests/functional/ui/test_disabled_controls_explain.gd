@@ -127,6 +127,13 @@ func _expected_menu_disabled(has_save: bool) -> Array[String]:
 		for button_name in ["LoadButton", "DeleteButton"]:
 			out.append("SaveLoadScreen/Panel/Box/SlotList/Slot%d/HBox/Buttons/%s"
 				% [i, button_name])
+	# Кнопки построений окна героя: макет ставит четыре заглушки (построений в модели
+	# нет, T-250). До T-295 писатель не находил их по устаревшему пути
+	# (`Sheet/Stone/BandSkills/...`), и кнопка была живее всякого объяснения: без
+	# иконки, без `disabled`, без причины, с мёртвым нажатием. Инвентарь обязан
+	# краснеть на таких, а не молчать, — здесь он и покраснел.
+	for i in 4:
+		out.append("HeroModelWindow/Center/Window/Sheet/BandSkills/Formations/Form_%d" % i)
 	out.sort()
 	return out
 

@@ -52,7 +52,12 @@ const _MARK_THICKNESS := 2.0
 ## Отступ второй рамки от края: когда оба знака включены, они не сливаются в одну полосу.
 const _MARK_INSET := 4.0
 
-const SLOT_ICON := "Center/Window/Sheet/Stone/Doll/DollSlot_%d/EquipIcon"
+## Иконка надетой вещи лежит **рядом** с рамкой куклы, а не внутри неё:
+## предмет — `Doll/DollIcon_%d`, рамка — `Doll/DollSlot_%d` (декор камня).
+## Прежний путь `DollSlot_%d/EquipIcon` не существовал ни одной версии сцены
+## после переезда под Sheet (D-280), а сторож `is TextureRect` глушил запись
+## молча — кукла не показывала надетое никогда (T-294).
+const SLOT_ICON := "Center/Window/Sheet/Stone/Doll/DollIcon_%d"
 
 const _STAT_ICON := {
 	"attack": "hero/stat_attack", "defense": "hero/stat_defense",
@@ -160,7 +165,7 @@ func _connect_signals() -> void:
 	_connect_btn("Center/Window/Sheet/Units/Close", close)
 
 	for i in 4:
-		var b := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Formations/Form_%d" % i)
+		var b := get_node_or_null("Center/Window/Sheet/BandSkills/Formations/Form_%d" % i)
 		if b is Button:
 			var cb := _on_form.bind(i)
 			if not b.pressed.is_connected(cb):
@@ -213,13 +218,9 @@ func _build() -> void:
 ## Рамка куклы для слота — поиск по HeroLayout.DOLL_SLOTS: порядок рамок задан
 ## один раз в таблице геометрии, вторая карта здесь обязательно бы разошлась.
 func _doll_frame(slot) -> int:
-	var slots: Array = HeroLayout.DOLL_SLOTS
-	for i in slots.size():
-		var v: Variant = slots[i]
-		# Декоративные рамки (T-242) держат StringName-метку, а не слот.
-		if v is int and int(v) == int(slot):
-			return i
-	return -1
+	# Порядок рамок задан в HeroLayout.DOLL_SLOTS; поиск — только через него,
+	# иначе карта «слот → рамка» появится здесь второй и разойдётся с таблицей.
+	return HeroLayout.frame_for_slot(slot)
 
 
 func _build_left() -> void:
@@ -257,41 +258,41 @@ func _build_left() -> void:
 		if sv is Label:
 			sv.text = str(val)
 			_theme_font_size("Center/Window/Sheet/Left/StatValue_%d" % i, "stat")
-	var ml := get_node_or_null("Center/Window/Sheet/Stone/BandMana/Mana_lbl")
+	var ml := get_node_or_null("Center/Window/Sheet/BandMana/Mana_lbl")
 	if ml is Label:
 		ml.text = GameText.stat_label("mana")
-		_theme_font_size("Center/Window/Sheet/Stone/BandMana/Mana_lbl", "default")
-	var mv := get_node_or_null("Center/Window/Sheet/Stone/BandMana/Mana_val")
+		_theme_font_size("Center/Window/Sheet/BandMana/Mana_lbl", "default")
+	var mv := get_node_or_null("Center/Window/Sheet/BandMana/Mana_val")
 	if mv is Label:
 		mv.text = "%d/%d" % [_mana_cur(), _mana_max()]
-		_theme_font_size("Center/Window/Sheet/Stone/BandMana/Mana_val", "default")
+		_theme_font_size("Center/Window/Sheet/BandMana/Mana_val", "default")
 	# «Уровень» из макета: в HeroController есть опыт (get_xp), но нет уровня —
 	# строку показывать нечем, а нулевой placeholder канон-макет портит (T-251).
 	var lv := get_node_or_null("Center/Window/Sheet/Left/LevelRow")
 	if lv is Control:
 		lv.visible = false
-	var sl := get_node_or_null("Center/Window/Sheet/Stone/BandMana/School_lbl")
+	var sl := get_node_or_null("Center/Window/Sheet/BandMana/School_lbl")
 	if sl is Label:
 		sl.text = GameText.stat_label("school")
-		_theme_font_size("Center/Window/Sheet/Stone/BandMana/School_lbl", "default")
-	var sv2 := get_node_or_null("Center/Window/Sheet/Stone/BandMana/School_val")
+		_theme_font_size("Center/Window/Sheet/BandMana/School_lbl", "default")
+	var sv2 := get_node_or_null("Center/Window/Sheet/BandMana/School_val")
 	if sv2 is Label:
 		sv2.text = _magic_school()
-		_theme_font_size("Center/Window/Sheet/Stone/BandMana/School_val", "default")
-	var st := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Skills_lbl")
+		_theme_font_size("Center/Window/Sheet/BandMana/School_val", "default")
+	var st := get_node_or_null("Center/Window/Sheet/BandSkills/Skills_lbl")
 	if st is Label:
 		st.text = GameText.stat_label("skills")
-		_theme_font_size("Center/Window/Sheet/Stone/BandSkills/Skills_lbl", "large")
+		_theme_font_size("Center/Window/Sheet/BandSkills/Skills_lbl", "large")
 	for i in 6:
-		var slot := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Skill_%d" % i)
+		var slot := get_node_or_null("Center/Window/Sheet/BandSkills/Skill_%d" % i)
 		if slot is not Button:
 			continue
 		var lvl := _skill_level(i)
 		var has := lvl > 0
-		var sic := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Skill_%d/SkillIcon" % i)
+		var sic := get_node_or_null("Center/Window/Sheet/BandSkills/Skill_%d/SkillIcon" % i)
 		if sic is TextureRect:
 			sic.texture = _tex(_SKILL_ICON[i]) if i < _SKILL_ICON.size() else null
-		var ll := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Skill_%d/SkillLevel" % i)
+		var ll := get_node_or_null("Center/Window/Sheet/BandSkills/Skill_%d/SkillLevel" % i)
 		if ll is Label:
 			ll.text = str(lvl)
 			ll.visible = has
@@ -343,7 +344,7 @@ func _build_bottom() -> void:
 		if nm is Label:
 			nm.text = str(army.army[i].get_display_name()) if filled else ""
 	for i in 4:
-		var fb := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Formations/Form_%d" % i)
+		var fb := get_node_or_null("Center/Window/Sheet/BandSkills/Formations/Form_%d" % i)
 		if fb is Button:
 			fb.icon = load(_ICON["formation"][i])
 			fb.add_theme_color_override("font_color", TEXT_GOLD)
@@ -358,6 +359,7 @@ func _refresh() -> void:
 	_refresh_stats()
 	_refresh_mana()
 	_rebuild_equipped()
+	_refresh_equip_list()
 	_refresh_grid()
 
 
@@ -408,6 +410,57 @@ func _rebuild_equipped() -> void:
 		var ov := get_node_or_null(SLOT_ICON % i)
 		if ov is TextureRect:
 			ov.visible = false
+
+## Список надетого левой колонки (макет A7–D10, `HeroLayout.BLOCKS["EquipList"]`).
+## Порядок — `HeroLayout.DOLL_SLOTS`, тот же, что у рамок куклы: третья строка
+## списка обязана быть тем же предметом, что и третья рамка, иначе список читается
+## как другой герой. Пустая строка **скрыта**, а не забита прочерком: блок без
+## значения не рисуется (носитель строки — T-254).
+## Число строк берёт сцена: генератор выпускает `EquipRow_%d`, собственный счётчик
+## здесь был бы вторым носителем геометрии и разошёлся бы при правке макета.
+func _refresh_equip_list() -> void:
+	var items: Array = _equipped_in_doll_order()
+	var i := 0
+	while true:
+		var row := get_node_or_null("Center/Window/Sheet/Left/EquipRow_%d" % i)
+		if row == null:
+			return
+		var art: Artifact = items[i] if i < items.size() else null
+		row.visible = art != null
+		var icon_path := _artifact_icon(art)
+		var ic := row.get_node_or_null("EquipIcon_%d" % i)
+		if ic is TextureRect:
+			(ic as TextureRect).texture = _tex(icon_path) if not icon_path.is_empty() else null
+		var nm := row.get_node_or_null("EquipName_%d" % i)
+		if nm is Label:
+			var lbl := nm as Label
+			lbl.text = art.display_name if art != null else ""
+			# Имя предмета длиннее колонки («Сапоги-скороходы» при 0.88×74 px), а
+			# Label по умолчанию переносит текст в две строки и залезает на
+			# соседнюю рамку. Правило то же, что у ячеек сумки (T-229) и их
+			# подписей (T-218): .tscn — нарушитель, писатель ставит гигиену сам.
+			lbl.clip_text = true
+			lbl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			_theme_font_size(
+				"Center/Window/Sheet/Left/EquipRow_%d/EquipName_%d" % [i, i], "default")
+		i += 1
+
+
+## Надетое в порядке рамок куклы. Декоративные рамки 12–15 держат StringName-метку,
+## а не слот (T-242), — они в список не попадают.
+func _equipped_in_doll_order() -> Array:
+	var out: Array = []
+	if _hero == null or not is_instance_valid(_hero) or _hero.inventory == null:
+		return out
+	for f in HeroLayout.DOLL_SLOTS_N:
+		var slot: int = HeroLayout.slot_at_frame(f)
+		if slot < 0:
+			continue
+		var art: Artifact = _hero.inventory.equipped.get(slot, null)
+		if art != null:
+			out.append(art)
+	return out
+
 
 ## Шаг сетки = размер Bag / (10×5): сцена на якорях-долях, пиксельный шаг был бы
 ## вторым носителем геометрии и расходился бы с окном. Нулевой размер (первый
@@ -683,7 +736,7 @@ func _unit_icon(key: String) -> Texture2D:
 ## Заполнение полосы маны: ширина полосы = доля от дорожки (текстура 12×12,
 ## рисуется растяжением — маскировать её иначе означало бы врать о запасе).
 func _refresh_mana() -> void:
-	var bar := get_node_or_null("Center/Window/Sheet/Stone/BandMana/ManaBar") as Control
+	var bar := get_node_or_null("Center/Window/Sheet/BandMana/ManaBar") as Control
 	if bar == null:
 		return
 	var mx := _mana_max()

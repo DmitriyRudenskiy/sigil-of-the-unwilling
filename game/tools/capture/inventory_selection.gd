@@ -12,6 +12,11 @@
 # применимый предмет (он выбран: золото). Песочница `execute_code` компилирует этот
 # текст как тело метода, поэтому объявлений `func` здесь быть не может; имён операций
 # записи файлов тоже нет — ошибки рвут соединение с игрой.
+# Пути узлов — после переезда блоков под Sheet (D-280): фикстура читала
+# до-переездные `Center/Window/Left/…` и `Center/Window/Right/Grid/Items/…`,
+# `get_node_or_null` на несуществующем пути возвращает null, а отчёт фикстуры
+# печатал «?» — то есть молчал вместо замера (тот же класс, что и писатели
+# экрана, T-295).
 var scene: Node = get_tree().current_scene
 if scene == null:
 	return {"ok": false, "reason": "нет текущей сцены"}
@@ -48,14 +53,14 @@ screen.select_backpack(1)
 
 var texts: Array = []
 for i in 4:
-	var lab: Node = screen.get_node_or_null("Center/Window/Left/StatValue_%d" % i) as Node
+	var lab: Node = screen.get_node_or_null("Center/Window/Sheet/Left/StatValue_%d" % i) as Node
 	texts.append(lab.text if lab != null else "?")
 var marks: Array = []
 for i in made.size():
 	# Узел предмета, а не ячейки ленты: предмет в сетке занимает несколько клеток,
 	# и рамка «выбран»/«некуда» относится к предмету.
 	var cell: Node = screen.get_node_or_null(
-		"Center/Window/Right/Grid/Items/Item_%d" % i) as Node
+		"Center/Window/Sheet/Stone/Bag/Items/Item_%d" % i) as Node
 	if cell == null:
 		marks.append("?")
 		continue
@@ -65,14 +70,16 @@ for i in made.size():
 		"S" if sel != null and sel.visible else "-",
 		"B" if blk != null and blk.visible else "-",
 		str((cell as Control).get_global_rect())])
-var exp: Node = screen.get_node_or_null("Center/Window/Left/Exp_val") as Node
+# `Exp_val` из фикстуры убран: узла нет ни в одной версии сцены после D-280, и
+# сам экран его не пишет — опыта как носителя на экране нет (T-241). Фикстура,
+# которая читает несуществующий узел и печатает «?», выглядит как работающая
+# проверка, поэтому поле снято, а не «починено» выдуманным путём.
 return {
 	"ok": true,
 	"visible": bool(screen.visible),
 	"backpack": inv.backpack.size(),
 	"selected": int(screen.selected_backpack_index()),
 	"stats": ", ".join(PackedStringArray(texts)),
-	"exp": exp.text if exp != null else "?",
 	"marks": " | ".join(PackedStringArray(marks)),
 	"rect": str((screen as Control).get_global_rect()),
 }

@@ -93,6 +93,32 @@ const DOLL_SLOTS := [
 	&"", &"", &"", &"",
 ]
 
+## Рамка куклы для слота, -1 — слот ни в одной рамке не показывается. Метки
+## `DOLL_SLOTS` — `StringName` с самого появления таблицы (21c2fc4f), а
+## `Artifact.Slot` — enum-целое: сравнивать их напрямую бессмысленно (`v is int`
+## не срабатывает никогда), поэтому сверка идёт по имени слота.
+static func frame_for_slot(slot: Artifact.Slot) -> int:
+	var want := String(Artifact.Slot.find_key(slot))
+	if want == "":
+		return -1
+	for i in DOLL_SLOTS.size():
+		if String(DOLL_SLOTS[i]) == want:
+			return i
+	return -1
+
+
+## Слот рамки куклы — обратная сторона того же порядка, чтобы список надетого и
+## кукла не могли разойтись: строка №k и рамка №k обязаны показывать одну вещь.
+## Рамки 12–15 — декор камня, у них нет слота (T-242).
+static func slot_at_frame(i: int) -> int:
+	if i < 0 or i >= DOLL_SLOTS.size():
+		return -1
+	var want := String(DOLL_SLOTS[i])
+	if want == "":
+		return -1
+	return int(Artifact.Slot.get(want, -1))
+
+
 ## Сетка сумки — одна на всех: GameNumbers.INVENTORY_GRID (50 клеток, D-280).
 const GRID_COLS := 10
 const GRID_ROWS := 5

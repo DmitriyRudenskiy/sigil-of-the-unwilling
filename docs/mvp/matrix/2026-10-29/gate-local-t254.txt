@@ -1,0 +1,60 @@
+# гейт локальный — T-254 / T-294 / T-295 (список надетого, рамки куклы, центральная полоса)
+# команда: ./game/run_tests.sh (GdUnit4 headless + MCP e2e + python-секции), дата 2026-10-29
+# пометка: local (head_sha до коммита = 81ccd053; CI не проверялся — по директиве владельца)
+# машина шарится: Xvfb гейт поднял сам (свободный дисплей), чужие :96/:97 не тронуты
+
+## GdUnit4 (headless)
+Overall Summary: 3601 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (378/378) · Executed test cases: (3601/3601) · Total execution time: 2min 49s
+Exit code: 0
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+LINT: SKIPPED (нет gdtoolkit у python3 или нет .gdlintrc в game/) — жёлтый уровень, не падение (T-288)
+Тест-кейсов: 3587 → 3601 (+14: 9 списка надетого/куклы + 5 центральной полосы,
+сведены в tests/unit/ui/test_inventory_actions.gd по требованию
+merge_files-рэтчета testmap).
+
+## MCP e2e (pytest + godot-mcp, Xvfb поднимал гейт)
+109 passed, 2 skipped in 288.06s (0:04:48)
+PYTEST LEDGER: passed=109 skipped=2 failed=0 errors=0 collected=111
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://...
+MCP JUNIT: passed=109 skipped=2 failed=0 errors=0
+MCP VERDICT: GREEN
+READINESS-CLASSIFIER: selftest GREEN
+Отличие от предыдущих прогонов: errors=0 (readiness-ошибка D-265 не воспроизвелась —
+среда измерилась в бюджет), therefore VERDICT GREEN, а не YELLOW.
+
+## Python-секции
+GENART: 11 passed (scripts/test_gen_map_art.py)
+классификатор MCP-журнала: 13 passed (scripts/test_classify_mcp_junit.py)
+
+## Документные гейты (./scripts/doc_gates.sh) — GREEN
+- аудит «док vs код»: опись 0 = базлайн 0, бездоковых 0, «файла нет» 0, allowlist 215
+- gdd_gate: t_duplicate_headers 7 (известные коллизии T-290), t_multi_footer 0,
+  dead_paths 5 (остаток T-286/T-287), d_without_rejected 170, q_ghost_rows 0
+- связность docs/: OK (108 заметок); CJK-гейт: 0
+- карта тестов: TESTMAP OK — дыр 81 (было 82), файлов в группах слияния 144 = базлайн,
+  дублей 0; базлайн перезаписан в сторону улучшения (scripts/testmap.baseline.json)
+
+## Первый прогон этого среза был красным — и это работа гейта
+res://tests/functional/ui/test_disabled_controls_explain.gd >
+  test_menu_disabled_items_carry_a_reason FAILED
+«инвентарь выключенных контролов меню разошёлся: ждалось 13 позиций, получено 17» —
+четыре лишних: HeroModelWindow/Center/Window/Sheet/BandSkills/Formations/Form_0..3.
+Причина: до починки пути (T-295) писатель не находил кнопки построений, поэтому они
+оставались активными, без иконки, `disabled` и причины, с несоединённым `pressed`.
+После починки они стали объясняющими себя заглушками (T-250) — инвентарь D-252
+покраснел, как и обязан. Инвентарь пополнен четырьмя путями; проверка «выключенный
+пункт объясняет причину» для них проходит.
+
+## Мутационная батарея
+game/tools/mut_equip_rows.sh — прогон по состоянию ПОСЛЕ коммита (батарея восстанавливает
+файлы через `git checkout --`, на незакоммиченном коде она стирает смену); результат —
+в тикетах T-254/T-294/T-295 (docs/mvp/TICKETS.md).
+
+## UX-review
+Кадр game/tmp/shots/hero-equip-rows.png (1920×1080, яркость 27.5; пиксели в git не идут,
+D-185), фикстура game/tools/capture/hero_equip_rows.gd (коммитится). Вердикт —
+[[20-ux-hero-screen]] §6.4; расхождение с пикселем макета не замерено (T-298).
