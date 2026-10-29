@@ -418,7 +418,7 @@ func on_day_passed(day: int):
 	# Проверка активного кризиса
 	if current_crisis != null:
 		process_ongoing_crisis()
-		return  # Во время кризиса обычные события не触发
+		return  # Во время кризиса обычные события не запускаются
 
 	# Проверка шанса кризиса
 	if can_trigger_crisis() and should_trigger_crisis():
@@ -440,7 +440,7 @@ func update_next_event_day():
 	var variability = rng.randi() % 4 - 2  # -2 to +2 дня
 	next_event_day = day_counter + max(3, base_interval + variability)
 
-## Попытка触发事件
+## Попытка запуска события
 func try_trigger_event():
 	var available_events = get_available_events()
 	if available_events.is_empty():

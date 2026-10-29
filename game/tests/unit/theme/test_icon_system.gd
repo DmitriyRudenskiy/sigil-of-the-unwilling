@@ -1,7 +1,7 @@
 extends BaseTest
 ## Task 11: тесты иконок, курсоров, кэша, fallback
 
-const IR = preload("res://scripts/theme/IconRegistry.gd")
+const IR = preload("res://scripts/theme/icon_registry.gd")
 const TC = preload("res://scripts/theme/theme_config.gd")
 
 func test_resource_icons_load() -> void:

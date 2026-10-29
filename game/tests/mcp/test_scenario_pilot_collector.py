@@ -39,7 +39,7 @@ var w = get_tree().current_scene
 if w == null or w.get_hero() == null:
     return {"error": "world not ready"}
 var pilot = get_node_or_null("/root/ScenarioPilot")
-if pilot == null or pilot.get_script() == null or not str(pilot.get_script().resource_path).contains("ScenarioPilot"):
+if pilot == null or pilot.get_script() == null or str(pilot.get_script().resource_path) != "res://scripts/probe/scenario_pilot.gd":
     return {"error": "pilot node not found"}
 w.set_meta("scenario_pilot", pilot)
 var r = pilot.start_scenario(w, __SEED__, "__ROLE__", "__CLASS__")

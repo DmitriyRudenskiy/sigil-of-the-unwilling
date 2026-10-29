@@ -19,7 +19,7 @@
 set -u
 G=${GODOT_BIN:-/home/user/.local/bin/godot}
 TEST=res://tests/unit/probe/test_builder_city_ledger_outcomes.gd
-ROLE=game/scripts/probe/BuilderRole.gd
+ROLE=game/scripts/probe/builder_role.gd
 FAILED=0
 
 # На шаренной машине нельзя запускать второй Godot, пока жив первый (протокол зависших

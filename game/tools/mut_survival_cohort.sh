@@ -15,9 +15,9 @@
 set -u
 G=${GODOT_BIN:-/home/user/.local/bin/godot}
 TESTS=(-a res://tests/unit/probe/test_survival_cohort.gd -a res://tests/unit/probe/test_survival_counters.gd)
-ROLE=game/scripts/probe/SurvivalRole.gd
+ROLE=game/scripts/probe/survival_role.gd
 PROBE=game/scripts/probe/balance_probe.gd
-PILOT=game/scripts/probe/ScenarioPilot.gd
+PILOT=game/scripts/probe/scenario_pilot.gd
 TARGETS=game/scripts/data/scenario_targets.gd
 REPORT=game/tools/survival_report.gd
 HEROVIS=game/scripts/entities/hero_visual_controller.gd

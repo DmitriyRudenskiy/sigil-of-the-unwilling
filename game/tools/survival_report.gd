@@ -29,7 +29,7 @@ extends SceneTree
 ## ссылается на `Services`.
 
 const WORLD_SCENE := "res://scenes/archive/world.tscn"
-const SCENARIO_PILOT_GD := "res://scripts/probe/ScenarioPilot.gd"
+const SCENARIO_PILOT_GD := "res://scripts/probe/scenario_pilot.gd"
 const PILOT_SCENE := "res://scenes/probe/ScenarioPilot.tscn"
 const FRAME_CAP := 30000
 const ROLE_ID := "survival"

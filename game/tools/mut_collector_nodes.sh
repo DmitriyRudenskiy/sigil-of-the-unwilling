@@ -12,8 +12,8 @@
 set -u
 G=${GODOT_BIN:-/home/user/.local/bin/godot}
 TEST=res://tests/unit/probe/test_collector_nodes_vs_units.gd
-PILOT=game/scripts/probe/ScenarioPilot.gd
-ROLE=game/scripts/probe/CollectorRole.gd
+PILOT=game/scripts/probe/scenario_pilot.gd
+ROLE=game/scripts/probe/collector_role.gd
 FAILED=0
 
 run() {

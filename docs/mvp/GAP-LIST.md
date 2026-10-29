@@ -75,9 +75,9 @@ date: 2026-10-17
 
 | # | Система | Код | Док-статус |
 |---|---|---|---|
-| B-7 | Командные диалоги | `systems/TeamDialogSystem.gd` + `ui/TeamDialogScreen.tscn` | 02f-слой (банк, не в MVP, Q4/P2) |
-| B-8 | Отношения попутчиков (лояльность/предательство) | `systems/RelationshipSystem.gd` | 02f-слой (банк); **в употреблении**: T-119 фиксил её баг |
-| B-9 | Чаризма-события | `systems/CharismaEvents.gd` | 02f-слой (банк) |
+| B-7 | Командные диалоги | `systems/team_dialog_system.gd` + `ui/TeamDialogScreen.tscn` | 02f-слой (банк, не в MVP, Q4/P2) |
+| B-8 | Отношения попутчиков (лояльность/предательство) | `systems/relationship_system.gd` | 02f-слой (банк); **в употреблении**: T-119 фиксил её баг |
+| B-9 | Чаризма-события | `systems/charisma_events.gd` | 02f-слой (банк) |
 | B-10 | Обман (проверки) | `systems/deception_check.gd` | 02f-слой (банк) |
 | B-11 | Рост врагов | `systems/enemy_growth_system.gd` | legacy-мир (не в доках) |
 | B-12 | Эндгейм | `systems/endgame_controller.gd` | legacy-мир (не в доках) |

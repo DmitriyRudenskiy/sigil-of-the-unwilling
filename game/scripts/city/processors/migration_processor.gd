@@ -2,7 +2,7 @@ class_name MigrationProcessor
 extends CitySubProcessor
 ## Reputation-driven migration (immigrants/emigrants).
 
-const CharismaEvents = preload("res://scripts/systems/CharismaEvents.gd")
+const CharismaEvents = preload("res://scripts/systems/charisma_events.gd")
 
 signal migration_occurred(city_uid: int, immigrants: int, emigrants: int)
 

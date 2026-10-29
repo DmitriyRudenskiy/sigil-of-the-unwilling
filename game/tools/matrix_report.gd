@@ -41,7 +41,7 @@ const WORLD_SCENE := "res://scenes/archive/world.tscn"
 ## `ScenarioPilot` грузится в рантайме, а не через `class_name`: скрипт ссылается на
 ## autoload `Services`, а скрипт инструмента компилируется на старте — до регистрации
 ## autoload'ов (тот же приём и та же ловушка, что в `tools/diag_biome_resources.gd`).
-const SCENARIO_PILOT_GD := "res://scripts/probe/ScenarioPilot.gd"
+const SCENARIO_PILOT_GD := "res://scripts/probe/scenario_pilot.gd"
 const PILOT_SCENE := "res://scenes/probe/ScenarioPilot.tscn"
 const FRAME_CAP := 30000
 const DEFAULT_TURNS := 90

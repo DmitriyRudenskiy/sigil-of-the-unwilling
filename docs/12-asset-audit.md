@@ -73,7 +73,7 @@ Read-only аудит визуальных ассетов (`game/assets/**/*.{png
 ## Несоответствия нейминга и структуры
 
 - Нижнего регистра/разделителей — **0 нарушений**.
-- `TeamDialogScreen.gd` и `TeamDialogData.gd` — PascalCase в **коде** (на момент аудита; сейчас носитель — `scripts/ui/team_dialog_screen.gd`, данных-класса `TeamDialogData.gd` в репо нет, система — `scripts/systems/TeamDialogSystem.gd`)
+- `TeamDialogScreen.gd` и `TeamDialogData.gd` — PascalCase в **коде** (на момент аудита; сейчас носитель — `scripts/ui/team_dialog_screen.gd`, данных-класса `TeamDialogData.gd` в репо нет, система — `scripts/systems/team_dialog_system.gd` (`TeamDialogSystem`))
   (вне assets/, но против godot-конвенции нижнего регистра; Linux case-sensitivity — риск для MCP-тестов).
 - `assets/raw/` — свалка исходников (2 файла); категории `tiles/` — 1 файл (`world_tiles.jpeg`),
   «категория-однушка»; `textures/objects/` смешивает здания и портреты. Рекомендация: портреты —

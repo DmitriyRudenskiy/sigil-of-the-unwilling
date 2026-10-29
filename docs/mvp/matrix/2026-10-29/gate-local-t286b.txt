@@ -1,0 +1,40 @@
+Локальный гейт T-286 шаг 2 (переименование 16 файлов scripts/), 2026-10-29.
+Канал: bash game/run_tests.sh (GdUnit headless + MCP e2e + GENART + selftest классификатора).
+Логи полные — /tmp/gate_t286.log (первый прогон, КРАСНЫЙ по моей правке) и /tmp/gate_t286b.log (второй, зелёный).
+
+=== Прогон 1 (до правки теста) — красный, пойман гейтом =====================
+Overall Summary: 3587 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+PYTEST LEDGER: passed=108 skipped=2 failed=1 errors=0 collected=111
+MCP RED: test_scenario_pilot_collector::test_scenario_pilot_collector_wizard [failure] :: AssertionError: Прогон не стартовал: {'error': 'pilot node not found'}
+  причина: tests/mcp/test_scenario_pilot_collector.py:42 сверял пилота по подстроке пути
+  скрипта (contains("ScenarioPilot")); после git mv путь стал scenario_pilot.gd.
+
+=== Прогон 2 (после правки) =================================================
+Overall Summary: 3587 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PYTEST LEDGER: passed=108 skipped=2 failed=0 errors=1 collected=111
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за): среда, не регрессия (D-265); тесты обязан переснять владелец либо повторный прогон:
+  - test_campaign_carrier::test_button_press_opens_party_screen_with_live_roster :: failed on setup with "godot_mcp.MCPError: игра не готова за 180 с (последняя ошибка: тулз game_eval вернул ошибку: Not connected to game interaction server.)
+MCP VERDICT: YELLOW
+GENART: интерпретатор /home/user/.venv/map-art/bin/python
+11 passed in 2.30s
+READINESS-CLASSIFIER: selftest GREEN
+
+=== Вывод кода выхода (не перехвачен обёрткой, выведен по run_tests.sh) =====
+
+GdUnit: 3587 test cases | 0 errors | 0 failures → GDUNIT_RC=0 (orphan-предупреждений 0).
+MCP: pytest вернул 1 (1 error readiness) → MCP_RC=1; LEDGER_OK=1 (108+2+0+1 = collected 111).
+Маркеры красных выходов отсутствовали: «PYTEST: RED (неполный прогон)» (run_tests.sh:315),
+«MCP: RED — тесты объявили отсутствие Godot» (:329), «PYTEST: SKIPPED … причин нет» — ни одного.
+classify_mcp_junit.py вернул 3 (журнал целиком из readiness-ошибок) → ветка :348-352: MCP_RC=0.
+GENART: 11 passed; классификатор selftest GREEN (:390, MCP_RC не тронут).
+Финал скрипта — exit "$MCP_RC" → EXIT=0 (жёлтый D-265 гейт не красит).
+
+=== Readiness-жёлтый: третья повторность на этой машине =====================
+
+test_campaign_carrier::test_button_press_opens_party_screen_with_live_roster —
+setup: «игра не готова за 180 с (последняя ошибка: тулз game_eval вернул ошибку:
+Not connected to game interaction server.)». Тот же класс, что mem_available=0MB
+(T-281) и предыдущий D-265-случай: живой Godot не поднимает interaction server.
+К переименованию не относится: party-экран и его тесты путей .gd не знают.

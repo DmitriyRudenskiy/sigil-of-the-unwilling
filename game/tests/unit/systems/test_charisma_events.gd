@@ -2,7 +2,7 @@ extends BaseTest
 
 # social-systems-delta D4: негативные события низкой харизмы
 
-const CharismaEvents = preload("res://scripts/systems/CharismaEvents.gd")
+const CharismaEvents = preload("res://scripts/systems/charisma_events.gd")
 
 func _city_with_pop(n: int = 3) -> City:
 	var c := City.new()

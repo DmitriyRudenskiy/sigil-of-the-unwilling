@@ -12,7 +12,7 @@
 set -u
 G=${GODOT_BIN:-/home/user/.local/bin/godot}
 TEST=res://tests/unit/probe/test_traveler_route.gd
-ROLE=game/scripts/probe/TravelerRole.gd
+ROLE=game/scripts/probe/traveler_role.gd
 FAILED=0
 
 run() {

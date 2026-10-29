@@ -16,7 +16,7 @@ set -u
 G=${GODOT_BIN:-/home/user/.local/bin/godot}
 TEST=res://tests/unit/probe/test_probe_hero_cell_after_death.gd
 PROBE=game/scripts/probe/balance_probe.gd
-ROLE=game/scripts/probe/TravelerRole.gd
+ROLE=game/scripts/probe/traveler_role.gd
 FAILED=0
 
 mutate() { # python-мутация: файл, старая строка, новая строка
