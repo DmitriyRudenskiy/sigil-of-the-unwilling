@@ -1,0 +1,54 @@
+Локальный гейт T-256 (карточка предмета: подложка, описание, порядок и роли текста)
+Дата: 2026-10-29, машина агента (Linux, llvmpipe), MCP_WORKERS=1
+Канал: `MCP_WORKERS=1 bash game/run_tests.sh` + `./scripts/doc_gates.sh` (отдельно, как устроено в run_tests.sh)
+Дерево на момент прогона: рабочий tree = HEAD 5cd8b7dc + правки T-256 (генератор сцены, сцена, экран, тесты, фикстура съёмки)
+
+$ MCP_WORKERS=1 bash game/run_tests.sh
+Overall Summary: 3635 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+
+PYTEST LEDGER: passed=111 skipped=2 failed=0 errors=1 collected=114
+MCP JUNIT: passed=111 skipped=2 failed=0 errors=1
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за): среда, не регрессия (D-265); тесты обязан переснять владелец либо повторный прогон:
+MCP VERDICT: YELLOW
+MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265)
+GENART: интерпретатор /home/user/.venv/map-art/bin/python
+READINESS-CLASSIFIER: selftest GREEN
+
+--- отказ единственного error (среда, не код) ---
+_________________ ERROR at setup of test_session_reset_caches __________________
+tests/mcp/conftest.py:221: in world_scene
+    mcp.wait_ready()
+tests/mcp/godot_mcp.py:449: in wait_ready
+    raise MCPError(
+E   godot_mcp.MCPError: игра не готова за 180 с (последняя ошибка: тулз game_eval вернул ошибку: Not connected to game interaction server.)
+E     среда в момент отказа: mem_available=0MB из 47242MB swap_free=579/20479MB load1=1.23 godot_procs=1(rss=173MB, state=S:1) psi_memory=some avg10=0.00 avg60=0.02 avg300=0.37 total=6675607415
+E     где стоит движок: pid=2018438 S wchan=futex_do_wait syscall=202 fd=23
+E     порт: 127.0.0.1:9090 — порта нет (bind не случился)
+E     boot-трейс: файл трейса /home/user/sigil-of-the-unwilling/game/tmp/mcp_boot/boot_2011725_43.log пуст или не создан — Godot не дошёл до автозагрузки McpInteractionServer (не стартовал/умер на старте)
+
+--- подписка отказа ---
+tests/mcp/test_readiness_evidence.py::test_zero_mem_available_is_not_rendered_as_unread PASSED
+
+$ ./scripts/doc_gates.sh
+OK: тесты самих проверщиков (11 файлов, 9.1.1)
+OPENSPEC SPECS: OK (проверено 87 сведённых спек)
+TESTMAP OK: дыр 80, файлов в группах слияния 150, дублей 0
+DOC GATES: GREEN
+
+ВЕРДИКТ: GdUnit 3635 | 0 | 0 (exit 0); MCP 111 passed / 2 skipped / failed=0 / errors=1 (collected=114)
+  — error классифицирован самим гейтом как readiness YELLOW (D-265): Godot не дошёл до
+    автозагрузки McpInteractionServer (boot-трейс пуст, порт 9090 не связан),
+    mem_available=0MB из 47242MB, load1=1.23 — память машины в момент старта воркера.
+  YELLOW ≠ RED (run_tests.sh), exit гейта = 0. Тот же отказ снимался в прогонах T-300/T-302.
+  DOC GATES GREEN, TESTMAP без движения (80/150/0), сканеры T-123/T-296 GREEN.
+  local: head 5cd8b7dc + T-256, GdUnit 3635, MCP 111/2/0/1e(readiness), smoke — чек-лист экрана героя ниже.
+
+Smoke-чек-лист (ручной проход живого экрана, MCP-канал):
+  - главное меню → «Продолжить»/новая игра недоступны без сейва — причина в тултипе (не трогалось);
+  - экран героя: выбор предмета в рюкзаке → подсказка с плитой, имя/подпись/описание/габарит/3 кнопки;
+  - фикстура возвращает tip_visible=true, body_visible=true, caption=«Описание» (MANIFEST.md кадра);
+  - кадр 1920×1080, sha256 9a9b5c41d7c3a4c35f6e604136ae9180cc4bd50235bbf75bd9479b5abde1d6d8.
