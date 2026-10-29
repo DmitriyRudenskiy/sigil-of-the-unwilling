@@ -1,0 +1,60 @@
+T-271 · локальный гейт (head b46ad4b8 — код, тесты, батарея, кадры и доки одним коммитом;
+этот файл — следующий за ним коммит; 2026-10-29)
+
+GdUnit: Overall Summary: 3638 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (385/385) · Executed test cases : (3638/3638) · Total execution time: 2min 53s
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+LINT: SKIPPED (нет gdtoolkit у python3 — известная лакуна среды, не выбор агента)
+MCP: ============ 1 failed, 111 passed, 2 skipped in 488.78s (0:08:08) =============
+PYTEST LEDGER: passed=111 skipped=2 failed=1 errors=0 collected=114
+MCP VERDICT: YELLOW (MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265))
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://... (см. docs/mvp/CAPTURE-HELPER.md)
+GENART: 11 passed in 2.29s · CLASSIFIER: 13 passed in 0.04s · READINESS-CLASSIFIER: selftest GREEN
+
+DOC GATES: GREEN (./scripts/doc_gates.sh на этом же дереве, rc=0)
+  OK: docs/ links consistent (112 notes checked) · OK: 00-INDEX.md актуален (114 заметок)
+  OK: доки ↔ код (автолоады, сцены, классы, save-ключи)
+  HERO-LAYOUT-MAP: блоков 19, адресных строк карты 18 — расхождений нет
+  GDD-GATE: GREEN · ПРОВЕНАНС: 694/694 ассетов покрыто (36 классов, 59 файлов)
+  152 passed (тесты самих проверщиков, 12 файлов) · OPENSPEC SPECS: OK (87) · TESTMAP OK: дыр 80, слияние 150, дублей 0
+
+Чтение единственного красного MCP. Тест `tests/mcp/test_main_menu_buttons_live.py::
+test_live_menu_column_matches_contract`, отказ на готовности, тело не выполнялось:
+  godot_mcp.MCPError: игра не готова за 180 с (последняя ошибка: тулз game_eval вернул
+  ошибку: Not connected to game interaction server.)
+  среда в момент отказа: mem_available=0MB из 47242MB swap_free=663/20479MB load1=1.18
+    godot_procs=1(rss=172MB, state=S:1) psi_memory=some avg10=0.00 avg60=0.00 avg300=0.46
+  где стоит движок: pid=2046641 S wchan=futex_do_wait syscall=202 fd=23
+  порт: 127.0.0.1:9090 — порта нет (bind не случился)
+  boot-трейс: файл трейса пуст или не создан — Godot не дошёл до автозагрузки
+    McpInteractionServer (не стартовал/умер на старте)
+Это та же подпись, что у зафиксированного набора D-265 (нулевой MemAvailable на шарящейся
+машине, порт не связан), — в этом прогоне она прилетела в тело теста, а не в фикстуру,
+поэтому pytest записал `<failure>`, а не setup-`<error>`; классификатор подписал её
+верно («1 error с подпиской readiness» — счётчик читает обе формы тега). Смена трогает
+экран героя (`artifact_inventory_screen`, `hero_layout`, сцена инвентаря), а этот тест —
+колонка главного меню; к диффу он не имеет отношения и в прошлых прогонах проходил.
+Публикуется жёлтый прогон: красный — только readiness (урок T-241: набор меняется между
+прогонами одного кода).
+
+Мутационная батарея (запущена на дереве b46ad4b8, доки уже в нём; `run()` в конце
+возвращает исходник `git checkout --`, после прогона дерево чистое):
+  M1 (дом карты возвращён на куклу, Rect2(571, 300, …)) — 11 кейсов | 0 errors | 3 failures
+  M2 (отжимание к противоположному углу выключено)      — 11 кейсов | 0 errors | 1 failures
+  M3 (полем объявлен кадр фигуры, а не сумка)            — 11 кейсов | 0 errors | 22 failures
+  M4 (вертикальные доли якорей считаются от ширины)     — 11 кейсов | 0 errors | 10 failures
+  «ИТОГ: все мутанты красные» — каждый мутант краснее своего сторожа, зелёных нет.
+M2 краснеет одним кейсом, и это и есть сторож отжимания (угловые предметы): если бы
+краснели только «дом»-кейсы, правило отжатия не сторожилось бы ничем.
+
+UX-review: машинным зрением, кадр-доказательство и вердикт по AC —
+docs/mvp/matrix/2026-10-29/ux-hero-tip-t271.md (кадры «до»/«после» ×2, sha256, возвраты
+фикстур; пиксельного сравнения с макетом нет — канон-макеты отсутствуют на диске, T-298).
+
+Тестовый леджер смены: +3 кейса / −0 / quarantine 0 (GdUnit 3635 → 3638), MCP-сборов 114
+без изменений, TESTMAP не двигался (80/150/0 — новые кейсы в уже учтённом файле).
