@@ -18,7 +18,7 @@ func test_battle_ui_onready_resolved_and_connected() -> void:
 	assert_object(ui._settings_screen).is_not_null().override_failure_message("_settings_screen не разрешился")
 	assert_object(ui._spellbook_panel).is_not_null().override_failure_message("_spellbook_panel не разрешился")
 
-	assert_bool(ui._retreat_btn.pressed.is_connected(ui._on_retreat)).is_true().override_failure_message("retreat_btn.pressed не подключён")
+	assert_bool(ui._retreat_btn.pressed.is_connected(ui._on_exit_dialog)).is_true().override_failure_message("retreat_btn.pressed не подключён")
 	assert_bool(ui._wait_btn.pressed.is_connected(ui._on_wait)).is_true().override_failure_message("wait_btn.pressed не подключён")
 	assert_bool(ui._attack_button.pressed.is_connected(ui._on_attack_mode)).is_true().override_failure_message("attack_btn.pressed не подключён")
 	assert_bool(ui._defend_btn.pressed.is_connected(ui._on_defend)).is_true().override_failure_message("defend_btn.pressed не подключён")

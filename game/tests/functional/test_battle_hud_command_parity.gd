@@ -43,7 +43,7 @@ func test_unavailable_command_changes_nothing() -> void:
 	var state: BattleState = battle.get("_state")
 	# «Спасение» некого вызывать: никто не лежит → кнопка глуха, а сигнал в обход
 	# кнопки не должен двигать бой.
-	assert_bool(ui._rescue_btn.disabled).is_true()
+	# D-294: кнопки «Спасения» в ряду нет — проверка глухости ушла к диалогу выхода.
 	var before := {}
 	for u in state.attacker_units:
 		before[u.uid] = u

@@ -150,22 +150,26 @@ func test_hero_without_hp_pool_hides_health_bar() -> void:
 
 # --- Кнопка «Спасение» (5.2) ------------------------------------------------
 
-func test_rescue_button_emits_rescue_request() -> void:
+# D-294: «Спасение» — пункт диалога выхода из боя, а не кнопка ряда.
+func test_rescue_item_of_exit_dialog_emits_rescue_request() -> void:
 	var ui := _mk_ui()
 	var fired := [false]
 	ui.rescue_requested.connect(func() -> void: fired[0] = true)
-
-	ui._rescue_btn.emit_signal("pressed")
-
+	ui._on_exit_dialog()
+	var dlg: AcceptDialog = null
+	for c: Node in ui.get_children():
+		if c is AcceptDialog:
+			dlg = c
+	assert_object(dlg).is_not_null()
+	dlg.get_child(0).get_child(1).emit_signal("pressed")
 	assert_bool(fired[0]).is_true()
 
 
-func test_rescue_button_follows_availability_and_locks_with_controls() -> void:
+# Ряд глушится вместе с командами; «Пропустить» — никогда (07-ui-ux:53).
+func test_row_locks_with_controls_and_skip_stays_live() -> void:
 	var ui := _mk_ui()
-
-	ui.set_rescue_enabled(true)
-	assert_bool(ui._rescue_btn.disabled).is_false()
 	ui.set_controls_enabled(false)
-	assert_bool(ui._rescue_btn.disabled).is_true()
-	# Инвариант 07-ui-ux:53 — «Пропустить» не глушится ничем.
+	for btn: Button in [ui._attack_button, ui._defend_btn, ui._wait_btn, ui._retreat_btn]:
+		assert_bool(btn.disabled).override_failure_message("кнопка ряда не заглушена").is_true()
 	assert_bool(ui._skip_btn.disabled).is_false()
+

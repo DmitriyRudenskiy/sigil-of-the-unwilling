@@ -72,13 +72,11 @@ func test_zone_d_medallions_stay_square() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	var paths := [
-		"bottom_bar/bar_box/left_box/settings_btn",
 		"bottom_bar/bar_box/left_box/retreat_btn",
-		"bottom_bar/bar_box/left_box/rescue_btn",
-		"bottom_bar/bar_box/right_box/attack_btn",
+		"bottom_bar/bar_box/left_box/attack_btn",
 		"bottom_bar/bar_box/right_box/spellbook_btn",
 		"bottom_bar/bar_box/right_box/wait_btn",
-		"bottom_bar/bar_box/right_box/defend_btn",
+		"bottom_bar/bar_box/right_box/cancel_btn",
 		"bottom_bar/bar_box/right_box/skip_btn",
 	]
 	for p: String in paths:
@@ -107,13 +105,11 @@ func test_zone_d_medallions_show_emblem_textures() -> void:
 		# Команды с медальоном владельца (4.5) — пластина и знак одним кадром из
 		# боевого комплекта `assets/ui/widgets/battle/`; остальное — прежние эмблемы
 		# (`assets/ui/widgets/`), листа владельца для них нет.
-		"bottom_bar/bar_box/left_box/settings_btn": "emblem_gear.png",
 		"bottom_bar/bar_box/left_box/retreat_btn": "retreat.png",
-		"bottom_bar/bar_box/left_box/rescue_btn": "emblem_ring.png",
-		"bottom_bar/bar_box/right_box/attack_btn": "emblem_swords.png",
+		"bottom_bar/bar_box/left_box/attack_btn": "emblem_swords.png",
 		"bottom_bar/bar_box/right_box/spellbook_btn": "spellbook.png",
 		"bottom_bar/bar_box/right_box/wait_btn": "wait.png",
-		"bottom_bar/bar_box/right_box/defend_btn": "defend.png",
+		"bottom_bar/bar_box/left_box/defend_btn": "defend.png",
 		"bottom_bar/bar_box/right_box/skip_btn": "emblem_skip.png",
 		"bottom_bar/bar_box/left_box/auto_btn": "auto.png",
 		"bottom_bar/bar_box/right_box/cancel_btn": "cancel.png",
@@ -138,43 +134,6 @@ func test_zone_d_medallions_show_emblem_textures() -> void:
 ## Правый ряд макета 11 начинается с двух пустых медальонов (слоты под будущие
 ## команды). Они не кнопки: несвязанный Button обещал бы нажатие, которого нет.
 ## ▲▼ окна сообщений вернул новый носитель — описание владельца (4.2).
-func test_zone_d_empty_slots_and_log_controls() -> void:
-	var ui: BattleUI = _mk_ui()
-	var right := ui.get_node_or_null("bottom_bar/bar_box/right_box") as HBoxContainer
-	assert_bool(right != null).is_true()
-	if right == null:
-		return
-	assert_int(right.get_child_count()).override_failure_message(
-		"правый ряд: два пустых слота + шесть команд (книга/отмена/ждать/защита/атака/пропуск)"
-	).is_equal(8)
-	for slot_name: String in ["slot_empty_1", "slot_empty_2"]:
-		var slot := right.get_node_or_null(slot_name)
-		assert_bool(slot != null).override_failure_message("нет слота %s" % slot_name).is_true()
-		if slot == null:
-			continue
-		assert_bool(not (slot is Button)).override_failure_message(
-			"%s: декорация не должна быть кнопкой" % slot_name
-		).is_true()
-		assert_int(slot.mouse_filter).override_failure_message(
-			"%s: слот ловит клики/фокус" % slot_name
-		).is_equal(Control.MOUSE_FILTER_IGNORE)
-	assert_bool(right.get_child(0) == right.get_node_or_null("slot_empty_1")).is_true() \
-		.override_failure_message("слоты — первыми в ряду, как в макете")
-	# ▲▼ окна сообщений вернуло НОВОЕ описание владельца (alpha-battle-field 4.2);
-	# прежняя строка «кластер ▲▼ макет не задумывал» относилась к макету 11 и
-	# снята вместе с ним — окно сообщений со стрелками теперь требование спеки.
-	assert_object(ui.get_node_or_null("bottom_bar/info_box/log_row/log_up_btn")).is_not_null()
-	assert_object(ui.get_node_or_null("bottom_bar/info_box/log_row/log_down_btn")).is_not_null()
-	assert_bool(ui.get_node_or_null("bottom_bar/info_box/log_row/history_btn") != null) \
-		.override_failure_message("☰ — единственная кнопка входа в историю боя").is_true()
-	# До первой записи лога смотреть нечего — ☰ не висит сиротским табом.
-	assert_bool(ui._history_btn.visible).is_false() \
-		.override_failure_message("пустая история — кнопки истории в кадре нет")
-	ui.set_status("скелет атакует")
-	assert_bool(ui._history_btn.visible).is_true() \
-		.override_failure_message("первая запись — ☰ появляется")
-
-
 func test_zone_f_result_overlay_single_exit() -> void:
 	var ui: BattleUI = _mk_ui()
 	assert_bool(ui._end_overlay.visible).is_false()

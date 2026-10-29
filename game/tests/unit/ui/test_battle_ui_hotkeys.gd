@@ -26,10 +26,10 @@ func _setup() -> void:
 
 func test_history_hotkeys() -> void:
 	_setup()
-	_press(KEY_H)
+	_press(KEY_J)
 	assert_bool(_ui._history_panel.visible).is_true().override_failure_message(
-		"docs/14 §5: H открывает историю")
-	_press(KEY_H)
+		"D-294: J открывает журнал")
+	_press(KEY_J)
 	assert_bool(_ui._history_panel.visible).is_false()
 	# ↑/↓ листают лог
 	_ui.set_status("первая")
@@ -64,19 +64,15 @@ func test_action_hotkeys_emit() -> void:
 	_setup()
 	var fired: Array[String] = []
 	for sig in ["skip_requested", "defend_requested", "wait_requested", "attack_mode_requested",
-			"retreat_requested", "auto_battle_requested", "settings_requested"]:
+			"auto_battle_requested"]:
 		_ui.connect(sig, func() -> void: fired.append(sig))
 	_press(KEY_S)
 	_press(KEY_D)
 	_press(KEY_W)
 	# «Атака» рождается глухой (`_connect_skeleton`), а тест — про клавишу,
 	# а не про фазу боя: команду будим вручную.
-	_ui._attack_button.disabled = false
-	_press(KEY_T)
-	_press(KEY_C)
 	_press(KEY_A)
-	_press(KEY_O)
-	assert_int(fired.size()).is_equal(7).override_failure_message(
+	assert_int(fired.size()).is_equal(4).override_failure_message(
 		"каждая клавиша панели звала свою команду: %s" % fired)
 
 

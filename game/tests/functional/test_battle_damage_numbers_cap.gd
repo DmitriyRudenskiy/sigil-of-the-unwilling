@@ -49,6 +49,6 @@ func test_numbers_never_steal_clicks_from_the_controls() -> void:
 	# Панель действий обязана принимать мышь (спека: «элементы управления остаются
 	# кликабельными»). До этого шага её кнопки стояли в MOUSE_FILTER_IGNORE —
 	# единственные кликабельные-только-хоткеями кнопки на всю игру.
-	for btn in [ui._attack_button, ui._defend_btn, ui._wait_btn, ui._skip_btn, ui._rescue_btn]:
+	for btn in [ui._attack_button, ui._defend_btn, ui._wait_btn, ui._skip_btn, ui._spellbook_btn]:
 		assert_int(btn.mouse_filter).is_not_equal(Control.MOUSE_FILTER_IGNORE)
 	assert_bool(ui._skip_btn.disabled).is_false()

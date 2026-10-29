@@ -11,13 +11,12 @@ const _BATTLE_UI_SCENE := preload("res://scenes/ui/battle_ui.tscn")
 
 # команда → путь узла (носитель раскладки — сцена, поэтому путь, а не имя)
 const _COMMANDS := {
-	"опции боя": "bottom_bar/bar_box/left_box/settings_btn",
 	"отступить": "bottom_bar/bar_box/left_box/retreat_btn",
 	"автобой": "bottom_bar/bar_box/left_box/auto_btn",
 	"книга заклинаний": "bottom_bar/bar_box/right_box/spellbook_btn",
 	"отмена": "bottom_bar/bar_box/right_box/cancel_btn",
 	"ждать": "bottom_bar/bar_box/right_box/wait_btn",
-	"защищаться": "bottom_bar/bar_box/right_box/defend_btn",
+	"защищаться": "bottom_bar/bar_box/left_box/defend_btn",
 }
 
 var _ui: Node = null
@@ -35,6 +34,7 @@ func _mk_ui() -> BattleUI:
 
 func test_panel_has_every_command_of_the_owner_list() -> void:
 	var ui := _mk_ui()
+	await get_tree().process_frame  # ряд применяется отложенно (D-294)
 	for command in _COMMANDS:
 		var btn := ui.get_node_or_null(NodePath(_COMMANDS[command])) as Button
 		assert_object(btn).is_not_null().override_failure_message("команда «%s» на панели" % command)

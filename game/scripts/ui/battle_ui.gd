@@ -28,9 +28,10 @@ static var _hero_portrait: Texture2D = null
 @onready var _bottom_bar: Control = $bottom_bar
 ## T-220: полосы, чья геометрия отъедает вертикаль поля боя (носитель числа — сцена).
 @onready var _hero_cards_band: Control = $hero_cards
-@onready var _settings_btn: Button = $"bottom_bar/bar_box/left_box/settings_btn"
+# D-294: Опции и Спасение — некоманды ряда (оверлей настроек и пункт диалога
+# выхода), их кнопок в полосе нет; ссылки сняты вместе с узлами в `_ready`.
 @onready var _retreat_btn: Button = $"bottom_bar/bar_box/left_box/retreat_btn"
-@onready var _rescue_btn: Button = $"bottom_bar/bar_box/left_box/rescue_btn"
+var _rescue_text: String = "Спасение"
 @onready var _auto_btn: Button = $"bottom_bar/bar_box/left_box/auto_btn"
 @onready var _wait_btn: Button = $"bottom_bar/bar_box/right_box/wait_btn"
 @onready var _attack_button: Button = $"bottom_bar/bar_box/right_box/attack_btn"
@@ -135,7 +136,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	# отдавать бой эмулятору.
 	if _hotkeys.has(event.keycode):
 		_press(_hotkeys[event.keycode])
-	elif event.keycode == KEY_H:
+	elif event.keycode == KEY_J:
 		_on_history_toggle()
 	elif event.keycode == KEY_UP:
 		_on_history_up()
@@ -185,11 +186,13 @@ func theme_root_theme(t: Theme) -> void:
 
 func _connect_skeleton() -> void:
 	_action_buttons = [
-		_retreat_btn, _rescue_btn, _auto_btn, _wait_btn, _attack_button,
+		_retreat_btn, _auto_btn, _wait_btn, _attack_button,
 		_defend_btn, _skip_btn, _cancel_btn,
 	]
 	_retreat_btn.pressed.connect(_on_retreat)
-	_rescue_btn.pressed.connect(_on_rescue)
+	# Раскладка ряда применяется отложенно: в `_ready` узел ещё настраивает
+	# детей, и перенос ребёнка в этот момент движок отклоняет.
+	call_deferred("_apply_command_row")
 	_auto_btn.pressed.connect(_on_auto_battle)
 	_cancel_btn.pressed.connect(_on_cancel)
 	_log_up_btn.pressed.connect(_on_history_up)
@@ -199,13 +202,15 @@ func _connect_skeleton() -> void:
 	_defend_btn.pressed.connect(_on_defend)
 	_skip_btn.pressed.connect(_on_skip)
 	_spellbook_btn.pressed.connect(_on_spellbook)
-	_settings_btn.pressed.connect(_on_settings)
+	_retreat_btn.pressed.disconnect(_on_retreat)
+	_retreat_btn.pressed.connect(_on_exit_dialog)
 	_attack_button.disabled = true
 	# Клавиши и подписи медальонов — из одной таблицы (см. `_hotkeys`).
 	_hotkeys = {
-		KEY_O: _settings_btn, KEY_C: _retreat_btn, KEY_A: _auto_btn,
-		KEY_T: _attack_button, KEY_D: _defend_btn, KEY_W: _wait_btn,
-		KEY_S: _skip_btn, KEY_K: _spellbook_btn,
+		# D-294: хоткеи дублируют кнопки ряда; у Атаки хоткея нет (цель — клик).
+		KEY_A: _auto_btn, KEY_W: _wait_btn, KEY_S: _skip_btn,
+		KEY_D: _defend_btn, KEY_B: _spellbook_btn,
+		KEY_C: get_node_or_null("bottom_bar/bar_box/right_box/cancel_btn"),
 	}
 	for key: int in _hotkeys:
 		var btn: Button = _hotkeys[key]
@@ -343,6 +348,31 @@ func close_spellbook() -> void:
 		_spellbook_panel.visible = false
 		spellbook_closed.emit()
 
+## Диалог выхода из боя (D-294): «Отступить» открывает выбор вместо мгновенного
+## отступа, «Спасение» — пункт диалога, «Сдаться» — до T-282 неактивно.
+func _on_exit_dialog() -> void:
+	var dlg: AcceptDialog = AcceptDialog.new()
+	dlg.title = "Выйти из боя?"
+	var row: HBoxContainer = HBoxContainer.new()
+	for spec: Array in [["Отступить", _on_retreat, true], [_rescue_text, _on_rescue, true],
+			["Сдаться", _on_surrender_placeholder, false]]:
+		# ponytail: строка «Сдаться» поедет в locale вместе с T-282.
+		var b: Button = Button.new()
+		b.text = String(spec[0])
+		b.disabled = not bool(spec[2])
+		b.pressed.connect(Callable(spec[1]))
+		row.add_child(b)
+	dlg.add_child(row)
+	add_child(dlg)
+	dlg.confirmed.connect(dlg.queue_free)
+	dlg.canceled.connect(dlg.queue_free)
+	dlg.popup_centered()
+
+
+func _on_surrender_placeholder() -> void:
+	pass  # механики капитуляции нет; пункт неактивен (T-282).
+
+
 func _on_retreat() -> void:
 	retreat_requested.emit()
 
@@ -447,8 +477,8 @@ static func _hero_portrait_texture() -> Texture2D:
 
 # «Спасение» (макет, шаг 5.2): кнопка активна, только когда есть кого поднимать.
 func set_rescue_enabled(enabled: bool) -> void:
-	if _rescue_btn != null:
-		_rescue_btn.disabled = not enabled
+	if _retreat_btn != null:
+		_retreat_btn.disabled = not enabled
 
 func _on_wait() -> void:
 	wait_requested.emit()
@@ -530,3 +560,41 @@ func hud_bands() -> Vector2:
 	if _bottom_bar != null:
 		bottom = _bottom_bar.get_global_rect().size.y
 	return Vector2(top, bottom)
+
+
+
+## Командный ряд боя (D-294): восемь истинных команд, 4+4, центр полосы пуст.
+func _apply_command_row() -> void:
+	# D-294: ряд = восемь истинных команд. Сцена несёт исторический состав
+	# (десять кнопок и два пустых слота), носителем новой раскладки сделан этот
+	# блок — править сцену под неё означало бы второй носитель раскладки.
+	var _rescue_node: Button = get_node_or_null("bottom_bar/bar_box/left_box/rescue_btn")
+	if _rescue_node != null:
+		_rescue_text = _rescue_node.get_node("caption").text
+	for _dead in ["bottom_bar/bar_box/left_box/settings_btn",
+			"bottom_bar/bar_box/left_box/rescue_btn",
+			"bottom_bar/bar_box/right_box/slot_empty_1",
+			"bottom_bar/bar_box/right_box/slot_empty_2"]:
+		var _n: Node = get_node_or_null(_dead)
+		if _n != null:
+			_n.free()  # подписи-дети уходят вместе с узлом
+	var _left: HBoxContainer = $bottom_bar/bar_box/left_box
+	for _b: Button in [_attack_button, _defend_btn]:
+		if _b.get_parent() != _left:
+			_b.get_parent().remove_child(_b)
+			_left.add_child(_b)
+	_left.move_child(_attack_button, 0)  # Атака, Защита, Отступить, Автобой
+	_left.move_child(_defend_btn, 1)
+	# Центр полосы пуст: строка журнала и ▲▼ из неё сняты, журнал — вкладка у
+	# края кадра (7.5).
+	for _c: CanvasItem in [_log_line, _log_up_btn, _log_down_btn]:
+		_c.visible = false
+	var _hb_parent: Node = _history_btn.get_parent()
+	if _hb_parent != self:
+		_hb_parent.remove_child(_history_btn)
+		add_child(_history_btn)
+	_history_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_history_btn.offset_left = -84.0
+	_history_btn.offset_top = 470.0
+	_history_btn.offset_right = -24.0
+	_history_btn.offset_bottom = 570.0
