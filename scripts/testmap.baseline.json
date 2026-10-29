@@ -1,9 +1,9 @@
 {
  "duplicate_groups": 0,
- "gd_files": 380,
- "gd_tests": 3610,
- "holes": 81,
- "merge_files": 146,
+ "gd_files": 384,
+ "gd_tests": 3628,
+ "holes": 80,
+ "merge_files": 149,
  "merge_groups": 28,
  "py_files": 35,
  "py_tests": 109
