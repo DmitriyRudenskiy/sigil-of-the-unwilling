@@ -73,3 +73,19 @@ func test_exit_dialog_items() -> void:
 	assert_int(row.get_child_count()).is_equal(3)
 	assert_bool(row.get_child(2).disabled).is_true()
 	dlg.queue_free()
+
+# (6) медальон несёт только знак (D-293), имя команды — в подсказке, а вкладка
+# журнала жива до первой записи лога и стоит вне ряда (D-294).
+func test_medallions_bare_and_journal_tab_alive() -> void:
+	var ui: BattleUI = await _ready_ui()
+	for box: String in ["left_box", "right_box"]:
+		for c: Node in ui.get_node("bottom_bar/bar_box/" + box).get_children():
+			var cap: Label = c.get_node_or_null("caption")
+			if cap != null:
+				assert_bool(cap.visible).override_failure_message(
+					"медальон %s показывает подпись" % c.name).is_false()
+			assert_str(c.tooltip_text).override_failure_message(
+				"медальон %s без подсказки" % c.name).is_not_empty()
+	assert_bool(ui._history_btn.visible).is_true()
+	var row: Rect2 = ui.get_node("bottom_bar/bar_box").get_global_rect()
+	assert_bool(ui._history_btn.get_global_rect().end.y <= row.position.y + 1.0).override_failure_message("вкладка журнала не вышла из ряда").is_true()

@@ -205,24 +205,37 @@ func _connect_skeleton() -> void:
 	_retreat_btn.pressed.disconnect(_on_retreat)
 	_retreat_btn.pressed.connect(_on_exit_dialog)
 	_attack_button.disabled = true
-	# Клавиши и подписи медальонов — из одной таблицы (см. `_hotkeys`).
+	# Клавиши, подсказки и подписи медальонов — по всему ряду, а не по таблице
+	# клавиш: медальон без хоткея («Атака», «Отступить») иначе оставался с
+	# подписью на кадре (ux-review D-294).
 	_hotkeys = {
 		# D-294: хоткеи дублируют кнопки ряда; у Атаки хоткея нет (цель — клик).
 		KEY_A: _auto_btn, KEY_W: _wait_btn, KEY_S: _skip_btn,
 		KEY_D: _defend_btn, KEY_B: _spellbook_btn,
 		KEY_C: get_node_or_null("bottom_bar/bar_box/right_box/cancel_btn"),
 	}
-	for key: int in _hotkeys:
-		var btn: Button = _hotkeys[key]
-		var caption: Label = btn.get_node_or_null("caption")
-		# D-293 (7.1): медальон несёт только знак. Подпись остаётся в сцене
-		# носителем имени команды — его же читает подсказка, — но на кадр больше не
-		# выводится: имя и клавиша живут во всплывающей подсказке.
-		if caption != null:
-			btn.tooltip_text = "%s (%s)" % [caption.text, OS.get_keycode_string(key)]
-			caption.visible = false
-		btn.mouse_entered.connect(_on_medallion_hover.bind(btn, true))
-		btn.mouse_exited.connect(_on_medallion_hover.bind(btn, false))
+	for box: Node in [$bottom_bar/bar_box/left_box, $bottom_bar/bar_box/right_box]:
+		for child: Node in box.get_children():
+			if child is Button:
+				_medallion(child)
+
+
+## Медальон ряда: имя команды и клавиша — во всплывающей подсказке, подпись с
+## кадра снята (D-293), наведение рисуется состоянием кнопки.
+func _medallion(btn: Button) -> void:
+	var caption: Label = btn.get_node_or_null("caption")
+	# D-293 (7.1): медальон несёт только знак. Подпись остаётся в сцене
+	# носителем имени команды — его же читает подсказка, — но на кадр больше не
+	# выводится: имя и клавиша живут во всплывающей подсказке.
+	if caption != null:
+		var key: String = ""
+		for k: int in _hotkeys:
+			if _hotkeys[k] == btn:
+				key = " (%s)" % OS.get_keycode_string(k)
+		btn.tooltip_text = caption.text + key
+		caption.visible = false
+	btn.mouse_entered.connect(_on_medallion_hover.bind(btn, true))
+	btn.mouse_exited.connect(_on_medallion_hover.bind(btn, false))
 
 
 func _on_medallion_hover(btn: Button, hovered: bool) -> void:
@@ -250,9 +263,6 @@ func set_status(text: String) -> void:
 		_history.pop_front()
 	_history_pos = _history.size() - 1
 	_log_line.text = text
-	# ☰ макет 11 не несёт отдельной кнопки истории: она просыпается вместе с
-	# первой записью лога, а до первой записи в полосе нечего смотреть.
-	_history_btn.visible = true
 
 func set_attack_preview(text: String) -> void:
 	# B: предпросмотр урона — error-chip (лёгальная подложка #281c0f, docs/14 §2)
@@ -593,8 +603,12 @@ func _apply_command_row() -> void:
 	if _hb_parent != self:
 		_hb_parent.remove_child(_history_btn)
 		add_child(_history_btn)
-	_history_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_history_btn.offset_left = -84.0
-	_history_btn.offset_top = 470.0
-	_history_btn.offset_right = -24.0
-	_history_btn.offset_bottom = 570.0
+	_history_btn.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	# Вкладка журнала — над правым краем ряда, а не в нём: на одном месте с
+	# «Пропуском» она читалась как четвёртая команда (ux-review D-294).
+	var row: Rect2 = $bottom_bar/bar_box.get_global_rect()
+	_history_btn.position = Vector2(row.end.x - 52.0, row.position.y - 72.0)
+	_history_btn.size = Vector2(52.0, 52.0)
+	# D-294: вкладка журнала вне ряда живёт с первого кадра боя — раньше она
+	# просыпалась с первой записью лога, пока была частью строки журнала (макет 11).
+	_history_btn.visible = true
