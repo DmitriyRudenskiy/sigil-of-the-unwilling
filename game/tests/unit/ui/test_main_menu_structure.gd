@@ -143,3 +143,110 @@ func test_main_menu_title_short_titles() -> void:
 	assert_array([ui._title_lines[0].text, ui._title_lines[1].text, ui._title_lines[2].text]) \
 		.is_equal(["SIGIL", "", "UNWILLING"])
 	assert_bool(ui._title_lines[1].visible).is_false()
+
+
+## ── Инвариант T-299: у каждого обработчика меню есть проводка ──────────────
+##
+## Мёртвый блок выбора героя жил месяц ровно потому, что сторожем в нём стоял
+## `get_node_or_null("HeroSelection")`: отсутствующий узел, незаполненное поле и
+## несоединённый обработчик выглядят одинаково — молчанием. `signal hero_selected`
+## не эмитился никогда, коннекторов к нему в репозитории не было, а читающий файл
+## считал выбор героя частью меню. Проверка ниже делает то же наблюдение
+## измеримым для всего файла: обработчик без `.connect(` красен.
+const _MENU_SOURCE := "res://scripts/ui/main_menu.gd"
+
+## Единственные разрешённые молчуны — с тикетом-владельцем. Список красен и в другую
+## сторону: если проводка появится, устаревшая строка красна так же, как мёртвый
+## обработчик (иначе allowlist превращается в кладбище).
+const _SILENCE_ALLOWED := {
+	"_on_load_game": "T-307 (экран 3 слотов без точки входа)",
+}
+
+
+func _source_lines() -> PackedStringArray:
+	var f := FileAccess.open(_MENU_SOURCE, FileAccess.READ)
+	assert_object(f).is_not_null().override_failure_message(
+		"не читается %s — проверка проводки не может измерить ничего" % _MENU_SOURCE)
+	if f == null:
+		return PackedStringArray()
+	return f.get_as_text().split("\n", false)
+
+
+func _ident_chars(c: String) -> bool:
+	return c == "_" or (c >= "a" and c <= "z") or (c >= "A" and c <= "Z") or (c >= "0" and c <= "9")
+
+
+## Имена `_on_…` внутри строки (connect-сайты пишут и `x.pressed.connect(_on_x)`,
+## и `Callable(self, "_on_x")`, и `is_connected(_on_x)`).
+func _handlers_named(line: String) -> Array:
+	var out: Array = []
+	var i := 0
+	while i < line.length():
+		var j := line.find("_on_", i)
+		if j < 0:
+			break
+		var k := j
+		while k < line.length() and _ident_chars(line[k]):
+			k += 1
+		out.append(line.substr(j, k - j))
+		i = k if k > j else j + 4
+	return out
+
+
+func test_main_menu_every_handler_is_connected() -> void:
+	var defined: Array = []
+	var wired := {}
+	for line in _source_lines():
+		var s := line.strip_edges()
+		if s.begins_with("func _on_"):
+			var open := s.find("(")
+			if open > 0:
+				defined.append(s.substr(5, open - 5))
+		elif s.contains(".connect(") or s.contains("Callable(") or s.contains("is_connected("):
+			for name in _handlers_named(s):
+				wired[name] = true
+	# Санитарная граница: пустой список определений означал бы, что разбор сломался,
+	# и тогда «сирот нет» было бы зелёной ложью (тот же класс молчания, что и предмет
+	# проверки).
+	assert_int(defined.size()).is_greater_equal(10).override_failure_message(
+		"разбор %s нашёл лишь %d обработчик(ов) — проверка больше ничего не измеряет"
+		% [_MENU_SOURCE, defined.size()])
+	var orphans: Array = []
+	for name in defined:
+		if not wired.has(name) and not _SILENCE_ALLOWED.has(name):
+			orphans.append(name)
+	assert_array(orphans).is_equal([]).override_failure_message(
+		"обработчики меню без проводки (T-299): %s — либо соединить, либо снять блок, "
+		% [orphans]
+		+ "либо вписать в _SILENCE_ALLOWED с номером тикета, который ждёт носителя")
+
+
+## Allowlist гниёт в обе стороны: строка живёт ровно до появления проводки.
+func test_main_menu_silence_allowlist_is_not_stale() -> void:
+	var wired := {}
+	for line in _source_lines():
+		var s := line.strip_edges()
+		if s.contains(".connect(") or s.contains("Callable(") or s.contains("is_connected("):
+			for name in _handlers_named(s):
+				wired[name] = true
+	for name in _SILENCE_ALLOWED:
+		assert_bool(wired.has(name)).is_false().override_failure_message(
+			"%s соединён — строка %s в _SILENCE_ALLOWED устарела (сними её)"
+			% [name, _SILENCE_ALLOWED[name]])
+
+
+## Снятый блок не должен возвращаться половинчато: узла в сцене нет, и код больше
+## его не ищет. Проверка с двух сторон, потому что `get_node_or_null` не краснеет
+## ни при каком из этих расхождений.
+func test_main_menu_hero_selection_api_is_gone() -> void:
+	var src := ""
+	for line in _source_lines():
+		src += line + "\n"
+	for leftover in ["hero_selected", "_hero_selection", "_selected_hero", "HeroSelection"]:
+		assert_bool(src.contains(leftover)).is_false().override_failure_message(
+			"в %s остался след снятого выбора героя: %s (T-299; носителя в сцене нет)"
+			% [_MENU_SOURCE, leftover])
+	var ui := await _spawn()
+	assert_object(ui.get_node_or_null("HeroSelection")).is_null().override_failure_message(
+		"узел HeroSelection появился в сцене, а проводки к нему по-прежнему нет")
+

@@ -22,10 +22,6 @@ const SCENE_CONTINUE := "res://scenes/main/main.tscn"
 @onready var _model_screen: ArtifactInventoryScreen = $HeroModelWindow
 @onready var _save_load_screen: SaveLoadScreen = $SaveLoadScreen
 
-signal hero_selected(hero_name: String, variant: String)
-var _selected_hero: String = &""
-@onready var _hero_selection = get_node_or_null("HeroSelection")
-
 func _ready() -> void:
     for arg in OS.get_cmdline_args():
         if arg.begins_with("--test-server"):
@@ -180,9 +176,13 @@ func _clear_session_caches() -> void:
 
     Services.clear_session()
 
-## ВРЕМЕННО НЕДОСТИЖИМО (Т-133, Q-M90): макет 09 не содержит пункта «Загрузить»,
-## кнопка убрана из колонки; экран выбора сохранения и его проводка оставлены
-## на месте до вердикта о носителе точки входа. Не удалять молча.
+## ВРЕМЕННО НЕДОСТИЖИМО (Т-133, Q-M90 → D-205 (а)): макет 09 не содержит пункта
+## «Загрузить», кнопка убрана из колонки; экран выбора сохранения и его проводка
+## оставлены на месте. Вердикт D-205 закрыл состав меню, но не судьбу экрана —
+## она у T-307. Не удалять молча и не соединять «временно» куда-нибудь: инвариант
+## «у каждого обработчика меню есть проводка» держится списком в
+## tests/unit/ui/test_main_menu_structure.gd, и этот обработчик — его единственная
+## строка.
 func _on_load_game() -> void:
     _save_load_screen.open("load")
 
@@ -204,20 +204,6 @@ func _on_chronicle() -> void:
         if data != null:
             entries = data.chronicle
     _chronicle_screen.show_entries(entries)
-
-func _on_hero_selected(name: String) -> void:
-    _selected_hero = name
-    _apply_hero_selection()
-
-func _on_cancel_selection() -> void:
-    _selected_hero = &""
-    if _hero_selection != null:
-        _hero_selection.visible = false
-
-func _apply_hero_selection() -> void:
-    if _hero_selection == null or _selected_hero == null:
-        return
-    hero_selected.emit(_selected_hero, "warrior")
 
 func _on_exit() -> void:
     get_tree().quit()

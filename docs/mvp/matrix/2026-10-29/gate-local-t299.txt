@@ -1,0 +1,98 @@
+Gate local — T-299 (снятый блок выбора героя + инвариант проводки меню)
+=====================================================================
+head_sha до коммита: c8857973 (pushed) · коммит среза: e95e6b38
+Прогон: ./game/run_tests.sh, 2026-10-29, машина шарится, CI не проверялся
+(по инструкции владельца от 2026-10-13).
+
+GdUnit (unit/integration/functional, headless)
+----------------------------------------------
+Overall Summary: 3606 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+LINT: SKIPPED (нет gdtoolkit у python3 — T-288)
+
+Было 3603 → стало 3606 (+3: every_handler_is_connected,
+silence_allowlist_is_not_stale, hero_selection_api_is_gone).
+
+MCP e2e (живой Godot, Xvfb)
+---------------------------
+PYTEST LEDGER: passed=108 skipped=2 failed=0 errors=1 collected=111
+108 passed, 2 skipped, 1 error in 463.57s (0:07:43)
+MCP VERDICT: YELLOW
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за):
+  среда, не регрессия (D-265); тесты обязан переснять владелец либо повторный
+  прогон
+Жертва: test_battle_controller::test_battle_via_controller_reaches_winner
+  180.11s setup · MCPError: игра не готова за 180 с (game_eval: Not connected
+  to game interaction server)
+  mem_available=0MB из 47242MB swap_free=330/20479MB load1=0.86
+  godot_procs=1(rss=172MB, state=S:1) psi_memory=some avg10=0.00 avg60=0.00
+  порт: 127.0.0.1:9090 — порта нет (bind не случился)
+  boot-трейс: пуст или не создан — Godot не дошёл до автозагрузки
+  лог запуска: 4 строки, дальше — только баннер движка и V-Sync warning
+Пропуски (оба — уровень молчит по причине, а не по молчанию):
+  test_battle_profiling.py:33 — нет узлов городов в сцене боя
+  test_capture.py:294 — съёмка только по запросу (CAPTURE_SCENE=...)
+
+Пересъёмка в изоляции (тот же коммит, та же среда):
+  DISPLAY=:97 MCP_PORT=9097 pytest tests/mcp/test_battle_controller.py::
+  test_battle_via_controller_reaches_winner -q → 1 passed in 5.25s
+  при том же MemAvailable: 0 kB (SwapFree 478368/20970996 kB на момент
+  пересъёмки). 5.25 с против 180.11 с при нулевой доступной памяти — среда,
+  не регрессия.
+
+Владелец памяти (не агент, не убивать; протокол зависимых процессов, > 4 ч →
+владелец репо): PID 762871 `strata --serve --pack …/packs/unsloth-ud-…`,
+пользователь user, старт 2026-10-26 12:15:04, RSS ~18.9 GB, шера 28.5 GB —
+при MemTotal 48 GB это и есть MemAvailable 0 kB.
+
+Python-уровни
+-------------
+GENART: 11 passed (интерпретатор /home/user/.venv/map-art/bin/python)
+READINESS-CLASSIFIER: selftest GREEN (13 passed)
+
+Батарея мутантов — game/tools/mut_menu_wiring.sh (прогон на ЗАКОММИЧЕННОМ
+дереве e95e6b38, дерево после прогона чистое)
+  MA (мёртвый обработчик вернулся): 15 test cases | 0 errors | 1 failures |
+     красные: test_main_menu_every_handler_is_connected
+  MB (сигнал снятого блока вернулся): 15 test cases | 0 errors | 1 failures |
+     красные: test_main_menu_hero_selection_api_is_gone
+  MC (проводка появилась, allowlist устарел): 15 test cases | 0 errors |
+     1 failures | красные: test_main_menu_silence_allowlist_is_not_stale
+  MD (носитель не читается): 15 test cases | 0 errors | 4 failures |
+     красные: every_handler_is_connected, hero_selection_api_is_gone,
+     silence_allowlist_is_not_stale
+  ИТОГ: все мутанты красные
+
+Замеры до коммита (сценарий вручную, НЕ вывод батареи)
+-----------------------------------------------------
+Те же MA/MB/MC/MD прогонялись вручную по рабочему дереву до коммита — чтобы
+проверить сам классификатор. Ручная версия классификатора ошиблась на MD:
+переименование всех `func _on_` обрывало прогон на ошибке разбора
+(`Identifier "_on_continue" not declared`), сводки не было, а черновик читал
+«красных нет» как «мутант зелёный». В батарею это внесено как правило:
+прогон без сводки — красный. Отдельно проверен MD2 (путь носителя несуществует):
+4 падения — санитарная граница `defined.size() >= 10` не даёт инварианту
+позеленеть на сломанном чтении файла.
+
+Док-уровень (./scripts/doc_gates.sh, до коммита)
+------------------------------------------------
+DOC GATES: GREEN
+  check_docs_links: OK; индекс 110 заметок (gen_docs_index — без диффа)
+  gdd_gate: t_duplicate_headers 0, t_multi_footer 0, dead_paths 5 (базлайн)
+  тесты самих проверщиков: 115 passed
+  OPENSPEC SPECS: OK (проверено 87 сведённых спеков)
+  TESTMAP OK: дыр 81, файлов в группах слияния 144, дублей 0
+
+Сводка тест-леджера
+-------------------
++3 / −0 / quarantine 0 / нетто +3: было 3603 → стало 3606. Причина: инвариант
+проводки меню (T-299) — три проверки вместо одной «убрали и забыли».
+
+Smoke (отчётная форма вердикта, CI не входит)
+---------------------------------------------
+Меню поднимается инстансом сцены в тестах (тот же файл, 15 test cases зелёные:
+колонка из пяти кнопок, отключённые пункты, титул, нажатие «Настройки»).
+Игровых экранов срез не касается: удалённый блок не имел ни узла, ни проводки,
+ни эмитента. Отдельного live-кадра не требуется — кадр меню не изменился бы
+(проверялось составом сцены: HeroSelection в ней не было и до правки).
