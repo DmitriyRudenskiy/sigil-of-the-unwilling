@@ -100,13 +100,35 @@ func _f(v: float) -> String:
 
 ## Узел-блок из таблицы: якоря от `parent`, опциональный фон-плитка.
 func _block(
-		node: String, parent: String, uid: int, bg: String = "", inset: int = 0) -> void:
-	# inset — внутренний отступ зоны в px: зона, вставшая впритык к границе
-	# камня, читается как наложение на стык колонок (T-257).
+		node: String, parent: String, uid: int, bg: String = "",
+		inset_sides: Dictionary = {}) -> void:
+	# inset_sides — внутренние отступы зоны в px: {"left": 40, "top": 40}.
+	#
+	# Зачем (T-257): зона, вставшая впритык к границе камня, стоит на его рамке.
+	# Рамка panel_stone — 9-slice с марджином 40 px (MANIFEST): видимая латунная
+	# линия тонкая (замер текстуры: яркость падает со 160 до 26 за 6 px), но
+	# угловой орнамент занимает всю полосу, поэтому зону убирать надо на марджин,
+	# а не на толщину линии.
+	#
+	# Число — пикселями и из носителя (margin из MANIFEST), а не долей камня:
+	# полоса рамки стоит постоянными `patch_margin` в логических px, тогда как
+	# прямоугольник камня меняет логический размер вместе с окном (canvas_items
+	# + expand, project.godot [display]), поэтому доля камня уезжала бы от рамки
+	# при аспекте, отличном от канонического (замер 1440×1080: камень +354 px
+	# по высоте, полоса — те же 40).
+	#
+	# Отступ задаётся только тем сторонам, которые и впрямь стоят на краю камня:
+	# симметричный отступ съедал бы половину полосы маны (138 px → 58 px) там,
+	# где справа у неё чистый камень.
 	var props := _anch(_L.BLOCKS[node], parent)
-	if inset > 0:
-		props += "offset_left = %d\noffset_top = %d\noffset_right = %d\noffset_bottom = %d\n" % [
-			-inset, -inset, inset, inset]
+	for side in ["left", "top", "right", "bottom"]:
+		var v := int(inset_sides.get(side, 0))
+		if v == 0:
+			continue
+		# offset_left/top — от якоря внутрь, offset_right/bottom — со знаком
+		# наружу, поэтому «внутрь» для правой и нижней сторон это минус.
+		var signed := v if side in ["left", "top"] else -v
+		props += "offset_%s = %d\n" % [side, signed]
 	_add_node(node, "Control", parent, props, uid)
 	uid += 1
 	if bg != "":
@@ -299,8 +321,13 @@ func _build() -> void:
 			+ ("horizontal_alignment = 0\n" if nm.ends_with("_lbl") else "mouse_filter = 2\n"), uid)
 		uid += 1
 
-	# — зона переноса A: мана и школа (камня макета не касаются) -------------
-	_block("BandMana", "Sheet", uid, "", 14)
+	# — зона переноса A: мана и школа ---------------------------------------
+	# Левый край блока в таблице стоит впритык к камню, поэтому зона отодвинута
+	# внутрь на марджин 9-slice рамки камня. До T-257 отступ был вычитан со знаком
+	# наружу (offset_left = −14), и зона стояла на 14 px левее самого камня — на
+	# пергаментном листе за его рамкой; верхней подписи доставал латунный кант.
+	var stone_edge := _kit_margin("panel_stone")
+	_block("BandMana", "Sheet", uid, "", {"left": stone_edge, "top": stone_edge})
 	uid += 1
 	var band := "Sheet/BandMana"
 	_add_node("Mana_lbl", "Label", band,
@@ -326,7 +353,9 @@ func _build() -> void:
 	uid += 1
 
 	# — зона переноса C: навыки и построения --------------------------------
-	_block("BandSkills", "Sheet", uid, "", 14)
+	# Правый край — та же рамка камня: строки навыков торчали за камень на те же
+	# 14 px (T-257).
+	_block("BandSkills", "Sheet", uid, "", {"right": stone_edge, "top": stone_edge})
 	uid += 1
 	var bs := "Sheet/BandSkills"
 	_add_node("Skills_lbl", "Label", bs,

@@ -20,6 +20,9 @@ const _OVERFLOW_LBL := "Center/Window/Sheet/Stone/Overflow_lbl"
 const _DESC := "Center/Window/Sheet/ItemTip/TipBox/TipDesc"
 const _TIP := "Center/Window/Sheet/ItemTip"
 const _DOLL := "Center/Window/Sheet/Stone/Doll"
+const _STONE := "Center/Window/Sheet/Stone"
+#Зоны переноса A и C (мана + школа, навыки + построения).
+const _BANDS := ["Center/Window/Sheet/BandMana", "Center/Window/Sheet/BandSkills"]
 # Явный шаг для чистой функции раскладки: тест не зависит от размера окна.
 const _PITCH := Vector2(60, 60)
 
@@ -373,3 +376,85 @@ func test_item_rect_has_no_default_pitch() -> void:
 		.override_failure_message("у item_rect снова есть шаг по умолчанию — второй носитель решётки")
 	assert_bool(block.contains("grid_pitch")).is_false() \
 		.override_failure_message("item_rect сам читает канва-шаг: вызывающий теряет пространство координат")
+
+## Марджин 9-slice рамки камня — из реестра кита, а не из копии в тесте:
+## генератор берёт то же число (`_kit_margin("panel_stone")`), и тест обязан
+## краснеть, если реестр изменится, а сцена — нет.
+func _kit_margin(name: String) -> int:
+	var raw: Variant = JSON.parse_string(
+			FileAccess.get_file_as_string("res://assets/ui/hero/MANIFEST.json"))
+	assert_that(raw).is_not_null()
+	var files: Variant = (raw as Dictionary).get("files", {})
+	var entry: Variant = (files as Dictionary).get("hero/" + name + ".png", {})
+	assert_that(entry).is_not_null()
+	var margin: int = int((entry as Dictionary).get("margin", 0))
+	assert_bool(margin > 0).is_true() \
+		.override_failure_message("у %s нет margin в MANIFEST — рамку нечем мерить" % name)
+	return margin
+
+
+func _controls_under(node: Node, out: Array) -> Array:
+	for child in node.get_children():
+		if child is Control:
+			out.append(child)
+			_controls_under(child, out)
+	return out
+
+
+## Зоны переноса обязаны стоять внутри камня, за полосой его рамки (T-257).
+##
+## Симптом тикета — полоса маны на пергаментном листе, строки навыков за правым
+## краем камня. Диагноз тикета («доли зон считаются от канвы, а не от `Stone»`)
+## не подтвердился: доли правильные, и в таблице зоны стоят внешним краем ровно
+## на крае камня (504 и 1307). Настоящая причина — попытка 16224d78: отступ был
+## вычтен со знаком наружу (offset_left = −14), и обе зоны встали на 14 px НАРУЖУ
+## самого камня, то есть на пергаменте за его рамкой.
+##
+## Норму отступа задаёт не толщина видимой линии (у рамки panel_stone она
+## тонкая: яркость текстуры падает со 160 до 26 за 6 px), а марджин 9-slice —
+## 40 px из `assets/ui/hero/MANIFEST.json`: в этой полосе лежат и линия, и
+## угловой орнамент. Число читается из MANIFEST, второй его копии в коде нет.
+##
+## Отступ — пикселями, а не долей камня: полоса рамки стоит постоянными
+## `patch_margin` в логических px, тогда как прямоугольник камня меняет
+## логический размер вместе с окном (canvas_items + expand, project.godot
+## [display]). Живой замер окна 1440×1080: внутренняя граница камня выросла по
+## высоте с 982 до 1336 логических px, offset зоны остался 40 px.
+func test_transfer_bands_stay_inside_the_stone_face() -> void:
+	var screen := await _mk_screen(true)
+	var stone := (screen.get_node_or_null(_STONE) as Control).get_global_rect()
+	var border := float(_kit_margin("panel_stone"))
+	var face := stone.grow(-border)
+	assert_bool(face.size.x > 0.0 and face.size.y > 0.0).is_true() \
+		.override_failure_message("камень уже своей рамки — премиса теста сломана")
+	for path in _BANDS:
+		var band := screen.get_node_or_null(path) as Control
+		assert_that(band).is_not_null()
+		var r := band.get_global_rect()
+		assert_bool(_inside(face, r)).is_true() \
+			.override_failure_message(
+					"зона %s (%s) вышла за полосу рамки камня %s" % [path, r, face])
+		# Внешний край зоны обязан отстоять от прямоугольника камня не меньше
+		# марджина рамки: именно это и значит «границы совпадают» для тикета.
+		var edge := r.position.x if path.ends_with("Mana") else stone.end.x - r.end.x
+		assert_bool(edge >= border - 1.0).is_true() \
+			.override_failure_message(
+					"внешний край %s стоит в %.2f px от края камня при рамке %.0f px" % [
+						path, edge, border])
+		# Пиксельная природа отступа, независимая от размера окна: зону
+		# отодвинул от якоря ровно марджин рамки камня, а не произвольное число
+		# и не доля камня (она бы поехала при другом аспекте окна).
+		var outer := "offset_left" if path.ends_with("Mana") else "offset_right"
+		var want := border if outer == "offset_left" else -border
+		assert_bool(is_equal_approx(band.get(outer), want)).is_true() \
+				.override_failure_message(
+						"%s: %s = %.2f px при рамке %.0f px" % [path, outer, float(band.get(outer)), border])
+		assert_bool(is_equal_approx(band.offset_top, border)).is_true() \
+				.override_failure_message(
+						"%s: верх зоны не убран за рамку камня (offset_top = %.2f)" % [path, band.offset_top])
+		for node in _controls_under(band, []):
+			assert_bool(_inside(face, (node as Control).get_global_rect())).is_true() \
+				.override_failure_message(
+						"%s.%s легло на рамку камня (%s при внутренней границе %s)" % [
+							path, (node as Node).get_name(),
+							(node as Control).get_global_rect(), face])
