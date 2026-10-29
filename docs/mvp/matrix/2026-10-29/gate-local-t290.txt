@@ -1,0 +1,43 @@
+# гейт локальный — T-290 (перенумерование задвоенных номеров тикетов)
+# команда: ./game/run_tests.sh (GdUnit4 headless + MCP e2e + python-секции), дата 2026-10-29
+# пометка: local (head_sha до коммита = 9a16c129; CI не проверялся — по директиве владельца)
+# машина шарится: Xvfb гейт поднял сам (свободный дисплей), чужие :96/:97 не тронуты
+# повод полному гейту: правка задела 4 файла game/ — только комментарии (ни строки логики),
+# но зелёный гейт обязателен перед push, когда дифф содержит игровой код
+
+## GdUnit4 (headless)
+Overall Summary: 3601 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+LINT: SKIPPED (нет gdtoolkit у python3 или нет .gdlintrc в game/) — жёлтый уровень, не падение (T-288)
+Тест-кейсов: 3601 → 3601 (+0 / −0; ни один тест не добавлен и не удалён — изменены
+только тексты ссылок в комментариях, карантеина нет, нетто 0).
+
+## MCP e2e (pytest + godot-mcp, Xvfb поднимал гейт)
+109 passed, 2 skipped in 287.77s (0:04:47)
+PYTEST LEDGER: passed=109 skipped=2 failed=0 errors=0 collected=111
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://...
+MCP JUNIT: passed=109 skipped=2 failed=0 errors=0
+MCP VERDICT: GREEN
+Отличий от предыдущего прогона нет: errors=0, readiness-YELLOW (D-265) не воспроизвёлся.
+
+## Python-секции
+GENART: 11 passed (scripts/test_gen_map_art.py)
+READINESS-CLASSIFIER: selftest GREEN (13 passed)
+
+## Док-гейты (./scripts/doc_gates.sh, финальное дерево, exit 0)
+GDD-GATE: GREEN — t_duplicate_headers: 0 (базлайн 0), t_multi_footer: 0, dead_paths: 5 (базлайн 5)
+тесты самих проверщиков: 115 passed
+OPENSPEC SPECS: OK (проверено 87 сведённых спек)
+TESTMAP OK: дыр 81, файлов в группах слияния 144, дублей 0
+check_docs_links.py: OK (108 заметок)
+Рэтчет этой правки: t_duplicate_headers 7 → 0 (scripts/gdd_gate.baseline.json) —
+новая коллизия номера красит гейт, а не копится.
+
+## Что гейт НЕ измерил
+Перенумерование ссылок — правка текста реестров: ни один тест не проверяет, что
+`T-303` имеет в виду меру цели Собирателя. Единственная механическая защита —
+счётчик коллизий (он же поймал долг) и пофайловое чтение 42 переведённых входов;
+поэтому в тикете записано, что механической замены по номеру не делал ни разу.

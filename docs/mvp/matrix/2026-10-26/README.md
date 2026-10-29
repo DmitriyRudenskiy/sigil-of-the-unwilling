@@ -77,7 +77,7 @@ SURVIVAL_REPEAT=2 godot --headless --path game -s res://tools/survival_report.gd
 | `adventurer-60.txt` | `af5b7d33` (счётчик убийств уже в инструменте) | `kills`, `kill_goal`, 9/11 с ≥1 убийством |
 | `trader-90.txt` | `af5b7d33` | 11 профилей Торговца за один процесс + **шум T-206** (см. ниже) |
 | `collector-90-repeat2.txt` | `8155d61a` (`MATRIX_REPEAT=2`) | Собиратель, 22 прогона (11 классов × 2): `same=true` у всех 11 |
-| `collector-90-nodes.txt` | `8155d61a` (счётчики узлов) | те же 11 профилей с `rare_nodes`, `rare_targets_seen`, `resource_nodes_extracted` → **T-210** |
+| `collector-90-nodes.txt` | `8155d61a` (счётчики узлов) | те же 11 профилей с `rare_nodes`, `rare_targets_seen`, `resource_nodes_extracted` → **T-303** |
 | `traveler-60-repeat2.txt` | `683b09e5` (`MATRIX_REPEAT=2`) | Путешественник, 60 ходов, 22 прогона: `same=true` у всех 11; `arrived` 9/11, `biomes` 1…5 |
 | `builder-60-ledger.txt` | `18f8becd` (`MATRIX_LEDGER=1`, `MATRIX_REPEAT=2`) | Городостроитель, 60 ходов: 11 строк + 76 снимков полей реестра (`food`, `starving`, `boroughs`, `level_block`, `build_block`) → **T-212**, **T-213** |
 | `builder-60-policy-experiments.txt` | `18f8becd` + правки автопилота (сняты) | те же 11 профилей при двух правках порядка действий: 5/11 и 6/11 против базовых 6/11 → обе гипотезы опровергнуты (D-260) |
@@ -111,7 +111,7 @@ SURVIVAL_REPEAT=2 godot --headless --path game -s res://tools/survival_report.gd
 6. **Цель Собирателя закрывается одним узлом.** В `collector-90-nodes.txt` у всех 11
    профилей `rare_nodes` = 1…2 при `rare_goal = 10`: Fighter и Wizard сняли **по одному
    узлу** (`rare_nodes=1`, `resource_nodes_extracted=1`) и закончили забег на первом ходе,
-   потому что `ResourceType.pickup_amount(GOLD) = 50` единиц на узел → **T-210**.
+   потому что `ResourceType.pickup_amount(GOLD) = 50` единиц на узел → **T-303**.
 7. **Прогон детерминирован:** 22 + 22 повтора того же seed в одном процессе дали
    байт-в-байт совпадающие строки (`same=true`, 22/22 и 22/22 ключей). Матрица воспроизводима
    без «проверено глазами».

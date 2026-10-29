@@ -56,7 +56,7 @@ func test_collector_metrics_shape() -> void:
 	assert_bool(bool(m.has("resources_per_day"))).is_true()
 	assert_bool(bool(m.has("survived"))).is_true()
 	# Задача 4.2 (2026-10-26): отчёт обязан различать узлы и единицы — «50» в замере
-	# было одним золотым узлом (T-210). Ключи без этого теста жили бы только в коде роли.
+	# было одним золотым узлом (T-303). Ключи без этого теста жили бы только в коде роли.
 	assert_bool(bool(m.has("rare_nodes"))).is_true()
 	assert_bool(bool(m.has("resource_nodes_extracted"))).is_true()
 	assert_bool(bool(m.has("rare_targets_seen"))).is_true()
@@ -221,7 +221,7 @@ class _FakePilot extends Node:
 	func rare_count() -> int:
 		return _rare_count
 
-	## Зеркало реального пилота (задача 4.2, T-210): фейк обязан поспевать за
+	## Зеркало реального пилота (задача 4.2, T-303): фейк обязан поспевать за
 	## поверхностью, которую читают роли, иначе «форма метрик» проверялась бы на
 	## устаревшем контракте.
 	func rare_nodes() -> int:

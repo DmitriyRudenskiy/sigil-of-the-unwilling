@@ -320,7 +320,7 @@ func _build_units() -> void:
 ## Карточка юнита (макет: портрет + плашка имени + Lv/M с полосами). Из них
 ## носитель имеют портрет, имя и число; уровень, HP и MP отряда в main не
 ## существуют (current_hp живёт в кампанийном ростере, D-220) — эти три метки
-## скрыты, а не обнулены (T-241, D-280).
+## скрыты, а не обнулены (T-306, D-280).
 func _build_bottom() -> void:
 	var army: HeroArmyController = _hero.army if _hero != null else null
 	for i in ARMY_CARDS_N:

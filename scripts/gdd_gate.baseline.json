@@ -5,6 +5,6 @@
  "risks_without_number": 10,
  "dead_paths": 5,
  "q_ghost_rows": 0,
- "t_duplicate_headers": 7,
+ "t_duplicate_headers": 0,
  "t_multi_footer": 0
 }
