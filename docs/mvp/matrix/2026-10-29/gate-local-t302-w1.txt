@@ -1,0 +1,25 @@
+T-302 · замер конфигурации постановки: MCP_WORKERS=1, полный прогон (head 59c6236d, 2026-10-29)
+
+Команда: MCP_WORKERS=1 bash game/run_tests.sh  (один живой Godot, Xvfb, без pytest-xdist)
+
+GdUnit: Overall Summary: 3633 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK · VACUOUS-ASSERT-GATE: OK · PATH-GATE: OK · NODE-PATH-GATE: OK
+MCP: ================== 112 passed, 2 skipped in 305.24s (0:05:05) ==================
+PYTEST LEDGER: passed=112 skipped=2 failed=0 errors=0 collected=114
+MCP VERDICT: GREEN
+PYTEST SKIPPED (2): test_battle_profiling.py:33 (нет узлов городов в сцене боя),
+                    test_capture.py:294 (съёмка только по запросу CAPTURE_SCENE)
+GENART 11 passed · READINESS-CLASSIFIER: selftest GREEN
+
+Оба теста тикета прошли в ПОЛНОМ прогоне (не поодиночке):
+  tests/mcp/test_disabled_reason_tooltip.py::test_disabled_button_tooltip_reaches_the_screen
+  tests/mcp/test_threat_rings_visual.py::test_carrier_measure_survives_content_scale
+
+Сравнение с прогоном той же смены на трёх воркерах (MCP_WORKERS=3, 488.98 с):
+passed=111 skipped=2 failed=1 — и упал не тикетный тест, а
+test_settings_menu::test_settings_screen_opens_from_menu с подпиской готовности
+(«игра не готова за 180 с … Not connected to game interaction server»), снятой
+классификатором как readiness (D-265). В W=1 прогоне он же зелёный.
+
+Вывод: на Linux/Xvfb симптом тикета (окно за кадром, мышь на Background) не
+воспроизводится ни при какой конфигурации прогона; плавает readiness. Закрыто.

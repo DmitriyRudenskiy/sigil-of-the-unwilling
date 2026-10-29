@@ -36,9 +36,12 @@ const DOLL_SLOTS_N: int = 16
 const ARMY_CARDS_N: int = 4
 # Зазор предмета внутри клетки — чтобы соседние предметы не слипались.
 const ITEM_GAP := 4.0
-const CELL_EMPTY := Color(1.0, 1.0, 1.0, 1.0)
-const CELL_FILLED := Color(0.62, 0.55, 0.45, 1.0)
-const CELL_HOVER := Color(1.3, 1.05, 0.6, 1.0)
+# Три состояния клетки объявлены в модуле стиля (T-300): тон, закрашиваемый в `modulate`,
+# тема не читает, поэтому его единственный источник — ThemeConfig, а не локальная константа
+# экрана. Имена сохранены: на них смотрит тест сетки (`test_inventory_grid.gd`).
+const CELL_EMPTY := ThemeConfig.C_CELL_EMPTY
+const CELL_FILLED := ThemeConfig.C_CELL_FILLED
+const CELL_HOVER := ThemeConfig.C_CELL_HOVER
 
 ## Маркеры предмета — непрозрачная рамка поверх иконки, а не `modulate` и не
 ## полупрозрачная плашка: иконки артефактов — плейсхолдеры со средним каналом
@@ -633,7 +636,9 @@ func _paint_cells(used: Dictionary) -> void:
 
 
 func _update_desc(inv: HeroInventory) -> void:
-	var desc := get_node_or_null("Center/Window/Sheet/ItemTip/TipBox/Desc")
+	# Видимая подпись блока (T-256): до этого текст писался в скрытый `Desc`, тест
+	# читал тот же узел и зелёнел, а на кадре описания не было.
+	var desc := get_node_or_null("Center/Window/Sheet/ItemTip/TipBox/TipDesc")
 	var tip := get_node_or_null("Center/Window/Sheet/ItemTip") as Control
 	if desc is not Label:
 		return

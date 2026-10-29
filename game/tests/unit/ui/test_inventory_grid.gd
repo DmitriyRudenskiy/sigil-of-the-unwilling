@@ -17,7 +17,7 @@ const _BAG := "Center/Window/Sheet/Stone/Bag"
 const _ITEMS := "Center/Window/Sheet/Stone/Bag/Items"
 const _OVERFLOW := "Center/Window/Sheet/Stone/Overflow"
 const _OVERFLOW_LBL := "Center/Window/Sheet/Stone/Overflow_lbl"
-const _DESC := "Center/Window/Sheet/ItemTip/TipBox/Desc"
+const _DESC := "Center/Window/Sheet/ItemTip/TipBox/TipDesc"
 const _TIP := "Center/Window/Sheet/ItemTip"
 # Явный шаг для чистой функции раскладки: тест не зависит от размера окна.
 const _PITCH := Vector2(60, 60)

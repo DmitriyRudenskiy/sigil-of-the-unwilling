@@ -5,6 +5,7 @@ extends BaseTest
 const MvpSaveManager = preload("res://scripts/campaign/save/mvp_save_manager.gd")
 const MvpSaveSchema = preload("res://scripts/campaign/save/mvp_save_schema.gd")
 const CampaignTrainingService = preload("res://scripts/campaign/campaign_training_service.gd")
+const CampaignComposition = preload("res://scripts/campaign/campaign_composition.gd")
 
 
 func before_test() -> void:
@@ -233,3 +234,96 @@ func test_every_missing_section_rejected() -> void:
 			.override_failure_message("ошибка должна называть отсутствующую секцию: %s" % err)
 	# Полный состав — валиден (контроль: тест не падает из-за лишнего).
 	assert_str(MvpSaveSchema.validate(_sample_state())).is_equal("")
+
+
+# — T-301: зубы у столбца «покрыто» в doc/SAVE_MATRIX.md ----------------------
+#
+# Байтовый контракт round-trip (test_cutover_composite, test_campaign_victory)
+# сверяет состояние с состоянием: под-ключ, пустой с обеих сторон, потерей не
+# считается. Именно поэтому строка матрицы не может быть ссылкой на контракт —
+# ей нужен ассерт на непустоту. Без него столбец «покрыто» гниёт молча: сборка
+# перестаёт писать секцию, round-trip остаётся зелёным, матрица врёт.
+# Батарея, доказывающая зубы: game/tools/mut_save_sections.sh (M1 map.threats,
+# M2 city.sm, M4 resources — здесь; M3 birth_carry — в кейсе ниже; все красные).
+
+
+func _finished_campaign(seed_value: int = 12345) -> CampaignComposition:
+	# Тот же composition root, что и main.gd (тот же прогон, что и вершинный
+	# контракт test_cutover_composite: 21 ход, K-канон-линия).
+	var c := CampaignComposition.from_campaign_config(seed_value)
+	var guard := 0
+	while not c.campaign.is_done() and guard < 21:
+		guard += 1
+		c.advance_turn()
+	return c
+
+
+func test_finished_campaign_leaves_no_empty_save_section() -> void:
+	var c := _finished_campaign()
+	assert_int(c.campaign.current_turn).is_greater(1)
+	assert_str(c.campaign.campaign_status).is_not_empty()
+	var state := c.build_save_state()
+
+	var res: Dictionary = state["resources"]
+	for key in ["food", "wood", "iron"]:
+		assert_bool(absf(float(res.get(key, 0.0))) > 0.0).is_true() \
+			.override_failure_message("resources.%s нулевой — строка матрицы пуста" % key)
+
+	var pop: Dictionary = state["population"]
+	assert_bool((pop.get("residents", []) as Array).size() > 0).is_true()
+	assert_int(int(pop.get("next_uid", 0))).is_greater(0)
+
+	var city: Dictionary = state["city"]
+	assert_bool((city.get("buildings", []) as Array).size() > 0).is_true()
+	assert_bool((city.get("districts", {}) as Dictionary).size() > 0).is_true()
+	assert_bool((city.get("sm", {}) as Dictionary).size() > 0).is_true()
+	assert_bool(int(city.get("housing", 0)) > 0).is_true()
+	assert_bool(int(city.get("party_size", 0)) > 0).is_true()
+
+	var map_sec: Dictionary = state["map"]
+	assert_bool((map_sec.get("region", {}) as Dictionary).size() > 0).is_true()
+	assert_bool((map_sec.get("threats", {}) as Dictionary).size() > 0).is_true() \
+		.override_failure_message("map.threats пуст — «покрыто» в матрице было бы ложью")
+
+	var camp: Dictionary = state["campaign"]
+	assert_bool(camp.has("final_battle_seen")).is_true()
+	assert_bool(camp.has("final_raid_repelled")).is_true()
+	assert_bool((camp.get("chronicle", {}) as Dictionary).size() > 0).is_true()
+	assert_bool((camp.get("goals", {}) as Dictionary).size() > 0).is_true()
+	assert_bool((camp.get("ethics", {}) as Dictionary).size() > 0).is_true()
+	assert_bool((camp.get("supply", {}) as Dictionary).size() > 0).is_true()
+
+	var ledger: Array = (state.get("prestige", {}) as Dictionary).get("ledger", [])
+	assert_int(ledger.size()).is_greater(0)
+	assert_str(str((state.get("sign", {}) as Dictionary).get("state", ""))).is_not_empty()
+
+
+func test_population_carries_survive_save_roundtrip() -> void:
+	# Переносы дробного счёта населения (population_system.gd:245-246 / :255-256)
+	# на канонической линии кампании равны 0.0 (голод, Репутация 0) — whole-state
+	# контракт их потерю не видит. Состояние строится напрямую: переносы
+	# накапливаются на дробном притоке.
+	var PopulationSystem := load("res://scripts/campaign/population_system.gd")
+	var pop = PopulationSystem.new()
+	pop.process_turn(1, 0.7)
+	var live_birth: float = pop._birth_carry
+	var live_mig: float = pop._mig_carry
+	if live_birth == 0.0 and live_mig == 0.0:
+		fail("переносы не накопились на process_turn(1, 0.7) — тест стал пустым")
+
+	# Сторона записи: to_dict обязан нести фактические переносы, а не 0.0. Без
+	# этого шага мутант «to_dict пишет 0.0» зелёный: from_dict честно читает то,
+	# что записано, и round-trip-равенство (0.0 == 0.0) потери не замечает.
+	var d: Dictionary = pop.to_dict()
+	assert_float(float(d.get("birth_carry", 0.0))).is_equal(live_birth)
+	assert_float(float(d.get("mig_carry", 0.0))).is_equal(live_mig)
+
+	# Сторона чтения: from_dict — статический конструктор, не метод экземпляра.
+	var restored = PopulationSystem.from_dict(d)
+	assert_float(float(restored.to_dict().get("birth_carry", -1.0))).is_equal(live_birth)
+	assert_float(float(restored.to_dict().get("mig_carry", -1.0))).is_equal(live_mig)
+
+	# Сейв, записанный до появления ключей, не должен их выдумывать.
+	var legacy = PopulationSystem.from_dict({"residents": [], "next_uid": 1})
+	assert_float(float(legacy.to_dict().get("birth_carry", -1.0))).is_equal(0.0)
+	assert_float(float(legacy.to_dict().get("mig_carry", -1.0))).is_equal(0.0)

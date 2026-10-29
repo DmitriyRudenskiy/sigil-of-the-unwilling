@@ -40,6 +40,47 @@ const _TSCN_MARK := "theme_override_styles/"
 ## краснеет, протухшая строка допуска краснеет тоже.
 const _DEAD_VARIATION_ASSIGNMENTS := {}
 
+## Рантаймная закраска цвета вне модуля стиля (T-300): путь → число разрешённых мест.
+## Считаются четыре механизма: `node.color =`, `node.modulate =`, `node.self_modulate =`
+## и `add_theme_color_override(...)`; местом считается запись, цвет в которой не берётся
+## из `ThemeConfig` (см. `_paint_is_off_style`). Допуск **двусторонний и по числу**: лишний
+## литерал красит (мест больше), удалённый красит тоже (мест меньше) — список может только
+## сокращаться, а «синхронизировать» его вверх нельзя.
+## Почему числами, а не именами, как `_ALLOWED`: у stylebox-обхода имя аргумента уникально
+## (`"focus"`), у цвета имени нет, а в одном экране один и тот же литерал встречается
+## по три раза (`Color("#e0bd67")` в городе), и под каждую копию имя — это шум.
+const _COLOR_ALLOWED := {
+	# Медальон инициативы: затемнение и подсветка своего узла. Общего тона медальона в
+	# модуле стиля нет — перенос ждёт шага T-300 ниже по счёту.
+	"res://scripts/ui/battle_ui.gd": 2,
+	# Город перекрашивает подписи через локальную палитру экрана (`PALETTE`) и литералы,
+	# а не через роли темы; 12 мест, сведение на ThemeConfig — T-300.
+	"res://scripts/ui/city_screen.gd": 12,
+	# Панель решения (Q-M83: сцен `decision_panel.tscn` в репо нет, класс никем не
+	# instantiated) — четыре канцелярских цвета движка на плашке серьёзности.
+	"res://scripts/ui/decision_panel.gd": 4,
+	# Панель статуса героя: серый «эта потребность не закрыта» и красный «критическое».
+	"res://scripts/ui/hero_status_panel.gd": 2,
+	# Меню: цвет неактивной кнопки Continue задаётся на месте, а не ролью темы.
+	"res://scripts/ui/main_menu.gd": 1,
+	# Затемнение обучающей накладки — литерал вместо C_OVERLAY_DIM.
+	"res://scripts/ui/tutorial_overlay.gd": 1,
+}
+
+## Идентичные/альфные концы, а не стиль: `Color.WHITE` — «вернуть как есть»,
+## `Color.TRANSPARENT` — «растворить», `Color(1, 1, 1, 1)` — то же самое записью.
+## Все три — концы твинов и ветки условия «виден/затемнён», состояния они не выражают,
+## поэтому из правила сняты (замер 2026-10-29: иначе правило красит
+## `modulate = Color.WHITE if видим else <тон тумана>`, то есть верный код).
+const _COLOR_IDENTITIES := ["Color.WHITE", "Color.TRANSPARENT"]
+const _COLOR_IDENTITY_RE := "Color\\s*\\(\\s*1(?:\\.0+)?\\s*,\\s*1(?:\\.0+)?\\s*,\\s*1(?:\\.0+)?\\s*(,\\s*1(?:\\.0+)?\\s*)?\\)"
+
+const _COLOR_ASSIGN_RE := "\\.(color|modulate|self_modulate)[ \\t]*=[ \\t]*"
+const _COLOR_OVERRIDE_MARK := "add_theme_color_override"
+const _COLOR_LITERAL_RE := "\\bColor[ \\t]*\\(|\\bColor\\.[A-Z]"
+const _STRING_RE := '"[^"]*"'
+const _CONST_DECL_RE := "^(const|var)[ \\t]+([A-Za-z_][A-Za-z0-9_]*)"
+
 const _VARIATION_MARK := "theme_type_variation"
 const _THEME_PATH := "res://assets/theme/game_theme.tres"
 
@@ -231,4 +272,161 @@ func test_no_dead_theme_type_variation_assignment() -> void:
 	for path in _DEAD_VARIATION_ASSIGNMENTS.keys():
 		assert_bool(seen.has(path)).is_true() \
 			.override_failure_message("допуск %s устарел: мёртвых присваиваний в нём нет" % path)
+
+
+## Рантаймная закраска цвета (T-300). Три гарда темы смотрят на **стили**: stylebox
+## переопределения, вариант темы, резолв носителя. Цвет, который код пишет прямо в узел
+## (`cell.modulate = CELL_HOVER`, `label.add_theme_color_override("font_color", …)`,
+## `rect.color = Color.GREEN`), ни в один из них не попадает: он не стиль, а свойство
+## узла. Практический смысл — цвет состояния не меняется вместе с темой и не краснеет,
+## когда экран переводят на роли темы; именно так и жил золотой подсвет клетки инвентаря
+## (константа экрана `CELL_HOVER`, общий тон-канон не объявлен).
+##
+## Почему скан исходников, а не живого дерева: обход видит **значение** цвета, но не его
+## источник, а дефект и есть источник — «взят не из модуля стиля». Значение из ThemeConfig
+## и литерал неразличимы, пока не сравнили запись. Тот же выбор уже обоснован выше для
+## stylebox-обхода (обход не отличает чужую вложенную сцену от своей).
+##
+## Что НЕ считается (зафиксировано, чтобы молчание было объяснимо, а не случайным):
+##   1) цвета из данных: `_Enums.parse_color(...)`, `art.get_rarity_color()`, параметры
+##      функций — источник не экран, а каталог/вызывающий код;
+##   2) записи через строковое имя свойства (`tween_property(n, "modulate", …)`,
+##      `set("color", …)`) — тот же класс, что `set("theme_override_" + x)` выше: текстовый
+##      скан их не видит, их ловит рантайм-гард конкретного экрана;
+##   3) сценевые `theme_override_colors/*` и `color = Color(...)` в .tscn — это механизм 2
+##      темы, он объят правилом T-147 по stylebox, а по цветам — вне объёма T-300.
+func test_runtime_color_paint_comes_from_style_module() -> void:
+	var offenders := PackedStringArray()
+	var seen := {}
+	var total := 0
+	for path in _files(".gd"):
+		var paints := _off_style_paints(path)
+		if paints.is_empty():
+			continue
+		total += paints.size()
+		seen[path] = paints.size()
+		var allowed: int = int(_COLOR_ALLOWED.get(path, 0))
+		if paints.size() != allowed:
+			offenders.append("%s: закрашиваний вне модуля стиля %d, допущено %d\n    %s" % [
+				path, paints.size(), allowed, "\n    ".join(paints)])
+	assert_int(offenders.size()).is_equal(0) \
+		.override_failure_message(
+			"цвет состояния закрашен в узел мимо модуля стиля (ThemeConfig): он не меняется "
+			+ "с темой и не покрывается ни одним гардом темы (T-300). Перенеси тон в ThemeConfig "
+			+ "или уменьши допуск, если тон удалён:\n%s" % "\n".join(offenders))
+	# Две опоры живости: слепой скан и мёртвый допуск.
+	assert_bool(total >= 20).is_true() \
+		.override_failure_message("скан закраски цвета почти слеп: мест %d" % total)
+	for path in _COLOR_ALLOWED.keys():
+		assert_bool(seen.has(path)).is_true() \
+			.override_failure_message(
+				"в допуске числится %s, а закрашиваний вне модуля стиля в нём нет — строка устарела" % path)
+
+
+## Места, где цвет пишется в узел и берётся не из модуля стиля: «NN: строка».
+func _off_style_paints(path: String) -> Array[String]:
+	var text := FileAccess.get_file_as_string(path)
+	var consts := _color_consts(text)
+	var re := RegEx.create_from_string(_COLOR_ASSIGN_RE)
+	var lit := RegEx.create_from_string(_COLOR_LITERAL_RE)
+	var lines := text.split("\n")
+	var out: Array[String] = []
+	for i in lines.size():
+		var stripped: String = String(lines[i]).strip_edges()
+		if stripped.begins_with("#"):
+			continue
+		var rhs := ""
+		var m := re.search(stripped)
+		if m != null:
+			rhs = stripped.substr(m.get_end(0))
+			# `==` (сравнение) — не закраска; `.color =` внутри объявления тоже не встречается.
+			if rhs.strip_edges().begins_with("="):
+				continue
+		elif stripped.contains(_COLOR_OVERRIDE_MARK):
+			rhs = stripped.substr(
+				stripped.find(_COLOR_OVERRIDE_MARK) + _COLOR_OVERRIDE_MARK.length())
+		else:
+			continue
+		# многострочный вызов: тянем следующие строки, пока скобки не сошлись
+		var j := i
+		# многострочность бывает двумя способами: незакрытая скобка и перенос обратным
+		# слэшем (`cell.modulate = CELL_EMPTY if свободна else …` — две строки, скобок нет)
+		while (rhs.count("(") > rhs.count(")") or rhs.strip_edges().ends_with("\\")) \
+				and j + 1 < lines.size():
+			j += 1
+			rhs += " " + String(lines[j]).strip_edges()
+		if _paint_is_off_style(rhs, consts, lit):
+			out.append("%d: %s" % [i + 1, stripped])
+	return out
+
+
+## Цветовые константы файла: имя → правая часть объявления. Нужны потому, что состояние
+## чаще всего красят именно ими (`cell.modulate = CELL_HOVER`), и источник цвета живёт
+## на строку объявления, а не на строку записи.
+func _color_consts(text: String) -> Dictionary:
+	var out := {}
+	var re := RegEx.create_from_string(_CONST_DECL_RE)
+	for raw in text.split("\n"):
+		var stripped: String = String(raw).strip_edges()
+		if stripped.begins_with("#"):
+			continue
+		var m := re.search(stripped)
+		if m == null:
+			continue
+		var eq := stripped.find("=")
+		if eq < 0:
+			continue
+		out[String(m.get_string(2))] = stripped.substr(eq + 1)
+	return out
+
+
+## «Вне модуля стиля» = в выражении есть цвет движка/литерал, и ни одного источника стиля
+## (`ThemeConfig`, `get_theme_color`, `GameNumbers` — тон тумана войны). Одиночный
+## идентификатор разворачивается в объявление файла и классифицируется по нему; если
+## объявления нет (параметр функции, поле, вызов из данных) — место вне правила.
+func _paint_is_off_style(rhs: String, consts: Dictionary, lit: RegEx) -> bool:
+	var expr := _strip_identity_colors(rhs)
+	if _expr_is_styled(expr):
+		return false
+	if lit.search(_without_strings(expr)) != null:
+		return true
+	# Состояния красят константами экрана: в строке записи цвета нет
+	# (`cell.modulate = CELL_EMPTY if свободна else (CELL_HOVER …)`), источник живёт на
+	# строке объявления. Разворачиваем каждый идентификатор выражения в объявление файла
+	# (вложенность — один уровень, глубже в репо не встречается).
+	for m in RegEx.create_from_string("[A-Za-z_][A-Za-z0-9_]*").search_all(_without_strings(expr)):
+		var tok := String(m.get_string(0))
+		if not consts.has(tok):
+			continue
+		var src := _strip_identity_colors(String(consts[tok]))
+		if _expr_is_styled(src):
+			continue
+		if lit.search(src) != null:
+			return true
+	return false
+
+
+## Снятие идентичных тонов («вернуть как есть», «растворить») из выражения — и запись
+## `Color(1, 1, 1, 1)`, и `Color(1.0, 1.0, 1.0, 1.0)`, и именованные концы твинов.
+func _strip_identity_colors(expr: String) -> String:
+	var out := expr
+	for identity in _COLOR_IDENTITIES:
+		out = out.replace(identity, "")
+	return RegEx.create_from_string(_COLOR_IDENTITY_RE).sub(out, "", true)
+
+## Строковые литералы из выражения вынимаются: `add_theme_color_override("font_color", X)`
+## и `d.get("color", …)` не источники цвета, а без съёма их слова попадают в разбор
+## идентификаторов и рождают ложные находки (замер: `s.color = _CE.parse_color(d.get(
+## "color", …))` резолвил токен `color` в `var color = _CE.SpellColor.COLORLESS`).
+func _without_strings(expr: String) -> String:
+	return RegEx.create_from_string(_STRING_RE).sub(expr, " ", true)
+
+
+## Источник стиля в выражении: модуль стиля `ThemeConfig` или чтение темы. Третий гость
+## — `GameNumbers`: тон тумана войны исторически объявлен в числовом модуле
+## (`MAP_FOG_MODULATE`), и два спавнера читают именно его; перенос тона в модуль стиля —
+## шаг T-300, до него выражение считается стилевым, иначе гард красит не дыру, а перенос.
+func _expr_is_styled(expr: String) -> bool:
+	return expr.contains("ThemeConfig") or expr.contains("get_theme_color") \
+			or expr.contains("GameNumbers")
 

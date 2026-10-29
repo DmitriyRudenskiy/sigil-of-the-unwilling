@@ -18,6 +18,7 @@ extends BaseTest
 # чужой носитель кадр не менял (override сильнее темы), после — меняет.
 const _THEME := preload("res://assets/theme/game_theme.tres")
 const _SCENE := preload("res://scenes/ui/artifact_inventory_screen.tscn")
+const _TIP := "Center/Window/Sheet/ItemTip"
 
 ## Сколько add_theme_stylebox_override обязано остаться в этом скрипте: ноль.
 # Живые узлы переведены на носители темы, мёртвые сняты вместе с хелперами.
@@ -204,12 +205,84 @@ func test_carriers_declare_panel_container_base_type() -> void:
 	for declared in [
 		'ArtifactOutline/base_type = "PanelContainer"',
 		'ArtifactBottom/base_type = "PanelContainer"',
+		# T-256: подсказка предмета переехала на общую роль карточки — её base_type
+		# обязан быть объявлен здесь же, иначе носитель не резолвится (замер T-147).
+		'PanelCard/base_type = "PanelContainer"',
 	]:
 		assert_str(text).contains(declared) \
 			.override_failure_message(
 				"в теме нет строки `%s` — носитель описан над другим классом (или удалён); "
 				% declared + "узлы `Outline` и `Bottom` — PanelContainer"
 			)
+
+
+## T-256: карточка предмета обязана стоять на плите, а не на рисунке камня.
+# Подсказка жила на варианте `ArtifactOutline` — это носитель рамки окна, у его
+# StyleBoxFlat поле прозрачное (`bg_color.a = 0`), поэтому карточка рисовала только
+# волосяную рамку, а имя, кнопки и описание легли поверх камня и фигуры. Ни один гард
+# темы этого не видел: стиль резолвился корректно, резолвилась именно запись варианта —
+# «подложки нет» свойство значения, а не механизма. Отсюда проверка не «какой вариант»,
+# а «резолвится ли непрозрачный фон».
+#
+# Второй симптом того же блока: описание писалось в скрытый узел `Desc`, тест читал его
+# же и зелёнел, на кадре текста не было (писатель без читателя). Поэтому здесь же —
+# требование, чтобы подпись, в которую пишет экран, была видимой.
+func test_item_tip_sits_on_an_opaque_plate() -> void:
+	var screen := _mk_screen()
+	await get_tree().process_frame
+	var tip := _node(screen, "Center/Window/Sheet/ItemTip")
+	assert_str(str(tip.theme_type_variation)).is_equal("PanelCard") \
+		.override_failure_message(
+			"`ItemTip` сидит на варианте `%s` — у прозрачных носителей (ArtifactOutline — "
+			% str(tip.theme_type_variation) + "рамка окна) карточка рисует только волосяную рамку"
+		)
+	var ov := ThemeCarrierGuard.stylebox_overrides(tip)
+	assert_int(ov.size()).is_equal(0) \
+		.override_failure_message(
+			"`ItemTip` несёт override — он сильнее темы: %s" % ", ".join(ov.keys())
+		)
+	var sb := tip.get_theme_stylebox("panel")
+	assert_that(sb).is_not_null()
+	assert_bool(ThemeCarrierGuard.resolves_carrier(tip, _THEME, "panel", "PanelCard")).is_true() \
+		.override_failure_message("`ItemTip` резолвит не PanelCard/styles/panel")
+	var opaque := false
+	if sb is StyleBoxFlat:
+		opaque = (sb as StyleBoxFlat).bg_color.a >= 0.9
+	elif sb is StyleBoxTexture:
+		opaque = (sb as StyleBoxTexture).texture != null
+	assert_bool(opaque).is_true() \
+		.override_failure_message(
+			"носитель подсказки резолвится в прозрачный стиль — подложки нет, текст и кнопки "
+			+ "рисуются поверх камня (кадр до: T-256)"
+		)
+	var desc := _node(screen, "Center/Window/Sheet/ItemTip/TipBox/TipDesc") as Label
+	assert_bool(desc.visible).is_true() \
+		.override_failure_message(
+			"`TipDesc` скрыт: экран пишет описание в невидимый узел, и кадр остаётся без текста"
+		)
+	# Роли текста — из темы (docs/17-ui-style-guide.md §17.6): без роли подпись
+	# резолвила белый цвет движка поверх коричневой плиты (кадр до, T-256).
+	for pair in [["TipName", "LabelStrong"], ["Desc_lbl", "LabelSecondary"],
+			["TipDesc", "LabelBody"]]:
+		var lbl := _node(screen, _TIP + "/TipBox/" + String(pair[0])) as Label
+		assert_str(String(lbl.theme_type_variation)).is_equal(StringName(pair[1])) \
+			.override_failure_message(
+				"подпись %s идёт без тип-роли темы: резолвится белый цвет движка "
+				% String(pair[0]) + "поверх коричневой плиты карточки")
+	# Порядок зоны D по макету: имя → подпись → тело → кнопки. До T-256 подпись
+	# `Desc_lbl` создавалась ПОСЛЕ тела и была скрыта — на кадре блок читался как
+	# «текст, потом неизвестно откуда взятое слово «Описание»».
+	var box := _node(screen, _TIP + "/TipBox") as Node
+	var ix_name := (_node(screen, _TIP + "/TipBox/TipName") as Node).get_index()
+	var ix_cap := (box.get_node("Desc_lbl") as Node).get_index()
+	var ix_body := (box.get_node("TipDesc") as Node).get_index()
+	var ix_btn := (box.get_node("TipButtons") as Node).get_index()
+	assert_int(ix_name).is_less_equal(ix_cap - 1).override_failure_message(
+		"имя предмета TipName обязано идти раньше подписи блока: %d vs %d" % [ix_name, ix_cap])
+	assert_int(ix_cap).is_less_equal(ix_body - 1).override_failure_message(
+		"подпись блока Desc_lbl обязана идти раньше тела TipDesc: %d vs %d" % [ix_cap, ix_body])
+	assert_int(ix_body).is_less_equal(ix_btn - 1).override_failure_message(
+		"тело TipDesc обязано идти раньше кнопок: %d vs %d" % [ix_body, ix_btn])
 
 
 # T-227 (С-2): проверки «в исходниках нет обхода темы» и «несуществующий тип не
