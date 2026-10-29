@@ -1,0 +1,39 @@
+T-301 · локальный гейт (head 8531fdfb: матрица + тесты + сверщик; родитель — сведение владельца
+0d3534a6 (alpha-battle-field/D-294); 2026-10-29)
+
+GdUnit: Overall Summary: 3633 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+MCP: ============= 1 failed, 111 passed, 2 skipped in 488.98s (0:08:08) =============
+PYTEST LEDGER: passed=111 skipped=2 failed=1 errors=0 collected=114
+MCP JUNIT: passed=111 skipped=2 failed=1 errors=0
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за): среда, не регрессия (D-265)
+  - test_settings_menu::test_settings_screen_opens_from_menu :: godot_mcp.MCPError: игра не готова
+    за 180 с (последняя ошибка: тулз game_eval вернул ошибку: Not connected to game interaction server.)
+MCP VERDICT: YELLOW (run_tests.sh:366 — readiness снимает красный, exit гейта 0)
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://...
+GENART: 11 passed in 2.26s · CLASSIFIER: 13 passed in 0.04s, READINESS-CLASSIFIER: selftest GREEN
+
+DOC GATES: GREEN (./scripts/doc_gates.sh на этом же дереве)
+  OK: docs/ links consistent (110 notes checked) · OK: 00-INDEX.md актуален (112 заметок)
+  OK: матрица покрытия сейвов ↔ дерево (ссылки, миграции, секции схемы) — новый сверщик T-301
+  OK: доки ↔ код (автолоады, сцены, классы, save-ключи) · HERO-LAYOUT-MAP: расхождений нет
+  GDD-GATE: GREEN (d_without_rejected 170/170, q_ghost_rows 0, t_duplicate_headers 0, t_multi_footer 0)
+  145 passed (тесты самих проверщиков, 11 файлов) · OPENSPEC SPECS: OK (87)
+  TESTMAP OK: дыр 80, файлов в группах слияния 150, дублей 0
+
+Толкование. GATE = 0: GdUnit 3633/0/0, MCP — YELLOW по readiness-подписи (одно меню,
+`test_settings_menu`; к сейву и матрице отношения не имеет, тот же симптом в T-310/T-241 на
+этой же шарящейся машине), генартилл и классификатор зелёные, доки зелёные. Production-код
+сменой не тронут (`git show --stat 8531fdfb`: доки, тесты, инструменты, базлайн TESTMAP) —
+прогон подтверждает и боевой код владельца из 0d3534a6: он в этом же прогоне.
+
+Зубы смены доказаны не прогоном, а батареей game/tools/mut_save_sections.sh: M1 map.threats
+→ «0 errors | 1 failures», M2 city.sm → 1, M4 resources → 3, M3 birth_carry → 2. До фикса
+двух проверок (assert_bool(x) \ + .override_failure_message() без .is_true()) M1 и M4
+выживали — то есть батарея отработала на самом себе. VACUOUS-ASSERT-GATE (T-123) этот
+класс ловит: проверка на снятом фиксе даёт строки 269 и 285 того же файла.
