@@ -1,6 +1,14 @@
 class_name BattleStateBuilder
 extends RefCounted
 
+## Расстановка сторон (3.8, референс композиции
+## `gpt-image-2.5-sunburst_a_Make_the_characters_.jpg`): шахматный зигзаг в своей
+## зоне — следующий юнит занимает следующую колонку и следующий ряд. Прежний обход
+## колонки вниз лепил стену у борта: отряд читался очередью, а середина поля
+## пустовала.
+const FORMATION_COLS := 2
+const FORMATION_TOP_ROW := 1
+
 var _attacker_stacks: Array = []
 var _defender_stacks: Array = []
 var _attacker_artifact_mods: Dictionary = {}
@@ -64,9 +72,6 @@ func build_into(state: BattleState) -> BattleState:
 func _build_units(state: BattleState, stacks: Array, is_atk: bool) -> Array[BattleState.BattleUnit]:
 	var units: Array[BattleState.BattleUnit] = []
 	var max_stacks := _max_units_per_side
-	var current_col := 0 if is_atk else BattleState.BW - 1
-	var col_step := 1 if is_atk else -1
-	var current_row := 0
 
 	for i in stacks.size():
 		if i >= max_stacks:
@@ -83,24 +88,15 @@ func _build_units(state: BattleState, stacks: Array, is_atk: bool) -> Array[Batt
 			push_error("[Battle] Invalid UnitStack received")
 			continue
 
-		var placed := false
-		while current_col >= 0 and current_col < BattleState.BW:
-			while current_row < BattleState.BH:
-				if not _cell_taken(current_col, current_row, units):
-					placed = true
-					break
-				current_row += 1
-			if placed:
-				break
-			current_col += col_step
-			current_row = 0
-
-		if not placed:
-			push_error("[BattleState] Cannot place stack %d: no free cells in deployment zone." % i)
+		var cell := formation_cell(units.size(), is_atk)
+		if cell.y >= BattleState.BH:
+			push_error(
+				"[BattleState] Формирование стороны исчерпано: юнит %d некуда ставить (BH=%d)."
+				% [units.size(), BattleState.BH]
+			)
 			continue
-
 		var unit := BattleState.BattleUnit.new(stack)
-		unit.cell = Vector2i(current_col, current_row)
+		unit.cell = cell
 		unit.side = BattleState.Side.ATTACKER if is_atk else BattleState.Side.DEFENDER
 		# Фасад к противнику (tactical-combat фаза 5): атакующий смотрит +x,
 		# защитник — −x (зоны расстановки на левом/правом краю).
@@ -117,18 +113,16 @@ func _build_units(state: BattleState, stacks: Array, is_atk: bool) -> Array[Batt
 			unit.init_dnd_hp()
 		units.append(unit)
 
-		current_row += 1
-		if current_row >= BattleState.BH:
-			current_row = 0
-			current_col += col_step
-
 	return units
 
-func _cell_taken(col: int, row: int, units: Array) -> bool:
-	for u in units:
-		if u.cell.x == col and u.cell.y == row:
-			return true
-	return false
+
+## Клетка formation-слота по индексу юнита. Индекс, а не счётчик попыток, делает
+## расстановку детерминированной: тот же состав — те же клетки, кадр воспроизводим.
+static func formation_cell(index: int, is_atk: bool) -> Vector2i:
+	var edge := 0 if is_atk else BattleState.BW - 1
+	var step := 1 if is_atk else -1
+	return Vector2i(edge + (index % FORMATION_COLS) * step, FORMATION_TOP_ROW + index)
+
 
 func _apply_artifact_effects(units: Array[BattleState.BattleUnit], mods: Dictionary) -> void:
 	if mods.is_empty():

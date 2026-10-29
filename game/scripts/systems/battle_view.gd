@@ -5,6 +5,11 @@ const RING := GameNumbers.BATTLE_FIELD_RING
 const HEX_OUTLINE_RADIUS := GameNumbers.BATTLE_HEX_OUTLINE_RADIUS
 const ATTACK_LUNGE_PX := GameNumbers.BATTLE_ATTACK_LUNGE_PX
 const MOVE_TWEEN_SEC := GameNumbers.BATTLE_MOVE_TWEEN_SEC
+
+## Порядок отрисовки фигур по ряду (3.8): ближний к нижнему краю перекрывает
+## дальнего, и перекрывающиеся силуэты читаются глубиной, а не кашей. База 6 —
+## над подсветкой поля (`_overlay` = 5), ниже подписей урона (20) и курсора (30).
+const UNIT_Z_BASE := 6
 const _HexDraw = preload("res://scripts/core/hex_draw.gd")
 const _ObstacleLabel = preload("res://scenes/ui/obstacle_label.tscn")
 const _FloatingText = preload("res://scenes/ui/floating_text.tscn")
@@ -252,6 +257,10 @@ func fit_camera() -> void:
 	_camera.position = center - Vector2(0.0, (_hud_reserve.x - _hud_reserve.y) / (2.0 * z))
 	fit_background()
 
+static func unit_z(row: int) -> int:
+	return UNIT_Z_BASE + row
+
+
 func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 	var n: Node2D = _UnitSprite.instantiate()
 	var key := unit.get_key()
@@ -286,7 +295,7 @@ func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 	cl.text = str(unit.get_count())
 
 	n.position = field_point(unit.cell)
-	n.z_index = 6
+	n.z_index = unit_z(unit.cell.y)
 	n.set_meta("uid", unit.uid)
 	_sprites_by_uid[unit.uid] = n
 	add_child(n)
@@ -327,6 +336,9 @@ func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> Tween:
 	var node := _find_node(unit)
 	if node == null or path.size() < 2:
 		return null
+	# Порядок отрисовки идёт за рядом: иначе юнит, сошедший в нижний ряд, остаётся
+	# под силуэтом того, кого он теперь перекрывает.
+	node.z_index = unit_z(path[path.size() - 1].y)
 	_kill_unit_tweens(unit.uid)
 	var an := _anim_of(node)
 	if an != null:

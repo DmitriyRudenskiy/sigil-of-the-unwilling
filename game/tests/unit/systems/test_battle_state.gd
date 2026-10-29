@@ -397,7 +397,9 @@ func test_get_unit_at_after_kill() -> void:
 		var found = state.get_unit_at(cell, BattleState.Side.DEFENDER)
 		assert_object(found).is_null().override_failure_message("dead unit still in grid at %s" % cell)
 
-func test_deployment_line_at_edge() -> void:
+func test_deployment_formation_zigzag() -> void:
+	# 3.8: сторона стоит шахматным зигзагом в двух колонках своей зоны, а не стеной
+	# у борта (референс композиции владельца).
 	var state = BattleState.new()
 
 	var atk: Array[UnitStack] = []
@@ -414,17 +416,18 @@ func test_deployment_line_at_edge() -> void:
 	assert_int(defenders.size()).is_equal(5).override_failure_message("expected 5 defender units")
 
 	var seen: Dictionary = {}
+	var edge := BattleState.BW - 1
 	for k in attackers.size():
 		var u = attackers[k]
-		assert_int(u.cell.x).is_equal(0).override_failure_message("attacker %d should be in column 0" % k)
-		assert_int(u.cell.y).is_equal(k).override_failure_message("attacker %d should be at row %d" % [k, k])
+		assert_int(u.cell.x).is_equal(k % 2).override_failure_message("attacker %d should alternate the two columns, got %s" % [k, u.cell])
+		assert_int(u.cell.y).is_equal(BattleStateBuilder.FORMATION_TOP_ROW + k).override_failure_message("attacker %d should step one row down the zigzag" % k)
 		assert_bool(seen.has(u.cell)).is_false().override_failure_message("duplicate attacker cell %s" % u.cell)
 		seen[u.cell] = true
 
 	for k in defenders.size():
 		var u = defenders[k]
-		assert_int(u.cell.x).is_equal(BattleState.BW - 1).override_failure_message("defender %d should be in column %d" % [k, BattleState.BW - 1])
-		assert_int(u.cell.y).is_equal(k).override_failure_message("defender %d should be at row %d" % [k, k])
+		assert_int(u.cell.x).is_equal(edge - (k % 2)).override_failure_message("defender %d should alternate the two edge columns, got %s" % [k, u.cell])
+		assert_int(u.cell.y).is_equal(BattleStateBuilder.FORMATION_TOP_ROW + k).override_failure_message("defender %d should step one row down the zigzag" % k)
 		assert_bool(seen.has(u.cell)).is_false().override_failure_message("duplicate defender cell %s" % u.cell)
 		seen[u.cell] = true
 
@@ -445,26 +448,38 @@ func test_deployment_max_capacity() -> void:
 	assert_int(defenders.size()).is_equal(7).override_failure_message("expected 7 defender units")
 
 	for k in attackers.size():
-		assert_bool(attackers[k].cell.x == 0 and attackers[k].cell.y == k).is_true().override_failure_message("max-cap attacker %d bad cell %s" % [k, attackers[k].cell])
+		var c: Vector2i = attackers[k].cell
+		assert_bool(c.x <= 1 and c.y < BattleState.BH).is_true().override_failure_message("атакующий %d: %s" % [k, c])
 	for k in defenders.size():
-		assert_bool(defenders[k].cell.x == BattleState.BW - 1 and defenders[k].cell.y == k).is_true().override_failure_message("max-cap defender %d bad cell %s" % [k, defenders[k].cell])
+		var d: Vector2i = defenders[k].cell
+		assert_bool(d.x >= BattleState.BW - 2).is_true().override_failure_message("защитник %d: %s" % [k, d])
 
-func test_cell_taken_avoids_occupied() -> void:
+
+func test_deployment_deterministic_and_middle_open() -> void:
+	# 3.8: тот же состав ⇒ те же клетки; середина поля ничейная — ни один юнит не
+	# заходит дальше двух колонок своей зоны.
+	var first := _deploy_cells()
+	var second := _deploy_cells()
+
+	assert_int(first.size()).is_equal(GameNumbers.MAX_UNITS_PER_SIDE * 2)
+	for k in first.size():
+		assert_bool(first[k] == second[k]).is_true().override_failure_message("клетка %d разошлась" % k)
+
+
+func _deploy_cells() -> Array:
 	var state = BattleState.new()
-
-	var atk: Array[UnitStack] = [Units.make_fixed_stack("swordsmen", 5)]
+	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
+	for k in GameNumbers.MAX_UNITS_PER_SIDE:
+		atk.append(Units.make_fixed_stack("swordsmen", 5))
+		def.append(Units.make_fixed_stack("goblins", 5))
 	state.place_army(atk, def)
-
-	var taken = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
-	taken.cell = Vector2i(0, 0)
-	var units: Array = [taken]
-
-	var builder: BattleStateBuilder = BattleStateBuilder.new()
-	assert_bool(builder._cell_taken(0, 0, units)).is_true().override_failure_message("_cell_taken should report (0,0) as occupied")
-	assert_bool(builder._cell_taken(0, 1, units)).is_false().override_failure_message("_cell_taken should report (0,1) as free")
-	assert_bool(builder._cell_taken(1, 0, units)).is_false().override_failure_message("_cell_taken should report (1,0) as free")
-
+	var out: Array = []
+	for u in state.attacker_units + state.defender_units:
+		var own: int = u.cell.x if u.side == BattleState.Side.ATTACKER else BattleState.BW - 1 - u.cell.x
+		assert_int(own).is_less_equal(1).override_failure_message("вне своей зоны: %s" % u.cell)
+		out.append([u.cell, u.side])
+	return out
 
 func test_deployment_rules_min_gap_and_bounds() -> void:
 	# 2.2: starting positions stay in bounds and keep >= 5 hex between the two deployment lines.
@@ -516,11 +531,18 @@ func test_reachable_reflects_move() -> void:
 	var units: Array = state.get_units_by_side(BattleState.Side.ATTACKER)
 	var A = units[0]
 	var B = units[1]
+	# Клетки берутся из расстановки: 3.8 поменял её (шахматный зигзаг), а тут
+	# проверяется кэш достижимости. Старый тест держал координаты стены у борта.
+	var b_cell: Vector2i = B.cell
+	var X: Vector2i = b_cell
+	for d in 6:
+		var n: Vector2i = HexUtils.get_neighbor(b_cell, d)
+		if n != A.cell and n.x >= 0 and n.y >= 0 and n.x < BattleState.BW and n.y < BattleState.BH:
+			X = n
+			break
 
-	var X := Vector2i(1, 1)
 	var fn := func() -> Dictionary: return state.build_all_blocked(A, {})
 
-	var b_cell := Vector2i(0, 1)
 	var r1: Dictionary = state.get_reachable(X, 1, fn)
 	assert_bool(r1.has(b_cell)).is_false().override_failure_message("r1: клетка B (%s) должна быть заблокирована" % b_cell)
 
