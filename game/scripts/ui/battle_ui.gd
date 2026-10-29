@@ -124,7 +124,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif _settings_screen.visible:
 			_settings_screen.visible = false
 		else:
-			_press(_cancel_btn)
+			# D-294: Esc — Опции (шаг 4.3 отдал его отмене, пока у Опций не стало
+			# своего входа вне ряда; отмена остаётся на кнопке и на C).
+			_on_settings()
 		get_viewport().set_input_as_handled()
 		return
 	if _settings_screen.visible:

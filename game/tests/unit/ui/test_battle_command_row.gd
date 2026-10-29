@@ -71,7 +71,14 @@ func test_exit_dialog_items() -> void:
 	assert_object(dlg).is_not_null()
 	var row: HBoxContainer = dlg.get_child(0)
 	assert_int(row.get_child_count()).is_equal(3)
-	assert_bool(row.get_child(2).disabled).is_true()
+	assert_bool(row.get_child(2).disabled).override_failure_message(
+		"«Сдаться» активна без механики капитуляции (T-282)").is_true()
+	var fired: Array[String] = []
+	ui.retreat_requested.connect(func() -> void: fired.append("retreat"))
+	ui.rescue_requested.connect(func() -> void: fired.append("rescue"))
+	row.get_child(0).emit_signal("pressed")
+	row.get_child(1).emit_signal("pressed")
+	assert_int(fired.size()).override_failure_message("пункты диалога: %s" % fired).is_equal(2)
 	dlg.queue_free()
 
 # (6) медальон несёт только знак (D-293), имя команды — в подсказке, а вкладка
