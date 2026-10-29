@@ -118,3 +118,68 @@ func test_accept_result_repeat_does_not_crash() -> void:
 	bc.accept_result()
 	bc.accept_result()
 	assert_int(got.size()).is_equal(2)
+
+# ── 5.1: «Автобой» — подтверждение, эмулятор, штатный итог ────────────────────
+
+class StubAutoUI extends BattleUI:
+	## Порядок паузы команд: по нему видно, что на время подтверждения и передачи
+	## управление действительно снято (`set_controls_enabled` — единственный
+	## носитель паузы панели, тем же пользуется пауза настроек).
+	var calls: Array[String] = []
+	func set_controls_enabled(enabled: bool) -> void:
+		calls.append("on" if enabled else "off")
+
+class AutoResult extends RefCounted:
+	var fired := 0
+	var winner := -1
+	var atk := -1
+	var def_ := -1
+	func take(w: BattleState.Side, a: Array[UnitStack], d: Array[UnitStack]) -> void:
+		fired += 1
+		winner = w
+		atk = a.size()
+		def_ = d.size()
+
+func _alive(state: BattleState) -> int:
+	return state.get_survivors(BattleState.Side.ATTACKER).size() \
+		+ state.get_survivors(BattleState.Side.DEFENDER).size()
+
+func _auto_fixture() -> Dictionary:
+	var bc = auto_free(BattleController.new())
+	var ui = auto_free(StubAutoUI.new())
+	bc._ui = ui
+	bc._state = BattleState.new()
+	var atk: Array[UnitStack] = [Units.make_fixed_stack("swordsmen", 10)]
+	var def_: Array[UnitStack] = [Units.make_fixed_stack("goblins", 10)]
+	bc._state.place_army(atk, def_)
+	return {"bc": bc, "ui": ui}
+
+## Итог «Автобоя» — вердикт того же состояния после эмулятора: контроллер сам
+## ничего не считает, он отдаёт состояние `BattleEmulator.run_auto_battle` и
+## сообщает `check_end` со своими же полосками выживших.
+func test_auto_battle_reports_emulated_state() -> void:
+	var f := _auto_fixture()
+	var bc = f["bc"]
+	var col := AutoResult.new()
+	bc.battle_finished.connect(col.take)
+	bc._run_auto_battle()
+	assert_int(col.fired).is_equal(1).override_failure_message("бой обязан закончиться одним итогом")
+	assert_bool(bc._state.battle_over).is_true()
+	assert_int(col.winner).is_equal(bc._state.check_end())
+	assert_int(col.atk).is_equal(bc._state.get_survivors(BattleState.Side.ATTACKER).size())
+	assert_int(col.def_).is_equal(bc._state.get_survivors(BattleState.Side.DEFENDER).size())
+
+## Пока игрок решает, команды сняты; отказ возвращает их, состояние боя не тронуто.
+func test_auto_battle_confirm_blocks_and_restores() -> void:
+	var f := _auto_fixture()
+	var bc = f["bc"]
+	var ui = f["ui"]
+	var alive_before: int = _alive(bc._state)
+	bc._on_auto_battle()
+	assert_that(ui.calls).contains_exactly(["off"]) \
+			.override_failure_message("открытие подтверждения обязано снять команды")
+	assert_object(bc._auto_confirm).is_not_null()
+	bc._auto_confirm.canceled.emit()
+	assert_that(ui.calls).contains_exactly(["off", "on"])
+	assert_int(_alive(bc._state)).is_equal(alive_before)
+	assert_bool(bc._state.battle_over).is_false()

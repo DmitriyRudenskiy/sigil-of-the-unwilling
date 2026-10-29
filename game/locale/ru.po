@@ -101,6 +101,15 @@ msgstr "SPELL: {id}"
 msgid "battle.retreat_confirm"
 msgstr "Отступление! Потеря 50% стеков."
 
+msgid "battle.auto_confirm"
+msgstr "Автобой доиграет этот бой без вас. Продолжить?"
+
+msgid "battle.auto_confirm_ok"
+msgstr "Автобой"
+
+msgid "battle.auto_confirm_cancel"
+msgstr "Отмена"
+
 msgid "battle.defend_bonus"
 msgstr "🛡️ Защита: +20% DEF до конца раунда."
 

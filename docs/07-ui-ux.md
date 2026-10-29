@@ -160,7 +160,8 @@ date: 2026-10-29
 
 | Клавиша | Экран | Действие | Источник |
 | --- | --- | --- | --- |
-| `A` / `D` / `W` / `S` | бой | атака / защита / ждать / пропуск | `scripts/ui/battle_ui.gd` (`_unhandled_input`, ветка `match`) |
+| `T` / `D` / `W` / `S` | бой | атака / защита / ждать / пропуск | `scripts/ui/battle_ui.gd` (`_unhandled_input`, ветка `match`) |
+| `O` / `C` / `A` / `Esc` | бой | опции боя / отступить / автобой / отмена | `scripts/ui/battle_ui.gd` — нижняя панель alpha-battle-field 4.3: `A` отдан автобою, «атака» переехала на `T`; хоткей зовёт команду только если кнопка не `disabled` |
 | `K` | бой | книга заклинаний | `scripts/ui/battle_ui.gd` |
 | `H`, `↑`, `↓` | бой | журнал боя и его прокрутка | `scripts/ui/battle_ui.gd` |
 | `Esc` | бой, кампания, город, диалог | отмена/закрытие | `scripts/ui/battle_ui.gd`, `scripts/ui/campaign_hud.gd`, `scripts/ui/city_screen.gd`, `scripts/ui/team_dialog_screen.gd`, `scripts/world/world_shortcuts.gd` |

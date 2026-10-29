@@ -4,14 +4,16 @@
 [ext_resource type="PackedScene" uid="uid://df2h40vir4ujo" path="res://scenes/ui/battle_spellbook_panel.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="3"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_gear.png" id="10_emblem_gear"]
-[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_flag.png" id="11_emblem_flag"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_ring.png" id="12_emblem_ring"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_swords.png" id="13_emblem_swords"]
-[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_book.png" id="14_emblem_book"]
-[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_hourglass.png" id="15_emblem_hourglass"]
-[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_shield.png" id="16_emblem_shield"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_skip.png" id="17_emblem_skip"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_round_normal.png" id="18_plate_empty"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/auto.png" id="19_medal_auto"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/cancel.png" id="20_medal_cancel"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/retreat.png" id="31_medal_retreat"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/spellbook.png" id="32_medal_spellbook"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/wait.png" id="33_medal_wait"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/defend.png" id="34_medal_defend"]
 
 [node name="BattleUI" type="CanvasLayer" unique_id=732893136]
 script = ExtResource("1")
@@ -57,6 +59,22 @@ horizontal_alignment = 1
 ; убраны как чужеродный кластер; ☰ остался — единственная кнопка входа в
 ; историю боя (вторая — клавиша H), виден с первой записи лога, а построчную
 ; прокрутку заменили стрелки ↑/↓ (обработчик тот же, что у снятых кнопок).
+; ▲▼ прокрутки журнала (alpha-battle-field 4.2/4.4): макет 11 их снимал
+; («в строке лога не несёт»), новое описание владельца просит окно сообщений со
+; стрелками обратно — новое описание перекрывает старый макет. Обработчик тот же,
+; что у клавиш ↑/↓.
+[node name="log_up_btn" type="Button" parent="bottom_bar/info_box/log_row"]
+custom_minimum_size = Vector2(24, 32)
+layout_mode = 2
+theme_type_variation = &"BibleButton"
+text = "▲"
+
+[node name="log_down_btn" type="Button" parent="bottom_bar/info_box/log_row"]
+custom_minimum_size = Vector2(24, 32)
+layout_mode = 2
+theme_type_variation = &"BibleButton"
+text = "▼"
+
 [node name="history_btn" type="Button" parent="bottom_bar/info_box/log_row" unique_id=1494162177]
 visible = false
 custom_minimum_size = Vector2(24, 32)
@@ -107,8 +125,8 @@ text = "Меню"
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
-icon = ExtResource("11_emblem_flag")
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("31_medal_retreat")
 expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/left_box/retreat_btn"]
@@ -124,6 +142,32 @@ grow_horizontal = 2
 mouse_filter = 2
 theme_type_variation = &"LabelButtonCaption"
 text = "Отступить"
+
+; «Автобой» (alpha-battle-field 4.2): команда есть в описании владельца, носитель
+; механики есть (`BattleEmulator`), интерфейса не было. Знак — медальон «меч»
+; листа владельца (дизайн §4: «скрещённых мечей» в листе нет, расхождение —
+; строка приёмки 4.6).
+[node name="auto_btn" type="Button" parent="bottom_bar/bar_box/left_box"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("19_medal_auto")
+expand_icon = true
+
+[node name="caption" type="Label" parent="bottom_bar/bar_box/left_box/auto_btn"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 100.0
+offset_right = 70.0
+offset_bottom = 128.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"LabelButtonCaption"
+text = "Автобой"
 
 [node name="rescue_btn" type="Button" parent="bottom_bar/bar_box/left_box"]
 custom_minimum_size = Vector2(100, 100)
@@ -204,8 +248,8 @@ text = "Атака"
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
-icon = ExtResource("14_emblem_book")
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("32_medal_spellbook")
 expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/spellbook_btn"]
@@ -222,12 +266,37 @@ mouse_filter = 2
 theme_type_variation = &"LabelButtonCaption"
 text = "Книга"
 
+; «Отмена» (alpha-battle-field 4.2): снимает выбор цели/режима и закрывает книгу;
+; носитель — `battle_controller.gd:_on_cancel`, медальон — перечёркнутый круг
+; листа владельца.
+[node name="cancel_btn" type="Button" parent="bottom_bar/bar_box/right_box"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("20_medal_cancel")
+expand_icon = true
+
+[node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/cancel_btn"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 100.0
+offset_right = 70.0
+offset_bottom = 128.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"LabelButtonCaption"
+text = "Отмена"
+
 [node name="wait_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=868382487]
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
-icon = ExtResource("15_emblem_hourglass")
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("33_medal_wait")
 expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/wait_btn"]
@@ -248,8 +317,8 @@ text = "Ждать"
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
-icon = ExtResource("16_emblem_shield")
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("34_medal_defend")
 expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/defend_btn"]

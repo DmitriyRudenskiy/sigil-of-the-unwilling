@@ -132,7 +132,7 @@ func _unit_at_pixel(global_pos: Vector2, side: BattleState.Side) -> BattleState.
 	for nb in HexUtils.get_all_neighbors(cell, _state.hex_shift_right):
 		unit = _state.get_unit_at(nb, side)
 		if unit != null:
-			var unit_pos := _view.map_to_local(nb)
+			var unit_pos := _view.field_point(nb)
 			if local_pos.distance_to(unit_pos) < GameNumbers.BATTLE_CLICK_RADIUS_PX:
 				return unit
 	return null

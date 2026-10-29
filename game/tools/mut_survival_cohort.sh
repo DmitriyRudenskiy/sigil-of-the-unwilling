@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+# `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без этого
+# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит»,
+# ничего не прогнав: отсутствующая команда = «тоже красный».
+timeout() {
+	# есть gtimeout — работаем им; нет — исполняем команду без ограничения времени
+	# (сдвиг аргумента: $1 — длительность, а не команда).
+	if command -v gtimeout >/dev/null; then gtimeout "$@"; else shift; "$@"; fi
+}
 # Мутационная батарея когорты выживания (задачи 7.1/7.3 цикла
 # scenario-matrix-behavior-reliability). Каждый мутант обязан покраснить
 # test_survival_cohort.gd или test_survival_counters.gd; зелёный мутант = дыра гейта.

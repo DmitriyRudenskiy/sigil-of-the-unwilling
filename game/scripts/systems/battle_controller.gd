@@ -20,6 +20,8 @@ var _last_spell_cost := 0
 ## mana paid (plain-stack path); a unit means that character's personal pool.
 ## A failed cast refunds the very pool that was charged.
 var _last_spell_payer: BattleState.BattleUnit = null
+# Подтверждение «Автобоя» (5.1) живёт, пока игрок решает; вне диалога — null.
+var _auto_confirm: ConfirmationDialog = null
 
 func _ready() -> void:
 	_init_state()
@@ -51,6 +53,9 @@ func _init_executor() -> void:
 func _wire_ui_signals() -> void:
 	_ui.retreat_requested.connect(_on_retreat)
 	_ui.rescue_requested.connect(_on_rescue)
+	# «Отмена» — тот же резолвер, что у Esc и закрытия книги (4.2).
+	_ui.cancel_requested.connect(_on_cancel)
+	_ui.auto_battle_requested.connect(_on_auto_battle)
 	_ui.wait_requested.connect(_on_wait)
 	_ui.attack_mode_requested.connect(_on_attack_mode)
 	_ui.skip_requested.connect(_on_skip)
@@ -174,6 +179,49 @@ func _on_skip() -> void:
 
 func _on_defend() -> void:
 	_executor.request_defend()
+
+
+## «Автобой» (5.1): подтверждение → эмулятор доигрывает **это же** состояние до
+## конца → штатный экран итога (`battle_finished` → flow → `show_result_overlay`).
+## Команды блокируются на всё время подтверждения и передачи: нажатое в полёте
+## действие изменило бы состояние, которого эмулятор уже не увидит.
+func _on_auto_battle() -> void:
+	if _state.battle_over or is_instance_valid(_auto_confirm):
+		return
+	_ui.set_controls_enabled(false)
+	_auto_confirm = ConfirmationDialog.new()
+	_auto_confirm.name = "AutoBattleConfirm"
+	_auto_confirm.dialog_text = GameText.battle_auto_confirm()
+	_auto_confirm.ok_button_text = GameText.battle_auto_confirm_ok()
+	_auto_confirm.cancel_button_text = GameText.battle_auto_confirm_cancel()
+	add_child(_auto_confirm)
+	_auto_confirm.confirmed.connect(_run_auto_battle, CONNECT_ONE_SHOT)
+	_auto_confirm.canceled.connect(_on_auto_declined, CONNECT_ONE_SHOT)
+	_auto_confirm.popup_centered()
+
+func _run_auto_battle() -> void:
+	_close_auto_confirm()
+	# Эмулятор — RefCounted без состояния боя: бой доигрывает тот же `_state`.
+	BattleEmulator.new().run_auto_battle(_state)
+	var winner := _state.check_end()
+	if winner == BattleState.Side.NONE:
+		# Потолок ходов эмулятора: бой не доигран, итога нет — управление назад.
+		_ui.set_controls_enabled(true)
+		return
+	battle_finished.emit(
+		winner,
+		_state.get_survivors(BattleState.Side.ATTACKER),
+		_state.get_survivors(BattleState.Side.DEFENDER),
+	)
+
+func _on_auto_declined() -> void:
+	_close_auto_confirm()
+	_ui.set_controls_enabled(true)
+
+func _close_auto_confirm() -> void:
+	if is_instance_valid(_auto_confirm):
+		_auto_confirm.queue_free()
+	_auto_confirm = null
 
 
 ## Действие «Спасение» (D5). Медальон и его сигнал подключаются в шаге 5

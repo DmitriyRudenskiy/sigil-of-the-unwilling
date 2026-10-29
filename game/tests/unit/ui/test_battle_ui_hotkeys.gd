@@ -47,13 +47,13 @@ func test_escape_priority() -> void:
 	_press(KEY_ESCAPE)
 	assert_bool(_ui._history_panel.visible).is_false()
 	assert_bool(_ui._settings_screen.visible).is_false().override_failure_message(
-		"docs/14 §5: Esc при открытой панели закрывает её, а не открывает настройки")
-	# иначе — настройки (путь кнопки: settings_requested → контроллер → open_settings)
-	var asked := [false]
-	_ui.settings_requested.connect(func() -> void: asked[0] = true)
+		"docs/14 §5: Esc при открытой панели закрывает её, а не зовёт команду")
+	# иначе — «Отмена» (4.3: Esc переехал с настроек на отмену)
+	var cancelled := [false]
+	_ui.cancel_requested.connect(func() -> void: cancelled[0] = true)
 	_press(KEY_ESCAPE)
-	assert_bool(asked[0]).is_true().override_failure_message(
-		"Esc без открытых панелей обязан просить настройки")
+	assert_bool(cancelled[0]).is_true().override_failure_message(
+		"Esc без открытых панелей обязан звать отмену")
 	# открытые настройки → Esc закрывает
 	_ui._settings_screen.visible = true
 	_press(KEY_ESCAPE)
@@ -63,13 +63,40 @@ func test_escape_priority() -> void:
 func test_action_hotkeys_emit() -> void:
 	_setup()
 	var fired: Array[String] = []
-	for sig in ["skip_requested", "defend_requested", "wait_requested", "attack_mode_requested"]:
+	for sig in ["skip_requested", "defend_requested", "wait_requested", "attack_mode_requested",
+			"retreat_requested", "auto_battle_requested", "settings_requested"]:
 		_ui.connect(sig, func() -> void: fired.append(sig))
 	_press(KEY_S)
 	_press(KEY_D)
 	_press(KEY_W)
+	# «Атака» рождается глухой (`_connect_skeleton`), а тест — про клавишу,
+	# а не про фазу боя: команду будим вручную.
+	_ui._attack_button.disabled = false
+	_press(KEY_T)
+	_press(KEY_C)
 	_press(KEY_A)
-	assert_int(fired.size()).is_equal(4)
+	_press(KEY_O)
+	assert_int(fired.size()).is_equal(7).override_failure_message(
+		"каждая клавиша панели звала свою команду: %s" % fired)
+
+
+# 4.3: недоступная команда не двигает бой. Проверка от клавиши, а не от метода
+# боя: раньше хоткеи звали `_on_*` напрямую и `disabled` обходили.
+func test_hotkey_of_disabled_command_is_silent() -> void:
+	_setup()
+	var fired: Array[String] = []
+	for sig in ["defend_requested", "wait_requested", "retreat_requested", "auto_battle_requested"]:
+		_ui.connect(sig, func() -> void: fired.append(sig))
+	_ui.set_controls_enabled(false)
+	for key in [KEY_D, KEY_W, KEY_C, KEY_A]:
+		_press(key)
+	assert_array(fired).is_empty()
+	# «Пропуск» — инвариант 07-ui-ux:53, он не глохнет и зовёт команду всегда
+	_ui.skip_requested.connect(func() -> void: fired.append("skip_requested"))
+	assert_bool(_ui._skip_btn.disabled).is_false()
+	_press(KEY_S)
+	assert_int(fired.size()).is_equal(1)
+	assert_str(fired[0]).is_equal("skip_requested")
 
 
 func test_final_accepts_f() -> void:

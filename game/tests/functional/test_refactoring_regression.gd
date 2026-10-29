@@ -113,9 +113,10 @@ func test_battle_ui_scene_has_skeleton() -> void:
 	_track(battle_ui)
 	battle_ui.name = "TestBattleUI"
 	assert_bool(battle_ui.has_method("_connect_skeleton")).is_true()
-	# Макет 11, нижний ряд: слева — settings, retreat, rescue; справа — два пустых
-	# слота макета, затем attack, spellbook, wait, defend, skip (skip — инвариант,
-	# остаётся). Пустые слоты добавлены вместе с эмблемами-файлами (шаг 5.3).
-	assert_that(battle_ui.get_node_or_null("bottom_bar/bar_box/left_box").get_child_count()).is_equal(3)
-	assert_that(battle_ui.get_node_or_null("bottom_bar/bar_box/right_box").get_child_count()).is_equal(7)
+	# Макет 11 + описание владельца (4.2): слева — settings, retreat, rescue и
+	# автобой; справа — два пустых слота макета, затем attack, spellbook, wait,
+	# defend, skip (инвариант) и отмена. Счётчики были 3/7 до того, как шагу 4.2
+	# вернули «Автобой» и «Отмена».
+	assert_that(battle_ui.get_node_or_null("bottom_bar/bar_box/left_box").get_child_count()).is_equal(4)
+	assert_that(battle_ui.get_node_or_null("bottom_bar/bar_box/right_box").get_child_count()).is_equal(8)
 	assert_bool(battle_ui.has_method("set_status")).is_true()

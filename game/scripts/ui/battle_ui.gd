@@ -6,6 +6,8 @@ const HERO_PORTRAIT_PATH := "res://assets/ui/hero/portrait.png"
 
 signal retreat_requested
 signal rescue_requested
+signal auto_battle_requested
+signal cancel_requested
 signal wait_requested
 signal attack_mode_requested
 signal skip_requested
@@ -29,15 +31,20 @@ static var _hero_portrait: Texture2D = null
 @onready var _settings_btn: Button = $"bottom_bar/bar_box/left_box/settings_btn"
 @onready var _retreat_btn: Button = $"bottom_bar/bar_box/left_box/retreat_btn"
 @onready var _rescue_btn: Button = $"bottom_bar/bar_box/left_box/rescue_btn"
+@onready var _auto_btn: Button = $"bottom_bar/bar_box/left_box/auto_btn"
 @onready var _wait_btn: Button = $"bottom_bar/bar_box/right_box/wait_btn"
 @onready var _attack_button: Button = $"bottom_bar/bar_box/right_box/attack_btn"
 @onready var _log_line: Label = $"bottom_bar/info_box/log_row/log_line"
-# ▲▼ прокрутки лога из сцены сняты (макет 11 их не несёт); обработчики
-# остались и работают со стрелок ↑/↓, поэтому здесь только ☰.
+# ☰ — вход в историю боя (вторая — клавиша H), видна с первой записи лога.
 @onready var _history_btn: Button = $"bottom_bar/info_box/log_row/history_btn"
 @onready var _defend_btn: Button = $"bottom_bar/bar_box/right_box/defend_btn"
 @onready var _skip_btn: Button = $"bottom_bar/bar_box/right_box/skip_btn"
 @onready var _spellbook_btn: Button = $"bottom_bar/bar_box/right_box/spellbook_btn"
+@onready var _cancel_btn: Button = $"bottom_bar/bar_box/right_box/cancel_btn"
+# ▲▼ окна сообщений (4.2): макет 11 их снимал в пользу клавиш ↑/↓, описание
+# владельца вернуло стрелки в центр панели.
+@onready var _log_up_btn: Button = $"bottom_bar/info_box/log_row/log_up_btn"
+@onready var _log_down_btn: Button = $"bottom_bar/info_box/log_row/log_down_btn"
 @onready var _history_panel: PanelContainer = $history_panel
 @onready var _history_list: ItemList = $"history_panel/history_list"
 @onready var _hero_left: Control = $hero_cards/hero_left
@@ -63,9 +70,26 @@ var _action_buttons: Array[Button] = []
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 @onready var _spellbook_panel: BattleSpellbookPanel = $BattleSpellbookPanel
 
+## Состояние медальона — модуляцией всей кнопки: под непрозрачной пластиной
+## медальона стейтбокс не виден, а неактивный медальон обязан читаться, а не
+## исчезать без следа.
+##
+## Альфа 2.9 — не опечатка: отключённую кнопку движок рисует иконкой с гашением
+## (~0.35), и на светлом поле медуальон становился призраком — «команды нет», а
+## не «команда недоступна» (кадр 4.6, α 0.4 и α 1 давали один и тот же кадр:
+## `font_disabled_color` варианта на это гашение не влияет). Множитель возвращает
+## пластине непрозрачность, а признаком неактивности служит затемнение цвета.
+const _MEDALLION_DIM := Color(0.45, 0.42, 0.38, 2.9)
+const _MEDALLION_HOVER := Color(1.18, 1.12, 0.96, 1)
 var _theme: Theme = null
 var _history: Array[String] = []
 var _history_pos := 0
+
+## Команда ↔ клавиша. Единственный носитель соответствия: из той же таблицы
+## печатаются подсказки у медальонов (4.5 — «подпись и горячая клавиша»), поэтому
+## подпись не может разойтись с реальной клавишей. H/↑/↓ не здесь: у истории нет
+## медальона, вход в неё — ☰ и клавиша.
+var _hotkeys: Dictionary = {}
 var _hero_refs: Dictionary = {}
 
 func _ready() -> void:
@@ -89,7 +113,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return
-	# §5: Esc — приоритет: открытая панель → закрыть, иначе настройки
+	# §5: Esc — приоритет: открытая панель → закрыть, иначе «Отмена» (4.3: Esc
+	# перешёл с настроек на отмену, настройки — на `O`).
 	if event.keycode == KEY_ESCAPE:
 		if _spellbook_panel.visible:
 			_spellbook_panel.visible = false
@@ -98,33 +123,38 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif _settings_screen.visible:
 			_settings_screen.visible = false
 		else:
-			_on_settings()
+			_press(_cancel_btn)
 		get_viewport().set_input_as_handled()
 		return
 	if _settings_screen.visible:
 		return
-	# §5: хоткеи — спека, не опция. Q (Авто) — absent: кнопки авто нет,
-	# AI-автобой вне скоупа (docs/14 §7) — тикет в TICKETS.md, не изобретаем.
-	match event.keycode:
-		KEY_A:
-			_on_attack_mode()
-		KEY_D:
-			_on_defend()
-		KEY_W:
-			_on_wait()
-		KEY_S:
-			_on_skip()
-		KEY_K:
-			_on_spellbook()
-		KEY_H:
-			_on_history_toggle()
-		KEY_UP:
-			_on_history_up()
-		KEY_DOWN:
-			_on_history_down()
-		_:
-			return
+	# Хоткеи панели (4.3, описание владельца): `O` опции, `C` отступить, `A`
+	# автобой, `W` ждать, `D` защищаться, `Esc` отмена. Клавиши, которых в списке
+	# нет, оставлены: `S` пропуск, `K` книга, `H` история, ↑/↓ журнал. «Атака»
+	# уступила `A` автобою и переехала на `T` — прежний палец на `A` не должен
+	# отдавать бой эмулятору.
+	if _hotkeys.has(event.keycode):
+		_press(_hotkeys[event.keycode])
+	elif event.keycode == KEY_H:
+		_on_history_toggle()
+	elif event.keycode == KEY_UP:
+		_on_history_up()
+	elif event.keycode == KEY_DOWN:
+		_on_history_down()
+	else:
+		return
 	get_viewport().set_input_as_handled()
+
+
+## Хоткеи идут через кнопку, а не через `_on_*`: `disabled` — единственное место,
+## где команда считается доступной для текущего юнита и фазы, и прямой вызов
+## обработчика его обходил (4.3: «недоступная команда не изменяет состояние
+## боя»). Побочный эффект тот, что требует спека: путь клавиши и путь мыши —
+## один путь.
+func _press(btn: Button) -> void:
+	if btn == null or btn.disabled:
+		return
+	btn.emit_signal("pressed")
 
 
 static func _key(event: InputEvent, keycode: Key) -> bool:
@@ -154,9 +184,16 @@ func theme_root_theme(t: Theme) -> void:
 	_history_panel.theme_type_variation = &"PanelPlate"
 
 func _connect_skeleton() -> void:
-	_action_buttons = [_retreat_btn, _rescue_btn, _wait_btn, _attack_button, _defend_btn, _skip_btn]
+	_action_buttons = [
+		_retreat_btn, _rescue_btn, _auto_btn, _wait_btn, _attack_button,
+		_defend_btn, _skip_btn, _cancel_btn,
+	]
 	_retreat_btn.pressed.connect(_on_retreat)
 	_rescue_btn.pressed.connect(_on_rescue)
+	_auto_btn.pressed.connect(_on_auto_battle)
+	_cancel_btn.pressed.connect(_on_cancel)
+	_log_up_btn.pressed.connect(_on_history_up)
+	_log_down_btn.pressed.connect(_on_history_down)
 	_wait_btn.pressed.connect(_on_wait)
 	_attack_button.pressed.connect(_on_attack_mode)
 	_defend_btn.pressed.connect(_on_defend)
@@ -164,6 +201,40 @@ func _connect_skeleton() -> void:
 	_spellbook_btn.pressed.connect(_on_spellbook)
 	_settings_btn.pressed.connect(_on_settings)
 	_attack_button.disabled = true
+	# Клавиши и подписи медальонов — из одной таблицы (см. `_hotkeys`).
+	_hotkeys = {
+		KEY_O: _settings_btn, KEY_C: _retreat_btn, KEY_A: _auto_btn,
+		KEY_T: _attack_button, KEY_D: _defend_btn, KEY_W: _wait_btn,
+		KEY_S: _skip_btn, KEY_K: _spellbook_btn,
+	}
+	for key: int in _hotkeys:
+		var btn: Button = _hotkeys[key]
+		var caption: Label = btn.get_node_or_null("caption")
+		# Наведённый медальон показывает название команды и её клавишу.
+		if caption != null:
+			btn.tooltip_text = "%s (%s)" % [caption.text, OS.get_keycode_string(key)]
+		btn.mouse_entered.connect(_on_medallion_hover.bind(btn, true))
+		btn.mouse_exited.connect(_on_medallion_hover.bind(btn, false))
+
+
+func _on_medallion_hover(btn: Button, hovered: bool) -> void:
+	if hovered:
+		btn.set_meta("hover", true)
+	else:
+		btn.remove_meta("hover")
+	_medallion_state(btn)
+
+
+## Состояние медальона видно без стейтбокса: неактивный гаснет, наведённый чуть
+## светится. Прежняя обратная связь шла стейтбоксом темы, но пластина медальона
+## лежит поверх неё и скрывает и наведение, и отключение.
+func _medallion_state(btn: Button) -> void:
+	if btn.disabled:
+		btn.self_modulate = _MEDALLION_DIM
+	elif btn.has_meta("hover"):
+		btn.self_modulate = _MEDALLION_HOVER
+	else:
+		btn.self_modulate = Color(1, 1, 1, 1)
 
 func set_status(text: String) -> void:
 	_history.append(text)
@@ -251,6 +322,7 @@ func set_controls_enabled(enabled: bool) -> void:
 		if btn == _skip_btn:
 			continue
 		btn.disabled = not enabled
+		_medallion_state(btn)
 
 	if _attack_button != null and not enabled:
 		_attack_button.disabled = true
@@ -273,6 +345,17 @@ func _on_retreat() -> void:
 
 func _on_rescue() -> void:
 	rescue_requested.emit()
+
+
+# «Автобой» (4.2): кнопка и сигнал. Передача на эмулятор с подтверждением —
+# группа 5 этого же change (`BattleEmulator.run_auto_battle`); носитель механики
+# есть уже сейчас, поэтому команда рисуется, а не ждёт своей группы.
+func _on_auto_battle() -> void:
+	auto_battle_requested.emit()
+
+
+func _on_cancel() -> void:
+	cancel_requested.emit()
 
 
 # --- Карточки героев (макет, шаг 5.2) ------------------------------------

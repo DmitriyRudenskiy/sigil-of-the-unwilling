@@ -51,6 +51,10 @@ const FLOATING_TEXT_RISE_PX  := 30.0
 const FLOATING_TEXT_FADE_SEC := 0.6
 const DAMAGE_NUMBER_RISE_PX  := 24.0
 const DAMAGE_NUMBER_FADE_SEC := 0.5
+# Наклон плоскости поля боя (alpha-battle-field): укорочение соты по вертикали.
+# 1.0 — поле лежит плашмя (вид до наклона, значение отката), 0.72 — поле читается
+# скошенной плоскостью. Ниже 0.6 сота перестаёт читаться сотой.
+const BATTLE_FIELD_TILT := 0.72
 const RETALIATION_ARROW_FADE_SEC := 0.35
 const PULSE_ANIM_SEC         := 0.15
 const PULSE_SCALE            := 1.25

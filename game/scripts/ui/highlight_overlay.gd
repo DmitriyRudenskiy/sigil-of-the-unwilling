@@ -13,24 +13,21 @@ func _draw() -> void:
     if tm == null:
         return
     for k in unreachable_cells:
-        _hex_fill(tm.map_to_local(k), ThemeConfig.C_BATTLE_HIGHLIGHT_UNREACH)
+        _hex_fill(BattleView.project(tm, k), ThemeConfig.C_BATTLE_HIGHLIGHT_UNREACH)
     for k in move_cells:
-        _hex_fill(tm.map_to_local(k), ThemeConfig.C_BATTLE_HIGHLIGHT_MOVE)
+        _hex_fill(BattleView.project(tm, k), ThemeConfig.C_BATTLE_HIGHLIGHT_MOVE)
     for k in move_cells:
-        _hex(tm.map_to_local(k), ThemeConfig.C_BATTLE_HIGHLIGHT_MOVE_B)
+        _hex(BattleView.project(tm, k), ThemeConfig.C_BATTLE_HIGHLIGHT_MOVE_B)
     for k in atk_cells:
-        _hex(tm.map_to_local(k), ThemeConfig.C_BATTLE_HIGHLIGHT_ATK)
+        _hex(BattleView.project(tm, k), ThemeConfig.C_BATTLE_HIGHLIGHT_ATK)
 
 func _hex(center: Vector2, col: Color) -> void:
-    var pts := PackedVector2Array()
-    for i in 7:
-        var ang := deg_to_rad(60.0 * i - 90.0)
-        pts.append(center + Vector2(cos(ang), sin(ang)) * BattleView.HEX_OUTLINE_RADIUS)
-    draw_polyline(pts, col, 3.0)
+    draw_polyline(_pts(center), col, 3.0)
 
 func _hex_fill(center: Vector2, col: Color) -> void:
-    var pts := PackedVector2Array()
-    for i in 7:
-        var ang := deg_to_rad(60.0 * i - 90.0)
-        pts.append(center + Vector2(cos(ang), sin(ang)) * BattleView.HEX_OUTLINE_RADIUS)
-    draw_colored_polygon(pts, col)
+    draw_colored_polygon(_pts(center), col)
+
+## Соты того же наклона, что и поле: полигон берётся из HexDraw, а не рисуется
+## вторым экземпляром формулы.
+func _pts(center: Vector2) -> PackedVector2Array:
+    return HexDraw.points_at(center, BattleView.HEX_OUTLINE_RADIUS, BattleView.TILT)

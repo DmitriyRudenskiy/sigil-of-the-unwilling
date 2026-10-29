@@ -13,11 +13,21 @@ const _UnitSprite = preload("res://scenes/ui/unit_sprite.tscn")
 const _HeroFigure = preload("res://scenes/ui/hero_figure.tscn")
 const _RetaliationArrow = preload("res://scenes/ui/retaliation_arrow.tscn")
 
-## Задний план и биом поля выбираются по мировой местности клетки врага
-## (`BattleState.background_terrain`), а не по типу боевой местности: ключи
-## «snow»/«swamp» — биомы мирового атласа, которых в перечне `HexTerrain` нет.
-## Местность без кадра = штатный вид (clear color + тайлы grass), а не пустой кадр.
-const BACKGROUNDS := {
+## Ключ мировой местности выбирает и носитель, и режим поля (T-269 → (б),
+## `alpha-battle-field`). Выбор делает сам носитель, а не флаг.
+##
+## `FIELD_ART` — кадр, который СТАНОВИТСЯ ПОЛЕМ: у него нет собственной
+## гекс-сетки, поэтому он вписывается в многоугольник доски, а тайлы гаснут
+## (`uses_art_field`). Претензия T-269 «у арта своя сетка, она расходится с
+## нашей» снята самим носителем: луг владельца сетки не имеет.
+##
+## `BACKDROP_ART` — пейзаж ЗА краями поля: у него своя нарисованная сетка и
+## декор внутри кадра, поэтому полем правит плитка. Местность без утверждённого
+## кадра идёт тем же путём автоматически — пустой путь = clear color + тайлы.
+const FIELD_ART := {
+	"grass": "res://assets/ui/backgrounds/battle_meadow.png",
+}
+const BACKDROP_ART := {
 	"snow": "res://assets/ui/backgrounds/battle_snow.png",
 	"swamp": "res://assets/ui/backgrounds/battle_swamp.png",
 }
@@ -26,11 +36,10 @@ const BIOMES := {
 	"swamp": TileAtlas.Biome.SWAMP,
 }
 
-## Промежуточный вид до тех пор, пока у носителя нет кадра местности без
-## собственной гекс-сетки: `true` — кадр поля боя становится самим полем (тайлы
-## гаснут, границу рисует `BoardOutline`), `false` — штатный вид тайлами, кадр
-## виден только за краями поля. Решение по кадру — за владельцем (ux-review).
-const ART_AS_FIELD := false
+## Наклон плоскости поля: 1.0 — соты лежат плашмя (вид до alpha-battle-field),
+## меньше — поле читается скошенной плоскостью. Это только рисунок: правила боя
+## (соседство, дистанция, путь) считаются на локальной сетке тайлмапа.
+const TILT := GameNumbers.BATTLE_FIELD_TILT
 
 enum CursorMode { DEFAULT, ATTACK, SPELL, RANGED, MOVE }
 
@@ -56,6 +65,11 @@ func setup() -> void:
 	_tile_map = _terrain
 	_tile_map.name = "BattleTerrain"
 	_tile_map.tile_set = TileAtlas.build_hex_tileset()
+	# Узел тайлмапа — единственный носитель наклона для тайлов: соты укорочены по
+	# вертикали, `project()` переносит тот же наклон на подсветки, курсор, обводку,
+	# фигуры и камеру. `HexGrid.calibrate` ниже считает локальную сетку, где
+	# наклона нет, — поэтому наклон не меняет правила.
+	_tile_map.scale = Vector2(1.0, TILT)
 	RenderingServer.set_default_clear_color(ThemeConfig.C_BATTLE_BG_VIEW)
 	HexGrid.calibrate(_tile_map)
 
@@ -73,10 +87,10 @@ func setup() -> void:
 	if not get_viewport().size_changed.is_connected(fit_camera):
 		get_viewport().size_changed.connect(fit_camera)
 
-## Поле «кадр вместо тайлов» имеет смысл только когда кадр выбранной местности
-## действительно под полем.
+## Поле рисует арт выбранной местности (`FIELD_ART`) — тайлы и обводка доски
+## тогда только спорят с кадром.
 func uses_art_field() -> bool:
-	return ART_AS_FIELD and _background != null and _background.texture != null
+	return FIELD_ART.has(_background_terrain) and _background != null and _background.texture != null
 
 
 func paint_field() -> void:
@@ -91,11 +105,10 @@ func paint_field() -> void:
 	if variants.is_empty():
 		push_error("TileAtlas: у биома %s нет базовых тайлов" % TileAtlas.BIOME_NAMES[biome])
 		return
-	# Два вида поля под выбранным кадром местности, переключаются одной константой
-	# `ART_AS_FIELD` (кадр вместо тайлов / тайлы поверх кадра) — см. вердикт
-	# ux-review: кадр владельца несёт собственную гекс-сетку, она расходится с
-	# нашей. Геометрия поля в обоих случаях остаётся на тайлмапе: `field_size()`
-	# и `fit_camera` считают её по залитым клеткам.
+	# Два вида поля выбирает ключ местности: `FIELD_ART` — кадр становится полем
+	# и тайлы гаснут, `BACKDROP_ART` (или местность без кадра) — полем правит
+	# плитка, кадр остаётся пейзажем за краями. Геометрия поля в обоих случаях на
+	# тайлмапе: `field_size()` и `fit_camera` считают её по залитым клеткам.
 	var art_field := uses_art_field()
 	_tile_map.modulate.a = 0.0 if art_field else 1.0
 	# Декоративная обводка ±RING нужна, когда вокруг поля только clear color: она
@@ -120,7 +133,7 @@ func paint_field() -> void:
 func add_obstacle(cell: Vector2i, emoji: String) -> void:
 	var lbl: Label = _ObstacleLabel.instantiate()
 	lbl.text = emoji
-	lbl.position = _tile_map.map_to_local(cell) + Vector2(-14, -16)
+	lbl.position = field_point(cell) + Vector2(-14, -16)
 	lbl.z_index = 4
 	add_child(lbl)
 
@@ -133,7 +146,7 @@ func spawn_hero_figure() -> void:
 	var hero: Sprite2D = _HeroFigure.instantiate()
 	hero.texture = load(path)
 	hero.scale = Vector2(1.0, 1.0)
-	hero.position = _tile_map.map_to_local(Vector2i(1, 1))
+	hero.position = field_point(Vector2i(1, 1))
 	add_child(hero)
 
 ## Концы используемой части поля в локальных координатах тайлмапа; пустой массив —
@@ -147,8 +160,8 @@ func _field_ends() -> Array:
 	if _tile_map.get_cell_source_id(Vector2i(0, 0)) == -1:
 		return []
 	return [
-		_tile_map.map_to_local(Vector2i.ZERO),
-		_tile_map.map_to_local(Vector2i(BattleState.BW - 1, BattleState.BH - 1)),
+		field_point(Vector2i.ZERO),
+		field_point(Vector2i(BattleState.BW - 1, BattleState.BH - 1)),
 	]
 
 
@@ -188,7 +201,7 @@ func field_center() -> Vector2:
 
 func set_background(terrain: String) -> void:
 	_background_terrain = terrain
-	var path: String = str(BACKGROUNDS.get(terrain, ""))
+	var path: String = str(FIELD_ART.get(terrain, BACKDROP_ART.get(terrain, "")))
 	var tex: Texture2D = null
 	if path != "" and ResourceLoader.exists(path):
 		tex = load(path) as Texture2D
@@ -272,7 +285,7 @@ func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 	var cl: Label = n.get_node("CountLabel")
 	cl.text = str(unit.get_count())
 
-	n.position = _tile_map.map_to_local(unit.cell)
+	n.position = field_point(unit.cell)
 	n.z_index = 6
 	n.set_meta("uid", unit.uid)
 	_sprites_by_uid[unit.uid] = n
@@ -322,7 +335,7 @@ func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> Tween:
 	var tw := create_tween()
 	_active_tweens[unit.uid] = tw
 	for i in range(1, path.size()):
-		tw.tween_property(node, "position", _tile_map.map_to_local(path[i]), MOVE_TWEEN_SEC)
+		tw.tween_property(node, "position", field_point(path[i]), MOVE_TWEEN_SEC)
 	if an != null:
 		# `stop()` оставил бы юнита на последнем кадре походки — шаг на месте.
 		tw.tween_callback(func(): an.play(&"idle"))
@@ -405,7 +418,7 @@ func show_floating_text(cell: Vector2i, text: String, color: Color) -> void:
 	var label: Label = _FloatingText.instantiate()
 	label.text = text
 	label.add_theme_color_override("font_color", color)
-	label.position = _tile_map.map_to_local(cell) + Vector2(-30, -60)
+	label.position = field_point(cell) + Vector2(-30, -60)
 	label.z_index = 20
 
 	add_child(label)
@@ -489,14 +502,21 @@ func clear_highlights() -> void:
 	_overlay.atk_cells.clear()
 	_overlay.refresh()
 
-func local_to_map(world_pos: Vector2) -> Vector2i:
-	return _tile_map.local_to_map(world_pos)
-
+## Клетка под мировой координатой. Наклон здесь не появляется сам собой:
+## `to_local` разворачивает трансформ тайлмапа, уже включающий `TILT`, а
+## `local_to_map` работает в локальной (без наклона) сетке.
 func global_to_map(global_pos: Vector2) -> Vector2i:
 	return _tile_map.local_to_map(_tile_map.to_local(global_pos))
 
-func map_to_local(cell: Vector2i) -> Vector2:
-	return _tile_map.map_to_local(cell)
+## Точка клетки на наклонной плоскости поля — ЕДИНСТВЕННЫЙ перевод клетки в
+## координату рисования: тайлы, подсветки, курсор, обводка, фигуры и камера
+## считают её. Рисунок клетки мимо этой функции даёт расхождение с кликом.
+static func project(tm: TileMapLayer, cell: Vector2i) -> Vector2:
+	var p: Vector2 = tm.map_to_local(cell)
+	return Vector2(p.x, p.y * TILT)
+
+func field_point(cell: Vector2i) -> Vector2:
+	return project(_tile_map, cell)
 
 func _find_node(unit: BattleState.BattleUnit) -> Node2D:
 	if unit == null:
