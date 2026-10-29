@@ -34,13 +34,19 @@ run "доки ↔ код (автолоады, сцены, классы, save-к�
 run "карта hero-экрана ↔ таблица BLOCKS (адреса, узлы, потребители)" "$PY" scripts/check_hero_layout_map.py
 run "матрица покрытия сейвов ↔ дерево (ссылки, миграции, секции схемы)" "$PY" scripts/check_save_matrix.py
 run "контур фаз GDD (состояния, поля реестров, ratchet)" "$PY" scripts/gdd_gate.py
+# Провенанс ассетов ([[13-art-bible]] §12, ASSET-1). Проверщик жил ручным запуском
+# и молча краснел на 201 ассете (все девять каталогов `sprites/*` и 25 файлов UI),
+# поэтому «зелёный провенанс» в задачах смен значился там, где его никто не мерил.
+# Уровень здесь, а не в game/run_tests.sh: чистый Python по дереву ассетов, Godot
+# для него поднимать не за чем (T-261).
+run "провенанс ассетов game/assets (строка на каждый файл)" "$PY" scripts/check_asset_provenance.py
 
 TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 	scripts/test_classify_mcp_junit.py scripts/test_gdd_gate.py scripts/test_gdd_grounding.py
 	scripts/test_gen_map_art.py scripts/test_testmap.py
 	scripts/test_check_hero_layout_map.py
 	scripts/test_check_openspec_specs.py scripts/test_check_node_paths.py
-	scripts/test_check_save_matrix.py)
+	scripts/test_check_save_matrix.py scripts/test_check_asset_provenance.py)
 # Отсутствующий файл списка — КРАСНЫЙ, а не «молча не досчитались»: ровно так список
 # и жил, пока в нём значился test_check_docs_links.py, которого никогда не было
 # (T-223). Проверщик без теста и проверщик, которого нет, — один и тот же класс.
