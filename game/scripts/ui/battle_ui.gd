@@ -97,7 +97,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return
-	# §5: Esc — приоритет: открытая панель → закрыть, иначе настройки
+	# §5: Esc — приоритет: открытая панель → закрыть, иначе «Отмена» (4.3: Esc
+	# перешёл с настроек на отмену, настройки — на `O`).
 	if event.keycode == KEY_ESCAPE:
 		if _spellbook_panel.visible:
 			_spellbook_panel.visible = false
@@ -106,24 +107,33 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif _settings_screen.visible:
 			_settings_screen.visible = false
 		else:
-			_on_settings()
+			_press(_cancel_btn)
 		get_viewport().set_input_as_handled()
 		return
 	if _settings_screen.visible:
 		return
-	# §5: хоткеи — спека, не опция. Q (Авто) — absent: кнопки авто нет,
-	# AI-автобой вне скоупа (docs/14 §7) — тикет в TICKETS.md, не изобретаем.
+	# Хоткеи панели (4.3, описание владельца): `O` опции, `C` отступить, `A`
+	# автобой, `W` ждать, `D` защищаться, `Esc` отмена. Клавиши, которых в списке
+	# нет, оставлены: `S` пропуск, `K` книга, `H` история, ↑/↓ журнал. «Атака»
+	# уступила `A` автобою и переехала на `T` — прежний палец на `A` не должен
+	# отдавать бой эмулятору.
 	match event.keycode:
+		KEY_O:
+			_press(_settings_btn)
+		KEY_C:
+			_press(_retreat_btn)
 		KEY_A:
-			_on_attack_mode()
+			_press(_auto_btn)
+		KEY_T:
+			_press(_attack_button)
 		KEY_D:
-			_on_defend()
+			_press(_defend_btn)
 		KEY_W:
-			_on_wait()
+			_press(_wait_btn)
 		KEY_S:
-			_on_skip()
+			_press(_skip_btn)
 		KEY_K:
-			_on_spellbook()
+			_press(_spellbook_btn)
 		KEY_H:
 			_on_history_toggle()
 		KEY_UP:
@@ -133,6 +143,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		_:
 			return
 	get_viewport().set_input_as_handled()
+
+
+## Хоткеи идут через кнопку, а не через `_on_*`: `disabled` — единственное место,
+## где команда считается доступной для текущего юнита и фазы, и прямой вызов
+## обработчика его обходил (4.3: «недоступная команда не изменяет состояние
+## боя»). Побочный эффект тот, что требует спека: путь клавиши и путь мыши —
+## один путь.
+func _press(btn: Button) -> void:
+	if btn == null or btn.disabled:
+		return
+	btn.emit_signal("pressed")
 
 
 static func _key(event: InputEvent, keycode: Key) -> bool:
