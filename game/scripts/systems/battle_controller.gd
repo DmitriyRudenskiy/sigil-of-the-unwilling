@@ -51,6 +51,10 @@ func _init_executor() -> void:
 func _wire_ui_signals() -> void:
 	_ui.retreat_requested.connect(_on_retreat)
 	_ui.rescue_requested.connect(_on_rescue)
+	# «Отмена» — тот же резолвер, что у Esc и закрытия книги (4.2).
+	_ui.cancel_requested.connect(_on_cancel)
+	# «Автобой» (auto_battle_requested) подключается группой 5 этого же change:
+	# подтверждение + `BattleEmulator.run_auto_battle` + блокировка команд.
 	_ui.wait_requested.connect(_on_wait)
 	_ui.attack_mode_requested.connect(_on_attack_mode)
 	_ui.skip_requested.connect(_on_skip)

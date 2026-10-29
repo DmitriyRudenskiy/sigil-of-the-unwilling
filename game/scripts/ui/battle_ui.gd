@@ -6,6 +6,8 @@ const HERO_PORTRAIT_PATH := "res://assets/ui/hero/portrait.png"
 
 signal retreat_requested
 signal rescue_requested
+signal auto_battle_requested
+signal cancel_requested
 signal wait_requested
 signal attack_mode_requested
 signal skip_requested
@@ -29,16 +31,21 @@ static var _hero_portrait: Texture2D = null
 @onready var _settings_btn: Button = $"bottom_bar/bar_box/left_box/settings_btn"
 @onready var _retreat_btn: Button = $"bottom_bar/bar_box/left_box/retreat_btn"
 @onready var _rescue_btn: Button = $"bottom_bar/bar_box/left_box/rescue_btn"
+@onready var _auto_btn: Button = $"bottom_bar/bar_box/left_box/auto_btn"
 @onready var _wait_btn: Button = $"bottom_bar/bar_box/right_box/wait_btn"
 @onready var _attack_button: Button = $"bottom_bar/bar_box/right_box/attack_btn"
 @onready var _turn_line: Label = $"bottom_bar/info_box/turn_line"
 @onready var _log_line: Label = $"bottom_bar/info_box/log_row/log_line"
-# ▲▼ прокрутки лога из сцены сняты (макет 11 их не несёт); обработчики
-# остались и работают со стрелок ↑/↓, поэтому здесь только ☰.
+# ☰ — вход в историю боя (вторая — клавиша H), видна с первой записи лога.
 @onready var _history_btn: Button = $"bottom_bar/info_box/log_row/history_btn"
 @onready var _defend_btn: Button = $"bottom_bar/bar_box/right_box/defend_btn"
 @onready var _skip_btn: Button = $"bottom_bar/bar_box/right_box/skip_btn"
 @onready var _spellbook_btn: Button = $"bottom_bar/bar_box/right_box/spellbook_btn"
+@onready var _cancel_btn: Button = $"bottom_bar/bar_box/right_box/cancel_btn"
+# ▲▼ окна сообщений (4.2): макет 11 их снимал в пользу клавиш ↑/↓, описание
+# владельца вернуло стрелки в центр панели.
+@onready var _log_up_btn: Button = $"bottom_bar/info_box/log_row/log_up_btn"
+@onready var _log_down_btn: Button = $"bottom_bar/info_box/log_row/log_down_btn"
 @onready var _history_panel: PanelContainer = $history_panel
 @onready var _history_list: ItemList = $"history_panel/history_list"
 @onready var _hero_left: Control = $hero_cards/hero_left
@@ -155,9 +162,16 @@ func theme_root_theme(t: Theme) -> void:
 	_history_panel.theme_type_variation = &"PanelPlate"
 
 func _connect_skeleton() -> void:
-	_action_buttons = [_retreat_btn, _rescue_btn, _wait_btn, _attack_button, _defend_btn, _skip_btn]
+	_action_buttons = [
+		_retreat_btn, _rescue_btn, _auto_btn, _wait_btn, _attack_button,
+		_defend_btn, _skip_btn, _cancel_btn,
+	]
 	_retreat_btn.pressed.connect(_on_retreat)
 	_rescue_btn.pressed.connect(_on_rescue)
+	_auto_btn.pressed.connect(_on_auto_battle)
+	_cancel_btn.pressed.connect(_on_cancel)
+	_log_up_btn.pressed.connect(_on_history_up)
+	_log_down_btn.pressed.connect(_on_history_down)
 	_wait_btn.pressed.connect(_on_wait)
 	_attack_button.pressed.connect(_on_attack_mode)
 	_defend_btn.pressed.connect(_on_defend)
@@ -274,6 +288,17 @@ func _on_retreat() -> void:
 
 func _on_rescue() -> void:
 	rescue_requested.emit()
+
+
+# «Автобой» (4.2): кнопка и сигнал. Передача на эмулятор с подтверждением —
+# группа 5 этого же change (`BattleEmulator.run_auto_battle`); носитель механики
+# есть уже сейчас, поэтому команда рисуется, а не ждёт своей группы.
+func _on_auto_battle() -> void:
+	auto_battle_requested.emit()
+
+
+func _on_cancel() -> void:
+	cancel_requested.emit()
 
 
 # --- Карточки героев (макет, шаг 5.2) ------------------------------------

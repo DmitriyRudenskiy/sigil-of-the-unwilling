@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bd5ptev6q2wpk"
-path="res://.godot/imported/sword.png-7272c7a7c83d3971bd90d6796e499511.ctex"
+uid="uid://cj3oo3iequubc"
+path="res://.godot/imported/surrender.png-005989d7e528e444f4b10dcf3d8b4336.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/widgets/battle/sword.png"
-dest_files=["res://.godot/imported/sword.png-7272c7a7c83d3971bd90d6796e499511.ctex"]
+source_file="res://assets/ui/widgets/battle/surrender.png"
+dest_files=["res://.godot/imported/surrender.png-005989d7e528e444f4b10dcf3d8b4336.ctex"]
 
 [params]
 
