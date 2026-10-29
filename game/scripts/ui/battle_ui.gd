@@ -210,9 +210,12 @@ func _connect_skeleton() -> void:
 	for key: int in _hotkeys:
 		var btn: Button = _hotkeys[key]
 		var caption: Label = btn.get_node_or_null("caption")
-		# Наведённый медальон показывает название команды и её клавишу.
+		# D-293 (7.1): медальон несёт только знак. Подпись остаётся в сцене
+		# носителем имени команды — его же читает подсказка, — но на кадр больше не
+		# выводится: имя и клавиша живут во всплывающей подсказке.
 		if caption != null:
 			btn.tooltip_text = "%s (%s)" % [caption.text, OS.get_keycode_string(key)]
+			caption.visible = false
 		btn.mouse_entered.connect(_on_medallion_hover.bind(btn, true))
 		btn.mouse_exited.connect(_on_medallion_hover.bind(btn, false))
 
