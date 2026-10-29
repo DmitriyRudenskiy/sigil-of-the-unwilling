@@ -636,7 +636,9 @@ func _paint_cells(used: Dictionary) -> void:
 
 
 func _update_desc(inv: HeroInventory) -> void:
-	var desc := get_node_or_null("Center/Window/Sheet/ItemTip/TipBox/Desc")
+	# Видимая подпись блока (T-256): до этого текст писался в скрытый `Desc`, тест
+	# читал тот же узел и зелёнел, а на кадре описания не было.
+	var desc := get_node_or_null("Center/Window/Sheet/ItemTip/TipBox/TipDesc")
 	var tip := get_node_or_null("Center/Window/Sheet/ItemTip") as Control
 	if desc is not Label:
 		return

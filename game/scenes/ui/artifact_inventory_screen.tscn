@@ -2237,7 +2237,7 @@ anchor_left = 0.356875
 anchor_top = 0.333333
 anchor_right = 0.644375
 anchor_bottom = 0.600000
-theme_type_variation = &"ArtifactOutline"
+theme_type_variation = &"PanelCard"
 visible = false
 
 
@@ -2249,43 +2249,40 @@ mouse_filter = 2
 
 [node name="TipName" type="Label" unique_id=1209 parent="Center/Window/Sheet/ItemTip/TipBox"]
 autowrap_mode = 3
+theme_type_variation = &"LabelStrong"
 
 
 
-[node name="TipDesc" type="Label" unique_id=1210 parent="Center/Window/Sheet/ItemTip/TipBox"]
+[node name="Desc_lbl" type="Label" unique_id=1210 parent="Center/Window/Sheet/ItemTip/TipBox"]
+theme_type_variation = &"LabelSecondary"
+
+
+
+[node name="TipDesc" type="Label" unique_id=1211 parent="Center/Window/Sheet/ItemTip/TipBox"]
 autowrap_mode = 3
+theme_type_variation = &"LabelBody"
 
 
 
-[node name="Desc_lbl" type="Label" unique_id=1211 parent="Center/Window/Sheet/ItemTip/TipBox"]
-visible = false
+[node name="TipButtons" type="HBoxContainer" unique_id=1212 parent="Center/Window/Sheet/ItemTip/TipBox"]
 
 
-
-[node name="Desc" type="Label" unique_id=1212 parent="Center/Window/Sheet/ItemTip/TipBox"]
-visible = false
-
-
-
-[node name="TipButtons" type="HBoxContainer" unique_id=1213 parent="Center/Window/Sheet/ItemTip/TipBox"]
-
-
-[node name="Equip" type="Button" unique_id=1214 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
+[node name="Equip" type="Button" unique_id=1213 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
 text = ""
 
 
 
-[node name="Remove" type="Button" unique_id=1215 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
+[node name="Remove" type="Button" unique_id=1214 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
 text = ""
 
 
 
-[node name="Dispose" type="Button" unique_id=1216 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
+[node name="Dispose" type="Button" unique_id=1215 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
 text = ""
 
 
 
-[node name="TipIcon" type="TextureRect" unique_id=1217 parent="Center/Window/Sheet/ItemTip"]
+[node name="TipIcon" type="TextureRect" unique_id=1216 parent="Center/Window/Sheet/ItemTip"]
 anchor_left = 0.82
 anchor_top = 0.04
 anchor_right = 0.98

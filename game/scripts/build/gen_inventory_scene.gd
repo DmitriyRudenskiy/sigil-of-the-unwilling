@@ -428,24 +428,36 @@ func _build() -> void:
 	uid += 1
 
 	# — панель предмета (макет: всплывающая подсказка поверх сумки) ---------
+	# Носитель подсказки — `PanelCard` (непрозрачная плита с золотой рамкой), а НЕ
+	# `ArtifactOutline`: тот же вариант, что и на рамке окна, но у его StyleBoxFlat
+	# поле прозрачное (bg_color.a = 0), поэтому карточка предмета рисовала только
+	# волосяную рамку, а имя, кнопки и описание висели поверх рисунка камня (T-256,
+	# кадр до: tmp-съёмка экрана героя с выбранным предметом).
 	_add_node("ItemTip", "PanelContainer", "Sheet",
 		_anch(_L.BLOCKS["ItemTip"], "Sheet")
-		+ "theme_type_variation = &\"ArtifactOutline\"\nvisible = false\n", uid)
+		+ "theme_type_variation = &\"PanelCard\"\nvisible = false\n", uid)
 	uid += 1
 	var tip := "Sheet/ItemTip"
 	_add_node("TipBox", "VBoxContainer", tip, "mouse_filter = 2\n", uid)
 	uid += 1
-	_add_node("TipName", "Label", tip + "/TipBox", "autowrap_mode = 3\n", uid)
+	# Роли текста — из темы (docs/17-ui-style-guide.md §17.6: «единственный носитель
+	# цвета и размера текста — тип-роль Label\* в теме»): без роли подпись резолвила
+	# белый цвет движка поверх коричневой плиты карточки (кадр до, T-256).
+	_add_node("TipName", "Label", tip + "/TipBox",
+		"autowrap_mode = 3\ntheme_type_variation = &\"LabelStrong\"\n", uid)
+	uid += 1
+	# Порядок зоны D по макету: подпись блока (`Desc_lbl`) идёт ПЕРЕД телом (`TipDesc`).
+	_add_node("Desc_lbl", "Label", tip + "/TipBox",
+		"theme_type_variation = &\"LabelSecondary\"\n", uid)
 	uid += 1
 	_add_node("TipDesc", "Label", tip + "/TipBox",
-		"autowrap_mode = 3\n", uid)
+		"autowrap_mode = 3\ntheme_type_variation = &\"LabelBody\"\n", uid)
 	uid += 1
-	# Desc_lbl/Desc — перенесённые узлы старой подписи (макет их не рисует):
-	# остаются под подсказкой, чтобы тесты действий предмета читали то же место.
-	_add_node("Desc_lbl", "Label", tip + "/TipBox", "visible = false\n", uid)
-	uid += 1
-	_add_node("Desc", "Label", tip + "/TipBox", "visible = false\n", uid)
-	uid += 1
+	# Подпись блока из макета (зона D: «Desc_lbl, Desc, Equip, Remove, Dispose»)
+	# создаётся выше — перед телом. До T-256 она и парная ей подпись `Desc` были
+	# перенесены скрытыми «чтобы тесты действий предмета читали то же место»: экран
+	# писал текст в невидимый `Desc`, тест читал его же и зелёнел, а на кадре
+	# описания не было вовсе. Скрытый двойник снят.
 	_add_node("TipButtons", "HBoxContainer", tip + "/TipBox", "", uid)
 	uid += 1
 	for nm in ["Equip", "Remove", "Dispose"]:
