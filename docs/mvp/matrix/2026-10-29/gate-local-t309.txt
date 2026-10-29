@@ -1,0 +1,69 @@
+T-309 · локальный гейт (head 5a25b91c: код 974e64bd, сведение с alpha-battle-field/D-293–D-294 5d421388, этот файл —
+следующий за ними коммит; 2026-10-29))
+
+GdUnit: Overall Summary: 3628 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+MCP: ================== 112 passed, 2 skipped in 305.20s (0:05:05) ==================
+PYTEST LEDGER: passed=112 skipped=2 failed=0 errors=0 collected=114
+MCP VERDICT: GREEN
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://... (см. docs/mvp/CAPTURE-HELPER.md)
+GENART: 11 passed in 2.28s · CLASSIFIER: 13 passed in 0.01s, READINESS-CLASSIFIER: selftest GREEN
+
+DOC GATES: GREEN (./scripts/doc_gates.sh на этом же дереве)
+  OK: docs/ links consistent (110 notes checked) · OK: 00-INDEX.md актуален (112 заметок)
+  OK: доки ↔ код (автолоады, сцены, классы, save-ключи) · HERO-LAYOUT-MAP: расхождений нет
+  GDD-GATE: GREEN (d_without_rejected 170/170, q_ghost_rows 0, t_duplicate_headers 0, t_multi_footer 0)
+  128 passed (тесты самих проверщиков) · OPENSPEC SPECS: OK (87) · TESTMAP OK: дыр 80, слияние 149, дублей 0
+
+Толкование. GATE = 0 целиком зелёный: GdUnit 0/0, MCP VERDICT GREEN (ни одной readiness-
+ошибки), тесты генератора арта карты и классификатор журнала зелёные, доки зелёные. Смена не тронула ни одного
+production-файла (`git show --stat 974e64bd`: тесты, инструменты, доки, базлайн TESTMAP),
+поэтому зелёный прогон подтверждает и владельческий боевой код (battle_ui/battle_view/арт,
+29 коммитов alpha-battle-field): он живёт в этом же прогоне вместе с тестами T-241 и T-310.
+
+Три прогона смены — среда шарится, MemAvailable 725 772 kB и 717 504 kB при 48 ГБ RAM
+(чужой strata --serve держит shmem; зафиксирован, не трогается):
+1. head 9be43395 (дерево до сведения, только смена T-309): GdUnit 3610/0/0, MCP
+   passed=109 skipped=2 failed=0 errors=3 collected=114 → YELLOW. Три ошибки — readiness-
+   подпись (D-265): test_battle_hud_live_populated::test_card_labels_meet_the_font_floor,
+   test_hexutils_perf::test_map_generation_80x80, test_shard_pruning::test_full_save_load_cycle_with_many_shards.
+2. head f19ed308 (первое сведение с 68aed748): GdUnit 3628/0/0, MCP 111/2/0/1 → YELLOW,
+   одна readiness-ошибка test_readiness_evidence::test_live_game_writes_boot_trace.
+3. head 95e4743d (сведение с 8a76eb50, этот прогон): MCP 112/2/0/0 → GREEN.
+Ни один красный не воспроизвёл: все три — `failed on setup`, тело не выполнялось, класс
+«среда, не регрессия» (урок T-241: тот же набор менял состав между прогонами одного кода).
+Публикуется прогон 3. От опубликованного дерева он отличается только чужими доками
+   (a247f5ef: 14-ux-battle-hud, DECISIONS D-294, спеки battle-hud/battle-ui, tasks) и моими
+   полями конвенции реестра к ним — ни одного файла игры в диффе нет; doc_gates на итоговом
+   дереве переснят и зелёный (GDD-GATE GREEN, OPENSPEC 87, TESTMAP 80/149/0, 128 тестов
+   проверщиков, 110 wikilink-проверок).
+
+Точечные прогоны на дереве сведения (f19ed308 — тот же код кампании, что и у ea6e02d5;
+владелец менял боевой экран, а не кампейн-экономику), дерево после прогонов чистое:
+- мутационная батарея game/tools/mut_stocks_registers.sh:
+  M1 (реестр города стартует не значением вектора) — 0 errors | 6 failures;
+  M2 (после тика продукции вектор перетирается реестром города) — 0 errors | 1 failures;
+  M3 (секция resources пишется из реестра города) — 0 errors | 5 failures;
+  «ИТОГ: все мутанты красные — шов сторожит сведение носителей».
+  Зелёный мутант означал бы, что шов ничего не сторожит; ни один не зелёный.
+  (На дереве до сведения, 9be43395, те же три мутанта дали те же 6/1/5.)
+- зонд godot --headless --path game -s res://tools/diag_stocks_registers.gd (сид 12345,
+  30 тиков) — числа воспроизведены дословно:
+  DIAG|day0 |turn=1 |food:stocks=600.0|ctx=600.0|wood:stocks=20.0 |ctx=20.0|iron:stocks=10.0|ctx=10.0
+  DIAG|day20|turn=21|food:stocks=-651.9|ctx=600.0|wood:stocks=188.6|ctx=20.0|iron:stocks=90.1|ctx=10.0
+  DIAG-SAVE|до_траты|food:save=-593.3|ctx=600.0|wood:save=197.1|ctx=20.0|iron:save=94.4|ctx=10.0
+  Ход 21 — финальный рейд, дальше advance_turn() пустой (turn не растёт, вектор замирает на
+  −593.3); секция сейва resources повторяет вектор поселения, а не реестр города.
+
+UX-review: не требуется — смена не меняет ни экрана, ни узла, ни строки; только тесты,
+инструменты и реестры (кадр снимать не с чего, кадра в артефакте нет намеренно).
+
+Тестовый леджер смены: +4 кейса / −0 / quarantine 0 (GdUnit 3606 → 3610 на дереве смены),
+MCP-сборов 114 без изменений. На сведённом дереве 3628 кейсов — +18 принёс
+alpha-battle-field; TESTMAP-базлайн переснят за их же тест-файлами (merge_files 146 → 149,
+дыр 81 → 80), движение приписано владельческому пушу в docs/mvp/TEST-MAP.md.
