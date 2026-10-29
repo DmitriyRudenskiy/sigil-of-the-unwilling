@@ -1,0 +1,20 @@
+# Локальный прогон гейта, срез T-300 (рантаймная закраска цвета под гардом)
+# машина: Linux/Xvfb, MCP_WORKERS=3 (дефолт run_tests.sh), HEAD=e611f263 (код 78a0dedf + docs)
+# команда: bash game/run_tests.sh (doc-гейты — отдельным прогоном, см. последнюю строку)
+# GdUnit: в выжимке только итог, по одной пачке Statistics на файл в полном журнале
+
+GENART: интерпретатор /home/user/.venv/map-art/bin/python
+MCP VERDICT: GREEN
+NODE-PATH-GATE: OK
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+Overall Summary: 3634 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+PYTEST LEDGER: passed=112 skipped=2 failed=0 errors=0 collected=114
+READINESS-CLASSIFIER: selftest GREEN
+SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://... (см. docs/mvp/CAPTURE-HELPER.md)
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+
+# полная строка pytest:
+================== 112 passed, 2 skipped in 313.33s (0:05:13) ==================
+# DOC GATES: GREEN (gdd_gate + check_docs_links + audit + testmap: дыр 80, merge_files 150, дублей 0; save-matrix, openspec, ui-assets)
