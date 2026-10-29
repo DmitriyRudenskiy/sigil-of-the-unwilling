@@ -381,59 +381,75 @@
     },
     "battle/spellbook.png": {
       "size": [
-        512,
-        512
+        280,
+        280
       ],
       "kind": "icon",
-      "note": "медальон команды нижней панели боя (alpha-battle-field 4.1) — вырезан с листа владельца 3×3 1536×1536 (`~/Downloads/Interface_battle/`) скриптом scripts/ui_kit/slice_battle_buttons.py округлой маской по геометрии листа: альфы в кадре нет, кожаная дорожка по цвету от пластины не отделяется. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель: spellbook_btn — «Книга» (`K`)"
+      "note": "медальон команды нижней панели боя (alpha-battle-field 7.4) — вырезан с генерированного листа девяти пластин 3×3 1024×1024 (категория `ui_medallions` в scripts/concept_art/spec.json, ComfyUI в LAN; лист `tmp/sheet-try.png`, md5 `bfdb0d9647de6a977302cf9da9ec8d53`) скриптом scripts/ui_kit/slice_battle_buttons.py флагами `--gen9 --trim=0.09` округлой маской по геометрии листа: альфы в кадре нет. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель:  spellbook_btn — «Книга» (`K`)"
     },
     "battle/retreat.png": {
       "size": [
-        512,
-        512
+        280,
+        280
       ],
       "kind": "icon",
-      "note": "медальон команды нижней панели боя (alpha-battle-field 4.1) — вырезан с листа владельца 3×3 1536×1536 (`~/Downloads/Interface_battle/`) скриптом scripts/ui_kit/slice_battle_buttons.py округлой маской по геометрии листа: альфы в кадре нет, кожаная дорожка по цвету от пластины не отделяется. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель: retreat_btn — «Отступить» (`C`)"
+      "note": "медальон команды нижней панели боя (alpha-battle-field 7.4) — вырезан с генерированного листа девяти пластин 3×3 1024×1024 (категория `ui_medallions` в scripts/concept_art/spec.json, ComfyUI в LAN; лист `tmp/sheet-try.png`, md5 `bfdb0d9647de6a977302cf9da9ec8d53`) скриптом scripts/ui_kit/slice_battle_buttons.py флагами `--gen9 --trim=0.09` округлой маской по геометрии листа: альфы в кадре нет. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель:  retreat_btn — «Отступить» (`C`)"
     },
     "battle/auto.png": {
       "size": [
-        512,
-        512
+        280,
+        280
       ],
       "kind": "icon",
-      "note": "медальон команды нижней панели боя (alpha-battle-field 4.1) — вырезан с листа владельца 3×3 1536×1536 (`~/Downloads/Interface_battle/`) скриптом scripts/ui_kit/slice_battle_buttons.py округлой маской по геометрии листа: альфы в кадре нет, кожаная дорожка по цвету от пластины не отделяется. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель: auto_btn — «Автобой» (`A`)"
+      "note": "медальон команды нижней панели боя (alpha-battle-field 7.4) — вырезан с генерированного листа девяти пластин 3×3 1024×1024 (категория `ui_medallions` в scripts/concept_art/spec.json, ComfyUI в LAN; лист `tmp/sheet-try.png`, md5 `bfdb0d9647de6a977302cf9da9ec8d53`) скриптом scripts/ui_kit/slice_battle_buttons.py флагами `--gen9 --trim=0.09` округлой маской по геометрии листа: альфы в кадре нет. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель:  auto_btn — «Автобой» (`A`)"
     },
     "battle/wait.png": {
       "size": [
-        512,
-        512
+        280,
+        280
       ],
       "kind": "icon",
-      "note": "медальон команды нижней панели боя (alpha-battle-field 4.1) — вырезан с листа владельца 3×3 1536×1536 (`~/Downloads/Interface_battle/`) скриптом scripts/ui_kit/slice_battle_buttons.py округлой маской по геометрии листа: альфы в кадре нет, кожаная дорожка по цвету от пластины не отделяется. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель: wait_btn — «Ждать» (`W`)"
+      "note": "медальон команды нижней панели боя (alpha-battle-field 7.4) — вырезан с генерированного листа девяти пластин 3×3 1024×1024 (категория `ui_medallions` в scripts/concept_art/spec.json, ComfyUI в LAN; лист `tmp/sheet-try.png`, md5 `bfdb0d9647de6a977302cf9da9ec8d53`) скриптом scripts/ui_kit/slice_battle_buttons.py флагами `--gen9 --trim=0.09` округлой маской по геометрии листа: альфы в кадре нет. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель:  wait_btn — «Ждать» (`W`)"
     },
     "battle/defend.png": {
       "size": [
-        512,
-        512
+        280,
+        280
       ],
       "kind": "icon",
-      "note": "медальон команды нижней панели боя (alpha-battle-field 4.1) — вырезан с листа владельца 3×3 1536×1536 (`~/Downloads/Interface_battle/`) скриптом scripts/ui_kit/slice_battle_buttons.py округлой маской по геометрии листа: альфы в кадре нет, кожаная дорожка по цвету от пластины не отделяется. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель: defend_btn — «Защита» (`D`)"
+      "note": "медальон команды нижней панели боя (alpha-battle-field 7.4) — вырезан с генерированного листа девяти пластин 3×3 1024×1024 (категория `ui_medallions` в scripts/concept_art/spec.json, ComfyUI в LAN; лист `tmp/sheet-try.png`, md5 `bfdb0d9647de6a977302cf9da9ec8d53`) скриптом scripts/ui_kit/slice_battle_buttons.py флагами `--gen9 --trim=0.09` округлой маской по геометрии листа: альфы в кадре нет. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель:  defend_btn — «Защита» (`D`)"
     },
     "battle/cancel.png": {
       "size": [
-        512,
-        512
+        280,
+        280
       ],
       "kind": "icon",
-      "note": "медальон команды нижней панели боя (alpha-battle-field 4.1) — вырезан с листа владельца 3×3 1536×1536 (`~/Downloads/Interface_battle/`) скриптом scripts/ui_kit/slice_battle_buttons.py округлой маской по геометрии листа: альфы в кадре нет, кожаная дорожка по цвету от пластины не отделяется. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель: cancel_btn — «Отмена» (`Esc`)"
+      "note": "медальон команды нижней панели боя (alpha-battle-field 7.4) — вырезан с генерированного листа девяти пластин 3×3 1024×1024 (категория `ui_medallions` в scripts/concept_art/spec.json, ComfyUI в LAN; лист `tmp/sheet-try.png`, md5 `bfdb0d9647de6a977302cf9da9ec8d53`) скриптом scripts/ui_kit/slice_battle_buttons.py флагами `--gen9 --trim=0.09` округлой маской по геометрии листа: альфы в кадре нет. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель:  cancel_btn — «Отмена» (`Esc`)"
     },
     "battle/surrender.png": {
       "size": [
-        512,
-        512
+        280,
+        280
       ],
       "kind": "icon",
-      "note": "медальон команды нижней панели боя (alpha-battle-field 4.1) — вырезан с листа владельца 3×3 1536×1536 (`~/Downloads/Interface_battle/`) скриптом scripts/ui_kit/slice_battle_buttons.py округлой маской по геометрии листа: альфы в кадре нет, кожаная дорожка по цвету от пластины не отделяется. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носителя на панели нет: команды «Сдаться» в бою нет (снята в 4.2), кадр медальона оставлен до разбора спорных пар в 4.6"
+      "note": "медальон команды нижней панели боя (alpha-battle-field 7.4) — вырезан с генерированного листа девяти пластин 3×3 1024×1024 (категория `ui_medallions` в scripts/concept_art/spec.json, ComfyUI в LAN; лист `tmp/sheet-try.png`, md5 `bfdb0d9647de6a977302cf9da9ec8d53`) скриптом scripts/ui_kit/slice_battle_buttons.py флагами `--gen9 --trim=0.09` округлой маской по геометрии листа: альфы в кадре нет. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носителя на панели нет: медальон команды нижней панели боя (alpha-battle-field 4.1) — вырезан с листа владельца 3×3 1536×1536 (`~/Downloads/Interface_battle/`) скриптом scripts/ui_kit/slice_battle_buttons.py округлой маской по геометрии листа: альфы в кадре нет, кожаная дорожка по цвету от пластины не отделяется. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носителя на панели нет: команды «Сдаться» в бою нет (снята в 4.2), кадр медальона оставлен до разбора спорных пар в 4.6"
+    },
+    "battle/attack.png": {
+      "size": [
+        280,
+        280
+      ],
+      "kind": "icon",
+      "note": "медальон команды нижней панели боя (alpha-battle-field 7.4) — вырезан с генерированного листа девяти пластин 3×3 1024×1024 (категория `ui_medallions` в scripts/concept_art/spec.json, ComfyUI в LAN; лист `tmp/sheet-try.png`, md5 `bfdb0d9647de6a977302cf9da9ec8d53`) скриптом scripts/ui_kit/slice_battle_buttons.py флагами `--gen9 --trim=0.09` округлой маской по геометрии листа: альфы в кадре нет. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель: attack_btn — «Атака», хоткея нет (цель — клик, D-294)"
+    },
+    "battle/skip.png": {
+      "size": [
+        280,
+        280
+      ],
+      "kind": "icon",
+      "note": "медальон команды нижней панели боя (alpha-battle-field 7.4) — вырезан с генерированного листа девяти пластин 3×3 1024×1024 (категория `ui_medallions` в scripts/concept_art/spec.json, ComfyUI в LAN; лист `tmp/sheet-try.png`, md5 `bfdb0d9647de6a977302cf9da9ec8d53`) скриптом scripts/ui_kit/slice_battle_buttons.py флагами `--gen9 --trim=0.09` округлой маской по геометрии листа: альфы в кадре нет. Пластина и знак — ОДНИМ кадром, поэтому теме рисовать под иконкой нечего (вариант BattleMedallion, 4.5). носитель: skip_btn — «Пропустить» (`S`)"
     }
   },
   "round_button": {
