@@ -5,8 +5,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="3"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_gear.png" id="10_emblem_gear"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_ring.png" id="12_emblem_ring"]
-[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_swords.png" id="13_emblem_swords"]
-[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_skip.png" id="17_emblem_skip"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/attack.png" id="35_medal_attack"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/skip.png" id="36_medal_skip"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_round_normal.png" id="18_plate_empty"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/auto.png" id="19_medal_auto"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/cancel.png" id="20_medal_cancel"]
@@ -226,8 +226,8 @@ stretch_mode = 5
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
-icon = ExtResource("13_emblem_swords")
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("35_medal_attack")
 expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/attack_btn"]
@@ -339,8 +339,8 @@ text = "Защита"
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
-icon = ExtResource("17_emblem_skip")
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("36_medal_skip")
 expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/skip_btn"]

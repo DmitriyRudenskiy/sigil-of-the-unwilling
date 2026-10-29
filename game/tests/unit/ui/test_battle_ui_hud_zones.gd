@@ -102,15 +102,16 @@ func test_zone_d_medallions_show_emblem_textures() -> void:
 	var ui: BattleUI = _mk_ui()
 	await get_tree().process_frame
 	var emblems := {
-		# Команды с медальоном владельца (4.5) — пластина и знак одним кадром из
-		# боевого комплекта `assets/ui/widgets/battle/`; остальное — прежние эмблемы
-		# (`assets/ui/widgets/`), листа владельца для них нет.
+		# Все восемь команд несут пластину комплекта (D-293, лист 7.4): пластина и знак
+		# одним кадром из `assets/ui/widgets/battle/`. Прежние круглые эмблемы
+		# (`emblem_swords`, `emblem_skip`) сняты вместе с вариацией RoundIconButton —
+		# медальон без пластины читался чужим в ряду (T-314, T-315).
 		"bottom_bar/bar_box/left_box/retreat_btn": "retreat.png",
-		"bottom_bar/bar_box/left_box/attack_btn": "emblem_swords.png",
+		"bottom_bar/bar_box/left_box/attack_btn": "attack.png",
 		"bottom_bar/bar_box/right_box/spellbook_btn": "spellbook.png",
 		"bottom_bar/bar_box/right_box/wait_btn": "wait.png",
 		"bottom_bar/bar_box/left_box/defend_btn": "defend.png",
-		"bottom_bar/bar_box/right_box/skip_btn": "emblem_skip.png",
+		"bottom_bar/bar_box/right_box/skip_btn": "skip.png",
 		"bottom_bar/bar_box/left_box/auto_btn": "auto.png",
 		"bottom_bar/bar_box/right_box/cancel_btn": "cancel.png",
 	}
