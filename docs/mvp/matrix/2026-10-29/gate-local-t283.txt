@@ -1,0 +1,142 @@
+# Локальный гейт 2026-10-29 — T-283 (мёртвый фасад `SpellResolver`)
+
+Прогон: `./game/run_tests.sh`, машина шарится, `DISPLAY` поднят прогоном.
+Дерево: `main` после `1eb53132` (T-290), правки T-283 не закоммичены.
+
+## GdUnit4 (unit / integration / functional, headless)
+
+```
+Overall Summary: 3603 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+LINT: SKIPPED (нет gdtoolkit у python3 или нет .gdlintrc в .../game)
+```
+
+Было 3601 → стало **3603**: два кейса новых (`test_spell_resolver_deadness.gd`),
+регрессий нет. Восемь переименованных проверок фасада остались в прогоне
+(`test_facade_resolve_*`), счётчик файла не изменился — 57.
+
+## MCP e2e (живой Godot, не headless)
+
+```
+108 passed, 2 skipped, 1 error in 470.95s
+PYTEST LEDGER: passed=108 skipped=2 failed=0 errors=1 collected=111
+MCP JUNIT: passed=108 skipped=2 failed=0 errors=1
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за):
+  среда, не регрессия (D-265); тесты обязан переснять владелец либо повторный прогон
+MCP VERDICT: YELLOW
+```
+
+Жертва одна, и это не assertion:
+
+```
+ERROR at setup of test_date_follows_the_day_in_live_game
+  godot_mcp.MCPError: игра не готова за 180 с (… Not connected to game interaction server.)
+    среда в момент отказа: mem_available=0MB из 47242MB swap_free=1318/20479MB
+    load1=1.21 godot_procs=1(rss=174MB, state=S:1) psi_memory=some avg10=0.00 …
+    порт: 127.0.0.1:9090 — порта нет (bind не случился)
+    boot-трейс: … пуст или не создан — Godot не дошёл до автозагрузки McpInteractionServer
+```
+
+Тот же тест, тот же день, изолированно (`DISPLAY=:97`, `MCP_PORT=9097`,
+тот же бинарь и тот же venv):
+
+```
+1 passed in 3.51s
+── память после: MemAvailable: 0 kB / SwapFree: 1391392 kB
+```
+
+То есть 3.5 с против 180 с таймаута при **той же нулевой доступной памяти** —
+четвёртое повторение среды после `gate-local-t279d.txt`, T-281 и T-172; тест
+и правка T-283 к отказу отношения не имеют (файл про дату кампанийного хода).
+
+## Состояние машины в момент прогона (замер, не гипотеза)
+
+```
+MemTotal:     48375580 kB
+MemAvailable:        0 kB
+Cached:       29605508 kB   из них Shmem: 28551560 kB  (не выгружается)
+SwapTotal:    20970996 kB
+SwapFree:      1593116 kB   (свободно 7.6 % свопа)
+```
+
+Владелец памяти — **не** процессы прогона:
+
+```
+PID 762871  user  STARTED Пн окт 26 12:15:04 2026  ELAPSED 2-21:09
+  /home/user/.local/share/strata/components/engine/0.1.48-linux-x86_64-cuda-cuda13/strata
+  --serve --pack .../packs/unsloth-ud-...
+RSS 18 954 356 kB, детей 0
+```
+
+Процесс чужой (не этой сессии), поэтому **не трогался** (протокол зависших
+процессов: чужой PID — флаг, не `kill`; возраст > 4 ч — владельцу репо).
+Свой Xvfb прогоном не убивался: использован уже поднятый `:97`, новых не
+заводилось, портов 9090–9098 после прогона не слушает никто (`ss -ltnp`).
+
+## Python-уровни
+
+```
+GENART: интерпретатор /home/user/.venv/map-art/bin/python — 11 passed in 2.26s
+READINESS-CLASSIFIER: selftest GREEN — 13 passed in 0.04s
+```
+
+## Док-гейты
+
+```
+GDD-GATE: GREEN
+  dead_paths: 5 (базлайн 5) OK        ← новые пути в 18-system-map живые
+  t_duplicate_headers: 0 (базлайн 0) OK
+  t_multi_footer: 0 (базлайн 0) OK
+OK: docs/ links consistent (108 notes checked)
+OK: тесты самих проверщиков (9 файлов) — 115 passed
+OPENSPEC SPECS: OK (проверено 87 сведённых спек)
+TESTMAP OK: дыр 81, файлов в группах слияния 144, дублей 0
+```
+
+## Мутационная батарея инварианта
+
+`bash game/tools/mut_spell_deadness.sh` на **закоммиченном** дереве (батарея
+удаляет `spell_resolver.gd` и восстанавливает его `git checkout` со сверкой
+байтов; на грязном дереве guard печатает причину и выходит с кодом 2).
+
+Красными оказались разные тесты, как и задумано: M1 —
+`test_spell_resolver_has_no_production_caller`, M2 —
+`test_spell_resolver_file_is_still_here`. Замеры до коммита (тот же сценарий
+вручную: одна сборка на мутант, восстановление `git checkout --` со сверкой
+`cmp` — байты совпали):
+
+```
+M1: Statistics: 2 test cases | 0 errors | 1 failures | Exit code: 100
+    FAILED test_spell_resolver_has_no_production_caller
+M2: Statistics: 2 test cases | 0 errors | 1 failures | Exit code: 100
+    FAILED test_spell_resolver_file_is_still_here
+```
+
+Прогон батареи целиком на закоммиченном дереве (`fb7ec582`, guard чистоты
+пройден, `spell_resolver.gd` восстановлен бит-в-бит — `git status` после прогона
+пуст):
+
+```
+M1: Statistics: 2 test cases | 0 errors | 1 failures | 0 flaky | 0 skipped | 0 orphans |
+M2: Statistics: 2 test cases | 0 errors | 1 failures | 0 flaky | 0 skipped | 0 orphans |
+ИТОГ: все мутанты красные
+```
+
+Совпадает с ручным замером до коммита — то есть батарея измеряет то же, что
+проверялось руками, а не сам факт своего запуска.
+
+## Что этот гейт НЕ измерил
+
+1. **Судьбу класса.** Инвариант запрещает молча монтировать и молча удалять;
+   какой из трёх вариантов T-267 выбрать — он не решает и решить не может.
+2. **Вызов из файла сцены.** Мутантом не проверяется (статический вызов в
+   `.tscn` не пишется); скан `scenes/` заведён на будущее, а не под замеры.
+3. **Семантику резолвера.** Замер «чем он отличается от `SpellCaster`» — чтение
+   кода, а не тест: ни одна проверка не утверждает, что `current_power` и
+   `influence_req` должны (не) работать в бою.
+4. **Живой путь магии.** Файлы `test_magic_resistance.gd` /
+   `test_battle_spell_targeting.gd` в этой смене не менялись и не переснимались;
+   их зелёный статус — наследие прогона целиком, а не этого среза.
+5. **Звук, playtest, пиксели.** Кадр для этого среза не снимался: правка не
+   меняет ни одного экрана (комментарии + два не-UI теста), ux-review не нужен.

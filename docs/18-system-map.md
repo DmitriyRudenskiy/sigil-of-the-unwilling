@@ -161,7 +161,7 @@ preload пишет `_Classes = preload("…/canon_classes.gd")`, и по име�
 | `SpellbookDef` | `spellbook_def.gd` | домен карты и книги заклинания: `id`, `template`, `speed`, `cost`, `color`, `influence_req`, `from_dict` / `to_dict` — граница между JSON реестра и кодом боя | `autoload/spellbook_registry.gd`, `data/battle_spell_bridge.gd` |
 | `BattleSpellBridge` | `battle_spell_bridge.gd` | мост «ключевое слово карты → эффект статуса» (`KEYWORD_TO_EFFECT`) и имена шаблонов (`T_DIRECT_DAMAGE`, `T_KEYWORD_BUFF`, …) | `autoload/battle_emulator.gd` — сам не autoload, его поднимают `battle/dnd/battle_factory.gd` и `tools/winrate_baseline.gd` |
 | `TemplateEngine` | `template_engine.gd` | реестр обработчиков шаблонов: `register_handler(template, handler)`, `execute`, `reset`; 19 обработчиков `data/templates/T01…T19` регистрирует autoload `TemplateBootstrap` | `autoload/template_bootstrap.gd` |
-| `SpellResolver` | `spell_resolver.gd` | **старый фасад разрешения заклинаний: в production не вызывается никем.** Замер: `grep -rn` по имени и по пути preload — вызовы только в `tests/unit/data/test_spell_system.gd`. Живой путь боя — `SpellCaster.cast()` из `systems/battle_action_resolver.gd` и `autoload/battle_emulator.gd` | тесты: `tests/unit/data/test_spell_system.gd` (писатель без читателя — T-283) |
+| `SpellResolver` | `spell_resolver.gd` | **старый фасад разрешения заклинаний: в production не вызывается никем.** Замер: `grep -rn` по имени и по пути preload — вызовы только в `tests/unit/data/test_spell_system.gd`. Живой путь боя — `SpellCaster.cast()` из `systems/battle_action_resolver.gd` и `autoload/battle_emulator.gd`; стоимости касается не резолвер, а вызывающий (`BattleActionResolver.pay_spell_mana`). Молча ни смонтировать, ни удалить: инвариант мёртвости — `tests/unit/data/test_spell_resolver_deadness.gd`, батарея `game/tools/mut_spell_deadness.sh` | тесты: `tests/unit/data/test_spell_system.gd` (писатель без читателя — T-283, судьба класса — T-267) |
 
 **Что разбор делает видимым.** Он поймал и собственную ошибку: первая версия
 этой таблицы утверждала, что `get_texture()` возвращает null всегда, — вывод по
@@ -175,7 +175,9 @@ preload пишет `_Classes = preload("…/canon_classes.gd")`, и по име�
 вердикт устаревшим, а отменить его никто не сел.
 
 Настоящий писатель без читателя в слое один: `SpellResolver` (T-283) — его не
-зовёт никто, кроме теста.
+зовёт никто, кроме теста. С 2026-10-29 это не заметка, а инвариант:
+`tests/unit/data/test_spell_resolver_deadness.gd` краснеет и если вызов
+появится, и если файл исчезнет.
 
 
 ## 3в. Городской слой `scripts/city/` и ядро `scripts/core/`

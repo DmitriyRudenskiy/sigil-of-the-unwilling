@@ -1,4 +1,20 @@
 
+## МЁРТВЫЙ ФАСАД (T-283; носитель решения — T-267).
+##
+## Ни один вызывающий в production-коде: бой колдует через `SpellCaster.cast`
+## (`scripts/systems/battle_action_resolver.gd:102`,
+## `scripts/autoload/battle_emulator.gd:42`) — у того пути свои тесты. Этот класс
+## единственная точка входа в `TemplateEngine` и 19 шаблонов
+## (`scripts/data/templates/`), и зовут его только проверки из
+## `tests/unit/data/test_spell_system.gd`. Семантика отличается от живого пути:
+## здесь есть стоимость (`current_power`) и `influence_req`, но нет сопротивления,
+## иммунитета и урона по стеклу — то есть это модель карточного боя, а не того,
+## что игра исполняет.
+##
+## Молча ни монтировать, ни удалять нельзя: инвариант держит
+## `tests/unit/data/test_spell_resolver_deadness.gd` (красный и при появлении
+## production-вызова, и при удалении файла). Каталог `assets/data/spells.json`
+## при этом жив: его читает `SpellbookRegistry` для боевого пути.
 class_name SpellResolver
 extends RefCounted
 
