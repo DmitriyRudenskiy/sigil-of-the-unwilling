@@ -452,6 +452,22 @@
    ],
    "reference": "1791999397246-01a13b7a-0abb-7b89-a0aa-4d39e5f5f207.jpeg",
    "style": "dark cinematic fantasy concept painting, carved stone and dark wood with thin gold filigree, strong glowing blue key light from the rose window, one small warm ember source, rich saturated mid-tones, moody but readable shadows"
+  },
+  "ui_medallions": {
+   "size": [
+    1024,
+    1024
+   ],
+   "count": 1,
+   "frame": "sheet of nine separate game ui icons arranged in a 3x3 grid, nine evenly spaced cells, each icon a square dark-bronze rounded metal plate with ornate corner rivets and one single centred emblem, plates not touching, plain near-black backdrop between cells, no text, no letters, no numbers, no arrows, no watermark, no frame around the whole sheet",
+   "items": [
+    {
+     "id": "ui_command_medallions",
+     "subject": "nine battle command medallions, one per cell, reading order left to right: crossed swords, upright shield, retreating running figure, hourglass, open spellbook with rune, crossed spears, raised fist, skull-and-crossed-bones, and a broken ring for cancel; all nine plates identical in size, material and lighting, emblem silhouettes thick and readable at 100 pixels"
+    }
+   ],
+   "reference": "1791999397246-01a13b7a-0abb-7b89-a0aa-4d39e5f5f207.jpeg",
+   "style": "dark cinematic fantasy game interface, carved stone and dark wood panels with thin gold filigree, parchment fields, glowing blue sigil accents, moody low-key lighting with one warm light source, engraved serif titling"
   }
  },
  "references_dir": "image-clone/etalons",

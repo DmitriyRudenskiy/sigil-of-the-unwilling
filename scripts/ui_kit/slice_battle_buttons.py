@@ -12,6 +12,7 @@
 а не на глаз — см. `CELLS`.
 
 Запуск: python3 scripts/ui_kit/slice_battle_buttons.py [--dry]
+       [--src=путь/к/листу.png] [--trim=0.045] [--gen9]   # лист генерации 7.4: 9 ячеек
 """
 from __future__ import annotations
 
@@ -21,8 +22,24 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[2]
-SRC = Path.home() / "Downloads/Interface_battle/mai-image-2.6 (t2i)_b_A_3×3_grid_of_hand-p.png"
+
+
+def _arg(name: str, default: str) -> str:
+    """Значение `--имя=значение` из argv (носителя в git нет — путь всегда внешний)."""
+    for a in sys.argv:
+        if a.startswith(f"--{name}="):
+            return a.split("=", 1)[1]
+    return default
+
+
+# Носитель по умолчанию — лист владельца. Сгенерированный лист (7.4, D-293) кладут
+# рядом и зовут `--src=`: путь зашит только как значение по умолчанию, потому что
+# пиксели в git не идут (D-185) и чужой Downloads не бывает переносимым.
+SRC = Path(_arg("src", str(Path.home() / "Downloads/Interface_battle/mai-image-2.6 (t2i)_b_A_3×3_grid_of_hand-p.png")))
 OUT = ROOT / "game/assets/ui/widgets/battle"
+# Доля кадра, срезаемая по каждому краю листа: у сгенерированного листа по периметру
+# орнаментальная рамка со светящимися глифами, она не должна попасть в угловые ячейки.
+TRIM = float(_arg("trim", "0"))
 GRID = 3
 INSET = 0.022          # кожаная дорожка по краям ячейки, доля кадра с каждой стороны (замер кадра: дорожка ~2%)
 RADIUS = 0.135          # скругление пластины (у носителя скругление пластины ~13% ширины)
@@ -34,6 +51,21 @@ FEATHER = 3.0          # мягкая кромка маски, px
 # (капитуляция — T-282, на панели НЕ рисуется, медальон лежит носителем), бегущая
 # фигура = `retreat` (отступить), меч = `auto` (у описания владельца «скрещённые
 # мечи» — в листе их нет, расхождение фиксирует приёмка 4.6, а не молчание).
+# Лист генерации 7.4: девять занятых ячеек в порядке чтения, знак↔команда сняты
+# с кадра (меч ↔ «атака», копья ↔ «автобой» — спор design.md §4 здесь не возникает,
+# в листе под каждый знак свой силуэт).
+CELLS_GEN9 = {
+    (0, 0): "attack",
+    (1, 0): "defend",
+    (2, 0): "retreat",
+    (0, 1): "wait",
+    (1, 1): "spellbook",
+    (2, 1): "auto",
+    (0, 2): "skip",
+    (1, 2): "surrender",
+    (2, 2): "cancel",
+}
+
 CELLS = {
     (0, 0): "spellbook",
     (1, 0): "surrender",
@@ -66,14 +98,18 @@ def matte(cell: Image.Image) -> Image.Image:
 
 def main() -> int:
     dry = "--dry" in sys.argv
+    cells = CELLS_GEN9 if "--gen9" in sys.argv else CELLS
     if not SRC.exists():
         print(f"нет носителя: {SRC}")
         return 1
     src = Image.open(SRC).convert("RGB")
+    if TRIM:
+        b = round(src.width * TRIM)
+        src = src.crop((b, b, src.width - b, src.height - b))
     cw, ch = src.width // GRID, src.height // GRID
     OUT.mkdir(parents=True, exist_ok=True)
     bad = 0
-    for (col, row), name in sorted(CELLS.items(), key=lambda kv: (kv[0][1], kv[0][0])):
+    for (col, row), name in sorted(cells.items(), key=lambda kv: (kv[0][1], kv[0][0])):
         cell = src.crop((col * cw, row * ch, (col + 1) * cw, (row + 1) * ch))
         plate = matte(cell)
         # пластина обязана быть почти квадратной: медальон растягивается под
