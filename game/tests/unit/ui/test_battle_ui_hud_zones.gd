@@ -104,14 +104,19 @@ func test_zone_d_medallions_show_emblem_textures() -> void:
 	var ui: BattleUI = _mk_ui()
 	await get_tree().process_frame
 	var emblems := {
+		# Команды с медальоном владельца (4.5) — пластина и знак одним кадром из
+		# боевого комплекта `assets/ui/widgets/battle/`; остальное — прежние эмблемы
+		# (`assets/ui/widgets/`), листа владельца для них нет.
 		"bottom_bar/bar_box/left_box/settings_btn": "emblem_gear.png",
-		"bottom_bar/bar_box/left_box/retreat_btn": "emblem_flag.png",
+		"bottom_bar/bar_box/left_box/retreat_btn": "retreat.png",
 		"bottom_bar/bar_box/left_box/rescue_btn": "emblem_ring.png",
 		"bottom_bar/bar_box/right_box/attack_btn": "emblem_swords.png",
-		"bottom_bar/bar_box/right_box/spellbook_btn": "emblem_book.png",
-		"bottom_bar/bar_box/right_box/wait_btn": "emblem_hourglass.png",
-		"bottom_bar/bar_box/right_box/defend_btn": "emblem_shield.png",
+		"bottom_bar/bar_box/right_box/spellbook_btn": "spellbook.png",
+		"bottom_bar/bar_box/right_box/wait_btn": "wait.png",
+		"bottom_bar/bar_box/right_box/defend_btn": "defend.png",
 		"bottom_bar/bar_box/right_box/skip_btn": "emblem_skip.png",
+		"bottom_bar/bar_box/left_box/auto_btn": "auto.png",
+		"bottom_bar/bar_box/right_box/cancel_btn": "cancel.png",
 	}
 	for p: String in emblems:
 		var b := ui.get_node_or_null(p) as Button
@@ -132,7 +137,7 @@ func test_zone_d_medallions_show_emblem_textures() -> void:
 
 ## Правый ряд макета 11 начинается с двух пустых медальонов (слоты под будущие
 ## команды). Они не кнопки: несвязанный Button обещал бы нажатие, которого нет.
-## Стрелки ▲▼ прокрутки лога макет не несёт — сняты, вход в историю один — ☰.
+## ▲▼ окна сообщений вернул новый носитель — описание владельца (4.2).
 func test_zone_d_empty_slots_and_log_controls() -> void:
 	var ui: BattleUI = _mk_ui()
 	var right := ui.get_node_or_null("bottom_bar/bar_box/right_box") as HBoxContainer
@@ -140,8 +145,7 @@ func test_zone_d_empty_slots_and_log_controls() -> void:
 	if right == null:
 		return
 	assert_int(right.get_child_count()).override_failure_message(
-		"правый ряд: два пустых слота + шесть команд (книга/отмена/ждать/защита + "
-		"атака и пропуск, у которых носитель механики есть)"
+		"правый ряд: два пустых слота + шесть команд (книга/отмена/ждать/защита/атака/пропуск)"
 	).is_equal(8)
 	for slot_name: String in ["slot_empty_1", "slot_empty_2"]:
 		var slot := right.get_node_or_null(slot_name)

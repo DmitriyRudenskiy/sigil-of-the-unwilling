@@ -4,16 +4,16 @@
 [ext_resource type="PackedScene" uid="uid://df2h40vir4ujo" path="res://scenes/ui/battle_spellbook_panel.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="3"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_gear.png" id="10_emblem_gear"]
-[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_flag.png" id="11_emblem_flag"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_ring.png" id="12_emblem_ring"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_swords.png" id="13_emblem_swords"]
-[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_book.png" id="14_emblem_book"]
-[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_hourglass.png" id="15_emblem_hourglass"]
-[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_shield.png" id="16_emblem_shield"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_skip.png" id="17_emblem_skip"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_round_normal.png" id="18_plate_empty"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/auto.png" id="19_medal_auto"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/cancel.png" id="20_medal_cancel"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/retreat.png" id="31_medal_retreat"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/spellbook.png" id="32_medal_spellbook"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/wait.png" id="33_medal_wait"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/battle/defend.png" id="34_medal_defend"]
 
 [node name="BattleUI" type="CanvasLayer" unique_id=732893136]
 script = ExtResource("1")
@@ -130,8 +130,8 @@ text = "Меню"
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
-icon = ExtResource("11_emblem_flag")
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("31_medal_retreat")
 expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/left_box/retreat_btn"]
@@ -156,7 +156,7 @@ text = "Отступить"
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
+theme_type_variation = &"BattleMedallion"
 icon = ExtResource("19_medal_auto")
 expand_icon = true
 
@@ -253,8 +253,8 @@ text = "Атака"
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
-icon = ExtResource("14_emblem_book")
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("32_medal_spellbook")
 expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/spellbook_btn"]
@@ -278,7 +278,7 @@ text = "Книга"
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
+theme_type_variation = &"BattleMedallion"
 icon = ExtResource("20_medal_cancel")
 expand_icon = true
 
@@ -300,8 +300,8 @@ text = "Отмена"
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
-icon = ExtResource("15_emblem_hourglass")
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("33_medal_wait")
 expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/wait_btn"]
@@ -322,8 +322,8 @@ text = "Ждать"
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"RoundIconButton"
-icon = ExtResource("16_emblem_shield")
+theme_type_variation = &"BattleMedallion"
+icon = ExtResource("34_medal_defend")
 expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/defend_btn"]

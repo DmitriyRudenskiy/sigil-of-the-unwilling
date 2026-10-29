@@ -71,9 +71,20 @@ var _action_buttons: Array[Button] = []
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 @onready var _spellbook_panel: BattleSpellbookPanel = $BattleSpellbookPanel
 
+## Состояние медальона — модуляцией всей кнопки: под непрозрачной пластиной
+## медальона стейтбокс не виден, а неактивный медальон обязан читаться, а не
+## исчезать без следа.
+const _MEDALLION_DIM := Color(1, 1, 1, 0.4)
+const _MEDALLION_HOVER := Color(1.18, 1.12, 0.96, 1)
 var _theme: Theme = null
 var _history: Array[String] = []
 var _history_pos := 0
+
+## Команда ↔ клавиша. Единственный носитель соответствия: из той же таблицы
+## печатаются подсказки у медальонов (4.5 — «подпись и горячая клавиша»), поэтому
+## подпись не может разойтись с реальной клавишей. H/↑/↓ не здесь: у истории нет
+## медальона, вход в неё — ☰ и клавиша.
+var _hotkeys: Dictionary = {}
 var _hero_refs: Dictionary = {}
 
 func _ready() -> void:
@@ -117,31 +128,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	# нет, оставлены: `S` пропуск, `K` книга, `H` история, ↑/↓ журнал. «Атака»
 	# уступила `A` автобою и переехала на `T` — прежний палец на `A` не должен
 	# отдавать бой эмулятору.
-	match event.keycode:
-		KEY_O:
-			_press(_settings_btn)
-		KEY_C:
-			_press(_retreat_btn)
-		KEY_A:
-			_press(_auto_btn)
-		KEY_T:
-			_press(_attack_button)
-		KEY_D:
-			_press(_defend_btn)
-		KEY_W:
-			_press(_wait_btn)
-		KEY_S:
-			_press(_skip_btn)
-		KEY_K:
-			_press(_spellbook_btn)
-		KEY_H:
-			_on_history_toggle()
-		KEY_UP:
-			_on_history_up()
-		KEY_DOWN:
-			_on_history_down()
-		_:
-			return
+	if _hotkeys.has(event.keycode):
+		_press(_hotkeys[event.keycode])
+	elif event.keycode == KEY_H:
+		_on_history_toggle()
+	elif event.keycode == KEY_UP:
+		_on_history_up()
+	elif event.keycode == KEY_DOWN:
+		_on_history_down()
+	else:
+		return
 	get_viewport().set_input_as_handled()
 
 
@@ -200,6 +196,40 @@ func _connect_skeleton() -> void:
 	_spellbook_btn.pressed.connect(_on_spellbook)
 	_settings_btn.pressed.connect(_on_settings)
 	_attack_button.disabled = true
+	# Клавиши и подписи медальонов — из одной таблицы (см. `_hotkeys`).
+	_hotkeys = {
+		KEY_O: _settings_btn, KEY_C: _retreat_btn, KEY_A: _auto_btn,
+		KEY_T: _attack_button, KEY_D: _defend_btn, KEY_W: _wait_btn,
+		KEY_S: _skip_btn, KEY_K: _spellbook_btn,
+	}
+	for key: int in _hotkeys:
+		var btn: Button = _hotkeys[key]
+		var caption: Label = btn.get_node_or_null("caption")
+		# Наведённый медальон показывает название команды и её клавишу.
+		if caption != null:
+			btn.tooltip_text = "%s (%s)" % [caption.text, OS.get_keycode_string(key)]
+		btn.mouse_entered.connect(_on_medallion_hover.bind(btn, true))
+		btn.mouse_exited.connect(_on_medallion_hover.bind(btn, false))
+
+
+func _on_medallion_hover(btn: Button, hovered: bool) -> void:
+	if hovered:
+		btn.set_meta("hover", true)
+	else:
+		btn.remove_meta("hover")
+	_medallion_state(btn)
+
+
+## Состояние медальона видно без стейтбокса: неактивный гаснет, наведённый чуть
+## светится. Прежняя обратная связь шла стейтбоксом темы, но пластина медальона
+## лежит поверх неё и скрывает и наведение, и отключение.
+func _medallion_state(btn: Button) -> void:
+	if btn.disabled:
+		btn.self_modulate = _MEDALLION_DIM
+	elif btn.has_meta("hover"):
+		btn.self_modulate = _MEDALLION_HOVER
+	else:
+		btn.self_modulate = Color(1, 1, 1, 1)
 
 func set_status(text: String) -> void:
 	_history.append(text)
@@ -287,6 +317,7 @@ func set_controls_enabled(enabled: bool) -> void:
 		if btn == _skip_btn:
 			continue
 		btn.disabled = not enabled
+		_medallion_state(btn)
 
 	if _attack_button != null and not enabled:
 		_attack_button.disabled = true

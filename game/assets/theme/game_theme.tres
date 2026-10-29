@@ -1570,6 +1570,18 @@ RoundIconButton/styles/hover = SubResource("StyleBoxTexture_round_hover")
 RoundIconButton/styles/pressed = SubResource("StyleBoxTexture_round_pressed")
 RoundIconButton/styles/disabled = SubResource("StyleBoxTexture_round_disabled")
 RoundIconButton/styles/focus = SubResource("StyleBoxEmpty_none")
+; alpha-battle-field 4.5: медальон владельца — пластина и знак ОДНИМ кадром
+; (`assets/ui/widgets/battle/`), поэтому под иконкой нечего рисовать: стандартная
+; плашка темы читается вторым дном под квадратом (спека: «на панели нет
+; стандартных плашек темы там, где макет несёт медальон»). Состояния тоже не
+; стейтбоксы — их под непрозрачной пластиной не видно, их несёт модуляция
+; иконки (`BattleUI._medallion_state`).
+BattleMedallion/base_type = "Button"
+BattleMedallion/styles/normal = SubResource("StyleBoxEmpty_none")
+BattleMedallion/styles/hover = SubResource("StyleBoxEmpty_none")
+BattleMedallion/styles/pressed = SubResource("StyleBoxEmpty_none")
+BattleMedallion/styles/disabled = SubResource("StyleBoxEmpty_none")
+BattleMedallion/styles/focus = SubResource("StyleBoxEmpty_none")
 ; Подпись под медальоном (макет: «Menu», «Surrender» …) — светлое с тёмной
 ; обводкой: текст лежит на живом поле боя, а не на панели.
 LabelButtonCaption/base_type = "Label"
