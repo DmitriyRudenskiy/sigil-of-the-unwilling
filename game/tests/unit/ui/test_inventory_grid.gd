@@ -19,6 +19,7 @@ const _OVERFLOW := "Center/Window/Sheet/Stone/Overflow"
 const _OVERFLOW_LBL := "Center/Window/Sheet/Stone/Overflow_lbl"
 const _DESC := "Center/Window/Sheet/ItemTip/TipBox/TipDesc"
 const _TIP := "Center/Window/Sheet/ItemTip"
+const _DOLL := "Center/Window/Sheet/Stone/Doll"
 # Явный шаг для чистой функции раскладки: тест не зависит от размера окна.
 const _PITCH := Vector2(60, 60)
 
@@ -218,3 +219,83 @@ func test_overflow_item_goes_to_the_strip() -> void:
 	var lbl := screen.get_node_or_null(_OVERFLOW_LBL) as Label
 	assert_that(lbl.visible).is_true()
 	assert_that(lbl.text).is_equal(GameText.artifact_overflow())
+
+
+## T-271: панель предмета — плита в поле сумки, а не над куклой. Дом обязан
+## лежать в поле и вне кадра фигуры: прежний rect ставил плиту над полем
+## куклы, и три её рамки оказывались под открытой подсказкой (слот под ней
+## нельзя было выбрать). Таблица геометрии — носитель дома, поэтому сверяется
+## напрямую, без окна.
+func test_tip_home_lives_in_the_bag_field_not_over_the_doll() -> void:
+	var home: Rect2 = HeroLayout.BLOCKS["ItemTip"]
+	var field := HeroLayout.bag_canvas()
+	var stone: Rect2 = HeroLayout.BLOCKS["Stone"]
+	var figure: Rect2 = HeroLayout.BLOCKS["Figure"]
+	var doll := Rect2(stone.position + figure.position, figure.size)
+	assert_that(home.size).is_equal(Vector2(460, 240))
+	assert_that(home).is_equal(Rect2(field.end - home.size, home.size))
+	assert_bool(field.encloses(home)).is_true() \
+		.override_failure_message("дом панели предмета вне поля сумки: %s в %s" % [home, field])
+	assert_bool(not doll.intersects(home)).is_true() \
+		.override_failure_message(
+				"дом панели предмета (%s) накладывается на кадр куклы (%s)" % [home, doll])
+
+
+## Живой экран: при выборе любого предмета плита остаётся в поле сумки и не
+## задевает ни одну из 16 рамок куклы. Проверка идёт от выбора предмета, а не
+## от вызова раскладки: путь `select_backpack → _repaint → _update_desc` и есть
+## тот, по которому плита едет в игре.
+func test_tip_never_covers_a_doll_frame() -> void:
+	var screen := await _mk_screen(true)
+	var inv: HeroInventory = _hero.inventory
+	assert_that(inv.add_to_backpack(_art("tip_sword", Artifact.Slot.WEAPON, Vector2i(2, 2)))) \
+		.is_true()
+	assert_that(inv.add_to_backpack(_art("tip_torso", Artifact.Slot.TORSO, Vector2i(3, 2)))) \
+		.is_true()
+	screen._refresh_grid()
+	var tip := screen.get_node_or_null(_TIP) as Control
+	var bag := screen.get_node_or_null(_BAG) as Control
+	for i in inv.backpack.size():
+		screen.select_backpack(i)
+		# Якоря и автоперенос сходятся только к следующему кадру: до него размер плиты
+		# — переходный (подпись ещё не разложена по ширине), и замер врал бы.
+		await await_idle_frame()
+		var r := tip.get_global_rect()
+		assert_bool(tip.visible).is_true() \
+			.override_failure_message("предмет %d выбран, а панели предмета нет" % i)
+		assert_bool(bag.get_global_rect().encloses(r.grow(-0.5))).is_true() \
+			.override_failure_message(
+					"панель предмета вышла из поля сумки: %s против %s" % [r, bag.get_global_rect()])
+		for f in ArtifactInventoryScreen.DOLL_SLOTS_N:
+			var frame := screen.get_node_or_null(_DOLL + "/DollSlot_%d" % f) as Control
+			assert_that(frame).is_not_null()
+			assert_bool(not frame.get_global_rect().intersects(r)).is_true() \
+				.override_failure_message(
+						"панель предмета (%s) легла на рамку куклы №%d (%s) — слот не выбрать"
+						% [r, f, frame.get_global_rect()])
+
+
+## Угловой предмет плита закрывать не вправе: от него она отжимается к
+## противоположному углу поля. Клетки в середине поля отжиманием не спасаются —
+## плита 460×240 при поле 720×354 перекрывает шесть клеток из десяти при любом
+## положении, и это осознанная цена (T-271: «правится местом, не размером»).
+func test_tip_steps_away_from_a_corner_item() -> void:
+	var screen := await _mk_screen(true)
+	var inv: HeroInventory = _hero.inventory
+	for corner in [Vector2i.ZERO, Vector2i(9, 0), Vector2i(0, 4), Vector2i(9, 4)]:
+		inv.backpack.clear()
+		inv.placements.clear()
+		inv.rotated.clear()
+		assert_that(inv.add_to_backpack(_art("tip_corner", Artifact.Slot.WEAPON, Vector2i(1, 1)))) \
+			.is_true()
+		inv.placements[0] = corner
+		screen._refresh_grid()
+		screen.select_backpack(0)
+		await await_idle_frame()
+		var tip := screen.get_node_or_null(_TIP) as Control
+		var icon := screen.get_node_or_null(_ITEMS + "/Item_0") as Control
+		assert_that(icon).is_not_null()
+		var r := tip.get_global_rect()
+		assert_bool(not r.has_point(icon.get_global_rect().get_center())).is_true() \
+			.override_failure_message(
+					"плита %s закрыла угловой предмет (%s)" % [r, icon.get_global_rect()])

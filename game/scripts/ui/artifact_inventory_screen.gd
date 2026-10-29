@@ -649,6 +649,7 @@ func _update_desc(inv: HeroInventory) -> void:
 	if tip is Control:
 		# Подсказка без предмета — пустая плашка поперёк камня; в макете её там нет.
 		tip.visible = art != null
+		_layout_tip(inv, idx)
 	if art == null:
 		desc.text = ""
 		return
@@ -660,6 +661,57 @@ func _update_desc(inv: HeroInventory) -> void:
 	if nm is Label:
 		nm.text = art.display_name
 	desc.text = "%s\n%s" % [art.description, line]
+
+
+## Геометрия панели предмета (T-271). Панель живёт в поле сумки (зона D карты —
+## «панель поверх», §5) и не заходит на куклу: прежний rect ставил плиту над
+## полем куклы, и три её рамки оказывались под открытой подсказкой — слот под
+## ней нельзя было выбрать. Плита стоит в поле сумки и отжимается к
+## противоположному от предмета углу: полностью не закрывать ничего нельзя —
+## 460×240 при поле 720×354 перекрывает шесть клеток из десяти по горизонтали
+## при любом положении, — но предмет, над которым открыта подсказка, остаётся
+## видимым в углах поля.
+func _layout_tip(inv: HeroInventory, idx: int) -> void:
+	var tip := get_node_or_null("Center/Window/Sheet/ItemTip") as Control
+	if tip == null:
+		return
+	var field := HeroLayout.bag_canvas()
+	var size: Vector2 = HeroLayout.BLOCKS["ItemTip"].size
+	var pos := field.end - size
+	var cell := _item_canvas_rect(inv, idx)
+	if cell.size.x > 0.0:
+		var mid := field.position + field.size * 0.5
+		var at := cell.get_center()
+		pos.x = field.end.x - size.x if at.x < mid.x else field.position.x
+		pos.y = field.end.y - size.y if at.y < mid.y else field.position.y
+	_set_anchors_to_canvas(tip, Rect2(pos, size))
+
+
+## Прямоугольник предмета в координатах канвы; пустой — если предмета нет или
+## он уехал в полосу «Перевес» (там своей геометрии нет, и плита остаётся дома).
+func _item_canvas_rect(inv: HeroInventory, idx: int) -> Rect2:
+	if inv == null or idx < 0 or idx >= inv.backpack.size() or inv.is_overflow(idx):
+		return Rect2()
+	var art: Artifact = inv.backpack[idx]
+	if art == null:
+		return Rect2()
+	var r := item_rect(
+			inv.placements[idx], art.resolved_cells(), inv.rotated[idx], HeroLayout.grid_pitch())
+	return Rect2(r.position + HeroLayout.bag_canvas().position, r.size)
+
+
+## Rect в пикселях канвы 1600×900 → якоря листа. Доли, а не пиксели: лист
+## занимает окно целиком, и композиция держится при любом его размере (T-248).
+func _set_anchors_to_canvas(node: Control, r: Rect2) -> void:
+	var c := HeroLayout.CANVAS
+	node.anchor_left = r.position.x / c.x
+	node.anchor_top = r.position.y / c.y
+	node.anchor_right = (r.position.x + r.size.x) / c.x
+	node.anchor_bottom = (r.position.y + r.size.y) / c.y
+	node.offset_left = 0.0
+	node.offset_top = 0.0
+	node.offset_right = 0.0
+	node.offset_bottom = 0.0
 
 
 static func item_rect(

@@ -2233,10 +2233,10 @@ text = "?"
 
 
 [node name="ItemTip" type="PanelContainer" unique_id=1207 parent="Center/Window/Sheet"]
-anchor_left = 0.356875
-anchor_top = 0.333333
-anchor_right = 0.644375
-anchor_bottom = 0.600000
+anchor_left = 0.519375
+anchor_top = 0.698889
+anchor_right = 0.806875
+anchor_bottom = 0.965556
 theme_type_variation = &"PanelCard"
 visible = false
 

@@ -14,7 +14,7 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (26)
+## Реестры и процессы (27)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -44,6 +44,7 @@ date: 2026-10-14
 | [[ux-artifact-tip-t256]] | UX-review T-256 — карточка предмета (зона D экрана героя) | reference | 2026-10-29 |
 | [[ux-battle-hud-t241]] | UX-review боевого HUD в наполненном состоянии (T-241) | reference | 2026-10-29 |
 | [[ux-battle-hud-t310]] | UX-review боевого HUD после снятия мёртвого `turn_line` (T-310) | reference | 2026-10-29 |
+| [[ux-hero-tip-t271]] | UX-review T-271 — посадка карточки предмета (зона D экрана героя) | reference | 2026-10-29 |
 
 ## GDD и стиль (87)
 
