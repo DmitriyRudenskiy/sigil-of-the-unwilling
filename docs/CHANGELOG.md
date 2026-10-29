@@ -9,6 +9,51 @@ date: 2026-10-29
 
 # CHANGELOG — docs/
 
+## 2026-10-29 — T-241: «первый кадр боя» был пустым; наполненный HUD получил фикстуру, а реестр — три новых хвоста
+
+* **Что чинит.** `show_default_enemy_card(_state)` вызывался только в `_ready` (на
+  пустом состоянии) и при снятии прицела. Живой флоу (`world_battle_coordinator.gd:154`
+  → `battle_flow.gd:18`) стартует бой уже после `_ready`, поэтому на первом кадре боя
+  `target_card.visible == false`, подпись «Цель», а AC `docs/14-ux-battle-hud.md` §6 и
+  `dnd-battle-ladder` 4.1 требуют окно противника с AC/HP сразу. Вызов добавлен в
+  `start_battle`.
+* **Почему этого не было видно.** Восемь тестов `test_enemy_card_always_visible.gd`
+  были зелёны и до правки: они наполняли состояние вручную. Текст-тест
+  (`assert_true(src.count("_ui.show_default_enemy_card(_state)") >= 2`) тоже был зелёным
+  — оба вызова существовали. Красным стал только поведенческий тест, который идёт через
+  `start_battle` (тот же приём, что `test_campaign_training_live.gd` для T-254).
+* **Носитель состояния.** `game/tools/capture/battle_hud_full.gd` — герой в ростере
+  (`GameNumbersHero.HERO_BATTLE_KEY`), `HeroMagic` с маной 12/20, три стека защиты,
+  снег. Он же наполняет канон-кадр (`tests/mcp/test_capture.py`), он же исполняется в
+  MCP-тесте `tests/mcp/test_battle_hud_live_populated.py`, он же возвращает словарь
+  диагностики в кадр. Один носитель на три уровня.
+* **Тестовый леджер.** +8 кейсов / −0 / quarantine 0 / нетто +8 (было 3601 → стало
+  3609 GdUnit+MCP): 4 GdUnit-кейса геометрии и кегля в канонических 1920×1080
+  (`test_battle_hud_populated_at_full_hd.gd`, размер кадра ставится как в T-220,
+  потому что Xvfb гейма — 1024×768, `game/run_tests.sh:195`), 3 MCP-кейса живого пути,
+  1 поведенческий в `test_enemy_card_always_visible.gd`. Батарея
+  `tools/mut_enemy_card.sh` дополнена M6 (вызов снят → красный), он же опровергает
+  не-пустоту нового MCP-теста: 1 failed, 2 passed.
+* **Эрратум premise T-241.** «фикстуры нет» — были две, но не наполняли карточки;
+  «живая `turn_queue`» — очередь и таймер сняты D-283.
+* **Реестр.** T-241 закрыт; **T-144** снят как moot (D-283 удалил `turn_time_left`,
+  каскад промахнул эту запись — симметричный T-230 закрыли тогда же); заведены
+  **T-310** (мёртвый `turn_line`, существование которого закреплён тестом),
+  **T-311** (`DnDBattleFactory` — ноль вызовов из продукции: строк «Уровень»/«Здоровье»
+  героя и «Способности» противника в живом бою не бывает; владелец), **T-312**
+  (макет-источник `design/single_window_layout/all_screens_ui.png` отсутствует, а
+  протокол ux-review и AC раунда `ui-mockup-parity` на него ссылаются).
+* **Что не удалось измерить.** Межпрогонный пиксель-дифф кадра «карточка показана /
+  скрыта» непригоден: два прогона Godot дают разные кадры анимации, bbox разницы уехал
+  на поле (329,149)–(1591,452) при прямоугольнике карточки (1546,370)–(1906,710).
+  Запрет зафиксирован в ux-review, чтобы меру не повторяли.
+* **Каскад:** `game/scripts/systems/battle_controller.gd`,
+  `game/tests/unit/ui/test_enemy_card_always_visible.gd`,
+  `game/tools/mut_enemy_card.sh`, `game/tools/capture/battle_hud_full.gd` (+`.uid`),
+  `game/tests/unit/ui/test_battle_hud_populated_at_full_hd.gd` (+`.uid`),
+  `game/tests/mcp/test_battle_hud_live_populated.py`, `docs/mvp/TICKETS.md`,
+  `docs/mvp/matrix/2026-10-29/ux-battle-hud-t241.md`, `docs/mvp/TEST-MAP.md`.
+
 ## 2026-10-29 — T-296: литерал пути узла сверяется со сценой MACHINE, появился NODE-PATH-GATE
 
 * **Что добавлено.** `scripts/check_node_paths.py` — уровень `NODE-PATH-GATE` в

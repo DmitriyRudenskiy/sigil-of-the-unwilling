@@ -381,6 +381,12 @@ func start_battle(
 
 	_executor.start_battle()
 
+	# 4.1 (M1) во втором месте: `_ready` зовёт карточку на пустом состоянии, а живой
+	# флоу (world_battle_coordinator.gd:154) стартует бой уже после ready — без этого
+	# вызова «первый кадр боя» прошёл бы с пустым правым краем кадра (T-241, кадр
+	# docs/mvp/matrix/2026-10-29/ux-battle-hud-t241.md: target_card.visible == false).
+	_ui.show_default_enemy_card(_state)
+
 ## T-220: запас поля боя берётся из геометрии полос HUD, а не из константы разрешения.
 func _apply_hud_reserve() -> void:
 	var bands := _ui.hud_bands()
