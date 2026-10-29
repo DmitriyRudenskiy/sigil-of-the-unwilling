@@ -1,0 +1,70 @@
+Gate local — T-171 (dict-форма тренировки снята, тесты перенесены на живой носитель)
+=====================================================================================
+head_sha до коммита: b8a8bb80 (pushed)
+Прогон: ./game/run_tests.sh, 2026-10-29, машина шарится (MemAvailable 0 kB, чужой
+strata --serve держит shmem), CI не проверялся (по инструкции владельца от 2026-10-13).
+Док-гейты: ./scripts/doc_gates.sh — отдельным прогоном (в run_tests.sh их нет).
+
+GdUnit (unit/integration/functional, headless)
+----------------------------------------------
+Exit code: 0
+Зачёт по журналу прогона (строки вида `res://tests/... > test_... PASSED`):
+  3601 test cases | 0 failures | 0 errors   (STARTED == PASSED == 3601, потер нет)
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+LINT: SKIPPED (нет gdtoolkit у python3 — T-288)
+
+Леджер теста тренировки: было 37 → стало 32 (−18 удалён
+tests/unit/campaign/test_campaign_training_service.gd, +13 tests/unit/campaign/
+test_campaign_training_live.gd вырос 14 → 27). Нетто смены −5:
+3606 → 3601 — совпало с предсказанием до прогона, расхождений нет.
+
+Локальная перепроверка затронутых файлов (до полного гейта, GdUnitCmdTool):
+  test_campaign_training_live.gd     27 | 0 | 0  PASSED
+  test_mvp_save.gd                   11 | 0 | 0  PASSED
+  test_campaign_city_economy_scenario.gd 2 | 0 | 0 PASSED  (числа зонда сохранены:
+    party.size()==1, class fighter, source training:guard_1/class:fighter,
+    детерминизм first == second)
+  test_training_class_mask.gd         5 | 0 | 0  PASSED
+Красный до удаления (основание удаления, а не «больше не вызывается»):
+  test_dict_entry_points_are_gone — 4 падения на ещё живом dict-входе.
+
+MCP e2e (живой Godot, Xvfb)
+---------------------------
+PYTEST LEDGER: passed=108 skipped=2 failed=0 errors=1 collected=111
+108 passed, 2 skipped, 1 error in 467.62s (0:07:47)
+MCP VERDICT: YELLOW
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за): среда,
+  не регрессия (D-265); тесты обязан переснять владелец либо повторный прогон
+Жертва: test_battle_controller::test_battle_via_controller_reaches_winner
+  :: failed on setup with "godot_mcp.MCPError: игра не готова за 180 с (последняя
+  ошибка: тулз game_eval вернул ошибку: Not connected to game interaction server.)"
+  mem_available=0MB из 47242MB swap_free=344/20479MB load1=0.99
+  godot_procs=1(rss=172MB, state=S:1) psi_memory=some avg10=0.00 avg60=0.00
+  avg300=0.70 total=6168817021
+Сверка с базлайном: 108/2/0/1 — те же числа, что до смены (T-299, T-283); тренировка
+не затронула ни один MCP-тест (носителя заявки нет — T-308).
+
+Прочие секции run_tests.sh
+--------------------------
+GENART: 11 passed in 2.29s (/home/user/.venv/map-art/bin/python)
+READINESS-CLASSIFIER: selftest GREEN (13 passed)
+
+Док-гейты (./scripts/doc_gates.sh)
+----------------------------------
+DOC GATES: GREEN
+OK: docs/ links consistent (108 notes checked)
+GDD-GATE: GREEN (d_without_rejected 170, t_duplicate_headers 0, t_multi_footer 0)
+OK: тесты самих проверщиков (9 файлов, 9.1.1) — 115 passed
+OPENSPEC SPECS: OK (проверено 87 сведённых спек)
+TESTMAP OK: дыр 81, файлов в группах слияния 144, дублей 0
+  (удаление test_campaign_training_service.gd рэтчет не ухудшило: merge_files 144,
+   дыр 81 — сверено с scripts/testmap.baseline.json прогоном --check)
+audit_docs_vs_code: «ДОК ССЫЛАЕТСЯ, ФАЙЛА НЕТ (0)»,
+  «НАЗВАНО ТОЛЬКО В РЕЕСТРАХ И ЖУРНАЛАХ (0)», базлайн 0 — опись 0
+
+Вердикт
+-------
+GdUnit 3601 / 0 / 0 (exit 0) + MCP YELLOW (среда, D-265, цифры базлайна) + док-гейты
+GREEN. Дымовая проверка по чек-листу — в треде; ревью диффа — владелец. CI не
+проверялся (по инструкции).

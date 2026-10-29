@@ -95,16 +95,24 @@ func _run_scenario() -> Dictionary:
 	var city := _make_city(6)
 	CityGrowthService.process_turn(city, 1)
 	var state := _state(city)
-	var trained := CampaignTrainingService.train(
-		state, _building_catalog(), 10, "fighter",
+	# Тренировка — живой носитель (T-171): заявка в очередь города и выдача тиком
+	# вместо dict-формы, которая ставила бойца в партию сразу. Стоимость и flow
+	# те же (total та же, source training:guard_1/class:fighter — проверяется ниже),
+	# партия зонда живёт в state.party, поэтому выдача докладывается в неё.
+	# Порог 2.4 (10 жителей на юнит, [ПРЕДЛОЖЕНИЕ]) здесь не предмет теста:
+	# город зонда — 2 жителя, отношение фиксируется параметром (1 юнит на 2),
+	# экономика сценария от порога не зависит.
+	var requested := CampaignTrainingService.request_training(
+		city, _building_catalog(), 10, "fighter",
 		{"id": "guard_1", "name": "Guard", "race": "humans",
 			"stats": {"str": 13, "dex": 10, "con": 10, "int": 10, "wis": 10, "cha": 10}},
-		[], 0, CampaignTrainingService.PARTY_CAPACITY, city.resource_ctx,
-		# Порог 2.4 (10 жителей на юнит, [ПРЕДЛОЖЕНИЕ]) здесь не предмет теста:
-		# город зонда — 2 жителя, отношение фиксируется параметром (1 юнит на 2),
-		# экономика сценария от порога не зависит.
-		2)
-	assert_bool(trained.ok).is_true()
+		0, [], 0, 2)
+	assert_bool(requested.ok).override_failure_message(str(requested.get("reason", ""))).is_true()
+	var issued: Dictionary = CampaignTrainingService.advance_training_turn(
+		city, CampaignTrainingService.PARTY_CAPACITY)
+	var issued_members: Array = issued["members"]
+	assert_that(issued_members.size()).is_equal(1)
+	state.party.append(issued_members[0])
 	var context := TurnContext.new()
 	context.cities.append(city)
 	var scheduler := TurnScheduler.new()

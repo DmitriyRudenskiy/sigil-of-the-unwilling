@@ -40,7 +40,8 @@ func _ready() -> void:
 
 
 ## Обновить экран по данным партии. `training_options` — прокинут хостом из
-## CampaignTrainingService.available_training_actions(); [] — без опций.
+## `CampaignTrainingService.available_training_actions_city()` (единственный вход
+## сервиса после T-171); [] — без опций.
 ## Длина очереди тренировки в MVP всегда 0 (immediate, без прогресса).
 func refresh(party: Array, capacity: int = Model.DEFAULT_CAPACITY, training_options: Array = []) -> void:
 	_model = Model.build_model(party, capacity, 0, training_options)

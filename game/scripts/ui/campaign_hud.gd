@@ -1063,8 +1063,7 @@ func bind_city(value: City, rng: RandomNumberGenerator = null) -> void:
 ## Граница: опций в этом экране нет, но уже не из-за сервиса — живая форма
 ## `CampaignTrainingService.available_training_actions_city` читает `City` (T-170,
 ## вариант (а)); кнопки заявки в HUD слоя кампании нет, она относится к UI-слою города
-## (`mvp-ui-flow`), и за ней ux-review. Dict-форма `available_training_actions`
-## остаётся наследием T-110 — вычищается в T-171.
+## (`mvp-ui-flow`), и за ней ux-review. Носитель кнопки заявки — предмет T-308.
 func bind_party(party: Array, capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY) -> void:
 	_party = party
 	if capacity != _party_capacity:
@@ -1216,6 +1215,8 @@ func refresh_city_screen() -> void:
 
 func refresh_party_screen() -> void:
 	if party_screen != null:
+		# Опции не прокинуты: у тренировки нет носителя заявки (T-308) — хосту нечего
+		# отдавать в экран, и пустой список здесь честнее выдуманного.
 		party_screen.refresh(_party, _party_capacity, [])
 
 

@@ -106,27 +106,45 @@ func test_campaign_city_and_trained_party_state_round_trip() -> void:
 	assert_that(trained["class"]).is_equal("fighter")
 	assert_that(trained.race).is_equal("human")
 
-func test_training_result_is_saved_with_party_and_resource_costs() -> void:
-	var state := _sample_state()
-	state.city.campaign_buildings = [{"uid": 8, "id": "barracks", "state": "active"}]
-	var catalog := {"schema_version": 1, "buildings": [{
-		"id": "barracks", "training": [{"class_id": "fighter",
-			"costs": {"food": 2.0, "iron": 1.0}}],
-		"prerequisites": {"buildings": [], "scenario_flags": [], "admin_capacity": 0},
-	}]}
-	var trained := CampaignTrainingService.train(state, catalog, 8, "fighter", {
-		"id": "new_guard", "name": "Guard", "race": "humans",
-		"stats": {"str": 13, "dex": 10, "con": 10, "int": 10, "wis": 10, "cha": 10},
-	})
-	assert_bool(trained.ok).is_true()
-	var saved := MvpSaveManager.save_slot(1, state)
-	assert_bool(saved.ok).is_true()
+
+## party-characters 2.5 (порт с dict-формы, T-171): выученный боец попадает в
+## партию и переживает запись/чтение слота — на живом носителе (заявка в очередь
+## города, выдача тиком).
+## Про стоимость здесь сказано честно: она списывается с city.resource_ctx, а
+## build_save_state() пишет секцию "resources" из settlement.stocks — два разных
+## регистра, и списание в сейв не попадает (замер T-171: ctx food 700→680,
+## stocks 600→600). Dict-форма проверяла 28.0/9.0, потому что сама и писала
+## state["resources"]; расхождение регистра зарегистрировано отдельным тикетом.
+func test_training_result_is_saved_with_party() -> void:
+	var comp: CampaignComposition = CampaignComposition.from_campaign_config(12345)
+	var city: City = comp.city
+	while city.pop.size() < 40:
+		city.add_migrant(PopUnit.State.WORKER, 0)
+	city.resource_ctx.add(&"food", 100.0)
+	city.resource_ctx.add(&"iron", 20.0)
+	city.campaign_buildings.append({"uid": 7, "id": "campaign_barracks", "state": "active",
+		"construction_turns_remaining": 0, "cell": city.center})
+	var alive := PartySystem.alive_members(comp.party).size()
+	var request := CampaignTrainingService.request_training(
+		city, CampaignBuildingCatalog.load_catalog(), 7, "fighter",
+		{"id": "new_guard", "name": "Guard", "race": "humans",
+			"stats": {"str": 13, "dex": 10, "con": 10, "int": 10, "wis": 10, "cha": 10}}, alive)
+	assert_bool(request.ok).override_failure_message(str(request.get("reason", ""))).is_true()
+	var issued: Dictionary = CampaignTrainingService.advance_training_turn(city, 5)
+	var members: Array = issued["members"]
+	assert_that(members.size()).is_equal(1)
+	comp.party.append(members[0])
+
+	var saved := MvpSaveManager.save_slot(1, comp.build_save_state())
+	assert_bool(saved.ok).override_failure_message(str(saved.get("message", ""))).is_true()
 	var loaded := MvpSaveManager.load_slot(1)
 	assert_bool(loaded.ok).is_true()
-	assert_that(loaded.state.party[-1].id).is_equal("new_guard")
-	assert_that(loaded.state.party[-1]["class"]).is_equal("fighter")
-	assert_float(float(loaded.state.resources.food)).is_equal_approx(28.0, 0.0001)
-	assert_float(float(loaded.state.resources.iron)).is_equal_approx(9.0, 0.0001)
+	var trained: Dictionary = loaded.state.party[-1]
+	assert_that(trained.id).is_equal("new_guard")
+	assert_that(trained["class"]).is_equal("fighter")
+	assert_that(trained.race).is_equal("humans")
+	assert_that(city.campaign_training).is_empty()
+
 
 func test_byte_determinism() -> void:
 	var state := _sample_state()

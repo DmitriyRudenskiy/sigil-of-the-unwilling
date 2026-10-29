@@ -90,7 +90,7 @@ static func slot_hint(party: Array, capacity: int, training_queue_length: int = 
 
 
 ## 3.1: полная модель экрана партии. `training_options` — прокинут из
-## CampaignTrainingService.available_training_actions() (визуальный слой);
+## `CampaignTrainingService.available_training_actions_city()` (визуальный слой);
 ## здесь не вычисляется (модель чистая, без каталога/ресурсов).
 static func build_model(
 	party: Array,
