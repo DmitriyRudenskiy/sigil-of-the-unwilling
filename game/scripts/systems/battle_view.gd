@@ -278,7 +278,7 @@ func _still_of(node: Node) -> Sprite2D:
 ## одним ростом (окончательную меру решает 3.3).
 static func scale_still(sp: Sprite2D, tex: Texture2D) -> void:
 	sp.scale = Vector2.ONE * (CharacterFrames.STILL_HEIGHT / float(tex.get_height()))
-	sp.offset = CharacterFrames.STILL_REST_OFFSET
+	sp.offset = CharacterFrames.still_rest_offset(tex)
 
 
 func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
@@ -294,6 +294,7 @@ func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 		# чужой походкой. Опора и разворот — те же, что у дорожек (3.9).
 		sp.texture = still
 		scale_still(sp, still)
+		n.set_meta("rest", sp.offset)
 		# Разворот — по направлению взгляда арта, а не по стороне напрямую: комплект
 		# смотрит влево, вырезы владельца нарисованы вправо (`CharacterFrames.faces_right`).
 		sp.flip_h = facing != CharacterFrames.faces_right(key)
@@ -357,13 +358,17 @@ func flash_unit(unit: BattleState.BattleUnit) -> void:
 		# Отдача от удара позой: сдвиг назад от противника (вырез развёрнут к нему)
 		# и возврат в опору покоя. Поза идёт по смещению, а не по позиции узла,
 		# поэтому не спорит с перемещением.
-		var rest_x := CharacterFrames.STILL_REST_OFFSET.x
+		# Покой — свой каждому вырезу (он зависит от высоты кадра), а не константа.
+		var rest: Vector2 = node.get_meta("rest")
+		# Амплитуда задана в world px, а `offset` — в единицах текстуры ДО `scale`:
+		# без делителя отдача в 6 px стала бы 1 px на экране и осталась бы невидимой.
+		var kick := STILL_RECOIL_PX / fig.scale.x
 		# Назад = прочь от противника, за кого он стоит, говорит мета facing, а не
 		# flip_h: у вырезов разворот перевёрнут относительно комплекта.
 		var faces: Vector2 = node.get_meta("faces")
 		var rt := create_tween()
-		rt.tween_property(fig, "offset:x", rest_x - faces.x * STILL_RECOIL_PX, GameNumbers.HIT_FLASH_SEC)
-		rt.tween_property(fig, "offset:x", rest_x, GameNumbers.HIT_FLASH_RECOVER_SEC)
+		rt.tween_property(fig, "offset:x", rest.x - faces.x * kick, GameNumbers.HIT_FLASH_SEC)
+		rt.tween_property(fig, "offset:x", rest.x, GameNumbers.HIT_FLASH_RECOVER_SEC)
 
 func remove_unit(unit: BattleState.BattleUnit) -> void:
 	var node := _find_node(unit)
@@ -394,8 +399,10 @@ func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> Tween:
 	var tw := create_tween()
 	_active_tweens[unit.uid] = tw
 	var half := MOVE_TWEEN_SEC * 0.5
-	var rest_y := CharacterFrames.STILL_REST_OFFSET.y
 	var fig := _still_of(node)
+	var rest: Vector2 = node.get_meta("rest") if fig != null else Vector2.ZERO
+	# Подъём позы — в world px, а `offset` — в единицах текстуры (см. `flash_unit`).
+	var lift := STILL_BOB_PX / fig.scale.y if fig != null else 0.0
 	for i in range(1, path.size()):
 		var to: Vector2 = field_point(path[i])
 		if fig == null:
@@ -406,9 +413,9 @@ func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> Tween:
 		# возвращается в покой. `parallel` обязателен: без него поза ехала бы
 		# отдельным шагом и темп пути удвоился. Темп пути от наличия позы не зависит.
 		tw.tween_property(node, "position", field_point(path[i - 1]).lerp(to, 0.5), half)
-		tw.parallel().tween_property(fig, "offset:y", rest_y - STILL_BOB_PX, half)
+		tw.parallel().tween_property(fig, "offset:y", rest.y - lift, half)
 		tw.tween_property(node, "position", to, half)
-		tw.parallel().tween_property(fig, "offset:y", rest_y, half)
+		tw.parallel().tween_property(fig, "offset:y", rest.y, half)
 	if an != null:
 		# `stop()` оставил бы юнита на последнем кадре походки — шаг на месте.
 		tw.tween_callback(func(): an.play(&"idle"))

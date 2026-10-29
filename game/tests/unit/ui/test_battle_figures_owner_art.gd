@@ -83,16 +83,19 @@ func test_owner_unit_stands_on_its_cutout() -> void:
 			"%s: буква-заглушка осталась поверх выреза" % key)
 
 
-## Опора и рост — общие с дорожками: стопы по нижнему краю кадра в позиции узла,
+## Опора и рост — общие с дорожками: нижний край кадра (линия стоп) в позиции узла,
 ## высота силуэта одинакова у всех вырезов, хотя кадры пришли разными (495–569 px).
+## Проверяется геометрия, а не константа смещения: `offset` — в единицах текстуры,
+## у каждого кадра он свой, и равенство констант ничего про стопы не говорит.
 func test_cutouts_share_anchor_and_height() -> void:
 	var heights := {}
 	for key: String in KEYS:
 		var u := _unit(key)
 		_view.create_unit_sprite(u)
 		var fig: Sprite2D = _sprite_of(u).get_node("Figure")
-		assert_vector(fig.offset).is_equal(CharacterFrames.STILL_REST_OFFSET) \
-			.override_failure_message("%s: вырез не стоит стопами в клетке" % key)
+		var feet := (fig.offset.y + fig.texture.get_height() / 2.0) * fig.scale.y
+		assert_float(feet).is_equal_approx(0.0, 0.01).override_failure_message(
+			"%s: стопы не в позиции узла, смещены на %.1f px" % [key, feet])
 		heights[key] = fig.scale.y * float(fig.texture.get_height())
 	for key: String in heights:
 		assert_float(heights[key]).is_equal_approx(CharacterFrames.STILL_HEIGHT, 0.01) \
@@ -121,15 +124,20 @@ func test_move_bobs_and_returns_to_rest() -> void:
 	var u := _unit("swordsmen")
 	_view.create_unit_sprite(u)
 	var fig: Sprite2D = _sprite_of(u).get_node("Figure")
-	var rest := CharacterFrames.STILL_REST_OFFSET
+	var rest: Vector2 = _sprite_of(u).get_meta("rest")
 	var tw := _view.animate_move(u, [u.cell, Vector2i(4, 2)])
 	assert_that(tw).is_not_null()
-	await await_millis(80)
-	# Порог без запаса: важна не величина подъёма, а то, что он начался (пик —
-	# середина полшага, то есть ~80 мс от команды). Осталась бы на опоре — и это
-	# скольжение статичной картинки.
-	assert_float(fig.offset.y).is_less(rest.y - 0.001) \
-		.override_failure_message("в пути поза осталась на опоре — это скольжение")
+	# Темп пути (0.15 с) короче кадра headless-теста, поэтому сэмпл «по часам»
+	# ловил бы позу в произвольной фазе. `custom_step` по шагу перематывает твин
+	# детерминированно: пик подъёма — конец первой половины полшага.
+	tw.pause()
+	tw.custom_step(GameNumbers.BATTLE_MOVE_TWEEN_SEC * 0.5)
+	# Мера — экран, а не единицы текстуры: `offset` домножается на `scale`, и без
+	# делителя подъём в 5 px давал бы ~1 px на поле (поза есть — не видно).
+	assert_float((rest.y - fig.offset.y) * fig.scale.y).is_greater_equal(4.0) \
+		.override_failure_message(
+			"в пути поза поднялась на экране меньше чем на 4 px — это скольжение")
+	tw.play()
 	await tw.finished
 	assert_vector(fig.offset).is_equal(rest) \
 		.override_failure_message("после шага поза не вернулась в покой")
@@ -141,11 +149,13 @@ func test_hit_recoils_and_returns_to_rest() -> void:
 	var u := _unit("knights")
 	_view.create_unit_sprite(u)
 	var fig: Sprite2D = _sprite_of(u).get_node("Figure")
-	var rest := CharacterFrames.STILL_REST_OFFSET
+	var rest: Vector2 = _sprite_of(u).get_meta("rest")
 	_view.flash_unit(u)
 	await await_millis(100)
 	assert_float(fig.offset.x).is_less(rest.x - 0.001) \
 		.override_failure_message("отдача атакующего обязана уйти назад по x (получено %.1f)" % fig.offset.x)
+	assert_float((rest.x - fig.offset.x) * fig.scale.x).is_greater_equal(2.0) \
+		.override_failure_message("отдача на экране меньше 2 px — анимация невидима")
 	await await_millis(400)
 	assert_vector(fig.offset).is_equal(rest) \
 		.override_failure_message("после удара поза не вернулась в покой")
