@@ -160,6 +160,25 @@ else
 	echo "VACUOUS-ASSERT-GATE: SKIPPED (python3 не найден — уровень молчит, зафиксировать в отчёте)"
 fi
 echo ""
+echo "=== пути узлов из скриптов ↔ сцены: сканер T-296 (гейт) ==="
+# Класс «переехал блок — скрипт остался»: экраны собираются генераторами, путь
+# узла — строковый литерал, а `get_node_or_null(...) is Label` делает промах
+# неотличимым от успеха. GdUnit этого не видит (тест экрана проверяет своё),
+# документальные гейты — тоже. Так потерялись левая колонка (D-280), строки
+# надетого (T-254), рамки куклы (T-294), полоса маны и навыков (T-295).
+if command -v python3 >/dev/null 2>&1; then
+	if PATHS="$(cd .. && python3 scripts/check_node_paths.py 2>&1)"; then
+		echo "$PATHS"
+		echo "NODE-PATH-GATE: OK"
+	else
+		echo "NODE-PATH-GATE: RED — литерал пути не живёт в сцене (T-296):"
+		echo "$PATHS"
+		exit 1
+	fi
+else
+	echo "NODE-PATH-GATE: SKIPPED (python3 не найден — уровень молчит, зафиксировать в отчёте)"
+fi
+echo ""
 echo "=== MCP tests (tugcantopaloglu/godot-mcp) ==="
 MCP_SERVER="${GODOT_MCP_SERVER:-$PWD/addons/godot-mcp/build/index.js}"
 if [ ! -f "$MCP_SERVER" ]; then

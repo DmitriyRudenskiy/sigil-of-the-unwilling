@@ -1,0 +1,11 @@
+# Исключения гейта «путь узла из скрипта существует в сцене» (scripts/check_node_paths.py, T-296).
+# Формат: скрипт<TAB>литерал<TAB>причина. Табы обязательны.
+# Правила: причина обязана быть проверяемой (место, где узел появляется в рантайме);
+# запись без причины — RED; запись, чей литерал снова резолвится, — RED (список гниёт в обе стороны).
+game/scripts/systems/battle_view.gd	Figure	узел внутри инстанса scenes/ui/unit_sprite.tscn; battle_view.gd:12 подмешивает спрайт кодом, в сцене поля его нет
+game/scripts/systems/battle_view.gd	Anim	то же: scenes/ui/unit_sprite.tscn (AnimatedSprite2D), инстанс создаёт battle_view.gd:12
+game/scripts/systems/battle_view.gd	Initial	то же: scenes/ui/unit_sprite.tscn (иконка-буква), инстанс создаёт battle_view.gd:12
+game/scripts/systems/battle_view.gd	CountLabel	то же: scenes/ui/unit_sprite.tscn (счётчик стека), инстанс создаёт battle_view.gd:12
+game/scripts/probe/balance_probe.gd	Battle	имя бой получает в рантайме: battle_flow.gd:38 `_active_battle.name = "Battle"`; probe ищет его от get_tree().root
+game/scripts/probe/balance_probe.gd	BattleTurnExecutor	узел создаёт battle_controller.gd:46-47 (`BattleTurnExecutor.new()` + name), внутри рантайм-сцены боя
+game/scripts/probe/balance_probe.gd	WorldSpawner	узел создаёт world_bootstrap.gd:304-305 (`WorldSpawner.new()` + name) внутри world-сцены; живой путь подтверждён MCP-тестами (test_threat_rings_visual.py)

@@ -116,6 +116,12 @@ ux-review — не шаг владельца и не предлог отложи
 | `godot ... GdUnitCmdTool.gd -a res://tests/<файл>.gd` | Запуск одного тест-файла |
 | `Godot --path game -s tools/shot_scene.gd -- --scene=… [--state=…] --out=…` | Кадр ОДНОЙ сцены для шага разработки: без MCP-сервера и порта 9090, ~0.4 с; канон не доказывает |
 
+**NODE-PATH-GATE** (T-296) — уровень `game/run_tests.sh`: `scripts/check_node_paths.py`
+сверяет литералы путей узлов (`get_node*`, `$Path`, `const ПУТЬ`) с деревом парной
+`.tscn`; исключения — `scripts/node_paths_allowlist.txt` (табы, причина обязательна,
+устаревшая запись красная). Самопроверка чекера — `scripts/test_check_node_paths.py`
+в списке `TESTS` гейта `scripts/doc_gates.sh`.
+
 **Быстрые проверки шага** (тем проверяется правка до гейта): один файл GdUnit
 строкой выше; один pytest-узор (`pytest tests/mcp/test_capture.py -k <имя>`);
 `python3 scripts/ui_grid.py --self-check` и `--verify` по кадру; `gdlint`/`gdformat`
