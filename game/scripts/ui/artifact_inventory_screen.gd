@@ -714,12 +714,19 @@ func _set_anchors_to_canvas(node: Control, r: Rect2) -> void:
 	node.offset_bottom = 0.0
 
 
+## Прямоугольник предмета в клетках `origin`+`cells` (поворот — менада осей).
+##
+## Шаг передаётся **явно и обязателен**: у этого прямоугольника нет «своего» шага.
+## Значение по умолчанию (`HeroLayout.grid_pitch()`) было вторым носителем геометрии:
+## вызывающий в живых координатах растянутого окна (T-248), забывший аргумент, молча
+## получал канва-шаг макета — рамка становилась шире своих клеток и смещалась, чем
+## описан симптом T-255. Живой шаг даёт `_bag_pitch()`, канва-шаг остаётся только там,
+## где координаты и есть канва (`_item_canvas_rect`).
 static func item_rect(
-			origin: Vector2i, cells: Vector2i, rot: bool, pitch: Vector2 = Vector2.ZERO) -> Rect2:
+			origin: Vector2i, cells: Vector2i, rot: bool, pitch: Vector2) -> Rect2:
 	var c: Vector2i = Vector2i(cells.y, cells.x) if rot else cells
-	var p := pitch if pitch != Vector2.ZERO else HeroLayout.grid_pitch()
 	var gap := Vector2(ITEM_GAP, ITEM_GAP)
-	return Rect2(Vector2(origin) * p, Vector2(c) * p - gap)
+	return Rect2(Vector2(origin) * pitch, Vector2(c) * pitch - gap)
 
 func _on_equip() -> void:
 	if _hero == null:

@@ -299,3 +299,77 @@ func test_tip_steps_away_from_a_corner_item() -> void:
 		assert_bool(not r.has_point(icon.get_global_rect().get_center())).is_true() \
 			.override_failure_message(
 					"плита %s закрыла угловой предмет (%s)" % [r, icon.get_global_rect()])
+
+## Прямоугольник обязан лежать внутри поля сумки с допуском в полпикселя:
+## долевой шаг даёт дробные координаты, а верхняя кромка предмета верхнего ряда
+## совпадает с границей поля, а не отстоит от неё.
+func _inside(field: Rect2, r: Rect2) -> bool:
+	var TOL := 0.5
+	return r.position.x >= field.position.x - TOL \
+			and r.position.y >= field.position.y - TOL \
+			and r.end.x <= field.end.x + TOL \
+			and r.end.y <= field.end.y + TOL
+
+
+## Предмет и его рамки обязаны оставаться внутри поля сумки (T-255).
+##
+## Симптом тикета — «иконки верхнего ряда вылезают за верхнюю границу сетки» —
+## держался не на двух шагах решётки, а на `expand_mode = KEEP_SIZE` у
+## клетки-текстуры: минимум такого узла равен размеру плитки, поэтому клетка из
+## плитки 96 px не сжималась до своих 76 и торчала за `Bag` (снято в 16224d78).
+## Равенство шага клеток и оверлеев сторожит `test_cells_and_items_share_one_pitch`;
+## этот кейс сторожит следствие на опасном крае — у предмета в нулевой строке
+## верхняя кромка и есть граница поля, а рамка выделения («шире своих клеток и
+## смещена вправо-вверх» по тикету) обязана совпадать с прямоугольником предмета.
+func test_item_and_its_frames_stay_inside_the_field() -> void:
+	var screen := await _mk_screen(true)
+	var inv: HeroInventory = _hero.inventory
+	assert_that(inv.add_to_backpack(_art("t255_shield", Artifact.Slot.SHIELD, Vector2i(3, 2)))) \
+		.is_true()
+	assert_that(inv.add_to_backpack(_art("t255_banner", Artifact.Slot.TORSO, Vector2i(2, 3)))) \
+		.is_true()
+	# Опасные края сетки: верхняя строка (кромка предмета = граница поля) и
+	# левый нижний угол (предмет 2×3 у нижней границы).
+	inv.placements[0] = Vector2i(6, 0)
+	inv.placements[1] = Vector2i(0, 2)
+	screen._refresh_grid()
+	screen.select_backpack(0)
+	await await_idle_frame()
+	var field := (screen.get_node_or_null(_BAG) as Control).get_global_rect()
+	var items := screen.get_node_or_null(_ITEMS) as Node
+	assert_that(items.get_child_count()).is_equal(2)
+	var first := Rect2()
+	for idx in 2:
+		var icon := items.get_node_or_null("Item_%d" % idx) as Control
+		assert_that(icon).is_not_null()
+		var r := icon.get_global_rect()
+		assert_bool(_inside(field, r)).is_true() \
+			.override_failure_message("иконка %d (%s) вышла за поле %s" % [idx, r, field])
+		if idx == 0:
+			first = r
+	# Рамка выделения = сам предмет: ни шире, ни смещённее (иначе подсветка врёт
+	# о том, какие клетки заняты, — ровно формулировка тикета).
+	var mark := screen.get_node_or_null(
+			"%s/Item_0/%s" % [_ITEMS, ArtifactInventoryScreen._MARK_SELECTED]) as Control
+	assert_that(mark).is_not_null()
+	assert_bool(mark.get_global_rect() == first).is_true() \
+		.override_failure_message(
+				"рамка %s не совпала с предметом %s" % [mark.get_global_rect(), first])
+	for strip in mark.get_children():
+		assert_bool(_inside(field, (strip as Control).get_global_rect())).is_true() \
+			.override_failure_message("полоска рамки выделения вышла за поле сумки")
+
+## У прямоугольника предмета не может быть «своего» шага решётки (T-255): шаг —
+## обязательный параметр, а не значение по умолчанию. Скан исходника, а не
+## поведение: вызывающий, которому вернётся канва-шаг по умолчанию, красит
+## поведенческие тесты только на растянутом окне (T-248), а здесь проверяется
+## сам носитель — подпись функции.
+func test_item_rect_has_no_default_pitch() -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/ui/artifact_inventory_screen.gd")
+	var at := src.find("static func item_rect(")
+	assert_bool(at >= 0).is_true().override_failure_message("предметный rect не найден в носителе")
+	var block := src.substr(at, src.find("\n\n", at) - at)
+	assert_bool(block.contains("= Vector2.ZERO")).is_false() \
+		.override_failure_message("у item_rect снова есть шаг по умолчанию — второй носитель решётки")
+	assert_bool(block.contains("grid_pitch")).is_false() \
+		.override_failure_message("item_rect сам читает канва-шаг: вызывающий теряет пространство координат")
