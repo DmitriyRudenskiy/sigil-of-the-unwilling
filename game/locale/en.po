@@ -101,6 +101,15 @@ msgstr "SPELL: {id}"
 msgid "battle.retreat_confirm"
 msgstr "Retreat! Lose 50% of stacks."
 
+msgid "battle.auto_confirm"
+msgstr "Auto-battle will finish this fight without you. Continue?"
+
+msgid "battle.auto_confirm_ok"
+msgstr "Auto-battle"
+
+msgid "battle.auto_confirm_cancel"
+msgstr "Cancel"
+
 msgid "battle.defend_bonus"
 msgstr "🛡️ Defend: +20% DEF until end of round."
 

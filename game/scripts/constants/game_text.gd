@@ -97,6 +97,9 @@ static func battle_luck() -> String: return TranslationServer.translate("battle.
 static func battle_killed(count: int) -> String: return TranslationServer.translate("battle.killed").format({"n": count})
 static func battle_spell_label(id: StringName) -> String: return TranslationServer.translate("battle.spell_label").format({"id": id})
 static func battle_retreat_confirm() -> String: return TranslationServer.translate("battle.retreat_confirm")
+static func battle_auto_confirm() -> String: return TranslationServer.translate("battle.auto_confirm")
+static func battle_auto_confirm_ok() -> String: return TranslationServer.translate("battle.auto_confirm_ok")
+static func battle_auto_confirm_cancel() -> String: return TranslationServer.translate("battle.auto_confirm_cancel")
 static func battle_defend_bonus() -> String: return TranslationServer.translate("battle.defend_bonus")
 static func battle_damage_preview(dmin: int, dmax: int, kmin: int, kmax: int) -> String:
 	return TranslationServer.translate("battle.damage_preview").format({"dmin": dmin, "dmax": dmax, "kmin": kmin, "kmax": kmax})
