@@ -14,7 +14,7 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (24)
+## Реестры и процессы (25)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -42,6 +42,7 @@ date: 2026-10-14
 | [[ux-battle-99]] | UX-review поля боя 11×9 (battle-99-hex-clean-hud) | reference | 2026-10-28 |
 | [[ux-theme-t228]] | UX-review T-228 — витрина §4.8 (пластина подсказки) и экран инвентаря | reference | 2026-10-28 |
 | [[ux-battle-hud-t241]] | UX-review боевого HUD в наполненном состоянии (T-241) | reference | 2026-10-29 |
+| [[ux-battle-hud-t310]] | UX-review боевого HUD после снятия мёртвого `turn_line` (T-310) | reference | 2026-10-29 |
 
 ## GDD и стиль (87)
 

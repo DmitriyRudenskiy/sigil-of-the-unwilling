@@ -31,7 +31,6 @@ func test_battle_ui_log_history_nodes() -> void:
 	_ui = ui
 	get_tree().root.add_child(ui)
 
-	assert_object(ui._turn_line).is_not_null().override_failure_message("turn_line не разрешился")
 	assert_object(ui._log_line).is_not_null().override_failure_message("log_line не разрешился")
 	assert_object(ui._history_btn).is_not_null().override_failure_message("history_btn не разрешился")
 	assert_object(ui._history_panel).is_not_null().override_failure_message("history_panel не разрешился")

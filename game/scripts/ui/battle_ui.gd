@@ -31,7 +31,6 @@ static var _hero_portrait: Texture2D = null
 @onready var _rescue_btn: Button = $"bottom_bar/bar_box/left_box/rescue_btn"
 @onready var _wait_btn: Button = $"bottom_bar/bar_box/right_box/wait_btn"
 @onready var _attack_button: Button = $"bottom_bar/bar_box/right_box/attack_btn"
-@onready var _turn_line: Label = $"bottom_bar/info_box/turn_line"
 @onready var _log_line: Label = $"bottom_bar/info_box/log_row/log_line"
 # ▲▼ прокрутки лога из сцены сняты (макет 11 их не несёт); обработчики
 # остались и работают со стрелок ↑/↓, поэтому здесь только ☰.

@@ -1,0 +1,32 @@
+T-310 · локальный гейт (head 9d0bb1e4, 2026-10-29) — снятие мёртвого turn_line
+GdUnit: Overall Summary: 3606 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+NODE-PATH-GATE: OK
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+MCP: PYTEST LEDGER: passed=110 skipped=2 failed=1 errors=1 collected=114
+MCP READINESS: YELLOW — 2 error с подпиской readiness (игра не готова за): среда, не регрессия (D-265); тесты обязан переснять владелец либо повторный прогон:
+  - test_hexutils_perf::test_bfs_reachable_performance :: failed on setup with "godot_mcp.MCPError: игра не готова за 180 с (последняя ошибка: тулз game_eval вернул ошибку: Not connected to game interaction server.)
+  - test_main_menu_buttons_live::test_live_disabled_states :: godot_mcp.MCPError: игра не готова за 180 с (последняя ошибка: тулз game_eval вернул ошибку: Not connected to game interaction server.)
+MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265)
+GENART: 11 passed in 2.29s · CLASSIFIER: READINESS-CLASSIFIER: selftest GREEN
+
+GDD-GATE: GREEN
+OPENSPEC SPECS: OK (проверено 87 сведённых спек)
+TESTMAP OK: дыр 81, файлов в группах слияния 145, дублей 0
+DOC GATES: GREEN
+
+Толкование. GATE = 0: MCP VERDICT YELLOW — единственные красный кейс и ошибка
+(`test_main_menu_buttons_live::test_live_disabled_states`,
+`test_hexutils_perf::test_bfs_reachable_performance`) сняты классификатором как
+readiness-подпись «игра не готова за 180 с» (D-265), MemAvailable на старте прогона
+1 397 880 kB. К снятию `turn_line` они не относятся: первый поднимает главное меню,
+второй — BFS по хекс-сетке, ни один не читает нижнюю полосу боевого HUD.
+
+Точечные прогоны поверх полного (полный прогна́н на дереве с правкой):
+- test_battle_ui_onready, test_battle_hud_populated_at_full_hd,
+  test_enemy_card_always_visible, test_battle_ui_hud_zones, test_battle_theme_carrier
+  → Overall Summary: 25 test cases | 0 errors | 0 failures;
+- test_battle_field_fit, test_battle_field_fit_720p, test_ui_responsive,
+  test_theme_source_scan, test_live_font_hygiene → 0 падений (в том же прогоне
+  пройдены field-fit и responsive).
