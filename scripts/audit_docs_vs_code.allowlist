@@ -17,7 +17,6 @@ AutoBalancer
 BaseTest
 BattleAI
 BattleAttackSequence
-BattleEmulator
 BattleFlanking
 BattleInfoModel
 BattleInput
