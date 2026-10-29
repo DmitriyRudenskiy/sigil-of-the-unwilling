@@ -89,3 +89,29 @@ func test_medallions_bare_and_journal_tab_alive() -> void:
 	assert_bool(ui._history_btn.visible).is_true()
 	var row: Rect2 = ui.get_node("bottom_bar/bar_box").get_global_rect()
 	assert_bool(ui._history_btn.get_global_rect().end.y <= row.position.y + 1.0).override_failure_message("вкладка журнала не вышла из ряда").is_true()
+
+# (7) D-294: R открывает диалог выхода, «Опции» — угловая шестерня вне ряда.
+func test_exit_hotkey_and_corner_options() -> void:
+	var ui: BattleUI = await _ready_ui()
+	assert_bool(_hotkeys_of(ui).has(KEY_R)).override_failure_message("R не открывает диалог выхода").is_true()
+	var fired := [false]
+	ui.settings_requested.connect(func() -> void: fired[0] = true)
+	var gear: Button = ui.get_node_or_null("settings_btn")
+	assert_object(gear).is_not_null()
+	var row: Rect2 = ui.get_node("bottom_bar/bar_box").get_global_rect()
+	assert_bool(row.intersects(gear.get_global_rect())).override_failure_message(
+		"шестерня стоит в командном ряду").is_false()
+	gear.emit_signal("pressed")
+	assert_bool(fired[0]).is_true()
+	ui._hotkeys[KEY_R].emit_signal("pressed")
+	var dlg: AcceptDialog = null
+	for c: Node in ui.get_children():
+		if c is AcceptDialog:
+			dlg = c
+	assert_object(dlg).is_not_null()
+	dlg.queue_free()
+
+
+func _hotkeys_of(ui: BattleUI) -> Dictionary:
+	return ui._hotkeys
+

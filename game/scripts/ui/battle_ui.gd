@@ -211,7 +211,7 @@ func _connect_skeleton() -> void:
 	_hotkeys = {
 		# D-294: хоткеи дублируют кнопки ряда; у Атаки хоткея нет (цель — клик).
 		KEY_A: _auto_btn, KEY_W: _wait_btn, KEY_S: _skip_btn,
-		KEY_D: _defend_btn, KEY_B: _spellbook_btn,
+		KEY_D: _defend_btn, KEY_B: _spellbook_btn, KEY_R: _retreat_btn,
 		KEY_C: get_node_or_null("bottom_bar/bar_box/right_box/cancel_btn"),
 	}
 	for box: Node in [$bottom_bar/bar_box/left_box, $bottom_bar/bar_box/right_box]:
@@ -581,8 +581,7 @@ func _apply_command_row() -> void:
 	var _rescue_node: Button = get_node_or_null("bottom_bar/bar_box/left_box/rescue_btn")
 	if _rescue_node != null:
 		_rescue_text = _rescue_node.get_node("caption").text
-	for _dead in ["bottom_bar/bar_box/left_box/settings_btn",
-			"bottom_bar/bar_box/left_box/rescue_btn",
+	for _dead in ["bottom_bar/bar_box/left_box/rescue_btn",
 			"bottom_bar/bar_box/right_box/slot_empty_1",
 			"bottom_bar/bar_box/right_box/slot_empty_2"]:
 		var _n: Node = get_node_or_null(_dead)
@@ -612,3 +611,21 @@ func _apply_command_row() -> void:
 	# D-294: вкладка журнала вне ряда живёт с первого кадра боя — раньше она
 	# просыпалась с первой записью лога, пока была частью строки журнала (макет 11).
 	_history_btn.visible = true
+	# D-294: «Опции» — некоманда ряда, но не невидимка: шестерня живёт в углу
+	# кадра вне ряда, Esc дублирует её (мышь без клавиатуры остаётся с входом).
+	var gear: Button = get_node_or_null("bottom_bar/bar_box/left_box/settings_btn")
+	if gear != null:
+		gear.get_parent().remove_child(gear)
+		add_child(gear)
+		gear.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		# Отступы — под минимальный размер медальона 100×100: с -76 кнопка
+		# растягивалась до 100 и вылезала за правый край layout-канвы.
+		gear.offset_left = -116.0
+		gear.offset_top = 16.0
+		gear.offset_right = -16.0
+		gear.offset_bottom = 116.0
+		gear.tooltip_text = "Опции (Esc)"
+		gear.pressed.connect(_on_settings)
+		var gear_cap: Label = gear.get_node_or_null("caption")
+		if gear_cap != null:
+			gear_cap.visible = false
