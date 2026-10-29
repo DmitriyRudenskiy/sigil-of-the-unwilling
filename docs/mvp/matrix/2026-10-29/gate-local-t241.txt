@@ -1,10 +1,12 @@
 Gate local — T-241 (первый кадр живого боя: карточка противника, карточка героя, кегль)
 =======================================================================================
-head_sha до коммита: b8bcb649 (pushed)
-Прогон: ./game/run_tests.sh, 2026-10-29, машина шарится (MemAvailable 0 kB, чужой
-PID 762871 `strata --serve` держит ~28.5 GB shmem), CI не проверялся (по инструкции
-владельца от 2026-10-13). Док-гейты — ./scripts/doc_gates.sh отдельным прогоном (в
-run_tests.sh их нет). Локально: local-прогон, пиксельные кадры — вне git (D-185).
+head_sha: b8bcb649 (pushed) → срез коммитом 41ed3022 (локальный, до пуша)
+Прогон: ./game/run_tests.sh, 2026-10-29, ДВАЖДЫ: первый — на коде среза до правки одного
+комментария в battle_controller.gd, второй (отчётный) — на уже закоммиченном коде 41ed3022.
+Машина шарится (MemAvailable 0 kB, чужой PID 762871 `strata --serve` держит ~28.5 GB
+shmem), CI не проверялся (по инструкции владельца от 2026-10-13). Док-гейты —
+./scripts/doc_gates.sh отдельным прогоном (в run_tests.sh их нет). Пиксельные кадры —
+вне git (D-185), резерв и манифест: ~/.local/share/sigil-reserve/battle-hud-t241/.
 
 GdUnit (unit + integration + functional)
 ----------------------------------------
@@ -21,17 +23,25 @@ GdUnit-счётчик: 3601 → 3606 (+5: 4 кейса нового файла �
 
 MCP e2e (четвёртый уровень)
 ---------------------------
-PYTEST LEDGER: passed=112 skipped=2 failed=0 errors=0 collected=114
-MCP JUNIT: passed=112 skipped=2 failed=0 errors=0
-MCP VERDICT: GREEN
+Отчётный прогон — ВТОРОЙ, на том коде, что коммитится (первый был на коде среза до
+правки одного комментария в battle_controller.gd; код тестов и сцен между прогонами не
+менялся):
+PYTEST LEDGER: passed=111 skipped=2 failed=0 errors=1 collected=114
+MCP JUNIT: passed=111 skipped=2 failed=0 errors=1
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за): среда, не
+регрессия (D-265); тесты обязан переснять владелец либо повторный прогон:
+  - test_campaign_carrier::test_button_press_opens_city_screen :: failed on setup with
+    "MCPError: игра не готова за 180 с (… Not connected to game interaction server.)"
+MCP VERDICT: YELLOW
   SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
   SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://...
-Счётчик: 111 collected / 108 passed / 1 failed → 114 collected / 112 passed / 0 failed.
-Прибавка = 3 новых кейса test_battle_hud_live_populated.py; плюс восстановился
-test_balance_probe::test_balance_probe_deterministic, который четырьмя прогонами подряд
-был единственным красным (readiness 180 с при MemAvailable 0). То есть уровень впервые
-за серию прогонов зелёц ЦЕЛИКОМ — жёлтым его держала среда, а не код; это наблюдение, а
-не обещание: при MemAvailable 0 readiness по-прежнему на грани.
+
+Первый прогон того же среза: passed=112 skipped=2 failed=0 errors=0 collected=114,
+MCP VERDICT: GREEN. Расхождение одного сбора между прогонами — тот же `test_campaign_carrier`
+(readiness 180 с при MemAvailable 0 kB), поэтому жёлтым стоит считать и уровень в целом
+нестабильным: за серию из пяти прогонов он давал и GREEN, и YELLOW на разных тестах.
+Ни один из двух прогонов не краснел на новых тестах: `test_battle_hud_live_populated.py`
+проходил в обоих (3 сбора). Счётчик сборов: 111 → 114 collected — это три новых кейса.
 
 Док-гейты (./scripts/doc_gates.sh)
 ----------------------------------
@@ -70,15 +80,32 @@ false, hero_hp_visible: false (строки без носителя в живо�
 
 Мутационная не-пустота
 ----------------------
-Батарея game/tools/mut_enemy_card.sh, M1–M6 (прогон на чистом дереве, см. ниже в этом
-же коммите). M6 — вызов `show_default_enemy_card` снят из `start_battle`:
-GdUnit-файл краснеет (поведенческий кейс + текст-рэтчет), а MCP-файл даёт
-`1 failed, 2 passed` с сообщением дефекта:
+Батарея game/tools/mut_enemy_card.sh, M1–M6, прогон на чистом дереве после коммита
+(HEAD 41ed3022), GdUnit-файл test_enemy_card_always_visible.gd:
+  M1 — дефолт прячет окно (исторический дефект): 0 errors | 9 failures
+  M2 — мёртвый враг остаётся в окне: 0 errors | 1 failures
+  M3 — подпись врёт до наведения: 0 errors | 2 failures
+  M4 — вызов снят из _ready: 0 errors | 1 failures
+  M5 — параметр подписи проигнорирован: 0 errors | 2 failures
+  M6 — вызов снят из start_battle (живой бой стартует после ready): 0 errors | 5 failures
+  ИТОГ: все мутанты красные — гейт держит (exit 0)
+M6 — это и есть не-пустота нового уровня: до правки он был ЗЕЛЁНЫМ. Тот же мутант на
+MCP-уровне даёт `1 failed, 2 passed` (проверено отдельным прогоном до коммита), текст
+провала — первое же утверждение, выровненное по строке 76 файла теста:
   AssertionError: бой идёт, враг жив, а карточка противника скрыта — до первого
   наведения игрок не видит ни AC, ни HP: {... 'target_card_visible': False,
-  'tc_caption': 'Цель', 'tc_def': '', 'tc_hp': '', 'tc_name': '' ...}
+  'tc_caption': 'Цель', 'tc_name': '', 'tc_hp': '', 'tc_def': '' ...}
 До правки M6 был зелёным — ровно поэтому текст-тест (`count(...) >= 2`) поднят до `>= 3`
 и добавлен поведенческий кейс.
+
+Что мутант НЕ краснит и что краснит в новом файле (замерено отдельно, прогон
+`test_battle_hud_populated_at_full_hd.gd` на дереве с manually снятым вызовом, затем
+`git checkout --`): M6 краснит и этот файл — `test_enemy_card_is_filled_at_full_hd`
+FAILED (сводка: 4 test cases | 0 errors | 5 failures). Зелёными под M6 остаются
+`test_hero_card_is_filled_at_full_hd`, `test_cards_stay_above_the_command_band` и
+`test_card_labels_meet_the_font_floor`: они утверждают другое (наличие героя, раскладку
+и кегль), а не факт наполненности окна цели. Это решение, а не промах: не-пустота
+уровня закреплена за первым кейсом и за M6, а базовый прогон без мутанта — 4/4 зелёные.
 
 Замер, который не удался (фиксируется, чтобы не повторяли)
 ----------------------------------------------------------
