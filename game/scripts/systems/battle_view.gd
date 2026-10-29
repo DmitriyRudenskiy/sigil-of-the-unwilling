@@ -6,6 +6,10 @@ const HEX_OUTLINE_RADIUS := GameNumbers.BATTLE_HEX_OUTLINE_RADIUS
 const ATTACK_LUNGE_PX := GameNumbers.BATTLE_ATTACK_LUNGE_PX
 const MOVE_TWEEN_SEC := GameNumbers.BATTLE_MOVE_TWEEN_SEC
 
+## Амплитуда процедурных поз выреза (3.9): подпрыгивание в пути и отдача от удара.
+const STILL_BOB_PX := 5.0
+const STILL_RECOIL_PX := 6.0
+
 ## Порядок отрисовки фигур по ряду (3.8): ближний к нижнему краю перекрывает
 ## дальнего, и перекрывающиеся силуэты читаются глубиной, а не кашей. База 6 —
 ## над подсветкой поля (`_overlay` = 5), ниже подписей урона (20) и курсора (30).
@@ -261,20 +265,50 @@ static func unit_z(row: int) -> int:
 	return UNIT_Z_BASE + row
 
 
+## Поза-вырез юнита либо `null`: у юнита с дорожками (или портретом) процедурной
+## анимации позы не нужно (задача 3.9).
+func _still_of(node: Node) -> Sprite2D:
+	if node == null or not node.has_meta("still"):
+		return null
+	return node.get_node_or_null("Figure") as Sprite2D
+
+
+## Поза-вырез ставится в клетку единой мерой высоты, а не нативным размером
+## кадра: вырезы пришли разными кадрами (495–569 px), а ряд обязан читаться
+## одним ростом (окончательную меру решает 3.3).
+static func scale_still(sp: Sprite2D, tex: Texture2D) -> void:
+	sp.scale = Vector2.ONE * (CharacterFrames.STILL_HEIGHT / float(tex.get_height()))
+	sp.offset = CharacterFrames.STILL_REST_OFFSET
+
+
 func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 	var n: Node2D = _UnitSprite.instantiate()
 	var key := unit.get_key()
 	var sp: Sprite2D = n.get_node("Figure")
 	var anim: AnimatedSprite2D = n.get_node("Anim")
 	var facing := unit.side == BattleState.Side.ATTACKER
-	var frames := CharacterFrames.frames_for(key)
-	if frames != null:
+	var still := CharacterFrames.still_texture_for(key)
+	var frames := CharacterFrames.frames_for(key) if still == null else null
+	if still != null:
+		# Арт владельца сильнее кадра комплекта: юнит стоит своим вырезом, а не
+		# чужой походкой. Опора и разворот — те же, что у дорожек (3.9).
+		sp.texture = still
+		scale_still(sp, still)
+		# Разворот — по направлению взгляда арта, а не по стороне напрямую: комплект
+		# смотрит влево, вырезы владельца нарисованы вправо (`CharacterFrames.faces_right`).
+		sp.flip_h = facing != CharacterFrames.faces_right(key)
+		n.set_meta("faces", Vector2.RIGHT if facing else Vector2.LEFT)
+		n.set_meta("still", true)
+		n.get_node("Initial").visible = false
+	elif frames != null:
 		# Анимированный носитель есть ⇒ портрет и буква-заглушка убираются: вторая
 		# картинка того же юнита поверх фигуры — мусор, а не резервная подпись.
 		anim.sprite_frames = frames
 		anim.offset = CharacterFrames.FEET_OFFSET
 		anim.scale = Vector2.ONE * CharacterFrames.SCALE
-		anim.flip_h = facing
+		# Разворот — по направлению взгляда конкретного арта, а не по стороне: волк
+		# нарисован вправо, рыцарь — влево.
+		anim.flip_h = facing != CharacterFrames.faces_right(key)
 		anim.visible = true
 		anim.play(&"idle")
 		n.get_node("Initial").visible = false
@@ -318,6 +352,18 @@ func flash_unit(unit: BattleState.BattleUnit) -> void:
 	var tw := create_tween()
 	tw.tween_property(node, "modulate", ThemeConfig.C_HIT_FLASH, GameNumbers.HIT_FLASH_SEC)
 	tw.tween_property(node, "modulate", Color.WHITE, GameNumbers.HIT_FLASH_RECOVER_SEC)
+	var fig := _still_of(node)
+	if fig != null:
+		# Отдача от удара позой: сдвиг назад от противника (вырез развёрнут к нему)
+		# и возврат в опору покоя. Поза идёт по смещению, а не по позиции узла,
+		# поэтому не спорит с перемещением.
+		var rest_x := CharacterFrames.STILL_REST_OFFSET.x
+		# Назад = прочь от противника, за кого он стоит, говорит мета facing, а не
+		# flip_h: у вырезов разворот перевёрнут относительно комплекта.
+		var faces: Vector2 = node.get_meta("faces")
+		var rt := create_tween()
+		rt.tween_property(fig, "offset:x", rest_x - faces.x * STILL_RECOIL_PX, GameNumbers.HIT_FLASH_SEC)
+		rt.tween_property(fig, "offset:x", rest_x, GameNumbers.HIT_FLASH_RECOVER_SEC)
 
 func remove_unit(unit: BattleState.BattleUnit) -> void:
 	var node := _find_node(unit)
@@ -331,6 +377,7 @@ func remove_unit(unit: BattleState.BattleUnit) -> void:
 	var tw := create_tween()
 	tw.tween_property(node, "modulate", Color.TRANSPARENT, GameNumbers.UNIT_REMOVE_FADE_SEC)
 	tw.tween_callback(node.queue_free)
+
 
 func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> Tween:
 	var node := _find_node(unit)
@@ -346,8 +393,22 @@ func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> Tween:
 		an.play()
 	var tw := create_tween()
 	_active_tweens[unit.uid] = tw
+	var half := MOVE_TWEEN_SEC * 0.5
+	var rest_y := CharacterFrames.STILL_REST_OFFSET.y
+	var fig := _still_of(node)
 	for i in range(1, path.size()):
-		tw.tween_property(node, "position", field_point(path[i]), MOVE_TWEEN_SEC)
+		var to: Vector2 = field_point(path[i])
+		if fig == null:
+			tw.tween_property(node, "position", to, MOVE_TWEEN_SEC)
+			continue
+		# Поза-вырез не имеет походки, а голое перемещение — скольжение статичной
+		# картинки: на первой половине шага фигура поднимается с опоры, на второй
+		# возвращается в покой. `parallel` обязателен: без него поза ехала бы
+		# отдельным шагом и темп пути удвоился. Темп пути от наличия позы не зависит.
+		tw.tween_property(node, "position", field_point(path[i - 1]).lerp(to, 0.5), half)
+		tw.parallel().tween_property(fig, "offset:y", rest_y - STILL_BOB_PX, half)
+		tw.tween_property(node, "position", to, half)
+		tw.parallel().tween_property(fig, "offset:y", rest_y, half)
 	if an != null:
 		# `stop()` оставил бы юнита на последнем кадре походки — шаг на месте.
 		tw.tween_callback(func(): an.play(&"idle"))

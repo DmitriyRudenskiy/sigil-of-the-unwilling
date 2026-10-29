@@ -98,8 +98,10 @@ func test_geometry_matches_the_field() -> void:
 
 ## Маппинг даёт фигуру: `Anim` виден и играет стойку, портрет и буква-заглушка убраны
 ## (вторая картинка того же юнита поверх фигуры — мусор, а не подпись).
+## Ключ взят не самый очевидный: `swordsmen`, `archers` и `knights` с 3.9 стоят
+## вырезом владельца (свой кадр сильнее чужой походки), поэтому здесь `champions`.
 func test_mapped_unit_plays_instead_of_showing_portrait() -> void:
-	var u := _unit("swordsmen")
+	var u := _unit("champions")
 	_view.create_unit_sprite(u)
 	var node := _sprite_of(u)
 	assert_that(node).is_not_null()
@@ -130,8 +132,8 @@ func test_unmapped_unit_keeps_portrait() -> void:
 ## Шаг играет походку, удар — получение удара там, где для него есть кадры. Юнит без
 ## такой дорожки (druid → priest) не имеет ни упасть, ни ошибки: остаётся вспышка.
 func test_move_and_hit_play_their_tracks() -> void:
-	var u := _unit("swordsmen")
-	var d := _unit("archers")
+	var u := _unit("wolves")
+	var d := _unit("champions")
 	var leaf := _unit("druid")
 	for unit in [u, d, leaf]:
 		_view.create_unit_sprite(unit)
@@ -154,7 +156,7 @@ func test_move_and_hit_play_their_tracks() -> void:
 ## эмиссия не обязана совпадать с тем, как движок сам завершает трек.
 func test_one_shot_track_returns_to_idle() -> void:
 	var an := AnimatedSprite2D.new()
-	an.sprite_frames = CharacterFrames.frames_for("swordsmen")
+	an.sprite_frames = CharacterFrames.frames_for("champions")
 	an.centered = false
 	add_child(an)
 	_view._play_once(an, &"attack")
@@ -164,3 +166,21 @@ func test_one_shot_track_returns_to_idle() -> void:
 	assert_that(an.animation).is_equal(&"idle") \
 		.override_failure_message("после конца attack дорожка не вернулась в idle")
 	an.queue_free()
+
+
+## Разворот принадлежит арту, а не стороне: комплект смотрит влево, а волк нарисован
+## вправо, и без исключения он стоял бы спиной к противнику. Кадром это видно сразу,
+## а проверка «стороны смотрят друг на друга» — нет: разворот-то формально есть.
+func test_facing_follows_the_art_not_the_side() -> void:
+	var knight_atk := _unit("champions")
+	var wolf_atk := _unit("wolves")
+	var wolf_def := _unit("wolves")
+	wolf_def.side = BattleState.Side.DEFENDER
+	for u in [knight_atk, wolf_atk, wolf_def]:
+		_view.create_unit_sprite(u)
+	assert_that((_sprite_of(knight_atk).get_node("Anim") as AnimatedSprite2D).flip_h).is_true() \
+		.override_failure_message("комплект нарисован влево: атакующему нужно зеркало")
+	assert_that((_sprite_of(wolf_atk).get_node("Anim") as AnimatedSprite2D).flip_h).is_false() \
+		.override_failure_message("волк нарисован вправо: атакующего зеркалить нельзя")
+	assert_that((_sprite_of(wolf_def).get_node("Anim") as AnimatedSprite2D).flip_h).is_true() \
+		.override_failure_message("защищающийся волк обязан смотреть влево, на противника")

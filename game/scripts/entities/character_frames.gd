@@ -36,11 +36,61 @@ const ANIMATED := {
 const FEET_OFFSET := Vector2(-256, -448)
 const SCALE := 0.25
 
+## Вырезы арт-комплекта владельца (3.1) — позы, вошедшие в тот же носитель
+## движения (3.9, Q-M118 → (а)): те же опора, разворот по стороне и y-порядок,
+## что у дорожек комплекта. Здесь только три силуэта левой стороны референса,
+## у которых есть юнит: `paladin` и `battle_dwarf` ждут ключа юнита (3.2), а
+## чужой силуэт подставлять нельзя.
+const STILL_FIGURES := {
+	"swordsmen": "res://assets/units/figures/swordsmen.png",
+	"archers": "res://assets/units/figures/archers.png",
+	"knights": "res://assets/units/figures/knights.png",
+}
+
+## Высота силуэта выреза на поле, world px — та же мера, что у дорожек комплекта
+## (силуэт 96 px), и она же попадает в меру референса «1.5–2 гекса». Окончательный
+## масштаб ряда решает 3.3.
+const STILL_HEIGHT := 96.0
+
+## Покой выреза: `centered = true`, поэтому смещение на половину высоты ставит
+## нижний край кадра (стопы выреза) ровно в позицию узла, то есть в клетку.
+const STILL_REST_OFFSET := Vector2(0.0, -STILL_HEIGHT / 2.0)
+
+## Штатный взгляд комплекта — влево, и `flip_h = атакующий` разворачивает его к
+## противнику. Исключения нарисованы вправо: без списка они смотрели бы от
+## противника, а тестом «по стороне» этого не поймать — разворот-то есть.
+const FACES_RIGHT := ["wolf"]
+
+
+## Направление взгляда фигуры задаёт арт, а не сторона: комплект смотрит влево, а
+## вырезы владельца и волк нарисованы вправо. Потребитель разворачивает фигуру
+## условием `facing != faces_right(key)`.
+static func faces_right(unit_key: String) -> bool:
+	if STILL_FIGURES.has(unit_key):
+		return true
+	return str(ANIMATED.get(unit_key, "")) in FACES_RIGHT
+
 static var _cache: Dictionary = {}
+static var _stills: Dictionary = {}
 
 
 static func clear_cache() -> void:
 	_cache.clear()
+	_stills.clear()
+
+
+## Текстура выреза юнита; `null` — выреза нет, потребитель остаётся на дорожках
+## или портрете. Отсутствующий файл молча даёт `null`: отсутствие картинки не
+## имеет права ронять бой.
+static func still_texture_for(unit_key: String) -> Texture2D:
+	if _stills.has(unit_key):
+		return _stills[unit_key]
+	var tex: Texture2D = null
+	var path := str(STILL_FIGURES.get(unit_key, ""))
+	if path != "" and ResourceLoader.exists(path):
+		tex = load(path) as Texture2D
+	_stills[unit_key] = tex
+	return tex
 
 
 ## SpriteFrames персонажа юнита; `null` — анимированного носителя нет, потребитель
