@@ -104,7 +104,7 @@ python -m pytest game/tests/mcp/test_capture.py -q --timeout=900
 Прогон файла: `13 test cases | 0 errors | 0 failures` (было 11, +2 кейса;
 тест-леджер: +2 / −0 / quarantine 0).
 Мутации запускались по одной, дерево после каждой восстанавливалось;
-`git status` после batteries — чистое.
+`git status` после батарей — чистое.
 
 ## Вердикт по AC (пункты §6 карты экрана героя)
 

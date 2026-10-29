@@ -1,0 +1,117 @@
+Gate local — T-255 (клетки, предмет и его рамки в сумке: один носитель шага)
+================================================================================
+head_sha: a8df8c80 (origin/main) → код среза d7942057, реестр и ux-review aa717bdb
+(оба локальные, до пуша).
+Прогон: ./game/run_tests.sh, 2026-10-30, ДВАЖДЫ и одинаково: первый — сразу после
+кодового коммита d7942057, второй (отчётный, с снятым кодом выхода) — на дереве
+после реестрового коммита aa717bdb. Расхождений между прогонами нет (в отличие от
+серии T-241, readiness-ошибок ни в одном прогоне).
+Машина шарится: чужие Xvfb :96 (5 дней) и :97 (23 ч) не трогались, съёмка шла на
+своём Xvfb :91 (1920×1080), поднятом и тем же срезом и снятом. CI не проверялся
+(по инструкции владельца от 2026-10-13). Док-гейты — ./scripts/doc_gates.sh
+отдельным прогоном (в run_tests.sh их нет). Пиксельные кадры вне git (D-185),
+резерв и манифест: ~/.local/share/sigil-reserve/inventory-t255/.
+
+GdUnit (unit + integration + functional)
+----------------------------------------
+Overall Summary: 3656 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (388/388)
+Executed test cases : (3656/3656)
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+=== путь узла из скрипта ↔ сцена (T-296) ===
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+SCRIPT ERROR / Parse Error в журнале: 0 строк (проверено отдельно — отчёт
+снимался только после этой проверки, урок «устаревшего report_*»).
+
+GdUnit-счётчик: 3654 → 3656 (+2 кейса в существующем носителе
+tests/unit/ui/test_inventory_grid.gd: 11 → 13; новых файлов тестов нет, поэтому
+TESTMAP не двигался). Выход GdUnit: 0.
+
+MCP e2e (четвёртый уровень)
+---------------------------
+PYTEST LEDGER: passed=112 skipped=2 failed=0 errors=0 collected=114
+MCP JUNIT: passed=112 skipped=2 failed=0 errors=0
+MCP VERDICT: GREEN
+112 passed, 2 skipped in 307.73s (0:05:07)
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://...
+Readiness-ошибок нет — жёлтого уровня в этом прогоне нет ни на одном тесте.
+Счётчик сборов не менялся (114): срез не заводил MCP-тестов, кадр съёмки — тот же
+канал по запросу, что и раньше.
+
+Python-секции гейта
+-------------------
+=== python: генератор арта карты (scripts/test_gen_map_art.py) ===  11 passed in 2.50s
+=== python: классификатор MCP-журнала (scripts/test_classify_mcp_junit.py) ===  13 passed in 0.01s
+READINESS-CLASSIFIER: selftest GREEN
+
+Выход: GATE_EXIT=0 (снят обёрткой вокруг run_tests.sh; run_tests.sh заканчивается
+`exit "$MCP_RC"` сразу после selftest-а классификатора, MCP VERDICT: GREEN →
+MCP_RC=0).
+
+Съёмка и приёмка кадром
+-----------------------
+Канал канонический (MCP + живой Godot, 1920×1080, свой дисплей :91):
+  DISPLAY=:91 MCP_PORT=9097 CAPTURE_SCENE=res://scenes/main_menu.tscn \
+  CAPTURE_SETUP=inventory_grid_pitch CAPTURE_NAME=inventory_grid_pitch_t255 \
+  CAPTURE_OUT=inventory-t255 pytest game/tests/mcp/test_capture.py -q --timeout=900
+inventory_grid_pitch_t255.png 1920×1080,
+SHA-256 0e707681b5539c74881f3450250bc327dc7a85afcb64e5c85f1f4fb14745290d.
+Резерв и манифест: ~/.local/share/sigil-reserve/inventory-t255/.
+Вердикт по AC, разбор и цифры замера:
+docs/mvp/matrix/2026-10-30/ux-hero-grid-t255.md.
+Фикстура вернула: field P(685.2, 618.0) S(864.0003, 424.7999), cell_6_0
+P(1203.6, 617.9995) S(86.40002, 84.95998), item P(1203.6, 617.9995)
+S(255.2001, 165.92), mark == item, mark_equals_item true, item_on_its_cell true,
+item_inside_field true. Числа — снимок до успокоения layout (песочница
+execute_code не умеет await); settled-замер живёт в GdUnit-гарде.
+
+Мутационная не-пустота (прогон по одной мутации, дерево восстанавливалось после
+каждой; git status после батарей — чистый)
+-----------------------------------------------------------------------------
+Носитель: game/scripts/ui/artifact_inventory_screen.gd, файл теста
+tests/unit/ui/test_inventory_grid.gd (13 кейсов), прогон на коммите d7942057:
+  база  — 0 errors | 0 failures (13 кейсов зелёные)
+  M1 — предмет шире своих клеток на 40 px (следствие «рамка шире клеток»):
+       0 errors | 3 failures
+  M2 — рамка выделения не на PRESET_FULL_RECT (перестаёт равняться предмету):
+       0 errors | 2 failures
+  M3 — item_rect() возвращает шаг по умолчанию = Vector2.ZERO и сам читает
+       HeroLayout.grid_pitch(): 0 errors | 2 failures
+  ИТОГ: все мутанты красные — гейт держит.
+Чужой гард test_cells_and_items_share_one_pitch (16224d78) не переснимался: он
+проверен зелёным прогоном всего файла, а его мутации держал
+tот срез и тот артефакт.
+
+Тестовый леджер
+---------------
++2 кейса (оба в существующем файле tests/unit/ui/test_inventory_grid.gd) / −0 /
+quarantine 0 / нетто +2; было 3654 GdUnit + 114 MCP-сборов → стало 3656 + 114.
+Причина: у второго симптома тикета (иконка и рамки за полем) не было сторожа, а
+шаг можно было вернуть молча значением по умолчанию.
+
+Док-гейты (./scripts/doc_gates.sh — отдельный прогон на том же дереве; в
+run_tests.sh их нет). Блок дописан после прогона: правка касается только этого
+.txt, число заметок индекса она не меняет.
+-----------------------------------------------------------------------------
+OK: docs/ links consistent (113 notes checked)
+OK: 00-INDEX.md актуален (115 заметок)
+ЕСТЬ В КОДЕ, НЕ УПОМИНАЕТСЯ В ДОКАХ (0) / ДОК ССЫЛАЕТСЯ, ФАЙЛА НЕТ (0) /
+НАЗВАНО ТОЛЬКО В РЕЕСТРАХ И ЖУРНАЛАХ (0), базлайн 0
+  q_without_type: 97 (базлайн 97) OK
+  q_without_priority: 115 (базлайн 115) OK
+  d_without_rejected: 170 (базлайн 170) OK
+  risks_without_number: 10 (базлайн 10) OK
+  dead_paths: 5 (базлайн 5) OK
+GDD-GATE: GREEN
+ПРОВЕНАНС: 696/696 ассетов покрыто (36 классов, 59 файлов); у 643 из 696 права не
+подтверждены (§12 открыт) — exit 0 этого НЕ ловит, это ASSET-1, владельцу
+152 passed in 2.87s — тесты самих проверщиков (12 файлов, pytest 9.1.1)
+OPENSPEC SPECS: OK (проверено 87 сведённых спек)
+TESTMAP OK: дыр 80, файлов в группах слияния 151, дублей 0
+DOC GATES: GREEN (rc=0)
+TESTMAP не двигался: новых тестовых файлов нет, оба кейса легли в существующий
+носитель tests/unit/ui/test_inventory_grid.gd, поэтому базлайн
+scripts/testmap.baseline.json не тронут.
