@@ -1,0 +1,286 @@
+{
+ "backfilled": true,
+ "canvas": 512,
+ "clips": {
+  "attack": {
+   "picked": "scripts/hero_anim/out/archers/attack/picked.json",
+   "variant": 1
+  },
+  "hit": {
+   "picked": "scripts/hero_anim/out/archers/hit/picked.json",
+   "variant": 4
+  },
+  "idle": {
+   "picked": "scripts/hero_anim/out/archers/idle/picked.json",
+   "variant": 1
+  },
+  "turn": {
+   "picked": "scripts/hero_anim/out/archers/turn/picked.json",
+   "variant": 1
+  },
+  "walk": {
+   "picked": "scripts/hero_anim/out/archers/walk/picked.json",
+   "variant": 2
+  }
+ },
+ "feet_y": 448,
+ "figure_h": 384,
+ "frames": {
+  "archers_attack_01.png": {
+   "sha256": "b97dab5521dc92b35f34be5a83de567287080c876d4f857a35ccecf98d950c80",
+   "track": "attack"
+  },
+  "archers_attack_02.png": {
+   "sha256": "d2afa2a31517813f5049b946279c8b4d4ff0712e440e340a1cb8a6d92d5a80e4",
+   "track": "attack"
+  },
+  "archers_attack_03.png": {
+   "sha256": "fd1e6134a4be5946fb2bd7bcf127cae8408c2bfe9b16ab67fcb45ca75bdde29c",
+   "track": "attack"
+  },
+  "archers_attack_04.png": {
+   "sha256": "33e4e8abe7413829ea7c65145b2f0f5d65f5828fb92e12d0a7edef413e1fdfe1",
+   "track": "attack"
+  },
+  "archers_attack_05.png": {
+   "sha256": "a034c959bab19ea1ded2c04f9584123c0b5850e354388fc42aafe5466d21c83f",
+   "track": "attack"
+  },
+  "archers_attack_06.png": {
+   "sha256": "0712523523ebac11c0f82ff0e21b2302dcb7ca664a5c31f2d572631788ce6428",
+   "track": "attack"
+  },
+  "archers_attack_07.png": {
+   "sha256": "a39e4005ec7c27e98c28bab8501c59bf8cfd0788744fdb42ccf3cb59bf197d99",
+   "track": "attack"
+  },
+  "archers_attack_08.png": {
+   "sha256": "a5ffe4041b8a7ebc4d98008c9380827f5c742ebf3e70cb4f73d8f732dd8c70ea",
+   "track": "attack"
+  },
+  "archers_attack_09.png": {
+   "sha256": "1f29bd2d4a6c79a703b50d6d5f36663cd2b18510657e53a84ca139c31bc8a7fe",
+   "track": "attack"
+  },
+  "archers_attack_10.png": {
+   "sha256": "f6252a7df77410e49969d8ade3da1b9eb02b74a702002006d9db74dbf6795a1f",
+   "track": "attack"
+  },
+  "archers_attack_11.png": {
+   "sha256": "86e6aee17656d9d5d54f3d0ad708dcf9f256ed948680f1ec25b240ef0f953f46",
+   "track": "attack"
+  },
+  "archers_attack_12.png": {
+   "sha256": "6dd63dc9464fac946b4d471ac6856de74085b58f4e2e24ea60cae07ee8e8dede",
+   "track": "attack"
+  },
+  "archers_hit_01.png": {
+   "sha256": "1f116a82d4596dbb1380fd0695e88052f13b2c1a5bae3207c09f59460656973a",
+   "track": "hit"
+  },
+  "archers_hit_02.png": {
+   "sha256": "76d0edd90fbdb5ced72ca26ba3cd7752550bceb4b4c5be2bd814269a99baea6f",
+   "track": "hit"
+  },
+  "archers_hit_03.png": {
+   "sha256": "6f4ce68a6ac778e2655fe677a0882df2a81081092aa1a690542f54a12873fda6",
+   "track": "hit"
+  },
+  "archers_hit_04.png": {
+   "sha256": "0f191a2bf9893c0905d545006af0f53331fb9c68154c026087bcf551bdb099c6",
+   "track": "hit"
+  },
+  "archers_hit_05.png": {
+   "sha256": "0e01200624ab60ca0b39edf6a95a2f9271764465e3349b37275152cec2e414ec",
+   "track": "hit"
+  },
+  "archers_hit_06.png": {
+   "sha256": "ae9cbdf2f441706d0b90200be37fe1a87046e9f34bcd6d3b7481b85f91ceafd6",
+   "track": "hit"
+  },
+  "archers_hit_07.png": {
+   "sha256": "2979fffa001bf4297e9d6f34f077b914c6161d078d2ea0e5fa277e5ca26c4095",
+   "track": "hit"
+  },
+  "archers_hit_08.png": {
+   "sha256": "3e2d1494ceda2199f61e5202ba3f42b667bc7082a0f265da7087a3c45f6bf83e",
+   "track": "hit"
+  },
+  "archers_hit_09.png": {
+   "sha256": "fcb611977b03b71231292b585e3e18e464a31792865b22907b375cb40d683b09",
+   "track": "hit"
+  },
+  "archers_hit_10.png": {
+   "sha256": "37bc441a32716e09be3b191ab6e19ea196ff846dcc430492bee0bf4b64796600",
+   "track": "hit"
+  },
+  "archers_hit_11.png": {
+   "sha256": "0e051855ec42a6d774855ecb4ea027154d1b2f7cb49fc65cb730036acd443d1b",
+   "track": "hit"
+  },
+  "archers_hit_12.png": {
+   "sha256": "d6c3369cf3e4840075b40017a9ebc05856eb0b55e36b5356159f2d8527fd321a",
+   "track": "hit"
+  },
+  "archers_idle_01.png": {
+   "sha256": "d275435cf8ea2ba8d045b4e562c01c0431abc809efb4656f583148ed62fe7cbe",
+   "track": "idle"
+  },
+  "archers_idle_02.png": {
+   "sha256": "e196f1514fff23b39f306cee61e86b0f3096925fdebd6ce165568ec4367e6604",
+   "track": "idle"
+  },
+  "archers_idle_03.png": {
+   "sha256": "813297d28da6e1034eda17e1f51deb44164e44d631e7750c58bbcf9e16d82da2",
+   "track": "idle"
+  },
+  "archers_idle_04.png": {
+   "sha256": "3d3b7e91bedfee6f58125e0fdab6502bf34d0399219e64569be68d0696e1c876",
+   "track": "idle"
+  },
+  "archers_idle_05.png": {
+   "sha256": "9ba15f15f7d749bd7e9f6a5bfba6c41c1b3be35e9f045adb975abf1567756007",
+   "track": "idle"
+  },
+  "archers_idle_06.png": {
+   "sha256": "e4c52569d60d45eb293ab2af0cff4e859307e0e04c2b2b2803d0bfb06a87c2d7",
+   "track": "idle"
+  },
+  "archers_idle_07.png": {
+   "sha256": "f92c2297511cd980acf9f2e7967905ba5fd96d2e6907da79adf7d962dd778ee0",
+   "track": "idle"
+  },
+  "archers_idle_08.png": {
+   "sha256": "4dff8f16e9f236cb47448ed3453317ef8e616e06bda7e8ba7a138285437fb6c7",
+   "track": "idle"
+  },
+  "archers_idle_09.png": {
+   "sha256": "8ea592c0d3ad11d16232e3a22447ae71a3c0dfad17d27627a582817d72bf1c8d",
+   "track": "idle"
+  },
+  "archers_idle_10.png": {
+   "sha256": "fbbf8e0744a0c1785a141cc3aa26095106e2d04999df72ebabd1145b0ff68fe0",
+   "track": "idle"
+  },
+  "archers_idle_11.png": {
+   "sha256": "aef614f2a4ba7c2adcdf331ed946e18eddb0998d0294f5189be4faff96e1cf71",
+   "track": "idle"
+  },
+  "archers_idle_12.png": {
+   "sha256": "863cfadfb4a5e3444cf3db0e4798c7e9480e11b9ceae670f32203bc5db1f5102",
+   "track": "idle"
+  },
+  "archers_turn_01.png": {
+   "sha256": "61a7056099781ced34a0d7737e414b2b17c71104b7f158349f6948363cc1de3b",
+   "track": "turn"
+  },
+  "archers_turn_02.png": {
+   "sha256": "1809b53c64510072f4f2d7f2a80fa407dc1ba11fb27243bf6d1900207883439c",
+   "track": "turn"
+  },
+  "archers_turn_03.png": {
+   "sha256": "5df5a32182e21714dca580536f2a843e2488cc10534d68d60e9691ff9ba4e0cd",
+   "track": "turn"
+  },
+  "archers_turn_04.png": {
+   "sha256": "5741268f814a87a7d03607f424c23b87d327a1bd535dc6c96a3e5c87df2e7cce",
+   "track": "turn"
+  },
+  "archers_turn_05.png": {
+   "sha256": "7d3d2adf7ae1f8798bb34043db1a0dc2eca33b52e8bea9c251fcd34c868a53ac",
+   "track": "turn"
+  },
+  "archers_turn_06.png": {
+   "sha256": "9c069fa062f0c8697d568748ed6d00c579d7544a681e78d918be84407d9b2132",
+   "track": "turn"
+  },
+  "archers_turn_07.png": {
+   "sha256": "ee2a8a03b927fcd03c840307ec6f2bc259f90c3968bca0f34f3f2851443f2081",
+   "track": "turn"
+  },
+  "archers_turn_08.png": {
+   "sha256": "6417ed6cad622270d9f72fa3f416cccab8df063d7f6e82e6769f4531fd9c1a8c",
+   "track": "turn"
+  },
+  "archers_turn_09.png": {
+   "sha256": "f80561c663846ec1a7c2b08ef1883f7bb79498e4270a4081b5d56844b9a18115",
+   "track": "turn"
+  },
+  "archers_turn_10.png": {
+   "sha256": "acc626b095d99e5461d57f2044af9bdb63d3ab4841b9bc8afac1832b5cbd80af",
+   "track": "turn"
+  },
+  "archers_turn_11.png": {
+   "sha256": "5be09b9afc36f00cbeac9fcf72db52aaf00cda9f4dcf78d6bd1a8bdf464854f4",
+   "track": "turn"
+  },
+  "archers_turn_12.png": {
+   "sha256": "0533ac909165c5d089961daa4d619b914b26ac91e3119d3e87c05d73b0012736",
+   "track": "turn"
+  },
+  "archers_walk_01.png": {
+   "sha256": "d7009c314c3cd2598d7489f9b280353ab45db2334c356945b3ac58e9ff22b2cb",
+   "track": "walk"
+  },
+  "archers_walk_02.png": {
+   "sha256": "29c01b2957e23662d76a86fee2c6c3e3644b5b7d78ab5dff294c30227857a475",
+   "track": "walk"
+  },
+  "archers_walk_03.png": {
+   "sha256": "2fdbe7beb79cc5e5fdde8d43587a473bd92886c8019e17fcae45b8aff320921f",
+   "track": "walk"
+  },
+  "archers_walk_04.png": {
+   "sha256": "eb27ed7a94a34b910823f02c9c896db9071fd44ebe6a078ffefdbc8d1a3c9037",
+   "track": "walk"
+  },
+  "archers_walk_05.png": {
+   "sha256": "fc609e1a1ceeb57dd3529648f1171364b79265bc86d0c2aa7407a02a0475393a",
+   "track": "walk"
+  },
+  "archers_walk_06.png": {
+   "sha256": "8c8eaa4e743709936630393f086ef8fc9f42b31ba1fb193f9c19153945502b2e",
+   "track": "walk"
+  },
+  "archers_walk_07.png": {
+   "sha256": "613202c27fea7a5116c04e0f658a6f2e14bc1c098cfd8432c8176395575f2d7a",
+   "track": "walk"
+  },
+  "archers_walk_08.png": {
+   "sha256": "bafb4337c4f46c7540958946ce3f2ba8f22a6ec1200e7c4c61007675c9f79af0",
+   "track": "walk"
+  },
+  "archers_walk_09.png": {
+   "sha256": "e93ff70bb66a514b2cc84e8968c4dc90b4b3ddf8f9025edf79995685f26eeb6d",
+   "track": "walk"
+  },
+  "archers_walk_10.png": {
+   "sha256": "ceef9c5b994ef53e4b1e98b4c1f3a1f4956b88b273e1ebb430c30daa860a9ff0",
+   "track": "walk"
+  },
+  "archers_walk_11.png": {
+   "sha256": "795ceb84105a06db503095841587cb0f00921ec896d108c1cad18b5c039638a0",
+   "track": "walk"
+  },
+  "archers_walk_12.png": {
+   "sha256": "1b25b674db7f859510eac50af7969b6a298eed8ec6b7850798595e88a20ad388",
+   "track": "walk"
+  }
+ },
+ "frames_per_track": 12,
+ "hero": "archers",
+ "loop_window": {
+  "attack": 0,
+  "hit": 0,
+  "idle": 40,
+  "turn": 0,
+  "walk": 40
+ },
+ "skip_start": {
+  "attack": 0,
+  "hit": 0,
+  "idle": 24,
+  "turn": 0,
+  "walk": 24
+ }
+}

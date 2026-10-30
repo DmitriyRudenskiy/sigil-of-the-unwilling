@@ -1,0 +1,285 @@
+{
+ "canvas": 512,
+ "clips": {
+  "attack": {
+   "picked": "scripts/hero_anim/out/paladin/attack/picked.json",
+   "variant": 1
+  },
+  "hit": {
+   "picked": "scripts/hero_anim/out/paladin/hit/picked.json",
+   "variant": 1
+  },
+  "idle": {
+   "picked": "scripts/hero_anim/out/paladin/idle/picked.json",
+   "variant": 2
+  },
+  "turn": {
+   "picked": "scripts/hero_anim/out/paladin/turn/picked.json",
+   "variant": 1
+  },
+  "walk": {
+   "picked": "scripts/hero_anim/out/paladin/walk/picked.json",
+   "variant": 2
+  }
+ },
+ "feet_y": 448,
+ "figure_h": 384,
+ "frames": {
+  "paladin_attack_01.png": {
+   "sha256": "bf3eeb4e9205666a34b7b56d58fa4d38515cb4d4cee34cfe1307edccd73d3214",
+   "track": "attack"
+  },
+  "paladin_attack_02.png": {
+   "sha256": "842d1e728e206cfbac56cbf85cdf1aed70089317b15babd1d32f61367eae2745",
+   "track": "attack"
+  },
+  "paladin_attack_03.png": {
+   "sha256": "665e3d0ec94879f8e6f9c25e1368f99b3e6670ddbd5b11a520707cac3a0bf2c3",
+   "track": "attack"
+  },
+  "paladin_attack_04.png": {
+   "sha256": "115e16d9295e2a4e63c9c1a760354f5028f1fccef3edb0ef8c6c2483fc2a3e4a",
+   "track": "attack"
+  },
+  "paladin_attack_05.png": {
+   "sha256": "23711b2596a298a9ab6f754d1031dc2be753a624a0e1f3af53d0ad3d1466b8b6",
+   "track": "attack"
+  },
+  "paladin_attack_06.png": {
+   "sha256": "44aa922ed320e6b1c9a4e5ed357a47582d0464ff25c5e42fd582e2cd91fb35eb",
+   "track": "attack"
+  },
+  "paladin_attack_07.png": {
+   "sha256": "ed3e1c35f75957dff9c8cac76c051ba1fc454db15667b502fa02efd669bafade",
+   "track": "attack"
+  },
+  "paladin_attack_08.png": {
+   "sha256": "b384dfde0f66e16ba224f73666a8fb3b0aead1faebca41046fb67862d731c46a",
+   "track": "attack"
+  },
+  "paladin_attack_09.png": {
+   "sha256": "5bdb2bbb6014a9446e3b2dd382a83b27fae7d183a279326b63ef3adad39ae128",
+   "track": "attack"
+  },
+  "paladin_attack_10.png": {
+   "sha256": "2379b8ffd1308b57f2340bc792292b79dda9b8afb4d9d04ae1f79ffe32751fbd",
+   "track": "attack"
+  },
+  "paladin_attack_11.png": {
+   "sha256": "11bcaee5d300f3c06d31b04c142bebf54bb4df785c13ae2d5bf7a95c4de67c46",
+   "track": "attack"
+  },
+  "paladin_attack_12.png": {
+   "sha256": "266d4d5a82380da070639bba850e1ea251daf7a25090edac88310df892f4b836",
+   "track": "attack"
+  },
+  "paladin_hit_01.png": {
+   "sha256": "5055e9b9ad04bfb3790b6e431abd59d0844fb6196eb8f6ac13c739c856e9c074",
+   "track": "hit"
+  },
+  "paladin_hit_02.png": {
+   "sha256": "a211bc298738be70bd367c59a05ad35ec5a75697864a35d170e21157a0ff949c",
+   "track": "hit"
+  },
+  "paladin_hit_03.png": {
+   "sha256": "bb511456f59dd749a395f64693a582de5059f32b3065960ccd1d5617d22d8e1b",
+   "track": "hit"
+  },
+  "paladin_hit_04.png": {
+   "sha256": "4326e1ea0aa63b7bee5ab55e5f63fcb06b1ac6a9ee5622324a2f7f7a78b95896",
+   "track": "hit"
+  },
+  "paladin_hit_05.png": {
+   "sha256": "41801298108583ab82de807bdfcceed3cce03cfb73070a12f9986c98d7b3c306",
+   "track": "hit"
+  },
+  "paladin_hit_06.png": {
+   "sha256": "31e95ae08aa5338d6879bff22f992ccde7b84fc0ca60873b594ca9190f561620",
+   "track": "hit"
+  },
+  "paladin_hit_07.png": {
+   "sha256": "9d25bcd5852d5cc8ca8b3a5367da1c7f120d4e0fdb03302f1eb73d448c3aaefa",
+   "track": "hit"
+  },
+  "paladin_hit_08.png": {
+   "sha256": "4da1266679f056ebe3c59c31c0af4f27e49dbf892d7df8cb1901c58efead1029",
+   "track": "hit"
+  },
+  "paladin_hit_09.png": {
+   "sha256": "6c94d694071e5a7770519924109fe4ceeab3c4bfa3ca9d0be5c868690b1ce07d",
+   "track": "hit"
+  },
+  "paladin_hit_10.png": {
+   "sha256": "95eff126fb889091f12552919efedae2b664c63d8c2be5c34df2f7f7797d0343",
+   "track": "hit"
+  },
+  "paladin_hit_11.png": {
+   "sha256": "0d20d2d100ff7c85147c4509f74c5d2ebf3adb6fe6daeb54d761ec4f3df17e76",
+   "track": "hit"
+  },
+  "paladin_hit_12.png": {
+   "sha256": "b074a30f9ef96939ce3c8942c9a444a4fed9984642ab7012cec2012ae79fa02b",
+   "track": "hit"
+  },
+  "paladin_idle_01.png": {
+   "sha256": "92cf47612916bd2759cbc6c4738d3180d3383eb50eb41c6dcebf3db5f034a383",
+   "track": "idle"
+  },
+  "paladin_idle_02.png": {
+   "sha256": "e9883c282117d59901f0a45e0ef844434df913a29afeaa8d257157b9238eaf63",
+   "track": "idle"
+  },
+  "paladin_idle_03.png": {
+   "sha256": "318ecfb550e4dce115d2a772b643264068d0c1df38d145be4b46c717b16808a5",
+   "track": "idle"
+  },
+  "paladin_idle_04.png": {
+   "sha256": "8c94c86a1bf31cdd472a78a19c0d469b697b1289677559a9604320f64afa8c7b",
+   "track": "idle"
+  },
+  "paladin_idle_05.png": {
+   "sha256": "d055ae315c2d2db537e5f348b0195a3bd0d3280019a25eb918395a08c190966d",
+   "track": "idle"
+  },
+  "paladin_idle_06.png": {
+   "sha256": "ae4572ece06c370f9e3c50125a82f46e9a7e35fa4b3fd01b7bb11e2b5212fcc8",
+   "track": "idle"
+  },
+  "paladin_idle_07.png": {
+   "sha256": "808656de105cb36d237e07916886446d3c87ee8c140ba31e690bcf5fea78d7b6",
+   "track": "idle"
+  },
+  "paladin_idle_08.png": {
+   "sha256": "eb754128d2a96b6b996c9e77d774c02a66e0d60d9ecfa6eff00a85d513f818fd",
+   "track": "idle"
+  },
+  "paladin_idle_09.png": {
+   "sha256": "05328b3bebbdc096918b247f0df765a2b9d5afb0a9bd47004beb61eb1393ae34",
+   "track": "idle"
+  },
+  "paladin_idle_10.png": {
+   "sha256": "e04431039d40a0215abcbf0f7318a5fe7da9099b9fc7de44513d47ba320f4e4b",
+   "track": "idle"
+  },
+  "paladin_idle_11.png": {
+   "sha256": "48c3be9a64295e7eb7f62436b601fb078c384ad9f47b94dcfffe5c530ed704ca",
+   "track": "idle"
+  },
+  "paladin_idle_12.png": {
+   "sha256": "666404cdf55aa98c472a9ae4d0472663eec7e9f40d016d171ac1134f8a60313c",
+   "track": "idle"
+  },
+  "paladin_turn_01.png": {
+   "sha256": "cc25a1e99c44bf4b03b93acb3687c5d2f9eeade46e06d174a980f9a43b764326",
+   "track": "turn"
+  },
+  "paladin_turn_02.png": {
+   "sha256": "dbd82dcb23657337433e31a72daad92d33b389153a6654f64e856b1fc14baaa4",
+   "track": "turn"
+  },
+  "paladin_turn_03.png": {
+   "sha256": "99d39dd90d3cd9a2f941b9b89a7863dce7df7fd38482737d8e04f8df0f7bed3e",
+   "track": "turn"
+  },
+  "paladin_turn_04.png": {
+   "sha256": "b399564b22edb073a4635c3fd6ff577d78993108326d8236d6d1011eec79ce98",
+   "track": "turn"
+  },
+  "paladin_turn_05.png": {
+   "sha256": "ce389eb989b1572a8d605337844f7e5bb2be808dbe6ce9cacad14f22c56c11f6",
+   "track": "turn"
+  },
+  "paladin_turn_06.png": {
+   "sha256": "f4b6eb6c3c36690a9b142c2e665255f528579bddcaf4499871bbccbf59495b21",
+   "track": "turn"
+  },
+  "paladin_turn_07.png": {
+   "sha256": "9da4182617f28b4f4ae8e00681379f5fb68ca96bdde1b937d3e5e6ffdcd3f434",
+   "track": "turn"
+  },
+  "paladin_turn_08.png": {
+   "sha256": "26668da502211ba54176c1f51e72c27d1b84a41178aa6f50fca88307f0325f8d",
+   "track": "turn"
+  },
+  "paladin_turn_09.png": {
+   "sha256": "b423b1cc21f2a5f799d7c35dbe22d96eda5b2c69b909880200ab86ceddb41d43",
+   "track": "turn"
+  },
+  "paladin_turn_10.png": {
+   "sha256": "c55bcc30d245ec2a19533455a13a020b2353b656181c791ae44d37358e1fc537",
+   "track": "turn"
+  },
+  "paladin_turn_11.png": {
+   "sha256": "1675da8825a392d653b921337e87cb8088dbd97707083414620ffe50628a83f6",
+   "track": "turn"
+  },
+  "paladin_turn_12.png": {
+   "sha256": "dca5ac1007b48563f16c7a1fa3b83c48ab663a1f3428a7de9db85a783215e951",
+   "track": "turn"
+  },
+  "paladin_walk_01.png": {
+   "sha256": "836ebcf3ef270840f98f9e173c58d9d656a16bf053e523ae8fee08686b4ed20f",
+   "track": "walk"
+  },
+  "paladin_walk_02.png": {
+   "sha256": "3f98185c7ecfe09687a3d6cee121d1eddb7447633f4d1f87c217e64672a80cff",
+   "track": "walk"
+  },
+  "paladin_walk_03.png": {
+   "sha256": "26d88856175617331175686be1fe93d3d115023b5dfd875afb395b1647e44d96",
+   "track": "walk"
+  },
+  "paladin_walk_04.png": {
+   "sha256": "14caf09632b1ed46743ffc701c92015f6e84559a5bdcfbb433b48f149151edbc",
+   "track": "walk"
+  },
+  "paladin_walk_05.png": {
+   "sha256": "9c8d43f14550d2844d5fbb77ced65226b5275cf5eeb8550a7da2b9dd5b487a63",
+   "track": "walk"
+  },
+  "paladin_walk_06.png": {
+   "sha256": "c2dfa0fa6d887e3e04ddec1132f9d0d83a413a7a88bd87eb9fad08f88e3dfd59",
+   "track": "walk"
+  },
+  "paladin_walk_07.png": {
+   "sha256": "3cd21deb83c7c6a34a36d4fdeae8a6ff5bc23359076d0dfbf5e1fd588af3f4f3",
+   "track": "walk"
+  },
+  "paladin_walk_08.png": {
+   "sha256": "99cca32ab4d1637c0cf6cb4c7d29a6ebdb78d9b3479a1d3e29c3a1db1f6c4e27",
+   "track": "walk"
+  },
+  "paladin_walk_09.png": {
+   "sha256": "5ea3f15c2e5ebc397469d51c2123c853cac4239f2e6e21a7bf4227f8dcc8e318",
+   "track": "walk"
+  },
+  "paladin_walk_10.png": {
+   "sha256": "c10bb689fb94dacb8807ab9ac09987a28f5efa404e318fe6fc56579c771416c0",
+   "track": "walk"
+  },
+  "paladin_walk_11.png": {
+   "sha256": "f87a7068f209993215c0950864fe633d742696777cfa04a3f7e8b3dc4627268d",
+   "track": "walk"
+  },
+  "paladin_walk_12.png": {
+   "sha256": "a1a3ac5280913daf39823ab2608077b023c177bf022096535e7d1ea5ed71b96d",
+   "track": "walk"
+  }
+ },
+ "frames_per_track": 12,
+ "hero": "paladin",
+ "loop_window": {
+  "attack": 0,
+  "hit": 0,
+  "idle": 40,
+  "turn": 0,
+  "walk": 40
+ },
+ "skip_start": {
+  "attack": 0,
+  "hit": 0,
+  "idle": 24,
+  "turn": 0,
+  "walk": 24
+ }
+}

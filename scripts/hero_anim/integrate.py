@@ -13,7 +13,9 @@
     python3 scripts/hero_anim/integrate.py swordsmen archers
 """
 import argparse
+import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -30,6 +32,7 @@ LOOP = {"idle": 1, "walk": 1, "attack": 0, "hit": 0, "turn": 0}
 SPEED = {"idle": 6.0, "walk": 8.0, "attack": 12.0, "hit": 12.0, "turn": 8.0}
 CANVAS = 512
 FEET_Y = 448
+FRAME = re.compile(r"^(?P<hero>.+)_(?P<action>idle|walk|attack|hit|turn)_\d{2}\.png$")
 SKIP_START = 24  # Wan стартует из покоя: у цикла первые ~0.8 с — «ещё стоит»
 LOOP_WINDOW = 40  # и к концу 81 кадра начинает разворачивать героя к камере
 FIGURE_H = 384  # при SCALE 0.25 даёт 96 px силуэта на поле — мера комплекта
@@ -37,8 +40,13 @@ HALO = {"paladin"}  # Wan дорисовала паладину зелёное �
 SPECK = 200  # замкнутый остров меньше — мусор ключа/нимба, а не часть тела (макс. настоящий 156)
 
 
-def frames_of(hero: str, action: str) -> Path:
-    """Каталог полного ролика принятого варианта; недостающие кадры докачиваются."""
+def frames_of(hero: str, action: str) -> tuple:
+    """Каталог полного ролика принятого варианта и номер варианта.
+
+    Вариант возвращается наружу: он попадает в манифест сборки, потому что
+    вердикт зрения («эти кадры — тот же персонаж») выносится конкретному
+    варианту клипа, а не каталогу героя (T-318).
+    """
     action_dir = hero_dir(hero, action)
     picked = action_dir / "picked.json"
     if not picked.exists():
@@ -51,7 +59,7 @@ def frames_of(hero: str, action: str) -> Path:
         path = dest / f"{i:03d}.png"
         if not path.exists():
             download(ref, path)
-    return dest
+    return dest, variant
 
 
 def load_frames(d: Path, hero: str) -> list:
@@ -165,7 +173,8 @@ def write_tres(hero: str, pngs: dict) -> Path:
 
 
 def integrate(hero: str, frames_per_track: int) -> None:
-    per_action = {action: load_frames(frames_of(hero, action), hero) for action in ACTIONS}
+    clips = {action: frames_of(hero, action) for action in ACTIONS}
+    per_action = {action: load_frames(clips[action][0], hero) for action in ACTIONS}
     # Общая рамка считается по всем дорожкам сразу: у героя один холст, иначе
     # дорожки разъезжаются при смене анимации.
     all_frames = [f for action in ACTIONS for f in per_action[action]]
@@ -187,16 +196,89 @@ def integrate(hero: str, frames_per_track: int) -> None:
             pngs[action].append(name)
     path = write_tres(hero, pngs)
     total = sum(len(v) for v in pngs.values())
+    write_manifest(hero, frames_per_track, clips, pngs)
     print(f"{hero}: {total} кадр(ов) → {path.relative_to(GAME.parent)}")
+
+
+def write_manifest(hero: str, frames_per_track: int, clips: dict, pngs: dict) -> Path:
+    """Манифест сборки: какие варианты клипов легли в какие файлы игры.
+
+    Кадры в `game/assets/sprites/` — бинарник, и до этого манифеста в репозитории
+    не было ничего, что связывало бы их с вердиктом зрения: пересъёмка (или
+    молчаливая перезапись старым промптом) не краснела нигде. Манифест даёт
+    машинную проверку `scripts/check_hero_frames.py`: файл в игре либо совпадает
+    с собранным комплектом, либо уровень краснеет.
+    """
+    frames = {}
+    for action in ACTIONS:
+        for name in pngs[action]:
+            blob = (GAME / "assets/sprites" / hero / name).read_bytes()
+            frames[name] = {"track": action, "sha256": hashlib.sha256(blob).hexdigest()}
+    body = {
+        "hero": hero,
+        "canvas": CANVAS,
+        "feet_y": FEET_Y,
+        "figure_h": FIGURE_H,
+        "frames_per_track": frames_per_track,
+        "skip_start": {a: (SKIP_START if LOOP[a] else 0) for a in ACTIONS},
+        "loop_window": {a: (LOOP_WINDOW if LOOP[a] else 0) for a in ACTIONS},
+        "clips": {a: {"variant": clips[a][1],
+                      "picked": f"scripts/hero_anim/out/{hero}/{a}/picked.json"}
+                  for a in ACTIONS},
+        "frames": frames,
+    }
+    dest = GAME / "assets/sprites" / hero / "frames_manifest.json"
+    dest.write_text(json.dumps(body, ensure_ascii=False, indent=1,
+                               sort_keys=True) + "\n", encoding="utf-8")
+    return dest
+
+
+def snapshot(hero: str, frames_per_track: int) -> Path:
+    """Манифест по тому, что уже лежит в игре, без пересборки кадров.
+
+    Нужен героям, снятым до манифеста: их сырые клипы локально не сохранились,
+    пересобирать их — значит молча переписать сто двадцать верных png. Манифест-
+    снимок помечен `backfilled` и защищает от последующего расхождения, но не
+    утверждает, что вариант дорожки пересмотрен.
+    """
+    out_dir = GAME / "assets/sprites" / hero
+    frames = {}
+    for f in sorted(out_dir.glob(f"{hero}_*.png")):
+        m = re.match(FRAME, f.name)
+        if not m:
+            continue
+        frames[f.name] = {"track": m.group("action"),
+                          "sha256": hashlib.sha256(f.read_bytes()).hexdigest()}
+    clips = {}
+    for action in ACTIONS:
+        picked = hero_dir(hero, action) / "picked.json"
+        clips[action] = {"variant": json.loads(picked.read_text())["variant"]
+                         if picked.exists() else None,
+                         "picked": f"scripts/hero_anim/out/{hero}/{action}/picked.json"}
+    body = {"hero": hero, "canvas": CANVAS, "feet_y": FEET_Y, "figure_h": FIGURE_H,
+            "frames_per_track": frames_per_track, "backfilled": True,
+            "skip_start": {a: (SKIP_START if LOOP[a] else 0) for a in ACTIONS},
+            "loop_window": {a: (LOOP_WINDOW if LOOP[a] else 0) for a in ACTIONS},
+            "clips": clips, "frames": frames}
+    dest = out_dir / "frames_manifest.json"
+    dest.write_text(json.dumps(body, ensure_ascii=False, indent=1, sort_keys=True) + "\n",
+                    encoding="utf-8")
+    return dest
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("hero", nargs="*", default=HEROES)
     ap.add_argument("--frames", type=int, default=12)
+    ap.add_argument("--backfill", action="store_true",
+                    help="только манифест по кадрам в игре, без пересборки (T-318)")
     args = ap.parse_args()
     for hero in args.hero or HEROES:
-        integrate(hero, args.frames)
+        if args.backfill:
+            path = snapshot(hero, args.frames)
+            print(f"{hero}: манифест-снимок → {path.relative_to(GAME.parent)}")
+        else:
+            integrate(hero, args.frames)
 
 
 if __name__ == "__main__":

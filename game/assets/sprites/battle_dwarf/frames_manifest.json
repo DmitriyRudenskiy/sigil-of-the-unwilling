@@ -1,0 +1,285 @@
+{
+ "canvas": 512,
+ "clips": {
+  "attack": {
+   "picked": "scripts/hero_anim/out/battle_dwarf/attack/picked.json",
+   "variant": 1
+  },
+  "hit": {
+   "picked": "scripts/hero_anim/out/battle_dwarf/hit/picked.json",
+   "variant": 1
+  },
+  "idle": {
+   "picked": "scripts/hero_anim/out/battle_dwarf/idle/picked.json",
+   "variant": 1
+  },
+  "turn": {
+   "picked": "scripts/hero_anim/out/battle_dwarf/turn/picked.json",
+   "variant": 1
+  },
+  "walk": {
+   "picked": "scripts/hero_anim/out/battle_dwarf/walk/picked.json",
+   "variant": 1
+  }
+ },
+ "feet_y": 448,
+ "figure_h": 384,
+ "frames": {
+  "battle_dwarf_attack_01.png": {
+   "sha256": "0c8b7134fd0a77d7f99e068ec7098b8c84d393afafb8d443a5fcbe3445be161c",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_02.png": {
+   "sha256": "221a5a5953b7e617d536e7801b1dee9ef9ab78ff74e23fa1077ae05f6413a2c7",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_03.png": {
+   "sha256": "1de7fbbadb317493c43a299266d67ecf8d83189bc5011ff2b383d545d7c3db33",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_04.png": {
+   "sha256": "bd8e96d41e7025a54555749d0083150844815d685b34b50c8a47ac13421ec237",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_05.png": {
+   "sha256": "eac71f29d122d2121fe65ca077f0bf287ee1a53dbf0802d3cdfd262ad605bf21",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_06.png": {
+   "sha256": "7f6881ae7990e7e4dab126d7a728d23514dc2e870ef9a94736854554ec929bfa",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_07.png": {
+   "sha256": "b0e8732db9d3dad1a07f006983f9007db0efae10ee7cb02b4a1ac60fbe5943e5",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_08.png": {
+   "sha256": "93cf4c0958d8f1551ee6239428fc73616aa0ec8a257465f84fc1e5dd6a17e08b",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_09.png": {
+   "sha256": "c65c5d762916221ef86badf239fff1c684418ea213f67ce2723a3cf95b642484",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_10.png": {
+   "sha256": "ddf173e9642231b02b605f13ae278d1dd5335a715dfb058eb8f97f131586d898",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_11.png": {
+   "sha256": "803ab5aa984f245e53047cbb19c320ffe70b177aa14315a65f9d7e674f67ef6b",
+   "track": "attack"
+  },
+  "battle_dwarf_attack_12.png": {
+   "sha256": "4bdc517e20747050e9b8daf25e9c751c97f922393282916714004530f2104703",
+   "track": "attack"
+  },
+  "battle_dwarf_hit_01.png": {
+   "sha256": "4cdc3b26ca861b5186aa1fad0120d4eaae4fe7c79decef60eb65a0cc4be6d125",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_02.png": {
+   "sha256": "1bf1b35ea055ab039fcb804b93712a9ac442f2f0230c3b4f4031c3b661166bce",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_03.png": {
+   "sha256": "b0932be6d7cc183ee4cbb8c10ef1344ec2fdbff7465339e48ebb688aeae3083d",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_04.png": {
+   "sha256": "1eef567f748e6319c94a05116fdb8792875905bbf0fbb316e07d025b0c64e46c",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_05.png": {
+   "sha256": "4efa7f09b68a693a5bc18dc08723c98e697f469d107424b7f32c6c1aaf22ea9e",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_06.png": {
+   "sha256": "06f271226303b88114ad0a7295b8a1054ff73b1f234b74ada9897b7ba0a6d936",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_07.png": {
+   "sha256": "c0d4285990fa9087365efa97b42ad123bef15e694717eb8df8f35efaad300e6c",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_08.png": {
+   "sha256": "2886c27b73cc36590a4588d2302ec8190e84da213c5f343be1d3be8699ba7160",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_09.png": {
+   "sha256": "409fb25f9513f6aa6cf5940f671a681f3a930ab4471a0724546555bd157d55bc",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_10.png": {
+   "sha256": "8216f16a6ec2b3b859273d1c47fc062324b1fe6abc9394cc409810a11bfcd43a",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_11.png": {
+   "sha256": "92d50f848e57c904c40f8134434c46d5073696d92b762cb9e08790fb92521b60",
+   "track": "hit"
+  },
+  "battle_dwarf_hit_12.png": {
+   "sha256": "110d403c12d1b1ef87bdc69da1b2bc26d3b4217110ca613fc4287d1a66ff3f5e",
+   "track": "hit"
+  },
+  "battle_dwarf_idle_01.png": {
+   "sha256": "5b9fb528ca848f4b61125204608fd01ebc685e7531a078599e71dae928e306c0",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_02.png": {
+   "sha256": "9abc0b5d72886f0e439d98f801fda59b7eb448c37dbc1df0839893d75f9a34e3",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_03.png": {
+   "sha256": "6633ba56c525e6c28fa9492858015952c680ce754f7783d4cd6dc0b7b7cc34a0",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_04.png": {
+   "sha256": "f7af820ecc32b46f75af6d71de5751e890f76380f5d2009d23947bb64141d3c5",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_05.png": {
+   "sha256": "952c5e77b0c6b3caaef67a8d4da293992d0d39914a10d1ce27ecba7ee08309f8",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_06.png": {
+   "sha256": "25d6a30ad25e93f3168e48edc07509412a5f807b8459e9442d438a0824eb2ddb",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_07.png": {
+   "sha256": "558155cf5edd55cea20a2dbdba2a1f3efe6db8a6a31639d5f4b953f2ad7ca419",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_08.png": {
+   "sha256": "7e77f9e11fca6864f59dc2383f7d2ffa9d9fc7f84e699e8f8650e94eaa50bd3f",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_09.png": {
+   "sha256": "c93c9438f486785a6ae5c319f29e4a763f0b0de8a5077787e89c13ad83805fcf",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_10.png": {
+   "sha256": "94a6c914749cb665902ffb759fe9c2417561a248f75cde42816f159ef4b544c4",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_11.png": {
+   "sha256": "221341299c7d124553029ae58e8aa5da94a282c0f84d14e686526e7e25e747f8",
+   "track": "idle"
+  },
+  "battle_dwarf_idle_12.png": {
+   "sha256": "df7d5c877219674c1fd19c17132b3a2d207d596d0506b66c9719b48c3c2006cd",
+   "track": "idle"
+  },
+  "battle_dwarf_turn_01.png": {
+   "sha256": "228dc453a264108507418c2a9edec49c4f345195e8195e4a4b914cf249e1dce3",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_02.png": {
+   "sha256": "41274750270ae224c9fe28b4297f94c21a57959a9251ee408d298d695a0ea996",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_03.png": {
+   "sha256": "415a3dc5a4c5c7d5aa139bebc64ab1f7540d87ee97f3fae90a12281c96c074e1",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_04.png": {
+   "sha256": "5bc5c1bb0125bb7517e19478e5cc766231af5d8496b8085f545f7a6958633600",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_05.png": {
+   "sha256": "5952d2bd17bd0b331cfc328aacfd90082cf12f3ca9ce1cd7b419e9999e2fdb93",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_06.png": {
+   "sha256": "07b6a0e1d2b1e4ee67b85c92d7de2e0ad7cdaf1cc95403139c5bfc0f7c974bc7",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_07.png": {
+   "sha256": "4e0998196890256bbbbe993f9216be37d167c6757ca7d81b3077f0e8abe0964f",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_08.png": {
+   "sha256": "db56d51dcfab2fb5b7c522dcb976fe61d73c8b80e31cb7f273dbe7ba4830ac41",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_09.png": {
+   "sha256": "c91aed7c37fca4e1839b8be117c0e3bbbbddb1e36d8a997a0dd67b8cc4b123af",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_10.png": {
+   "sha256": "8412bda3309b71c4eccd429c2910e9d85b5b01291761af7ff8a3a508266bf30f",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_11.png": {
+   "sha256": "c00bdc06a3001ccda095fbccfd2193df867356ed70c6bcb167809d6c2e440b0c",
+   "track": "turn"
+  },
+  "battle_dwarf_turn_12.png": {
+   "sha256": "bae1a3e61de0c00ea1732f64672eacff3ad5851d51534386d3836006856faf76",
+   "track": "turn"
+  },
+  "battle_dwarf_walk_01.png": {
+   "sha256": "25707c0e4a672d51581fc035426b5b7e8c704b05a822f6e5b267f73a9a66ec59",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_02.png": {
+   "sha256": "e24a5df53bf2a8271da39df757c197ca097156e5bfe1c40f2a87a2e0ead266eb",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_03.png": {
+   "sha256": "7933a1f5dc2f758f18f3a21d68ed18758e998c5897f63ff34e788f965a5ebedf",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_04.png": {
+   "sha256": "b282a371fc1186a679bd13333d6b3a257f520227927708012acb3912c7461708",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_05.png": {
+   "sha256": "2b36a5efded7669f4a184ab948a1b7611b155c38d2224108d2b728bdf26092a8",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_06.png": {
+   "sha256": "3a825d0a35785f682a8ca86e752d6535fcf5547b178c23a5e86285995012c3b1",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_07.png": {
+   "sha256": "88e5135352c73d52db48abaa08bc37e8401e4d453ae3ec7ddadea548732b3d3a",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_08.png": {
+   "sha256": "0d439d73d61572268ca7a39b7f726a0143b19730d7a0581a06970aba59cefa8a",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_09.png": {
+   "sha256": "01d8e1b54fa07e421df0e118be9eebdb4b02c952b822cf346687709e4932b4af",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_10.png": {
+   "sha256": "233a3c47e3f918d94548001fac5202695a945e48bccdc070b1cd17e902f19632",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_11.png": {
+   "sha256": "49c73350e0a2682f283eedc2520d209f79feb03ca0208ab221cf0693b783ab50",
+   "track": "walk"
+  },
+  "battle_dwarf_walk_12.png": {
+   "sha256": "142f39407e61b97a0ea64b9670f55f4b3d0bcf0b1ba9f0ec5f561bcd1349bfa6",
+   "track": "walk"
+  }
+ },
+ "frames_per_track": 12,
+ "hero": "battle_dwarf",
+ "loop_window": {
+  "attack": 0,
+  "hit": 0,
+  "idle": 40,
+  "turn": 0,
+  "walk": 40
+ },
+ "skip_start": {
+  "attack": 0,
+  "hit": 0,
+  "idle": 24,
+  "turn": 0,
+  "walk": 24
+ }
+}
