@@ -10,7 +10,7 @@
 прозрачных PNG на юнита, а на глаз в бою при 96 px разницы нет. Сырьё остаётся
 в `scripts/hero_anim/out/` (gitignored).
 
-    python3 scripts/hero_anim/integrate.py swordsmen archers
+    python3 scripts/hero_anim/integrate.py blackblade greenhood
 """
 import argparse
 import json
@@ -33,7 +33,7 @@ FEET_Y = 448
 SKIP_START = 24  # Wan стартует из покоя: у цикла первые ~0.8 с — «ещё стоит»
 LOOP_WINDOW = 40  # и к концу 81 кадра начинает разворачивать героя к камере
 FIGURE_H = 384  # при SCALE 0.25 даёт 96 px силуэта на поле — мера комплекта
-HALO = {"paladin"}  # Wan дорисовала паладину зелёное свечение: оно не фон и не герой
+HALO = {"goldmace"}  # Wan дорисовала паладину зелёное свечение: оно не фон и не герой
 SPECK = 200  # замкнутый остров меньше — мусор ключа/нимба, а не часть тела (макс. настоящий 156)
 
 

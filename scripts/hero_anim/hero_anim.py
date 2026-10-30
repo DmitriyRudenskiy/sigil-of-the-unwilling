@@ -30,19 +30,48 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 HERE = Path(__file__).resolve().parent
 COMFY = "http://192.168.0.230:8188"
 FIGURES = HERE.parent.parent / "game" / "assets" / "units" / "figures"
 OUT = HERE / "out"
-HEROES = ["swordsmen", "archers", "knights", "paladin", "battle_dwarf"]
+HEROES = ["blackblade", "greenhood", "silverhalberd", "goldmace", "barehammer"]
 ACTIONS = ["idle", "walk", "attack", "hit", "turn"]
 
 # Стиль одного ряда держат сами вырезы владельца: персонаж описан один раз — картинкой
 # (см. PROFILE_PROMPT). Своих слов о персонаже в промптах нет ни в одном шаге.
 # Позы из набора владельца, переписанные под наших героев: статичная камера,
 # изоляция на хромакее (фон потом режется альфой), один персонаж в кадре.
+# Что модель теряет на повороте, несмотря на «keep every object the reference
+# carries»: у goldmace щит пропал на всех четырёх вариантах. Дыра латается точечно и
+# по правилу D-297: не архетипом, а тем, что реально нарисовано на reference. Пустая
+# строка = терять нечего, общего запрета хватает.
+GEAR = {
+    "goldmace": " Keep the reference gear exactly: a round wooden shield stays "
+                "strapped on the left arm, its face turned away from the camera.",
+}
+
+# Разовая переспецификация расы (владелец, 2026.10.30: «расы — только люди»). Единственный
+# случай, где D-297 нарушается намеренно: вырез коротышки НЕ может нести идентичность
+# человека, поэтому гонка и телосложение описаны словом, а картинка держит стиль, лицо,
+# цвета, снаряжение и оружие. Обычный поворот расу не меняет — он для правки, где
+# reference единственный рассказ о персонаже.
+RESPEC = {
+    "barehammer": (
+        "Turn this character sheet into a front-facing standing pose, arms lowered, "
+        "full body visible, feet at the bottom edge of the frame, the whole figure "
+        "inside the frame. Keep the exact same art style, the same face and expression, "
+        "the same colours, the same clothing, the same weapon in the same hand. "
+        "Change one thing only: this character is a HUMAN man, not a dwarf — tall, "
+        "lean, long legs, a normal human head-to-body ratio, the same scarred grinning "
+        "face, the same beard, the same tattoo, the same bare torso, leather harness, "
+        "fur pauldron, tartan kilt and stone warhammer. Do not add or remove anything "
+        "else. Plain uniform bright green background #00FF00, no floor, no shadow, "
+        "no text."
+    ),
+}
+
 POSE = {
     "idle": "The character stands in an idle pose, slight natural breathing motion, "
             "weight shifting slightly, calm and focused, static camera.",
@@ -81,11 +110,13 @@ PROFILE_PROMPT = (
     "Rotate the character from the reference image to a right side profile view. "
     "Keep everything else exactly as in the reference: same art style, same face "
     "and expression, same colours, same clothing, same weapon in the same hand. "
-    "Do not redesign the character, do not add or remove anything, do not change "
-    "the weapon or the colours. Both arms lowered, hands still gripping the same "
-    "weapon, its head resting near the ground. Full body, feet at the bottom edge "
-    "of the frame, single character, isolated on a flat solid background, no floor, "
-    "no cast shadow.")
+    "Keep every object the reference figure carries or wears, on the same limb or "
+    "in the same hand — nothing is put down, removed or hidden. Do not redesign the "
+    "character, do not add or remove anything, do not change the weapon or the "
+    "colours. Both arms lowered, hands still gripping the same weapon. The weapon "
+    "keeps exactly its reference size, shape and length: a long shaft stays long, "
+    "a head that was up stays up. Full body, feet at the bottom edge of the frame, "
+    "single character, isolated on a flat solid background, no floor, no cast shadow.")
 # Фон: граф вырезает фон (birefnet), поэтому фон промта важен меньше, чем однородность —
 # просим сплошной зелёный хромакей, чтобы матовый край был чистым. «Studio lighting» и
 # любые слова о свете сюда не пишутся: свет в промпте перекрашивает персонажа.
@@ -344,6 +375,85 @@ def score_variant(path: Path) -> tuple[float, float, float, float]:
     return fg / (w * h), bottom, green / (w * h), sharp
 
 
+# ---------------------------------------------------------------- пропорции
+# Контроль пропорций СТАВИТСЯ ДО видеопрогона: минута GPU на дорожку и десять минут
+# на лист вариантов — цена, за которую нельзя узнавать о «коротком и широком» после.
+# Полосы АБСОЛЮТНЫЕ, без эталона: сравнение с вырезом владельца меряет оружие (щит
+# или древко в полосе плеч дают «плечи/голова» 4.0), а разброс сложения между героями
+# законен. За полосу выходит не другой персонаж, а другой биологический вид.
+HEIGHT_MIN, HEIGHT_MAX = 512, 1200       # px силуэта: ниже — интеграция тянет в мыло
+ASPECT_MIN, ASPECT_MAX = 1.30, 2.90      # рост/ширина: человек с оружием
+SHOULDER_MIN, SHOULDER_MAX = 1.20, 3.00  # плечи/голова
+
+
+def proportions(path: Path) -> dict:
+    """Геометрия силуэта по альфе: (рост, ширина, рост/ширина, плечи/голова)."""
+    alpha = Image.open(path).convert("RGBA").getchannel("A")
+    box = alpha.getbbox()
+    if not box:
+        raise SystemExit(f"пустой силуэт (нет альфы): {path}")
+    alpha = alpha.crop(box)
+    w, h = alpha.size
+    mask = alpha.point([255 if v > 127 else 0 for v in range(256)])
+    buf = mask.tobytes()
+    width = [buf[r * w:(r + 1) * w].count(255) for r in range(h)]
+    head_rows = max(1, int(h * 0.08))
+    head = sum(width[:head_rows]) / head_rows or 1
+    shoulder = max(width[int(h * 0.10):max(int(h * 0.10) + 1, int(h * 0.25))] or [1])
+    return {"h": h, "w": w, "aspect": h / w, "shoulder_over_head": shoulder / head}
+
+
+def proportion_faults(got: dict) -> list[str]:
+    """Расхождения с полосой набора (пустой список = допуск)."""
+    bad = []
+    if not HEIGHT_MIN <= got["h"] <= HEIGHT_MAX:
+        bad.append(f"силуэт {got['h']} px вне полосы {HEIGHT_MIN}…{HEIGHT_MAX}")
+    if not ASPECT_MIN <= got["aspect"] <= ASPECT_MAX:
+        bad.append(f"рост/ширина {got['aspect']:.2f} вне полосы {ASPECT_MIN}…{ASPECT_MAX} "
+                   f"(сложение не человека)")
+    if not SHOULDER_MIN <= got["shoulder_over_head"] <= SHOULDER_MAX:
+        bad.append(f"плечи/голова {got['shoulder_over_head']:.2f} вне полосы "
+                   f"{SHOULDER_MIN}…{SHOULDER_MAX}")
+    return bad
+
+
+def cmd_check(hero: str) -> int:
+    got = proportions(hero_dir(hero) / "adopted.png")
+    bad = proportion_faults(got)
+    print(f"{hero}: силуэт {got['w']}×{got['h']}  рост/ширина {got['aspect']:.2f}  "
+          f"плечи/голова {got['shoulder_over_head']:.2f}")
+    for why in bad:
+        print(f"  FAIL: {why}")
+    print("ПРОПОРЦИИ: " + ("FAIL" if bad else "OK"))
+    return 3 if bad else 0
+
+
+def selfcheck_proportions() -> int:
+    """Мера обязана различать рост и ширину и не пускать «не человека».
+
+    Силуэт — голова (`head` доли ширины) плюс корпус: полоса «плечи/голова» на
+    одном прямоугольнике не проверяется, она про отношение, а не про площадь.
+    """
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        for name, w, h, ok in (("tall", 200, 800, False),      # рост/ширина 4.0
+                               ("human", 300, 780, True),      # 2.6
+                               ("stocky", 400, 400, False)):   # 1.0 — коротышка
+            path = Path(d) / f"{name}.png"
+            im = Image.new("RGBA", (w + 40, h + 40), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(im)
+            draw.rectangle([20 + w // 4, 20, 20 + 3 * w // 4 - 1, 20 + int(h * 0.12) - 1],
+                           fill=(255, 255, 255, 255))
+            draw.rectangle([20, 20 + int(h * 0.12), 20 + w - 1, 20 + h - 1],
+                           fill=(255, 255, 255, 255))
+            im.save(path)
+            p = proportions(path)
+            assert p["h"] == h and p["w"] == w and abs(p["aspect"] - h / w) < 1e-6, p
+            assert bool(proportion_faults(p)) != ok, (name, p, proportion_faults(p))
+    print("САМОПРОВЕРКА: OK (полоса ловит коротышку и растянутого, человека пускает)")
+    return 0
+
+
 # ---------------------------------------------------------------- подшаги
 def hero_dir(hero: str, action: str = "") -> Path:
     return OUT / hero / (action or "profile")
@@ -371,11 +481,23 @@ def cmd_generate(args) -> int:
     hero, action = args.hero, args.action
     out = hero_dir(hero, action)
     out.mkdir(parents=True, exist_ok=True)
+    if action and not args.no_check:
+        # Дорожка не вернёт пропорции обратно: профиль — единственный вход ролика.
+        got = proportions(hero_dir(hero) / "adopted.png")
+        bad = proportion_faults(got)
+        if bad:
+            print(f"профиль {got['w']}×{got['h']}  рост/ширина {got['aspect']:.2f}  "
+                  f"плечи/голова {got['shoulder_over_head']:.2f}")
+            for why in bad:
+                print(f"  FAIL: {why}")
+            raise SystemExit("пропорции профиля не прошли контроль — сначала переснять "
+                             "профиль (`--no-check` обходит контроль осознанно)")
     src = source_image(hero, action)
     server_name = upload(src)
     prompt = args.prompt or (
         f"{CHROMA} {POSE[action]}" if action else
-        f"{PROFILE_PROMPT}. {CHROMA}")
+        RESPEC[hero] if args.respec else
+        f"{PROFILE_PROMPT}{GEAR.get(hero, '')}. {CHROMA}")
     tag = f"{hero}-{action or 'profile'}"
     for v in range(1, args.variants + 1):
         have = sorted(out.glob(f"v{v:02d}_*.png"))
@@ -481,6 +603,12 @@ def main() -> int:
                    help="скачать все кадры выбранного варианта")
     p.add_argument("--adopt", type=int, default=0, help="выбрать вариант: хромакей + обрезать в край")
     p.add_argument("--score", action="store_true", help="разбор вариантов числом")
+    p.add_argument("--check", action="store_true",
+                   help="промерить пропорции принятого профиля")
+    p.add_argument("--respec", action="store_true",
+                   help="разово переспецифицировать расу/тело (см. RESPEC), а не поворачивать")
+    p.add_argument("--no-check", action="store_true", help="не проверять пропорции перед видео")
+    p.add_argument("--self-check", action="store_true", help="проверить саму меру")
     args = p.parse_args()
     if args.collect:
         return cmd_collect(args.hero, args.action, args.collect)
@@ -488,6 +616,10 @@ def main() -> int:
         return cmd_adopt(args.hero, args.action, args.adopt)
     if args.score:
         return cmd_score(args.hero, args.action)
+    if args.self_check:
+        return selfcheck_proportions()
+    if args.check:
+        return cmd_check(args.hero)
     return cmd_generate(args)
 
 

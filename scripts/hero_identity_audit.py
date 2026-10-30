@@ -17,7 +17,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-HEROES = ["swordsmen", "archers", "knights", "paladin", "battle_dwarf"]
+HEROES = ["blackblade", "greenhood", "silverhalberd", "goldmace", "barehammer"]
 FIGURE = "game/assets/units/figures"
 PROFILE = "scripts/hero_anim/out/{hero}/profile/adopted.png"
 FRAME = "game/assets/sprites/{hero}/{hero}_idle_01.png"
