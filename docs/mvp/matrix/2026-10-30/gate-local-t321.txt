@@ -1,0 +1,68 @@
+Gate local — T-321 (диагноз гибели Городостроитель × Разбойник: трасса шкалы REST)
+==================================================================================
+head_sha: код — локальный коммит над `origin/main 49f8e0ca` (`game/tools/diag_hero_needs.gd`
++ `.uid`), доки — вторым коммитом (`docs/mvp/matrix/2026-10-30/t321-rest-trace.md`,
+`docs/mvp/TICKETS.md`, `docs/CHANGELOG.md`, `docs/00-INDEX.md`), этот артефакт — третьим.
+Прогон снят на дереве, содержимое которого и есть код-коммит: новым файлом был только
+`game/tools/diag_hero_needs.gd` (в тесты не входит, в игру не загружается).
+
+CI не проверялся (по инструкции владельца от 2026-10-13). Вердикт — локальный прогон +
+ревью диффа владельцем в треде. Пикселей срез не производит: доказательство замера —
+`docs/mvp/matrix/2026-10-30/t321-rest-trace.md` и сам инструмент.
+
+Состояние среды: `free -m` — 699 MB доступно на старте прогона. Отдельная ловушка этой
+машины: `/proc/meminfo` показывал `MemAvailable: 0 kB` при тех же 699 MB свободы —
+28.5 GB занимает `Shmem` (общая память чужих процессов: tmpfs/POSIX-сегменты), и ядро
+клампит MemAvailable к нулю. Перед решением «машина забита» смотреть `free -m` и
+`/proc/pressure/memory` (some avg10 = 0.00 — ожидания памяти нулевое, прогоны шли).
+Чужие Xvfb :96 и :97 не трогались;
+MCP — порт 9090, `MCP_WORKERS=1` (дефолт).
+
+GdUnit (unit + integration + functional)
+----------------------------------------
+Overall Summary: 3668 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (389/389)
+Executed test cases : (3668/3668)
+Total execution time: 2min 50s 701ms
+Exit code: 0 (печатается самим прогоном). Счётчик случаев не двигался: срез добавил
+инструмент, а не тест, — тестовая карта (`scripts/testmap.baseline.json`) не переснималась,
+`holes` 80 / `merge_files` 152 / `дубли` 0 остались прежними.
+
+Сопутствующие гейты того же прогона:
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK, NODE-PATH-GATE: OK — новый файл проверялся: его литералы
+  `res://scenes/archive/world.tscn`, `res://scripts/probe/scenario_pilot.gd`,
+  `res://scenes/probe/ScenarioPilot.tscn` существуют
+LINT: SKIPPED (нет gdtoolkit у python3) — среда, а не халтура; фиксируется здесь.
+
+MCP e2e (четвёртый уровень)
+---------------------------
+PYTEST LEDGER: passed=112 skipped=2 failed=0 errors=0 collected=114
+SKIPPED (2 — причина обязательна):
+  test_battle_profiling.py:33 — нет узлов городов в сцене боя
+  test_capture.py:294 — съёмка только по запросу: CAPTURE_SCENE=res://...
+MCP JUNIT: passed=112 skipped=2 failed=0 errors=0
+MCP VERDICT: GREEN — в отличие от прогона 2026-10-30 (T-238: 1 failed + 1 error класса
+readiness: `test_balance_probe::test_balance_probe_deterministic` и
+`test_campaign_carrier::test_counter_bar_shows_the_live_campaign_carrier`), сегодня обе
+прошли. То есть вчерашний YELLOW был средовым, а не кодовым — как и говорила разметка D-265.
+
+Прочее: GENART 11 passed; READINESS-CLASSIFIER 13 passed + selftest GREEN;
+HERO FRAMES OK (5 герой(ов), 300 кадров сверены с манифестом); HERO-LAYOUT-MAP блоков 19.
+DOC GATES: GREEN (переснят после добавления этого артефакта: тесты проверщиков 184 passed,
+OPENSPEC SPECS OK 87, TESTMAP OK дыр 80 / групп слияния 152 / дублей 0).
+
+Замеры среза (не гейт, а предмет тикета)
+----------------------------------------
+`godot --headless --path game -s res://tools/diag_hero_needs.gd` (builder × rogue,
+seed 1701587817, бюджет 90 ходов), ход 1 → 65:
+
+    NEEDS|budget|ticks=45|in_city=19(42%)|extracts=42|per_turn=0.93|attack=5|
+      rest=0.84→0.000|drift=-0.0187/ход|Δв_городе=-0.013|Δвне=-0.024
+    NEEDS|endgame={ "state": "DEFEAT", "end_reason": "unsuccessored_death" }
+
+Восстановление шкалы (+0.26) сработало 6 раз из 44 переходов; боёв к смерти 46;
+перегруз снаряжением 0.0 при лимите 20.0 всю трассу. Когорта классов той же ролью:
+у десяти выживших REST на последнем снимке 0.40–1.00, доля ходов в городе 63–71%.
+Числа, цепочка и команды воспроизведения — `docs/mvp/matrix/2026-10-30/t321-rest-trace.md`.
