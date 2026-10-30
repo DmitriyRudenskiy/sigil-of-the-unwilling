@@ -3,6 +3,19 @@ extends BaseTest
 ## Прежнее имя — test_city_processor.gd, каталог — unit/world/ (T-305, шаг 2, 2026-10-30).
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
+## WorldSeasons._turn_count — статика процесса, а сезон текущего хода входит в
+## производство (Лето ×1.2, 07-balance §6). Фиксируем весну явно: до переезда в
+## unit/city файл случайно попадал на весенний ход и потому был зелёным, в новом
+## порядке он доставался чужому счётчику ходов (T-305 шаг 2 → T-322).
+var _season_turns := 0
+
+func before_test() -> void:
+	_season_turns = WorldSeasons.get_turns()
+	WorldSeasons.set_turns(1)  # Весна: prod_mult 1.0
+
+func after_test() -> void:
+	WorldSeasons.set_turns(_season_turns)  # чужое состояние не оставляем
+
 func _cell_at_distance(city: City, d: int) -> Vector2i:
 	if d <= 0:
 		return city.center
