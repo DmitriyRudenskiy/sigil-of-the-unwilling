@@ -7023,6 +7023,43 @@ GdUnit: 3479/3479, 366/366 сюиты, 0 errors / 0 failures / 0 orphans, exit 0
 а не нашёл его. При слиянии файлов с разными `before_test` — не выбирать «чужую»
 фикстуру молча, а выносить конструктор города явно.
 
+**Шаг 2 (2026-10-30, агент): группа названа по носителям.** Из 12 файлов переименованы
+четыре, чей носитель однозначен по числу **обращений к классу** (не по подстроке имени):
+
+| Прежнее имя | Новое | Носитель и измерение |
+| --- | --- | --- |
+| `unit/world/test_city_processor.gd` | `unit/city/test_city_turn_processor.gd` | `scripts/city/city_turn_processor.gd` — 12 вызовов `CityTurnProcessor` против 4 совпадений паттерна `city` |
+| `unit/world/test_city_reputation.gd` | `unit/city/test_reputation_system.gd` | `scripts/city/reputation_system.gd` — 30 вызовов `ReputationSystem` |
+| `unit/world/test_city_persistence.gd` | `unit/world/test_city_factory_persistence.gd` | `scripts/world/city_factory.gd` — 7 вызовов `CityFactory` против 3 `CityManager` |
+| `unit/world/test_city_arena.gd` | `unit/world/test_arena_ring_system.gd` | `scripts/city/arena_ring_system.gd` — 32 вызова `ArenaRingSystem` и 16 `ArenaTurnRunner` |
+
+`merge_files` **152 → 148** при **неизменных** `gd_files` 389, `gd_tests` 3668, дырах 80 и
+дублях 0: падение получено переименованием, а не слиянием, и это не подгонка метрики,
+потому что имя файла в этом наборе и есть утверждение о носителе (отдельный шаг с явной
+ценой — ровно то, что требовал отчёт шага 1). Два файла переехали в `unit/city/`, их
+носители живут в `scripts/city/`. Тела тестов не правились: 67 кейсов четвёрки зелёны и
+до, и после (`Overall Summary: 67 test cases | 0 errors | 0 failures`). В шапке
+`test_city.gd` — список переименований, в каждом файле — строки «носитель + прежнее имя».
+
+**Эрратум отчёта выше (2026-10-27).** `test_city_arena.gd` и `test_city_processor.gd`
+приписаны там `city_check.gd` («6 упоминаний против 1»). В `test_city_processor.gd`
+обращений к `CityCheck` нет ни одного. В `test_city_arena.gd` шесть вхождений `CityCheck`
+есть, но все шесть — аннотации типа результата (`var res: CityCheck =
+ArenaTurnRunner.place_building(...)`), то есть шаг 1 посчитал подстроку, а не предмет
+проверки. Носитель этого файла — арена (`ArenaRingSystem`/`ArenaTurnRunner`).
+
+**Пятеро смешанных остались в группе и переименованы не будут** (пока не разделены):
+`test_city_level.gd` (prosperity_system 16 / building_defs 6 / unique_building 5),
+`test_city_navigation.gd` (marker_layer 10 / city 7), `test_city_system.gd` (pop_unit 15 /
+building_defs 8 / borough_rules 5), `test_city_tech_tree.gd` (building_defs 19 / city_check 8 /
+city_service 8), `test_city_hex_layout.gd` (hex_utils 5 / city 5 / city_factory 4). Имя под
+один из носителей было бы новой ложью — правый шаг здесь разделение файла, а не
+переименование. Ещё двое: `test_smoldering_city.gd` ждёт T-286 (носитель
+`scripts/settlement/SmolderingCity.gd` с заглавной буквы эвристика имени не находит),
+`test_builder_city_ledger_outcomes.gd` — тест роли пробы, а не города. Строка «12 файлов»
+в футере — состояние шага 1; после шага 2 в группе 8 файлов.
+
+
 **Зависит:** T-227 · **Блокирует:** — · **Владелец:** агент · **Статус:** открыт (С-3а закрыт,
 С-3 продолжат: группа `city.gd` — 12 файлов)
 
