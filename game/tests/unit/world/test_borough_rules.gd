@@ -1,4 +1,8 @@
 extends BaseTest
+## Носитель: scripts/world/borough_rules.gd — лимит Borough по фракции, стоимость,
+## повыше­ние уровня по соседям того же уровня. Два нижних теста переехали сюда из
+## `unit/test_city_system.gd` (шаг 3 T-305, 2026-10-30): их носитель всегда был этот,
+## второго файла на него заводить не стали.
 
 
 
@@ -120,3 +124,29 @@ func test_process_level_ups_returns_count() -> void:
 	var raised := BoroughRules.process_level_ups(city)
 	assert_int(raised).is_greater(0)
 	assert_int(center_borough.level).is_greater(1)
+
+func test_borough_limit_by_faction() -> void:
+	# Прежний дом — unit/test_city_system.gd (шаг 3 T-305).
+	city.add_followers(5)
+	assert_that(BoroughRules.max_boroughs(city)).is_equal(2)
+	city.faction = City.Faction.NECROPHAGE
+	assert_that(BoroughRules.max_boroughs(city)).is_equal(5)
+
+func test_borough_levelup_needs_4_same_level() -> void:
+	# Прежний дом — unit/test_city_system.gd (шаг 3 T-305).
+	var x := Vector2i(5, 5)
+	var nb: Array = HexUtils.get_all_neighbors(x)
+	var center_b := Borough.new()
+	center_b.cell = x
+	center_b.level = 1
+	city.boroughs.append(center_b)
+	for i in 4:
+		var b := Borough.new()
+		b.cell = nb[i]
+		b.level = 1
+		city.boroughs.append(b)
+	assert_that(BoroughRules.same_level_neighbors(city, city.boroughs[0])).is_equal(4)
+	var ups := BoroughRules.process_level_ups(city)
+	assert_that(ups).is_equal(1)
+	assert_that(city.boroughs[0].level).is_equal(2)
+	assert_bool(BoroughRules.can_level_up(city, city.boroughs[0])).is_false()

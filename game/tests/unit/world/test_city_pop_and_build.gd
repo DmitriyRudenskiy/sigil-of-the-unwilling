@@ -1,4 +1,12 @@
 extends BaseTest
+## Носитель: scripts/world/city.gd — население города (смена состояний юнитов,
+## потолок, рождение, патруль, урожай) и стройки города (постройка, повышение).
+## Прежнее имя — `unit/test_city_system.gd` (шаг 3 T-305, 2026-10-30); цикл города
+## ушёл в `unit/world/test_city_manager_cycle.gd`, правила Borough — в
+## `unit/world/test_borough_rules.gd`.
+## Пересечение с `test_city_rings_and_serialization.gd` (кольцевой допуск стройки и
+## отказ на клетке рабочего) замечено и **не** сведено: тот файл проверяет причину
+## отказа, этот — состояние населения после отказа. Сведение — за этим же тикетом.
 
 const FOOD_PER_TILE := 100.0
 
@@ -11,12 +19,6 @@ func _city() -> City:
 func _food_yield(_cell: Vector2i) -> Dictionary:
 	return {&"food": FOOD_PER_TILE, &"industry": 10.0, &"dust": 0.0,
 		&"science": 0.0, &"influence": 0.0}
-
-func _mk_borough(cell: Vector2i) -> Borough:
-	var b := Borough.new()
-	b.cell = cell
-	b.level = 1
-	return b
 
 func assert_almost_eq(a: float, b: float, delta: float, _msg: String = "") -> void:
 	assert_float(a).is_equal_approx(b, delta)
@@ -52,51 +54,6 @@ func test_growth_births_follow_threshold() -> void:
 	assert_that(r.births).is_equal(1)
 	assert_almost_eq(c.food_stockpile, FOOD_PER_TILE - 1.0 - 5.0 * pow(2.0, 2.75), 0.01, "food stockpile after birth")
 
-func test_cycle_inflow_summer_with_glory_and_temple() -> void:
-	var mgr = auto_free( CityManager.new())
-	var cap := _city()
-	mgr.register_city(cap, true)
-	cap.storage[&"industry"] = 1000.0
-	cap.special_sites[HexUtils.get_all_neighbors(cap.center)[0]] = BuildingDefs.SITE_SHRINE
-	# Ранняя игра: дымовая — храм требует уровень (early-game-foundation)
-	cap.level = 11
-	assert_that(cap.build_building(BuildingDefs.great_temple(), \
-		HexUtils.get_all_neighbors(cap.center)[0])).is_not_null()
-	mgr.add_glory(50.0, &"test")
-	for i in GameNumbers.CITY_CYCLE_TURNS:
-		mgr.on_turn_ended(7)
-	assert_that(cap.pop_total()).is_equal(8)
-	mgr.free()
-
-func test_cycle_inflow_winter_halved() -> void:
-	var mgr = auto_free( CityManager.new())
-	var cap := _city()
-	mgr.register_city(cap, true)
-	for i in GameNumbers.CITY_CYCLE_TURNS:
-		mgr.on_turn_ended(1)
-	assert_that(cap.pop_total()).is_equal(1)
-	mgr.free()
-
-func test_borough_limit_by_faction() -> void:
-	var c := _city()
-	c.add_followers(5)
-	assert_that(BoroughRules.max_boroughs(c)).is_equal(2)
-	c.faction = City.Faction.NECROPHAGE
-	assert_that(BoroughRules.max_boroughs(c)).is_equal(5)
-
-func test_borough_levelup_needs_4_same_level() -> void:
-	var c := _city()
-	var x := Vector2i(5, 5)
-	var nb: Array = HexUtils.get_all_neighbors(x)
-	c.boroughs.append(_mk_borough(x))
-	for i in 4:
-		c.boroughs.append(_mk_borough(nb[i]))
-	assert_that(BoroughRules.same_level_neighbors(c, c.boroughs[0])).is_equal(4)
-	var ups := BoroughRules.process_level_ups(c)
-	assert_that(ups).is_equal(1)
-	assert_that(c.boroughs[0].level).is_equal(2)
-	assert_bool(BoroughRules.can_level_up(c, c.boroughs[0])).is_false()
-
 func test_building_upgrade_requires_hero_and_followers() -> void:
 	var c := _city()
 	c.add_followers(5)
@@ -122,21 +79,6 @@ func test_free_building_placement_distance() -> void:
 	assert_bool(c.can_build_building(BuildingDefs.market(), far).ok).is_false()
 	var near: Vector2i = HexUtils.get_all_neighbors(c.center)[0]
 	assert_bool(c.can_build_building(BuildingDefs.market(), near).ok).is_true()
-
-func test_overflow_transfer_between_cities() -> void:
-	var mgr = auto_free( CityManager.new())
-	var cap := _city()
-	var other := _city()
-	mgr.register_city(cap, true)
-	mgr.register_city(other)
-	cap.add_followers(9)
-	for i in GameNumbers.CITY_CYCLE_TURNS:
-		mgr.on_turn_ended(7)
-	assert_that(cap.over_limit()).is_equal(1)
-	assert_that(cap.send_followers_to(other, 1)).is_equal(1)
-	assert_that(cap.over_limit()).is_equal(0)
-	assert_that(other.pop_total()).is_equal(1)
-	mgr.free()
 
 func test_patrol_gives_safety() -> void:
 	var c := _city()
