@@ -1,7 +1,12 @@
 extends BaseTest
-
-
-
+## Носитель: scripts/city/prosperity_system.gd (процветание, надбка золота,
+## модификатор репутации и переходы уровня города).
+## Прежнее имя — `unit/world/test_city_level.gd`; в шаге 3 T-305 файл разделён по
+## носителям: кольцевые предельности города (`ring_of`, `building_max_distance`,
+## `can_build_building`, `serialize`) ушли в
+## `unit/world/test_city_rings_and_serialization.gd`.
+## Третий снизу тест считает `CityTurnProcessor` как драйвер: предмет проверки —
+## значения процветания, золота и сигнал `city_level_up`, а не работа процессора.
 
 var center := Vector2i(5, 5)
 
@@ -114,62 +119,11 @@ func test_level_max() -> void:
 	assert_bool(bool(check.ok)).is_false()
 	assert_that(check.reasons.size()).is_equal(1)
 
-func test_build_radius_by_level() -> void:
-	var c: Variant = _city()
+func test_build_radius_for_level_is_fixed() -> void:
+	# D6: радиус зафиксирован на 3 (кольца 1–3 вокруг ядра, 02g §2.1); зеркало
+	# города (city.building_max_distance) проверяется своим носителем.
 	for lvl in [1, 2, 3, 4, 5]:
-		c.level = lvl
-		# D6: радиус зафиксирован на 3 (кольца 1–3 вокруг ядра, 02g §2.1)
-		var expected: int = [3, 3, 3, 3, 3][lvl - 1]
-		assert_that(ProsperitySystem.build_radius_for_level(lvl)).is_equal(expected)
-	# city-hex-layout: building_max_distance — фикс 3 (кольца 1–3 вокруг ядра)
-	c.level = 1
-	assert_that(c.building_max_distance()).is_equal(3)
-	c.level = 12
-	assert_that(c.building_max_distance()).is_equal(3)
-
-func test_ring_of() -> void:
-	var c: Variant = _city()
-	assert_that(c.ring_of(center)).is_equal(0)
-	assert_that(c.ring_of(_ring_cell(1))).is_equal(1)
-	assert_that(c.ring_of(_ring_cell(3))).is_equal(3)
-
-func test_ring_build_gate() -> void:
-	# city-hex-layout: радиус фикс 3 — кольцо 4 никогда недоступно, кольцо 3 всегда
-	var c: Variant = _city()
-	c.storage[&"industry"] = 1000.0
-	var far := _ring_cell(4)
-	assert_bool(c.can_build_building(BuildingDefs.market(), far).ok).is_false()
-	c.level = 3
-	assert_bool(c.can_build_building(BuildingDefs.market(), far).ok).is_false()
-	var near := _ring_cell(3)
-	assert_bool(c.can_build_building(BuildingDefs.market(), near).ok).is_true()
-
-func test_build_rejected_on_worker_cell() -> void:
-	var c: Variant = _city()
-	c.storage[&"industry"] = 100.0
-	var cell := _ring_cell(1)
-	c._add_pop(PopUnit.State.WORKER, 0, cell)
-	var res: CityCheck = c.can_build_building(BuildingDefs.farm(), cell)
-	assert_bool(res.ok).is_false()
-	assert_that(str(res.reason)).is_equal("Клетка занята рабочим")
-	assert_that(c.pop.size()).is_equal(1)
-	assert_bool(c.can_build_building(BuildingDefs.farm(), _ring_cell(2)).ok).is_true()
-
-func test_serialize_roundtrip() -> void:
-	var c: Variant = _city()
-	c.level = 3
-	c.prosperity = 77.5
-	var restored := City.new()
-	restored.deserialize(c.serialize())
-	assert_that(restored.level).is_equal(3)
-	assert_bool(absf(restored.prosperity - 77.5) < 1e-9).is_true()
-
-func test_serialize_clamps() -> void:
-	var c: Variant = _city()
-	var restored := City.new()
-	restored.deserialize({"level": 99, "prosperity": -5.0})
-	assert_that(restored.level).is_equal(GameNumbers.CITY_LEVEL_MAX)
-	assert_bool(absf(restored.prosperity - 0.0) < 1e-9).is_true()
+		assert_that(ProsperitySystem.build_radius_for_level(lvl)).is_equal(3)
 
 func test_processor_prosperity_and_level_up() -> void:
 	var c: Variant = _city()
