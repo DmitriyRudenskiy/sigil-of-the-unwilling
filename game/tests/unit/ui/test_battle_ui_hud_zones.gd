@@ -150,3 +150,82 @@ func test_zone_f_result_overlay_single_exit() -> void:
 	ui._continue_btn.emit_signal("pressed")
 	assert_bool(accepted[0]).is_true() \
 		.override_failure_message("«Продолжить» → сигнал в flow")
+
+
+## T-315: отключённый медальон обязан быть ТЕМНЕЕ ряда, а не светлее его.
+## Замер канонным кадром 1920×1080 (фикстура `battle_hud_full`,
+## `scripts/measure_medallion_row.py`): пластина «Отступить» при `disabled = true` и
+## `self_modulate = (1,1,1,1)` даёт линейную яркость 0.226 против 0.052 у
+## включённых соседей — в 4.38 раза светлее при критерии «не светлее ×1.5».
+## Причина не в теме и не в «сыром альфа-канале пикса»: движок гасит иконку
+## отключённой кнопки альфой ~0.4, а theme-ключ `icon_disabled_modulate` у `Button`
+## отсутствует (замер `get_theme_color` → (0,0,0,1)), поэтому рычаг — узловой
+## `self_modulate`, а компенсирующее затемнение (`ThemeConfig.C_BATTLE_MEDALLION_DIM`)
+## обязано приходить вместе с `disabled`, а не только по наведению мыши.
+func test_zone_d_disabled_medallion_paints_dim() -> void:
+	var ui: BattleUI = _mk_ui()
+	var med := _zone_d_medallions(ui)
+	assert_int(med.size()).override_failure_message(
+		"медальонов в ряду %d, макет 11 — восемь" % med.size()
+	).is_equal(8)
+	# Начальное состояние: «Атака» заглушена до выбора цели — и уже обязана нести
+	# затемнение, иначе первый же кадр ряда содержит светлый отключённый медальон.
+	_assert_zone_d_medallion_paint(med, "сборка ряда (_ready)")
+	assert_bool(_zone_d_medallion(med, "attack_btn").disabled).override_failure_message(
+		"«Атака» не заглушена до выбора цели"
+	).is_true()
+
+	# «Нечего спасать» — эта ветка глушит «Отступить» мимо наведения мыши.
+	ui.set_rescue_enabled(false)
+	assert_bool(_zone_d_medallion(med, "retreat_btn").disabled).override_failure_message(
+		"«Отступить» не глушится вместе с «нечего спасать»"
+	).is_true()
+	_assert_zone_d_medallion_paint(med, "set_rescue_enabled(false)")
+	ui.set_rescue_enabled(true)
+	_assert_zone_d_medallion_paint(med, "set_rescue_enabled(true)")
+
+	ui.set_attack_enabled(false)
+	_assert_zone_d_medallion_paint(med, "set_attack_enabled(false)")
+	ui.set_attack_enabled(true)
+	_assert_zone_d_medallion_paint(med, "set_attack_enabled(true)")
+
+	ui.set_controls_enabled(false)
+	_assert_zone_d_medallion_paint(med, "set_controls_enabled(false)")
+	ui.set_controls_enabled(true)
+	_assert_zone_d_medallion_paint(med, "set_controls_enabled(true)")
+
+
+## Медальоны ряда собираются обходом дерева, а не списком путей: `_apply_command_row`
+## переставляет кнопки между `left_box` и `right_box`, и путь из сцены под live-
+## порядком не гарантирован (проверено кадром: `attack_btn` живёт в `left_box`).
+func _zone_d_medallions(node: Node) -> Array:
+	var acc: Array = []
+	_collect_zone_d_medallions(node, acc)
+	return acc
+
+
+func _collect_zone_d_medallions(node: Node, acc: Array) -> void:
+	for c in node.get_children():
+		if c is Button and (c as Button).theme_type_variation == "BattleMedallion":
+			acc.append(c)
+		_collect_zone_d_medallions(c, acc)
+
+
+func _zone_d_medallion(medallions: Array, node_name: String) -> Button:
+	for b in medallions:
+		if (b as Button).name == node_name:
+			return b as Button
+	return null
+
+
+## Инвариант ряда: закраска пластины однозначно выведена из её доступности.
+## Сравнение строк, а не `Color`: значения считаются из `ThemeConfig`, а сообщение
+## обязано показывать обе стороны (какой медальон, какое состояние, что нарисовано).
+func _assert_zone_d_medallion_paint(medallions: Array, what: String) -> void:
+	for b in medallions:
+		var btn := b as Button
+		var want: Color = ThemeConfig.C_BATTLE_MEDALLION_DIM if btn.disabled else Color.WHITE
+		var msg := (
+			"%s: %s disabled=%s закрашен %s, ожидался %s — отключённый медальон без затемнения читается ярче ряда (T-315)"
+			% [what, str(btn.name), str(btn.disabled), str(btn.self_modulate), str(want)])
+		assert_str(str(btn.self_modulate)).override_failure_message(msg).is_equal(str(want))

@@ -77,9 +77,23 @@ var _action_buttons: Array[Button] = []
 ##
 ## Альфа 2.9 — не опечатка: отключённую кнопку движок рисует иконкой с гашением
 ## (~0.35), и на светлом поле медальон становился призраком — «команды нет», а
-## не «команда недоступна» (кадр 4.6, α 0.4 и α 1 давали один и тот же кадр:
-## `font_disabled_color` варианта на это гашение не влияет). Множитель возвращает
-## пластине непрозрачность, а признаком неактивности служит затемнение цвета.
+## не «команда недоступна». Множитель возвращает пластине непрозрачность, а
+## признаком неактивности служит затемнение цвета.
+##
+## Исправленная диагностика (T-315): прежнее объяснение «α 0.4 и α 1 давали один
+## и тот же кадр» (4.6) было следствием, а не причиной — затемнение на тех путях
+## просто не применялось. Замер канонным кадром 1920×1080 (фикстура
+## `battle_hud_full`, `scripts/measure_medallion_row.py`): «Отступить» при
+## `disabled = true` и белом `self_modulate`
+## — 0.226 линейной яркости против 0.052 у включённых соседей, в 4.38 раза СВЕТЛЕЕ
+## ряда. Рычаг — только узловой `self_modulate`: theme-ключа `icon_disabled_modulate`
+## у `Button` нет (замер `get_theme_color` → (0,0,0,1), эти ключи принадлежат
+## `TextureButton`), а гашение иконки зашито в движок.
+##
+## Отсюда инвариант ряда: `disabled` меняется только через `_set_medallion_enabled`.
+## Три точки (`_connect_skeleton`, `set_attack_enabled`, `set_rescue_enabled`)
+## писали `disabled` напрямую, и наведённый ниже тест ловит возврат к ним.
+##
 ## Тоны живут в модуле стиля (T-300): `self_modulate` — свойство узла, его не видит ни один
 ## гард темы, поэтому точка истины хотя бы одна. Значения перенесены без изменения.
 const _MEDALLION_DIM := ThemeConfig.C_BATTLE_MEDALLION_DIM
@@ -208,7 +222,9 @@ func _connect_skeleton() -> void:
 	_spellbook_btn.pressed.connect(_on_spellbook)
 	_retreat_btn.pressed.disconnect(_on_retreat)
 	_retreat_btn.pressed.connect(_on_exit_dialog)
-	_attack_button.disabled = true
+	# До первого выбора цели «Атака» недоступна — и недоступна «как медальон»,
+	# то есть вместе с затемнением пластины (T-315).
+	_set_medallion_enabled(_attack_button, false)
 	# Клавиши, подсказки и подписи медальонов — по всему ряду, а не по таблице
 	# клавиш: медальон без хоткея («Атака», «Отступить») иначе оставался с
 	# подписью на кадре (ux-review D-294).
@@ -240,6 +256,20 @@ func _medallion(btn: Button) -> void:
 		caption.visible = false
 	btn.mouse_entered.connect(_on_medallion_hover.bind(btn, true))
 	btn.mouse_exited.connect(_on_medallion_hover.bind(btn, false))
+
+
+## Единственная точка смены доступности медальона (T-315): `disabled` и его
+## закраска не разъезжаются. Гасит иконку отключённой кнопки движок (альфой
+## ~0.4), поэтому пропущенная перекраска делает команду не «недоступной», а
+## самой яркой в ряду — тест зоны D держит это на всех восьми медальонах.
+## Точка одна намеренно: и начальное состояние ряда проходит через неё
+## (`_connect_skeleton`), а не рисуется при сборке медальона — иначе «почини один
+## из двух путей» оставляло бы тест зелёным.
+func _set_medallion_enabled(btn: Button, enabled: bool) -> void:
+	if btn == null:
+		return
+	btn.disabled = not enabled
+	_medallion_state(btn)
 
 
 func _on_medallion_hover(btn: Button, hovered: bool) -> void:
@@ -343,15 +373,13 @@ func set_controls_enabled(enabled: bool) -> void:
 		# уже защищён фазой WAITING_INPUT (battle_turn_executor.gd:279)
 		if btn == _skip_btn:
 			continue
-		btn.disabled = not enabled
-		_medallion_state(btn)
+		_set_medallion_enabled(btn, enabled)
 
 	if _attack_button != null and not enabled:
-		_attack_button.disabled = true
+		_set_medallion_enabled(_attack_button, false)
 
 func set_attack_enabled(enabled: bool) -> void:
-	if _attack_button != null:
-		_attack_button.disabled = not enabled
+	_set_medallion_enabled(_attack_button, enabled)
 
 func _on_spellbook_chosen(id: StringName) -> void:
 	close_spellbook()
@@ -491,8 +519,7 @@ static func _hero_portrait_texture() -> Texture2D:
 
 # «Спасение» (макет, шаг 5.2): кнопка активна, только когда есть кого поднимать.
 func set_rescue_enabled(enabled: bool) -> void:
-	if _retreat_btn != null:
-		_retreat_btn.disabled = not enabled
+	_set_medallion_enabled(_retreat_btn, enabled)
 
 func _on_wait() -> void:
 	wait_requested.emit()
