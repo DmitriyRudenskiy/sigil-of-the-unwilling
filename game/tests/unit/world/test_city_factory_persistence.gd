@@ -1,4 +1,6 @@
 extends BaseTest
+## Носитель: scripts/world/city_factory.gd (создание города) и его же загрузка через
+## CityManager. Прежнее имя — test_city_persistence.gd (T-305, шаг 2, 2026-10-30).
 
 
 

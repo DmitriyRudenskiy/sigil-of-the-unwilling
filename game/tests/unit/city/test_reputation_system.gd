@@ -1,4 +1,6 @@
 extends BaseTest
+## Носитель: scripts/city/reputation_system.gd (репутация и её полосы).
+## Прежнее имя — test_city_reputation.gd, каталог — unit/world/ (T-305, шаг 2, 2026-10-30).
 
 
 

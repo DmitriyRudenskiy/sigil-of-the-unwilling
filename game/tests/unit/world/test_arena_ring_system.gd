@@ -1,4 +1,7 @@
 extends BaseTest
+## Носитель: scripts/city/arena_ring_system.gd (кольца арены, рассадка, доход кольца);
+## часть проверок держит ArenaTurnRunner (ход арены). Имя файла = носитель (T-227 С-3);
+## до 2026-10-30 файл назывался test_city_arena.gd и попадал в группу city.gd по эвристике имени.
 
 
 var city: City

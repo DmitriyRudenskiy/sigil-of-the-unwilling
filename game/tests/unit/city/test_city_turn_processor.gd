@@ -1,4 +1,6 @@
 extends BaseTest
+## Носитель: scripts/city/city_turn_processor.gd (ход города) и ZoningSystem.
+## Прежнее имя — test_city_processor.gd, каталог — unit/world/ (T-305, шаг 2, 2026-10-30).
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
 func _cell_at_distance(city: City, d: int) -> Vector2i:
