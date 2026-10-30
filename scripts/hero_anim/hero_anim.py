@@ -39,20 +39,8 @@ OUT = HERE / "out"
 HEROES = ["swordsmen", "archers", "knights", "paladin", "battle_dwarf"]
 ACTIONS = ["idle", "walk", "attack", "hit", "turn"]
 
-# Стиль одного ряда (одна база на всех — консистентность между роликами),
-# промты по-английски: Wan 2.2 и Qwen понимают движение точнее именно так.
-BASE = {
-    "swordsmen": "A highly detailed stylized 3D dark fantasy warrior in battered "
-                 "black plate armour with a long sword",
-    "archers": "A highly detailed stylized 3D dark fantasy archer in worn leather "
-               "armour with a longbow and quiver",
-    "knights": "A highly detailed stylized 3D dark fantasy knight in blue and steel "
-               "plate armour with a sword and a round shield",
-    "paladin": "A highly detailed stylized 3D dark fantasy paladin in ornate gilded "
-               "plate armour with a greatsword and a halo of light",
-    "battle_dwarf": "A highly detailed stylized 3D dark fantasy battle dwarf in heavy "
-                    "iron plate armour with a bearded face and a warhammer",
-}
+# Стиль одного ряда держат сами вырезы владельца: персонаж описан один раз — картинкой
+# (см. PROFILE_PROMPT). Своих слов о персонаже в промптах нет ни в одном шаге.
 # Позы из набора владельца, переписанные под наших героев: статичная камера,
 # изоляция на хромакее (фон потом режется альфой), один персонаж в кадре.
 POSE = {
@@ -80,14 +68,29 @@ NEG_VIDEO = ("vivid colors, overexposed, static, blurry details, subtitles, pain
              # и возврат в стойку, а зелёное свечение фона ключься дырами в силуэте.
              "falling down, falling over, sitting on the ground, kneeling, "
              "lying on the ground, green glow, coloured rim light")
-PROFILE_PROMPT = ("Obtain the right side profile view. Hands at the bottom. Full body, "
-                  "feet at the bottom edge of the frame, single character, same art style, "
-                  "face, armour and weapon as the reference, isolated on a flat solid "
-                  "background, no floor, no cast shadow.")
+# Поворот — ПРАВКА референса, а не генерация по описанию: персонаж описан РОВНО один
+# раз, картинкой. Проверено на прогоне 2026-10-30 (D-297): прошлый промпт называл
+# персонажа словами (`stylized 3D dark fantasy … heavy iron plate armour`, «soft
+# cinematic studio lighting», и само слово `armour` в списке «взять с референса»), а
+# конкретное существительное из текста бьёт абстрактную отсылку к картинке — варвар без
+# брони получил латы, серебряный рыцарь с алебардой получил синюю броню, меч и щит,
+# у паладина пропали булава и щит. Отсюда запрет: в тексте поворота нет ни одного
+# предмета, цвета и жанрового слова — только категории (same face / colours / clothing /
+# weapon) и явная судьба оружия, иначе «руки опущены» читается как «руки пустые».
+PROFILE_PROMPT = (
+    "Rotate the character from the reference image to a right side profile view. "
+    "Keep everything else exactly as in the reference: same art style, same face "
+    "and expression, same colours, same clothing, same weapon in the same hand. "
+    "Do not redesign the character, do not add or remove anything, do not change "
+    "the weapon or the colours. Both arms lowered, hands still gripping the same "
+    "weapon, its head resting near the ground. Full body, feet at the bottom edge "
+    "of the frame, single character, isolated on a flat solid background, no floor, "
+    "no cast shadow.")
 # Фон: граф вырезает фон (birefnet), поэтому фон промта важен меньше, чем однородность —
-# просим сплошной зелёный хромакей, чтобы матовый край был чистым.
+# просим сплошной зелёный хромакей, чтобы матовый край был чистым. «Studio lighting» и
+# любые слова о свете сюда не пишутся: свет в промпте перекрашивает персонажа.
 CHROMA = "Isolated on a uniform solid green chroma key background, full body shot, " \
-         "feet at the bottom edge of the frame, soft cinematic studio lighting, " \
+         "feet at the bottom edge of the frame, " \
          "single character, no shadow on the floor."
 
 
@@ -371,8 +374,8 @@ def cmd_generate(args) -> int:
     src = source_image(hero, action)
     server_name = upload(src)
     prompt = args.prompt or (
-        f"{BASE[hero]}. {CHROMA} {POSE[action]}" if action else
-        f"{PROFILE_PROMPT}. {BASE[hero]}. {CHROMA}")
+        f"{CHROMA} {POSE[action]}" if action else
+        f"{PROFILE_PROMPT}. {CHROMA}")
     tag = f"{hero}-{action or 'profile'}"
     for v in range(1, args.variants + 1):
         have = sorted(out.glob(f"v{v:02d}_*.png"))
@@ -401,7 +404,9 @@ def cmd_generate(args) -> int:
         for i in list(range(0, len(files), step))[:5]:
             download(files[i], out / f"v{v:02d}_{i:03d}.png")
         print(f"{tag} v{v}: {len(files)} кадр(ов) за {time.time() - t0:.0f} c", flush=True)
-    variants = sorted({int(p.name[1:3]) for p in out.glob("v*_*.png")})
+    # `v*_*.png` ловит и `video_input.png` (его кладёт сюда же видеопрогон), а в
+    # профиле после прогона видео это гарантированный краш — только цифры в индексе.
+    variants = sorted({int(p.name[1:3]) for p in out.glob("v*_*.png") if p.name[1:3].isdigit()})
     if args.sheet:
         dest = out / "sheet.png"
         if action:
