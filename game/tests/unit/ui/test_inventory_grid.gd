@@ -20,6 +20,7 @@ const _OVERFLOW_LBL := "Center/Window/Sheet/Stone/Overflow_lbl"
 const _DESC := "Center/Window/Sheet/ItemTip/TipBox/TipDesc"
 const _TIP := "Center/Window/Sheet/ItemTip"
 const _DOLL := "Center/Window/Sheet/Stone/Doll"
+const _FIGURE := "Center/Window/Sheet/Stone/Figure"
 const _STONE := "Center/Window/Sheet/Stone"
 #Зоны переноса A и C (мана + школа, навыки + построения).
 const _BANDS := ["Center/Window/Sheet/BandMana", "Center/Window/Sheet/BandSkills"]
@@ -458,3 +459,62 @@ func test_transfer_bands_stay_inside_the_stone_face() -> void:
 						"%s.%s легло на рамку камня (%s при внутренней границе %s)" % [
 							path, (node as Node).get_name(),
 							(node as Control).get_global_rect(), face])
+
+
+## T-258: кукла обязана занимать свой адресный блок (E1–G6) целиком.
+##
+## Тикет утверждал два: «светлой каменной врезки под куклой нет» и «фигура
+## стоит вверху блока и по высоте вдвое меньше макета». Второе было верно про
+## заглушку и снято T-249: `hero/figure.png` — арт ComfyUI 428×478 с вырезанным
+## фоном, т.е. 1:1 к блоку 427×477. Первое перенесено в T-316: у врезки нет
+## носителя — ни строки в карте элементов (docs/20-ux-hero-screen.md §3), ни
+## записи в BLOCKS, ни ассета в ките, а пикселей макета 12 на диске нет (T-298),
+## поэтому её геометрию нечем измерить.
+##
+## Здесь — замер, а не постройка. Проверяются: прямоугольник узла после layout,
+## свойства `TextureRect`, которыми текстура рисуется именно в этом
+## прямоугольнике, и доля чернил в самой текстуре. Чернила — потому что
+## «мельче блока» рождается не только якорями: арт с прозраческими полями даёт
+## маленькую куклу в правильном прямоугольнике, и прямоугольник узла этого не
+## видит (урок T-255: смотреть на следствие, а не на конструкцию).
+func test_doll_figure_fills_its_address_block() -> void:
+	var screen := await _mk_screen(true)
+	var fig := screen.get_node_or_null(_FIGURE) as TextureRect
+	assert_that(fig).is_not_null()
+	var stone := (screen.get_node_or_null(_STONE) as Control).get_global_rect()
+	var s: Rect2 = HeroLayout.BLOCKS["Stone"]
+	var b: Rect2 = HeroLayout.BLOCKS["Figure"]
+	var r := fig.get_global_rect()
+	var TOL := 1.0
+	var want := Rect2(
+			stone.position + b.position / s.size * stone.size, b.size / s.size * stone.size)
+	assert_bool(abs(r.position.x - want.position.x) <= TOL
+			and abs(r.position.y - want.position.y) <= TOL
+			and abs(r.size.x - want.size.x) <= TOL
+			and abs(r.size.y - want.size.y) <= TOL) \
+		.override_failure_message(
+				"фигура %s не совпала со своим адресным блоком %s (камень %s)" % [r, want, stone])
+	# KEEP_SIZE вместо IGNORE_SIZE делает минимумом узла размер текстуры, и якоря
+	# перестают слушаться — тот же класс, что клетки с `custom_minimum_size`.
+	assert_that(fig.expand_mode).is_equal(TextureRect.EXPAND_IGNORE_SIZE)
+	# Куклу нельзя растягивать в окне другого аспекта — рисунок сохраняется
+	# пропорциональным и центрированным, поэтому высота чернил проверяется ниже.
+	assert_that(fig.stretch_mode).is_equal(TextureRect.STRETCH_KEEP_ASPECT_CENTERED)
+	var img := fig.texture.get_image()
+	assert_that(img).is_not_null()
+	var fill := float(img.get_used_rect().size.y) / float(img.get_height())
+	assert_bool(fill >= 0.85).is_true() \
+		.override_failure_message(
+				"кукла занимает %.2f высоты своей текстуры — в кадре она меньше блока" % fill)
+	# Пропорции сохраняются, поэтому при другом аспекте окна кукла обязана
+	# упираться в блок хотя бы одной своей стороной (letterbox допустим по
+	# одной оси, но не полями с обеих сторон). Для канонического 16:9 из этих
+	# же чисел следует 0.9996 высоты блока (кадр 1920×1080: блок 512.3×572.4 px,
+	# аспект текстуры 0.8954 → рисунок 572.2 px), из них чернил — 0.993.
+	var aspect := float(img.get_width()) / float(img.get_height())
+	var drawn_w := minf(r.size.x, r.size.y * aspect) / r.size.x
+	var drawn_h := minf(r.size.y, r.size.x / aspect) / r.size.y
+	assert_bool(maxf(drawn_w, drawn_h) >= 0.98).is_true() \
+		.override_failure_message(
+				"рисунок куклы %.2f×%.2f блока %s при аспекте текстуры %.4f" % [
+					drawn_w, drawn_h, r, aspect])
