@@ -1,0 +1,78 @@
+Gate local — T-235 (набор иконок артефактов: инвариант уникальности, билет закрыт)
+===================================================================================
+head_sha: код среза e6b4be83, доки 44ccb25e (оба локальны до пуша), origin/main 606c4e93.
+Прогон: ./game/run_tests.sh, 2026-10-30, ОДИН прогон, снят на закоммиченном дереве
+(тест, батарея, TESTMAP-запись и переснятый базлайн — в первом коммите, TICKETS /
+CHANGELOG / эрратум docs/15 — во втором; доки тесты не читаются).
+
+CI не проверялся (по инструкции владельца от 2026-10-13). Вердикт — локальный прогон
++ ревью диффа владельцем в треде. Батарея снята на закоммиченном дереве (см. ниже),
+пиксельных артефактов смена не производит.
+
+Состояние среды: MemAvailable 1084 MB на старте прогона (замер `free -m`, не весь
+прогон), к середине — 976 MB. Чужие Xvfb :96/:97 не трогались, свой :92 (съёмка
+кадров T-318) снят до прогона.
+
+GdUnit (unit + integration + functional)
+----------------------------------------
+Overall Summary: 3667 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (389/389)
+Executed test cases : (3667/3667)
+Total execution time: 2min 54s 569ms
+Exit code: 0. Леджер: **+3 / −0 / quarantine 0 / нетто +3** (3664 → 3667), причина —
+новый файл `tests/unit/assets/test_artifact_icons_unique.gd` (дубль растра, непустота
+всех 60 иконок, живость области скана). Файлов 388 → 389.
+
+Сопутствующие гейты того же прогона:
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK, NODE-PATH-GATE: OK
+LINT: SKIPPED (нет gdtoolkit у python3) — уровень молчит на этой машине; фиксируется
+  здесь, чтобы не выглядеть зелёным.
+
+MCP e2e (четвёртый уровень)
+---------------------------
+PYTEST LEDGER: passed=111 skipped=2 failed=0 errors=1 collected=114
+SKIPPED (2 — причина обязательна):
+  tests/mcp/test_battle_profiling.py:33 — нет узлов городов в сцене боя
+  tests/mcp/test_capture.py:294 — съёмка только по запросу (CAPTURE_SCENE=…)
+MCP READINESS: YELLOW — 1 error с подпиской readiness (среда, не регрессия, D-265;
+тот же класс, что Q-M115/T-172 и прогон T-318, только на другом тесте):
+  - test_save_load_continue::test_save_load_then_continue :: failed on setup with
+    "godot_mcp.MCPError: игра не готова за 180 с (последняя ошибка: тулз game_eval
+    вернул ошибку: Not connected to game interaction server.)"
+MCP VERDICT: YELLOW — классификатор снял красный как readiness; YELLOW ≠ RED
+(маппинг run_tests.sh), exit прогона не поднимал.
+
+Python-секции прогона
+---------------------
+GENART: интерпретатор /home/user/.venv/map-art/bin/python → 11 passed
+классификатор MCP-журнала: 13 passed; READINESS-CLASSIFIER: selftest GREEN
+
+Документ-гейты (`./scripts/doc_gates.sh`, в run_tests.sh их нет):
+  TESTMAP OK: дыр 80, файлов в группах слияния 152, дублей 0
+    (рэтчет поднят легитимно: +1 файл на носителе, запись «Движение 2026-10-30
+    (T-235)» в docs/mvp/TEST-MAP.md, базлайн переснят тем же коммитом)
+  кадры героев ↔ манифест integrate.py → HERO FRAMES: OK (5 герой(ов), 300 кадров)
+  тесты самих проверщиков → 159 passed
+  OPENSPEC SPECS: OK (87 сведённых спек); DOC LINKS: OK (121 заметка)
+  DOC GATES: GREEN
+
+Зубы смены (вне run_tests.sh, на закоммиченном дереве)
+------------------------------------------------------
+bash game/tools/mut_icon_unique.sh:
+  M1 (дубль растра: club == stone_axe):        3 test cases | 0 errors | 1 failures
+  M2 (прозрачная иконка: rune_sword):          3 test cases | 0 errors | 1 failures
+  M3 (область скана несуществующая):           3 test cases | 0 errors | 2 failures
+  ИТОГ: все мутанты красные; дерево после батареи — 0 изменённых записей.
+M2 был зелёным на первой версии теста и это дефект проверки, а не мутанта: растр
+читался через `load(path)` — кэш импорта, собранный с прежних байтов. После перевода
+на `Image.load_from_file` (читает байты файла) мутант краснеет.
+
+Итог: GdUnit 0 падений (+3 случая), MCP YELLOW (среда, тест назван), python-секции
+зелёные, документ-гейты GREEN, батарея красная по всем трём мутантам → гейт локально
+зелёный. Exit=0 выведен по структуре лога: ни одной строки, по которой run_tests.sh
+ставит MCP_RC=1 («PYTEST: RED (неполный прогон…», «MCP: RED — тесты объявили
+отсутствие Godot…», «журнал не разобран», «GENART: SKIPPED», «selftest RED»), в
+прогоне нет (проверено grep-ом, 0 совпадений); GdUnit-красный вышел бы на строке 76
+и оборвал бы прогон.
