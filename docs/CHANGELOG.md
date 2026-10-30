@@ -9,6 +9,22 @@ date: 2026-10-30
 
 # CHANGELOG — docs/
 
+## 2026-10-30 — T-305 шаг 4: `test_city_system.gd` разрезан, `test_borough_rules.gd` дополнен
+
+* **Что.** `game/tests/unit/test_city_system.gd` (13 кейсов) разделён:
+  `game/tests/unit/world/test_city_manager_cycle.gd` (носитель
+  `game/scripts/world/city_manager.gd`, 3 кейса),
+  `game/tests/unit/world/test_city_pop_and_build.gd` (носитель
+  `game/scripts/world/city.gd`, 8 кейсов), 2 кейса Borough дописаны в уже
+  существовавший `game/tests/unit/world/test_borough_rules.gd` (17 → 19).
+* **Предохранитель.** Запись поверх имени носителя почти унесла 17 существующих
+  проверок; перехвачено счётчиком тест-функций (`gd_tests` 3669 → 3652), файл
+  восстановлен из `HEAD`. Проверка `git ls-files` перед созданием файла — часть шага.
+* **Метрика.** `merge_files` 148, дыр 80, дублей 0 (базлайн не переснят), тест-файлов
+  390 → 391, кейсов 3669.
+* **Смешанных осталось трое:** `test_city_navigation.gd`, `test_city_tech_tree.gd`,
+  `test_city_hex_layout.gd`.
+
 ## 2026-10-30 — T-305 шаг 3: `test_city_level.gd` разделён по носителям
 
 * **Что.** `game/tests/unit/world/test_city_level.gd` (16 кейсов) разрезан на
