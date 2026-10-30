@@ -22,6 +22,10 @@ const C_PANEL_MID        := Color(0.3, 0.2, 0.12)
 const C_PANEL_DARK       := Color(0.08, 0.06, 0.04, 0.95)
 const C_OVERLAY_DIM      := Color(0.0, 0.0, 0.0, 0.75)
 const C_OVERLAY_HEAVY    := Color(0.0, 0.0, 0.0, 0.8)
+## Затемнение обучающей накладки (T-300). Не `C_OVERLAY_DIM`: альфа 0.7 вместо 0.75 —
+## значение перенесено из `tutorial_overlay.gd` один в один, кадр не двигался; расхождение
+## двух затемнений — вопрос к арт-пассу, а не к гарду стиля.
+const C_OVERLAY_TUTORIAL := Color(0.0, 0.0, 0.0, 0.7)
 const C_SLOT_BG          := Color(0.35, 0.24, 0.15)
 const C_BG_DARK          := Color(0.05, 0.04, 0.10)
 const C_RARITY_TRACK     := Color(0.15, 0.15, 0.15, 0.5)
@@ -35,6 +39,9 @@ const C_BTN_PRESSED      := Color("#281c0f")  # C_BG (вдавлено)
 const C_BTN_BORDER       := Color("#8a6a3a")  # C_GOLD
 const C_BTN_SHADOW       := Color(0.086, 0.063, 0.039, 0.5)  # C_SHADOW #16100a
 const C_BTN_TEXT         := Color("#e8d5a8")  # C_TEXT
+## Недоступная кнопка меню (T-300): тон шрифта неактивной плиты. Жил литералом в
+## `main_menu.gd`, то есть не менялся ни с темой, ни с состоянием плиты.
+const C_BTN_TEXT_DISABLED := Color(0.45, 0.42, 0.35, 1)
 
 const C_BATTLE_HIGHLIGHT_MOVE   := Color(0.2, 0.7, 1.0, 0.28)
 const C_BATTLE_HIGHLIGHT_MOVE_B := Color(0.3, 0.9, 1.0, 0.95)
@@ -55,6 +62,12 @@ const C_SIDE_DEFENDER           := Color(0.9, 0.3, 0.2)
 const C_ACTIVE_INFO             := Color(0.85, 0.90, 1.0)
 const C_INITIATIVE_YOUR         := Color(0.7, 0.85, 1.0)
 const C_INITIATIVE_ENEMY        := Color(1.0, 0.75, 0.7)
+## Медальон ряда инициативы (T-300): неактивный гаснет, наведённый светится. Тоны —
+## `self_modulate`, то есть свойство узла, а не стилевой параметр: перенесены из
+## `battle_ui.gd` значениями один в один; альфа 2.9 оставлена как есть — каналы modulate
+## не обязаны лежать в 0..1, и здесь альфа намеренно усилена (гашение по RGB).
+const C_BATTLE_MEDALLION_DIM    := Color(0.45, 0.42, 0.38, 2.9)
+const C_BATTLE_MEDALLION_HOVER  := Color(1.18, 1.12, 0.96, 1)
 const C_HIT_FLASH               := Color(1, 0.3, 0.3)
 const C_LOCK_FLASH              := Color(1, 0.5, 0.5)
 
@@ -73,6 +86,12 @@ const C_RARITY_RELIC  := Color(1.0, 0.75, 0.15)
 # за окном (кадромер 2026-10-26). Тоны — текстовые каноны золотого и тревожного.
 const C_UI_CELL_SELECTED := Color(1.0, 0.85, 0.4)   # тон C_TEXT_GOLD
 const C_UI_CELL_BLOCKED  := Color(1.0, 0.25, 0.2)   # тон C_TEXT_DANGER
+
+## Иконки потребностей героя (T-300): серый — «потребность не закрыта», красный —
+## «критическое». Пишутся в `modulate` иконки, поэтому ни один гард темы их не видел;
+## значения перенесены из `hero_status_panel.gd` без изменения.
+const C_STATUS_NEED_UNMET    := Color(0.4, 0.4, 0.4)
+const C_STATUS_NEED_CRITICAL := Color(1.0, 0.3, 0.25)
 
 ## Состояния клетки сетки инвентаря (T-300). Тон пишется в `modulate` клетки из
 ## `_paint_cells()`, то есть это не стиль, а свойство узла: ни один гард темы (stylebox,

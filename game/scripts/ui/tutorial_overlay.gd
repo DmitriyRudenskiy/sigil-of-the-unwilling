@@ -114,7 +114,7 @@ func _build() -> void:
 	background.name = "Background"
 	background.set_anchors_preset(Control.PRESET_FULL_RECT)
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	background.color = Color(0.0, 0.0, 0.0, 0.7)
+	background.color = ThemeConfig.C_OVERLAY_TUTORIAL  # тон в модуле стиля (T-300)
 	root.add_child(background)
 	var card := PanelContainer.new()
 	card.name = "Card"

@@ -96,7 +96,7 @@ func _style_buttons() -> void:
         # (MenuPlate/disabled — обесцвеченная плита), плюс тусклый шрифт и
         # отсутствующая анимация наведения.
         btn.add_theme_color_override("font_color", ThemeConfig.C_BTN_TEXT)
-        btn.add_theme_color_override("font_disabled_color", Color(0.45, 0.42, 0.35, 1))
+        btn.add_theme_color_override("font_disabled_color", ThemeConfig.C_BTN_TEXT_DISABLED)
         btn.mouse_entered.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_hover"))
         btn.pressed.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_click"))
         _UIAnimator.setup_button(btn)

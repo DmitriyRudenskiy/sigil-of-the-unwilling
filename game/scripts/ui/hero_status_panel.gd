@@ -63,7 +63,7 @@ func refresh() -> void:
 		_stats_label.text = ""
 		_followers_label.text = ""
 		for k in _need_icons:
-			(_need_icons[k] as TextureRect).modulate = Color(0.4, 0.4, 0.4)
+			(_need_icons[k] as TextureRect).modulate = ThemeConfig.C_STATUS_NEED_UNMET
 		return
 	var h: HeroController = _hero
 	_title.text = GameText.hero_title(h.hero_name, _path_name(h.path_id))
@@ -72,7 +72,9 @@ func refresh() -> void:
 	_followers_label.text = _followers_text(h)
 	for k in _need_icons:
 		var critical := h.needs != null and h.needs.is_critical(k)
-		(_need_icons[k] as TextureRect).modulate = Color(1.0, 0.3, 0.25) if critical else Color.WHITE
+		(_need_icons[k] as TextureRect).modulate = (
+			ThemeConfig.C_STATUS_NEED_CRITICAL if critical else Color.WHITE
+		)
 	_build_team_box(h)
 
 func _condition_text(h: HeroController) -> String:

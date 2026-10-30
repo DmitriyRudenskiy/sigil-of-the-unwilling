@@ -49,22 +49,19 @@ const _DEAD_VARIATION_ASSIGNMENTS := {}
 ## Почему числами, а не именами, как `_ALLOWED`: у stylebox-обхода имя аргумента уникально
 ## (`"focus"`), у цвета имени нет, а в одном экране один и тот же литерал встречается
 ## по три раза (`Color("#e0bd67")` в городе), и под каждую копию имя — это шум.
+## Подсрез 2 (2026-10-30): шесть мест уехали в модуль стиля — медальон инициативы (2),
+## иконки потребностей героя (2), тусклый шрифт неактивной кнопки меню (1), затемнение
+## обучающей накладки (1); строки этих файлов из допуска сняты. Остались город (литералы
+## подписей, подсрез «город») и панель решения (мёртвый класс, ждёт носитель по Q-M83).
 const _COLOR_ALLOWED := {
-	# Медальон инициативы: затемнение и подсветка своего узла. Общего тона медальона в
-	# модуле стиля нет — перенос ждёт шага T-300 ниже по счёту.
-	"res://scripts/ui/battle_ui.gd": 2,
 	# Город перекрашивает подписи через локальную палитру экрана (`PALETTE`) и литералы,
-	# а не через роли темы; 12 мест, сведение на ThemeConfig — T-300.
+	# а не через роли темы; 12 мест литералами, сведение на ThemeConfig — T-300.
 	"res://scripts/ui/city_screen.gd": 12,
 	# Панель решения (Q-M83: сцен `decision_panel.tscn` в репо нет, класс никем не
-	# instantiated) — четыре канцелярских цвета движка на плашке серьёзности.
+	# instantiated) — четыре канцелярских цвета движка на плашке серьёзности. Мигрировать
+	# тон класса без носителя — рисовать пиксел, которого игрок не видит; переедет вместе
+	# с носителем панели (T-132).
 	"res://scripts/ui/decision_panel.gd": 4,
-	# Панель статуса героя: серый «эта потребность не закрыта» и красный «критическое».
-	"res://scripts/ui/hero_status_panel.gd": 2,
-	# Меню: цвет неактивной кнопки Continue задаётся на месте, а не ролью темы.
-	"res://scripts/ui/main_menu.gd": 1,
-	# Затемнение обучающей накладки — литерал вместо C_OVERLAY_DIM.
-	"res://scripts/ui/tutorial_overlay.gd": 1,
 }
 
 ## Идентичные/альфные концы, а не стиль: `Color.WHITE` — «вернуть как есть»,
@@ -294,43 +291,56 @@ func test_no_dead_theme_type_variation_assignment() -> void:
 ##      `set("color", …)`) — тот же класс, что `set("theme_override_" + x)` выше: текстовый
 ##      скан их не видит, их ловит рантайм-гард конкретного экрана;
 ##   3) сценевые `theme_override_colors/*` и `color = Color(...)` в .tscn — это механизм 2
-##      темы, он объят правилом T-147 по stylebox, а по цветам — вне объёма T-300.
+##      темы, он объят правилом T-147 по stylebox, а по цветам — вне объёма T-300;
+##   4) многострочное объявление константы (`const PALETTE := {` и `Color(...)` на
+##      следующих строках): разбор разворачивает идентификатор по **своей** строке, видит
+##      `{` и считает место стилевым. Практический смысл — локальный словарь тонов
+##      (`PALETTE.text_muted` в городе) laundering'ом проходит гард. Сводится на нет не
+##      регуляркой, а переносом палитры в модуль стиля (T-300, подсрез «город»).
 func test_runtime_color_paint_comes_from_style_module() -> void:
 	var offenders := PackedStringArray()
 	var seen := {}
-	var total := 0
+	var sites := 0
 	for path in _files(".gd"):
-		var paints := _off_style_paints(path)
-		if paints.is_empty():
+		var paints: Dictionary = _paint_sites(path)
+		var off: Array[String] = paints["off"]
+		sites += (paints["all"] as Array).size()
+		if off.is_empty():
 			continue
-		total += paints.size()
-		seen[path] = paints.size()
+		seen[path] = off.size()
 		var allowed: int = int(_COLOR_ALLOWED.get(path, 0))
-		if paints.size() != allowed:
+		if off.size() != allowed:
 			offenders.append("%s: закрашиваний вне модуля стиля %d, допущено %d\n    %s" % [
-				path, paints.size(), allowed, "\n    ".join(paints)])
+				path, off.size(), allowed, "\n    ".join(off)])
 	assert_int(offenders.size()).is_equal(0) \
 		.override_failure_message(
 			"цвет состояния закрашен в узел мимо модуля стиля (ThemeConfig): он не меняется "
 			+ "с темой и не покрывается ни одним гардом темы (T-300). Перенеси тон в ThemeConfig "
 			+ "или уменьши допуск, если тон удалён:\n%s" % "\n".join(offenders))
-	# Две опоры живости: слепой скан и мёртвый допуск.
-	assert_bool(total >= 20).is_true() \
-		.override_failure_message("скан закраски цвета почти слеп: мест %d" % total)
+	# Две опоры живости: слепой скан и мёртвый допуск. Порог считается по **всем** местам
+	# закраски (замер 2026-10-30 — 69), а не по нарушениям: сведение допуска — цель тикета,
+	# и гард, краснеющий от собственных успехов, рано или поздно «починили» бы понижением
+	# порога. Слепому скану всё равно, сколько дыр, — ему бы перестать видеть места.
+	assert_bool(sites >= 40).is_true() \
+		.override_failure_message(
+			"скан закраски цвета почти слеп: мест закраски %d (замер 2026-10-30 — 69)" % sites)
 	for path in _COLOR_ALLOWED.keys():
 		assert_bool(seen.has(path)).is_true() \
 			.override_failure_message(
 				"в допуске числится %s, а закрашиваний вне модуля стиля в нём нет — строка устарела" % path)
 
 
-## Места, где цвет пишется в узел и берётся не из модуля стиля: «NN: строка».
-func _off_style_paints(path: String) -> Array[String]:
+## Места, где в узел пишется цвет, и пометка «вне модуля стиля» для каждого:
+## `{"all": [«NN: строка»], "off": [«NN: строка»]}`. «all» нужен проверке живости — она
+## меряет не дыры, а площадь скана.
+func _paint_sites(path: String) -> Dictionary:
 	var text := FileAccess.get_file_as_string(path)
 	var consts := _color_consts(text)
 	var re := RegEx.create_from_string(_COLOR_ASSIGN_RE)
 	var lit := RegEx.create_from_string(_COLOR_LITERAL_RE)
 	var lines := text.split("\n")
-	var out: Array[String] = []
+	var all: Array[String] = []
+	var off: Array[String] = []
 	for i in lines.size():
 		var stripped: String = String(lines[i]).strip_edges()
 		if stripped.begins_with("#"):
@@ -355,9 +365,10 @@ func _off_style_paints(path: String) -> Array[String]:
 				and j + 1 < lines.size():
 			j += 1
 			rhs += " " + String(lines[j]).strip_edges()
+		all.append("%d: %s" % [i + 1, stripped])
 		if _paint_is_off_style(rhs, consts, lit):
-			out.append("%d: %s" % [i + 1, stripped])
-	return out
+			off.append("%d: %s" % [i + 1, stripped])
+	return {"all": all, "off": off}
 
 
 ## Цветовые константы файла: имя → правая часть объявления. Нужны потому, что состояние

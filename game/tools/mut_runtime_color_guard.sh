@@ -31,7 +31,10 @@ TESTS=(-a res://tests/unit/ui/test_theme_source_scan.gd
 GRID=game/tests/unit/ui/test_theme_source_scan.gd
 INV=game/scripts/ui/artifact_inventory_screen.gd
 ARMY=game/scripts/ui/army_panel.gd
-TUT=game/scripts/ui/tutorial_overlay.gd
+# Мишень «файла в допуске» — панель решения: после подсреза 2 (2026-10-30) в допуске
+# остались город и она, а город — следующая мишень сведения, поэтому якорь ставится на
+# файл, который не поедет от следующего шага тикета.
+DP=game/scripts/ui/decision_panel.gd
 FAILED=0
 
 run() { # имя, файл-мишень (его и возвращаем)
@@ -80,21 +83,21 @@ run M2 "$ARMY"
 # M3 — тот же литерал в файле, который уже в допуске: допуск — это ЧИСЛО мест, а не
 # разрешение. Без этой проверки «файл в списке» превращается в лицензию красить сколько
 # угодно, и гард перестаёт ловить именно то, ради чего писался.
-mutate "$TUT" '
-old = "\tbackground.color = Color(0.0, 0.0, 0.0, 0.7)"
-assert s.count(old) == 1, "затемнение накладки не найдено: %d" % s.count(old)
-s = s.replace(old, old + "\n\tcard.color = Color(0.1, 0.2, 0.3, 0.4)", 1)
+mutate "$DP" '
+old = "\t\t\t\tcolor_rect.color = Color.GREEN"
+assert s.count(old) == 1, "плашка серьёзности не найдена: %d" % s.count(old)
+s = s.replace(old, old + "\n\t\t\t\tcolor_rect.color = Color(\"#123456\")", 1)
 '
-run M3 "$TUT"
+run M3 "$DP"
 
 # M4 — протухший допуск: нарушитель починили (тон поехал в модуль стиля), а строку в
 # допуске не убрали. Гард обязан краснить и это — иначе допуск живёт дольше дыры.
-mutate "$TUT" '
-old = "\tbackground.color = Color(0.0, 0.0, 0.0, 0.7)"
-assert s.count(old) == 1, "затемнение накладки не найдено: %d" % s.count(old)
-s = s.replace(old, "\tbackground.color = ThemeConfig.C_OVERLAY_DIM", 1)
+mutate "$DP" '
+old = "\t\t\t\tcolor_rect.color = Color.GREEN"
+assert s.count(old) == 1, "плашка серьёзности не найдена: %d" % s.count(old)
+s = s.replace(old, "\t\t\t\tcolor_rect.color = ThemeConfig.C_TEXT_SUCCESS", 1)
 '
-run M4 "$TUT"
+run M4 "$DP"
 
 # M5 — снята калибровка идентичных тонов. `Color(1, 1, 1, 1)` — «вернуть как есть», не
 # состояние; если регулярка снимается, верный код обязан покраснить (иначе допуск —
