@@ -1,0 +1,76 @@
+Gate local — T-247 (опись строк экрана «Герой» в CSV + акт инвентаря баннера и миниатюры)
+================================================================================
+head_sha: кодовый срез 1d9b499a (локальный main), родитель origin/main abc65622.
+Прогон: ./game/run_tests.sh, 2026-10-30, ОДИН прогон, снят на дереве после
+кодового коммита; в дереве оставались только неиндексированные доки (тесты их не
+читают). Код игры этим срезом не менялся: правка — GdUnit-кейсы, CSV-опись,
+мутационная батарея, два удалённых PNG и MANIFEST.
+
+Код выхода nohup-обёртка не сохранила; он выводится из секций журнала и равен 0:
+GdUnit 0 failures, VACUOUS-ASSERT- и ORPHAN-гейты OK, MCP VERDICT: YELLOW
+(классификатор readiness — код 3 → MCP_RC=0, run_tests.sh:366),
+GENART 11 passed, READINESS-CLASSIFIER: selftest GREEN. Красных секций в журнале
+нет ни одной.
+
+Машина шарится: чужие Xvfb :96 и :97 не трогались, своих Xvfb/Godot после прогона
+не осталось; CI не проверялся (по инструкции владельца от 2026-10-13). Док-гейты —
+./scripts/doc_gates.sh отдельным прогоном (в run_tests.sh их нет): DOC GATES:
+GREEN после gen_docs_index.py (119 заметок). Пиксельных кадров у среза нет:
+состав экрана — не внешний вид (см. ux-hero-carriers-t247.md §1).
+
+Состояние среды (важно для чтения MCP-секции): MemAvailable 0 kB при 47242 MB
+всего, SwapFree 101 MB из 20479 MB, load1 ≈ 1.0; сосед strata PID 1883360
+(чужой, не трогал). Тот же класс, что Q-M115 и T-172: среда, а не код.
+
+GdUnit (unit + integration + functional)
+----------------------------------------
+Overall Summary: 3662 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped |
+0 orphans
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+NODE-PATH-GATE: OK
+LINT: SKIPPED (нет gdtoolkit у python3) — как и во всех предыдущих прогонах
+Тест-леджер: +3 / −0 / quarantine 0 → нетто +3; было 3659 → стало 3662.
+Прирост — три кейса описи в game/tests/unit/ui/test_inventory_grid.gd
+(test_carrier_inventory_accounts_for_every_mockup_row_type,
+_paths_resolve_in_the_scene_and_on_disk, _names_every_hero_kit_texture).
+
+MCP e2e (pytest + godot-mcp, живой Godot без --headless)
+--------------------------------------------------------
+PYTEST LEDGER: passed=109 skipped=2 failed=1 errors=2 collected=114
+Сборка та же, что на T-306 (114); расхождение прогона — только в readiness.
+SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу:
+  CAPTURE_SCENE=res://... (см. docs/mvp/CAPTURE-HELPER.md)
+MCP VERDICT: YELLOW — три ошибки с подпиской «игра не готова за 180 с
+(Not connected to game interaction server)», сняты как readiness (D-265):
+  - test_campaign_carrier::test_city_screen_registered_in_campaign_ui_manager
+  - test_dest_marker_boot::test_dest_marker_leaves_on_teardown
+  - test_scenario_pilot_collector::test_scenario_pilot_collector_wizard
+Доказательство среды из журнала (строки готовности, T-172):
+  среда в момент отказа: mem_available=0MB из 47242MB swap_free=101/20479MB
+  load1=1.07 godot_procs=1(rss=173MB, state=S:1) psi_memory=some avg10=0.00
+  avg60=0.00 avg300=0.33 total=7309885095
+Ни один падёж не указывает на экран «Герой»: опись читается GdUnit-кейсами,
+которые в этой же сессии прошли (см. батарею ниже).
+
+Мутационная батарея (приёмка гарда, bash game/tools/mut_hero_carriers.sh)
+-------------------------------------------------------------------------
+M1 (шапка covered 13 → 14):        Statistics: 19 | 0 errors | 1 failures
+M2 (путь NamePlate → NamePlateGone): Statistics: 19 | 0 errors | 1 failures
+M3 (hero/figure.png → figureGone):  Statistics: 19 | 0 errors | 1 failures
+M4 (со строки 5 сняты Q-M121/T-306/T-251): Statistics: 19 | 0 errors | 1 failures
+M5 (выброшена строка описи полосы маны):   Statistics: 19 | 0 errors | 2 failures
+Мутации: 5, красных ожидалось 5, провалов: 0 (батарея снята на закоммиченном
+срезе 1d9b499a, откат — git checkout -- по CSV)
+
+Док-гейты и сверки (отдельные прогоны)
+--------------------------------------
+./scripts/doc_gates.sh — DOC GATES: GREEN (после gen_docs_index.py: 119 заметок;
+до перегенерации индекса — RED по индексу, как и предусмотрено)
+python3 scripts/check_ui_assets.py — проверено 95 файлов (widgets + icons), OK
+  (было 97 до акта инвентаря: минус banner.png и mini.png)
+python3 scripts/check_hero_layout_map.py — блоков 19, адресных строк карты 18,
+  расхождений нет
+python3 scripts/testmap.py --check — TESTMAP OK: дыр 80, файлов в группах
+  слияния 151, дублей 0 (ухудшения нет: кейсы добавлены в существующий файл)
