@@ -102,6 +102,29 @@ const C_CELL_EMPTY   := Color(1.0, 1.0, 1.0, 1.0)   # клетка свобод�
 const C_CELL_FILLED  := Color(0.62, 0.55, 0.45, 1.0)  # клетка занята — приглушение
 const C_CELL_HOVER   := Color(1.3, 1.05, 0.6, 1.0)  # наведённый/выбранный предмет — растущий тон
 
+## Палитра экрана города (T-300, подсрез 3). До этого акта одиннадцать тонов жили
+## локальным словарём `PALETTE` в `city_screen.gd`, ещё два (заглушка пустой доски и
+## строка легенды) существовали только как литералы в местах записи. Значения перенесены
+## один в один, кадр не двигался.
+## Плита и доска — поверхности, которые экран сам уже не красит: они уехали в тему
+## (T-147, `game_theme.tres`), но имена остались, потому что на них проверяется контраст.
+## Дрейф-гард `test_ui_contrast_canon.gd` этой семейки не знает: она не из гайда §1.2 и
+## ждёт арт-пасса, а WCAG-проверка пар «текст/поверхность» живёт в
+## `test_city_screen_palette.gd` и читает эти же константы.
+const C_CITY_BG           := Color("#11120f")   # фон экрана
+const C_CITY_PANEL        := Color("#211e18")   # плита
+const C_CITY_BOARD        := Color("#171915")   # доска города
+const C_CITY_TEXT         := Color("#f1e6cf")   # заголовок и основная подпись
+const C_CITY_TEXT_MUTED   := Color("#c6b78f")   # вторичная подпись
+const C_CITY_GOLD         := Color("#e0bd67")   # золотой акцент секций
+const C_CITY_TEAL         := Color("#77e4da")   # информационный акцент, рамка фокуса
+const C_CITY_WARNING      := Color("#e8a17c")   # «не вышло»
+const C_CITY_SUCCESS      := Color("#91c992")   # «вышло»
+const C_CITY_TEXT_BODY    := Color("#d5cdbb")   # текст сообщений
+const C_CITY_METRIC       := Color("#e7d5aa")   # числа метрик
+const C_CITY_PLACEHOLDER  := Color("#a99c7e")   # заглушка пустой доски
+const C_CITY_LEGEND       := Color("#e4ddce")   # строка легенды
+
 const C_RES_WOOD    := Color(0.62, 0.44, 0.24)
 const C_RES_MERCURY := Color(0.64, 0.67, 0.74)
 const C_RES_ORE     := Color(0.50, 0.40, 0.34)

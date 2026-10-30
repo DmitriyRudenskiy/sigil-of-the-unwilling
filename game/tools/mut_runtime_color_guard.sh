@@ -21,7 +21,10 @@ timeout() {
 #   M5 — снята калибровка идентичных тонов (`Color(1, 1, 1, 1)` снова считается
 #        состоянием) — гард обязан покраснить и это, иначе «допуск» — резинка;
 #   M6 — ослеплённый сам гард: классификатор всегда «чисто» (мутация проверки,
-#        прецедент M8 в mut_theme_variations.sh).
+#        прецедент M8 в mut_theme_variations.sh);
+#   M7 — в экран вернули локальный словарь тонов и красят из него: до подсреза 3 (2026-10-30)
+#        приём был слепым участком (многострочное объявление разворачивалось в «{» и
+#        считалось стилевым), поэтому зелёный M7 = участок снова открыт.
 #
 # Запуск: bash game/tools/mut_runtime_color_guard.sh   (из корня репо, дерево чистое)
 set -u
@@ -31,9 +34,10 @@ TESTS=(-a res://tests/unit/ui/test_theme_source_scan.gd
 GRID=game/tests/unit/ui/test_theme_source_scan.gd
 INV=game/scripts/ui/artifact_inventory_screen.gd
 ARMY=game/scripts/ui/army_panel.gd
-# Мишень «файла в допуске» — панель решения: после подсреза 2 (2026-10-30) в допуске
-# остались город и она, а город — следующая мишень сведения, поэтому якорь ставится на
-# файл, который не поедет от следующего шага тикета.
+CITY=game/scripts/ui/city_screen.gd
+# Мишень «файла в допуске» — панель решения: после подсреза 3 (2026-10-30) она осталась
+# в допуске одна, но якорь всё равно ставится туда, где не светит носитель: протухший
+# якорь краснеет молча, и батарея врёт «гейт держит».
 DP=game/scripts/ui/decision_panel.gd
 FAILED=0
 
@@ -119,6 +123,19 @@ assert s.count(old) == 1, "тело классификатора не найде
 s = s.replace(old, "\treturn false\n\tvar expr := _strip_identity_colors(rhs)", 1)
 '
 run M6 "$GRID"
+
+# M7 — локальный словарь тонов возвращён в экран, и подпись красится из него. Отдельный
+# смысл: до подсреза 3 такой код гард не видел вовсе (правая часть многострочного
+# объявления читалась как «{»). Красный M7 = закрытый участок, зелёный = ослепление.
+mutate "$CITY" '
+old = "const CATALOG_CATEGORIES := ["
+assert s.count(old) == 1, "каталог города не найден: %d" % s.count(old)
+s = s.replace(old, "const LAUNDER := {\n\t\"muted\": Color(\"#c6b78f\"),\n}\n\n" + old, 1)
+paint = "\tsubtitle.add_theme_color_override(\"font_color\", ThemeConfig.C_CITY_TEXT_MUTED)"
+assert s.count(paint) == 1, "подпись подзаголовка города не найдена: %d" % s.count(paint)
+s = s.replace(paint, "\tsubtitle.add_theme_color_override(\"font_color\", LAUNDER.muted)", 1)
+'
+run M7 "$CITY"
 
 echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (гейт держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — гейт дырявый")"
 git status --porcelain | grep -v "^??" || echo "дерево чистое"

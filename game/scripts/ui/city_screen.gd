@@ -21,19 +21,9 @@ const CampaignDefenseResolver := preload("res://scripts/city/campaign_defense_re
 ## обрезание, которое видно на съёмке «до» ui-mockup-parity.
 const HEADER_COMPACT_BELOW := 1900.0
 
-const PALETTE := {
-	"background": Color("#11120f"),
-	"panel": Color("#211e18"),
-	"board": Color("#171915"),
-	"text_primary": Color("#f1e6cf"),
-	"text_muted": Color("#c6b78f"),
-	"accent_gold": Color("#e0bd67"),
-	"accent_teal": Color("#77e4da"),
-	"text_warning": Color("#e8a17c"),
-	"text_success": Color("#91c992"),
-	"text_body": Color("#d5cdbb"),
-	"text_metric": Color("#e7d5aa"),
-}
+## Палитра экрана живёт в модуле стиля (T-300, подсрез 3): `C_CITY_*` в `theme_config.gd`.
+## Локальный словарь `PALETTE` был второй точкой истины — тон в нём нельзя было ни
+## перекрасить темой, ни поймать гардом (многострочное объявление разворачивалось в «{»).
 
 const CATALOG_CATEGORIES := [
 	{"title": "Все", "roles": []},
@@ -173,7 +163,7 @@ func _resource_icon(resource_id: StringName) -> Texture2D:
 func _apply_keyboard_focus(control: Control) -> void:
 	var focus := StyleBoxFlat.new()
 	focus.bg_color = Color(0, 0, 0, 0)
-	focus.border_color = PALETTE.accent_teal
+	focus.border_color = ThemeConfig.C_CITY_TEAL
 	focus.set_border_width_all(2)
 	focus.set_corner_radius_all(4)
 	control.add_theme_stylebox_override("focus", focus)
@@ -181,7 +171,7 @@ func _apply_keyboard_focus(control: Control) -> void:
 func _build_shell() -> void:
 	var shade := ColorRect.new()
 	shade.name = "ScreenShade"
-	shade.color = Color(PALETTE.background, 0.68)
+	shade.color = Color(ThemeConfig.C_CITY_BG, 0.68)
 	shade.mouse_filter = Control.MOUSE_FILTER_STOP
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(shade)
@@ -212,12 +202,12 @@ func _build_shell() -> void:
 	_title_label.name = "CityTitle"
 	_title_label.text = "Город"
 	_title_label.add_theme_font_size_override("font_size", 26)
-	_title_label.add_theme_color_override("font_color", Color("#f1e6cf"))
+	_title_label.add_theme_color_override("font_color", ThemeConfig.C_CITY_TEXT)
 	header_row.add_child(_title_label)
 	var subtitle := Label.new()
 	subtitle.name = "CitySubtitle"
 	subtitle.text = "КАМПАНИЙНЫЙ ГОРОД · 52 КЛЕТКИ"
-	subtitle.add_theme_color_override("font_color", Color("#c6b78f"))
+	subtitle.add_theme_color_override("font_color", ThemeConfig.C_CITY_TEXT_MUTED)
 	subtitle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_row.add_child(subtitle)
 	_header_subtitle = subtitle
@@ -239,7 +229,7 @@ func _build_shell() -> void:
 		# значения перенесены float-в-float, кадр обязан остаться тем же.
 		metric.theme_type_variation = &"CityResourceMetric"
 		_apply_keyboard_focus(metric)
-		metric.add_theme_color_override("font_color", PALETTE.text_metric)
+		metric.add_theme_color_override("font_color", ThemeConfig.C_CITY_METRIC)
 		metric.pressed.connect(_on_resource_pressed.bind(id))
 		_resource_buttons[id] = metric
 		metrics.add_child(metric)
@@ -249,7 +239,7 @@ func _build_shell() -> void:
 	_population_metric.tooltip_text = "Население города"
 	_population_metric.focus_mode = Control.FOCUS_ALL
 	_apply_keyboard_focus(_population_metric)
-	_population_metric.add_theme_color_override("font_color", Color("#e7d5aa"))
+	_population_metric.add_theme_color_override("font_color", ThemeConfig.C_CITY_METRIC)
 	header_row.add_child(_population_metric)
 	_housing_metric = Label.new()
 	_housing_metric.name = "HousingMetric"
@@ -257,7 +247,7 @@ func _build_shell() -> void:
 	_housing_metric.tooltip_text = "Жильё и лимит из запросов города"
 	_housing_metric.focus_mode = Control.FOCUS_ALL
 	_apply_keyboard_focus(_housing_metric)
-	_housing_metric.add_theme_color_override("font_color", Color("#e7d5aa"))
+	_housing_metric.add_theme_color_override("font_color", ThemeConfig.C_CITY_METRIC)
 	header_row.add_child(_housing_metric)
 	_city_level_button = Button.new()
 	_city_level_button.name = "CityLevelProgression"
@@ -296,7 +286,7 @@ func _build_shell() -> void:
 	_sidebar_title = Label.new()
 	_sidebar_title.text = "СТРОИТЕЛЬСТВО"
 	_sidebar_title.add_theme_font_size_override("font_size", 18)
-	_sidebar_title.add_theme_color_override("font_color", Color("#e0bd67"))
+	_sidebar_title.add_theme_color_override("font_color", ThemeConfig.C_CITY_GOLD)
 	_sidebar_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sidebar_header.add_child(_sidebar_title)
 	_sidebar_button = Button.new()
@@ -362,7 +352,7 @@ func _build_shell() -> void:
 	_board_placeholder.name = "BoardPlaceholder"
 	_board_placeholder.text = "План города"
 	_board_placeholder.add_theme_font_size_override("font_size", 28)
-	_board_placeholder.add_theme_color_override("font_color", Color("#a99c7e"))
+	_board_placeholder.add_theme_color_override("font_color", ThemeConfig.C_CITY_PLACEHOLDER)
 	_board_placeholder.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	board_area.add_child(_board_placeholder)
 	_board = CampaignCityBoard.new()
@@ -388,7 +378,7 @@ func _build_shell() -> void:
 	_inspector_panel.add_child(inspector_box)
 	_inspector_title = Label.new()
 	_inspector_title.name = "InspectorTitle"
-	_inspector_title.add_theme_color_override("font_color", Color("#e0bd67"))
+	_inspector_title.add_theme_color_override("font_color", ThemeConfig.C_CITY_GOLD)
 	inspector_box.add_child(_inspector_title)
 	var inspector_scroll := ScrollContainer.new()
 	inspector_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -410,12 +400,12 @@ func _build_shell() -> void:
 	legend.add_child(legend_box)
 	var legend_title := Label.new()
 	legend_title.text = "РЕЛЬЕФ И КОЛЬЦА"
-	legend_title.add_theme_color_override("font_color", Color("#e0bd67"))
+	legend_title.add_theme_color_override("font_color", ThemeConfig.C_CITY_GOLD)
 	legend_box.add_child(legend_title)
 	for row in ["Ядро", "Кольцо I", "Кольцо II", "Кольцо III"]:
 		var legend_row := Label.new()
 		legend_row.text = "◆  " + row
-		legend_row.add_theme_color_override("font_color", Color("#e4ddce"))
+		legend_row.add_theme_color_override("font_color", ThemeConfig.C_CITY_LEGEND)
 		legend_box.add_child(legend_row)
 
 	_legacy_panel = PanelContainer.new()
@@ -475,7 +465,7 @@ func _build_shell() -> void:
 	_message_label.clip_text = true
 	_message_label.custom_minimum_size = Vector2(0, 23)
 	_message_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_message_label.add_theme_color_override("font_color", Color("#d5cdbb"))
+	_message_label.add_theme_color_override("font_color", ThemeConfig.C_CITY_TEXT_BODY)
 	footer.add_child(_message_label)
 
 func _update_placement_controls() -> void:
@@ -871,9 +861,9 @@ func _initialize_campaign_catalog() -> void:
 		tab.button_pressed = category_index == 0
 		tab.custom_minimum_size.y = 30
 		tab.focus_mode = Control.FOCUS_ALL
-		tab.add_theme_color_override("font_color", PALETTE.text_muted)
-		tab.add_theme_color_override("font_pressed_color", PALETTE.accent_gold)
-		tab.add_theme_color_override("font_hover_color", PALETTE.text_primary)
+		tab.add_theme_color_override("font_color", ThemeConfig.C_CITY_TEXT_MUTED)
+		tab.add_theme_color_override("font_pressed_color", ThemeConfig.C_CITY_GOLD)
+		tab.add_theme_color_override("font_hover_color", ThemeConfig.C_CITY_TEXT)
 		# Носитель объявляет четыре состояния сразу: normal/hover — покой, pressed/
 		# hover_pressed — активная. Второй носитель для «активной» не нужен: вкладка и до
 		# переноса становилась активной сменой button_pressed, а не перекраской.
@@ -991,9 +981,9 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	select.flat = true
 	select.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	select.theme_type_variation = &"CityCardTitle"
-	select.add_theme_color_override("font_color", PALETTE.text_primary)
-	select.add_theme_color_override("font_hover_color", PALETTE.accent_gold)
-	select.add_theme_color_override("font_pressed_color", PALETTE.accent_gold)
+	select.add_theme_color_override("font_color", ThemeConfig.C_CITY_TEXT)
+	select.add_theme_color_override("font_hover_color", ThemeConfig.C_CITY_GOLD)
+	select.add_theme_color_override("font_pressed_color", ThemeConfig.C_CITY_GOLD)
 	_apply_keyboard_focus(select)
 	select.pressed.connect(_on_building_card_pressed.bind(building_id))
 	details.add_child(select)
@@ -1006,7 +996,7 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	role_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	role_line.name = "BuildingRoles"
 	role_line.theme_type_variation = &"LabelSecondary"
-	role_line.add_theme_color_override("font_color", PALETTE.text_muted)
+	role_line.add_theme_color_override("font_color", ThemeConfig.C_CITY_TEXT_MUTED)
 	details.add_child(role_line)
 
 	var cost_panel := PanelContainer.new()
@@ -1021,14 +1011,14 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	cost_caption.name = "CostCaption"
 	cost_caption.text = "СТОИМОСТЬ"
 	cost_caption.theme_type_variation = &"LabelSecondary"
-	cost_caption.add_theme_color_override("font_color", PALETTE.text_muted)
+	cost_caption.add_theme_color_override("font_color", ThemeConfig.C_CITY_TEXT_MUTED)
 	cost_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cost_row.add_child(cost_caption)
 	var costs: Dictionary = definition.get("costs", {})
 	if costs.is_empty():
 		var free_label := Label.new()
 		free_label.text = "БЕСПЛАТНО"
-		free_label.add_theme_color_override("font_color", PALETTE.accent_gold)
+		free_label.add_theme_color_override("font_color", ThemeConfig.C_CITY_GOLD)
 		cost_row.add_child(free_label)
 	else:
 		for resource_id in costs:
@@ -1046,7 +1036,7 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 			amount.name = "CostAmount_" + String(resource_id)
 			amount.text = _format_amount(float(costs[resource_id]))
 			amount.add_theme_font_size_override("font_size", 16)
-			amount.add_theme_color_override("font_color", PALETTE.accent_gold)
+			amount.add_theme_color_override("font_color", ThemeConfig.C_CITY_GOLD)
 			item.add_child(amount)
 			cost_row.add_child(item)
 
@@ -1056,7 +1046,7 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	effect_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	effect_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	effect_line.theme_type_variation = &"LabelSecondary"
-	effect_line.add_theme_color_override("font_color", PALETTE.text_body)
+	effect_line.add_theme_color_override("font_color", ThemeConfig.C_CITY_TEXT_BODY)
 	box.add_child(effect_line)
 	var prerequisite_line := Label.new()
 	prerequisite_line.name = "BuildingPrerequisites"
@@ -1064,7 +1054,7 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	prerequisite_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	prerequisite_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	prerequisite_line.theme_type_variation = &"LabelSecondary"
-	prerequisite_line.add_theme_color_override("font_color", PALETTE.text_muted)
+	prerequisite_line.add_theme_color_override("font_color", ThemeConfig.C_CITY_TEXT_MUTED)
 	box.add_child(prerequisite_line)
 	var status_line := Label.new()
 	status_line.name = "BuildingAvailability"
@@ -1080,7 +1070,7 @@ func _update_building_availability(status_line: Label, definition: Dictionary) -
 		"Строительство: %d ход(а)" % int(definition.get("construction_turns", 0)),
 		String(status.reason) if not bool(status.ok) else "Требования выполнены"]
 	status_line.add_theme_color_override("font_color",
-		Color("#e8a17c") if not bool(status.ok) else Color("#91c992"))
+		ThemeConfig.C_CITY_WARNING if not bool(status.ok) else ThemeConfig.C_CITY_SUCCESS)
 
 func _refresh_catalog_statuses() -> void:
 	if _campaign_catalog.is_empty() or city == null:

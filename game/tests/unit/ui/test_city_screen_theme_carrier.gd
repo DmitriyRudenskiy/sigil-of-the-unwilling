@@ -21,8 +21,9 @@ const _SCREEN := preload("res://scenes/ui/city_screen.tscn")
 const _CHIP_PATH := "ScreenMargin/ScreenLayout/ScreenHeader/HeaderRow/ResourceHud/%sMetric"
 
 ## Снятые переопределения: ровно те значения, что возвращал _resource_metric_style.
-# Рамка hover/pressed бралась из PALETTE.accent_gold — сравниваем с тем же источником,
-# а не с продублированной шестнадцатеричной строкой.
+# Рамка hover/pressed бралась из локального словаря экрана; с подсреза 3 (T-300) он живёт
+# в модуле стиля — сравниваем с тем же источником, что и код, а не с продублированной
+# шестнадцатеричной строкой.
 const _STATES := {
 	"normal": [Color("#30291d"), Color("#9a804d")],
 	"hover": [Color("#3b3120"), null],
@@ -33,7 +34,7 @@ const _STATES := {
 ## Сколько add_theme_stylebox_override обязано остаться в city_screen.gd после
 # подсреза 3: 16 было, 4 снято подсрезом 1 (чипы), 6 — подсрезом 2 (панели
 # оболочки), 5 — подсрезом 3 (каталог зданий). Один оставшийся — фокус клавиатуры
-# (подрез 4), он ждёт решения владельца про Button/focus.
+# (подсрез 4), он ждёт решения владельца про Button/focus.
 const _REMAINING_OVERRIDES := 1
 
 ## Документированный остаток: override клавиатурного фокуса на Button-узлах города
@@ -116,7 +117,7 @@ func test_chips_resolve_transcribed_values() -> void:
 		var chip := _chip(screen, id)
 		for state in _STATES:
 			var want: Array = _STATES[state]
-			var want_border: Color = want[1] if want[1] != null else CityScreen.PALETTE["accent_gold"]
+			var want_border: Color = want[1] if want[1] != null else ThemeConfig.C_CITY_GOLD
 			var got: StyleBoxFlat = chip.get_theme_stylebox(state) as StyleBoxFlat
 			assert_that(got).is_not_null()
 			assert_bool(ThemeCarrierGuard.resolves_carrier(chip, _THEME, state, "CityResourceMetric")).is_true() \
@@ -469,9 +470,9 @@ func test_catalog_tabs_carry_four_states() -> void:
 			.override_failure_message("рамка покоя вкладки %s ≠ перенесённой" % got_normal.border_color)
 		assert_bool(got_pressed.bg_color == _TAB_ACTIVE_BG).is_true() \
 			.override_failure_message("фон активной вкладки %s ≠ перенесённого" % got_pressed.bg_color)
-		assert_bool(got_pressed.border_color == CityScreen.PALETTE["accent_gold"]).is_true() \
+		assert_bool(got_pressed.border_color == ThemeConfig.C_CITY_GOLD).is_true() \
 			.override_failure_message(
-				"рамка активной вкладки %s ≠ PALETTE.accent_gold" % got_pressed.border_color
+				"рамка активной вкладки %s ≠ ThemeConfig.C_CITY_GOLD" % got_pressed.border_color
 			)
 		assert_int(got_normal.corner_radius_top_left).is_equal(4)
 		assert_int(got_normal.border_width_left).is_equal(1)
