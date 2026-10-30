@@ -97,7 +97,7 @@ date: 2026-10-14
 | [[12-asset-audit]] | Asset Audit — game/assets | snapshot | 2026-10-13 |
 | [[13-art-bible]] | Art Bible — визуальная идентичность | deepened | 2026-10-18 |
 | [[14-ux-battle-hud]] | UX-спека — боевой HUD (UI-2) | draft | 2026-10-28 |
-| [[15-asset-spec-artifacts]] | Asset-spec — 29 иконок артефактов (UI-4) | draft | 2026-10-13 |
+| [[15-asset-spec-artifacts]] | Asset-spec — 29 иконок артефактов (UI-4) | draft | 2026-10-30 |
 | [[16-ux-review-battle-hud]] | UX-ревью боевого HUD (UI-3, шаг 3) | draft | 2026-10-13 |
 | [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-10-18 |
 | [[18-lora-style-groups]] | Теги стилей обучающей нарезки — измерено, а не на глаз | reference | 2026-10-27 |
