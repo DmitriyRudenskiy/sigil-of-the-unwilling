@@ -27,6 +27,28 @@ func test_seed_deterministic_and_distinct() -> void:
 	assert_bool(bool(s1 != s4)).is_true()
 	assert_bool(bool(s1 > 0)).is_true()
 
+## Инвентарь ячеек матрицы (**T-238**): драйвер `scripts/scenario_matrix.py` берёт список
+## прогонов из `matrix_report.gd -- --list`, то есть из этих же таблиц. Пока продукт
+## «роль × класс» без дублей и без пустых множителей, инвентарь и отчёт сличимы
+## строка в строку; дубль пары — это две строки матрицы на один прогон и сводка,
+## посчитанная по нему дважды.
+func test_matrix_cell_product_has_no_duplicates() -> void:
+	var roles: Array = ScenarioTargets.role_ids()
+	var classes: Array = HeroClasses.CLASSES.keys()
+	classes.sort()
+	assert_bool(bool(not roles.is_empty())).is_true()
+	assert_bool(bool(not classes.is_empty())).is_true()
+	var seen := {}
+	for role in roles:
+		for cls in classes:
+			var key := "%s|%s" % [str(role), str(cls)]
+			var fresh := not seen.has(key)
+			assert_bool(fresh).is_true().override_failure_message("дубль ячейки матрицы: " + key)
+			seen[key] = true
+			assert_bool(bool(ScenarioTargets.seed_for(str(cls), str(role)) > 0)).is_true()
+			assert_bool(bool(ScenarioTargets.max_turns(str(role)) > 0)).is_true()
+	assert_bool(bool(seen.size() == roles.size() * classes.size())).is_true()
+
 func test_make_role_all_five() -> void:
 	var ids: Array = ["collector", "traveler", "trader", "adventurer", "builder"]
 	for id in ids:

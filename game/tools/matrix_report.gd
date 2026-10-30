@@ -24,7 +24,17 @@ extends SceneTree
 ## правильно, автопрогону нельзя. `Platform.is_test_framework_run()` читает ту же
 ## переменную в рантайме, поэтому установки из `_initialize()` хватает.
 ##
+## Инвентарь ячеек (для драйвера `scripts/scenario_matrix.py`, **T-238**):
+##   godot --headless --path game -s res://tools/matrix_report.gd -- --list
+## печатает по строке `MATRIX-CELL|role=…|class=…|seed=…|turns=…` на каждую пару
+## «роль × класс» и `MATRIX-INV|roles=…|classes=…|cells=…`. Список ячеек живёт здесь,
+## а не в python: копия 5×11 в драйвере расходится с `ScenarioTargets` при первой же
+## новой роли, и матрица начинает молча недосчитывать строки.
+##
 ## Печатает по строке на класс (`MATRIX|key=value|...`) и строку `MATRIX-SUMMARY|...`.
+## Строка содержит `goal=true|false`, `goal_turn=N` и `secs=S` — достигнута ли цель роли
+## и сколько шёл прогон; история прогонов и сравнение строятся по ним, поэтому поля
+## обязаны быть в строке, а не выводиться из метрик глазами.
 ## Числа из этих строк переносится в `openspec/.../tasks.md` и в отчёт цикла, поэтому
 ## инструмент коммитится: локальные прогоны вне git — не хранилище (D-192).
 ##
@@ -86,6 +96,10 @@ func _initialize() -> void:
 		print("MATRIX-ERROR|нужен роль-аргумент: -- <role> [turns] [class,...]")
 		quit(2)
 		return
+	if args[0] == "--list":
+		_print_inventory()
+		quit(0)
+		return
 	var role_id := args[0]
 	var turns := DEFAULT_TURNS
 	if args.size() > 1:
@@ -97,7 +111,12 @@ func _initialize() -> void:
 	print("MATRIX-START|role=%s|turns=%d|classes=%d" % [role_id, turns, classes.size()])
 	var broken: Array[String] = []
 	for class_id in classes:
+		var t0 := Time.get_ticks_msec()
 		var row := await _run_profile(role_id, class_id, turns)
+		# Время прогона клетки требует спек `scenario-matrix` («время прогона»), и оно же
+		# единственное отличие «прогон короткий» от «прогон медленный» в плоском отчёте.
+		# Двумя знаками: строка матрицы переносится в задачи и в сравнение прогонов.
+		row.secs = "%.2f" % (float(Time.get_ticks_msec() - t0) / 1000.0)
 		print("MATRIX|" + _row_to_line(row))
 		if str(row.get("error", "")) != "":
 			broken.append("%s(%s)" % [class_id, row.error])
@@ -119,7 +138,11 @@ func _initialize() -> void:
 ## по напечатанной строке, а не по полям: печатается именно она, и именно её переносят
 ## в `tasks.md`. Повторные строки в сводку не попадают: сводка считается по первому прогону.
 func _determinism_check(role_id: String, class_id: String, turns: int, first: Dictionary) -> void:
-	var base := _row_to_line(first)
+	var base_row := first.duplicate()
+	# Wall-clock из сравнения вынут: повтор того же seed обязан сойтись байт в байт,
+	# а `secs` не сходится никогда — иначе детерминизм краснеет на каждом прогоне.
+	base_row.erase("secs")
+	var base := _row_to_line(base_row)
 	var hashes: PackedStringArray = PackedStringArray([base.md5_text().substr(0, 8)])
 	var same := true
 	for n in REPEAT - 1:
@@ -134,6 +157,23 @@ func _determinism_check(role_id: String, class_id: String, turns: int, first: Di
 			print("MATRIX-ROW-A|" + base)
 			print("MATRIX-ROW-B|" + line)
 	print("MATRIX-DETERMINISM|class=%s|runs=%d|same=%s|hashes=%s" % [class_id, REPEAT, str(same), ",".join(hashes)])
+
+
+## Инвентарь ячеек матрицы (**T-238**): роли из `ScenarioTargets.role_ids()`, классы из
+## `HeroClasses.CLASSES` в отсортированном порядке — ровно тот же порядок, что у прогона,
+## чтобы инвентарь и отчёт сличались строка в строку. Мир не поднимается.
+func _print_inventory() -> void:
+	var inv_classes: Array = HeroClasses.CLASSES.keys()
+	inv_classes.sort()
+	var roles: Array = ScenarioTargets.role_ids()
+	for role in roles:
+		for cls in inv_classes:
+			print("MATRIX-CELL|role=%s|class=%s|seed=%d|turns=%d" % [
+				str(role), str(cls),
+				ScenarioTargets.seed_for(str(cls), str(role)),
+				ScenarioTargets.max_turns(str(role))])
+	print("MATRIX-INV|roles=%d|classes=%d|cells=%d"
+		% [roles.size(), inv_classes.size(), roles.size() * inv_classes.size()])
 
 
 func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
@@ -196,6 +236,13 @@ func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
 	var endgame: Dictionary = world.get_endgame_state()
 	row.turns = int(pilot.turn)
 	row.done = bool(pilot.done)
+	# Достижение цели — метка самого пилота: `goal_reached_turn` ставится в `_step()`
+	# до `_finish()`, то есть пока герой жив. Звать `role.goal_met(pilot)` посмертно —
+	# тот же класс падения, что у `metrics` до фикса **T-207** (`_hero_cell` на
+	# освобождённом герое), а цель, посчитанная после конца прогона, к тому же
+	# отличается от той, по которой пилот реально остановился.
+	row.goal_turn = int(pilot.goal_reached_turn)
+	row.goal = int(pilot.goal_reached_turn) >= 0
 	row.error = str(pilot.error_msg)
 	row.deals = int(metrics.get("deals", 0))
 	row.gold = int(metrics.get("gold", 0))
@@ -440,6 +487,11 @@ func _summarize(role_id: String, turns: int) -> Dictionary:
 		margins.append(r.margin)
 	golds.sort()
 	margins.sort()
+	var goals := 0
+	for r in _rows:
+		if bool(r.get("goal", false)):
+			goals += 1
+	s["goal"] = "%d/%d" % [goals, _rows.size()]
 	s["survived"] = "%d/%d" % [alive, _rows.size()]
 	s["deals"] = deals
 	s["gold_median"] = int(golds[golds.size() / 2]) if not golds.is_empty() else 0
