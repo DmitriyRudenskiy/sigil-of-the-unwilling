@@ -148,24 +148,6 @@
    ],
    "source": "comfyui krea2 по scripts/concept_art/hero_screen_spec.json (эталон — макет 12), укладка scripts/ui_kit/place_hero_art.py",
    "note": "фигура-кукла: алый капюшон, поднятая рука, кремовая обводка; фон срезан по связным областям (place_hero_art.py); бокс = пропорция HERO['Figure']"
-  },
-  "hero/banner.png": {
-   "kind": "image",
-   "size": [
-    124,
-    124
-   ],
-   "source": "плейсхолдер UI-2",
-   "note": "плейсхолдер знамени отряда (снят с экрана, арта носителя нет)"
-  },
-  "hero/mini.png": {
-   "kind": "image",
-   "size": [
-    124,
-    92
-   ],
-   "source": "плейсхолдер UI-2",
-   "note": "плейсхолдер мини-карты отряда (снят с экрана как выдуманный элемент, D-278)"
   }
  }
 }

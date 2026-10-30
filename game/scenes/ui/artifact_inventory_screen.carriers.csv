@@ -1,0 +1,94 @@
+# COVERAGE artifact_inventory_screen: covered 13 / outside-mockup 7 / missing 1
+# Инвариант: covered + missing == 14 — типов строк макета ровно 14 (§4 карты
+# docs/20-ux-hero-screen.md). COVERAGE считается по строкам-типам (строки `# TYPE`
+# ниже); строки данных — по номерам карты §3, инстансы одного типа (50 ячеек сетки,
+# 16 рамок куклы, 4 карточки отряда) свёрнуты в семейство с `*`.
+#
+# Как читать.
+#   row         — номер строки карты §3 (`+` — элемент состава, которым карта не нумеровалась).
+#   mockup_type — один из 14 типов строк макета (§4) или `-` (типа в макете нет).
+#   mockup      — адрес в сетке макета 12 (канва 1600×900) или `-`.
+#   node        — путь узла от корня сцены; `|` разделяет несколько узлов; `*` — семейство;
+#                 `-` — узла нет (строка не реализована).
+#   asset       — носитель пикселя: `hero/...` = game/assets/ui/hero/, `icons/...` =
+#                 game/assets/ui/icons/, `units/...` = game/assets/units/, `theme` — стиль
+#                 темы (не кит экрана), `none` — картинки у строки нет.
+#   data        — чем заполняется: func экрана, свойство модели, `декор` или `нет`.
+#   status      — covered (в макете есть и носитель есть) | no-carrier (носителя данных
+#                 нет — узел скрыт навсегда или не собран) | outside-mockup (в кадре
+#                 макета слота нет: §4 и §5).
+#   note        — билет или решение; для no-carrier и outside-mockup ссылка обязательна.
+#   Статусы `# TYPE`-строк — про тип макета целиком: covered | missing. Они не обязаны
+#   совпадать со статусом отдельной строки: тип «карточка юнита» закрыт (имя, иконка,
+#   число), а его строки 23–25 остаются без носителя.
+#
+# TYPE 01 пергамент = covered
+# TYPE 02 плита = covered
+# TYPE 03 плашка имени = covered
+# TYPE 04 строка уровня = missing
+# TYPE 05 разделитель = covered
+# TYPE 06 блок характеристик = covered
+# TYPE 07 список надетого = covered
+# TYPE 08 фигура = covered
+# TYPE 09 рамка куклы = covered
+# TYPE 10 ячейка сетки = covered
+# TYPE 11 карточка юнита = covered
+# TYPE 12 плитка-кнопка = covered
+# TYPE 13 подсказка предмета = covered
+# TYPE 14 рама портрета = covered
+#
+# ASSET-CENSUS hero/MANIFEST.json — 15 строк: 13 читаются сценой или скриптом экрана;
+#   2 без потребителя: `hero/bar_hp.png` (красная полоса карточки `CardHp_*` скрыта
+#   навсегда — T-306; а в сцене у полосы стоит дорожка `bar_track.png`) и
+#   `hero/tile_brass.png` (плитки `Close` и `Quests` одеты темой кнопки а не китом).
+#   Обе строки в MANIFEST остаются: пиксель — штатный носитель строки макета, он ждёт
+#   решения о значении (Q-M121) и о стиле плитки — а не удаления.
+# REMOVED-BY-INVENTORY-ACT `hero/banner.png` и `hero/mini.png` (T-247): узлы `Side`,
+#   `Banner`, `Mini` сняты со сцены D-278; grep по имени и по пути дал ноль
+#   потребителей — файлы удалены из репозитория вместе со строками MANIFEST и из
+#   списка генератора scripts/ui_kit/build_hero_kit.py.
+row,mockup_type,mockup,node,asset,data,status,note
+1,пергамент,A1–D10,Center/Window/Sheet/Left/Bg,hero/panel_parchment.png,декор,covered,D-280
+2,плита,D1–I10,Center/Window/Sheet/Stone/Bg,hero/panel_stone.png,декор,covered,T-257 — марджа 9-slice 40 px
+3,рама портрета,A1–D4,Center/Window/Sheet/Left/PortraitFrame,hero/frame_portrait.png,декор,covered,UI-6
+3,рама портрета,A1–D4,Center/Window/Sheet/Left/Portrait,hero/portrait.png,_build_left(),covered,UI-6 — арт krea2
+4,плашка имени,A4–D5,Center/Window/Sheet/Left/NamePlate,hero/banner_name.png,декор,covered,D-278
+4,плашка имени,A4–D5,Center/Window/Sheet/Left/Name,none,_build_left() → _hero.hero_name,covered,T-309 — имя из модели героя
+5,строка уровня,A5–D6,Center/Window/Sheet/Left/LevelRow,none,нет,no-carrier,Q-M121 · T-306 · T-251 — уровня в модели нет; скрыто по значению
+6,строка уровня,A5–D6,-,none,нет,no-carrier,T-306 — опыт есть только у отряда (`party_screen.gd:112` и `:132` · K-M13)
+7,разделитель,A6–D6,Center/Window/Sheet/Left/Rule1,hero/rule_brass.png,декор,covered,D-278
+7,разделитель,A7–D7,Center/Window/Sheet/Left/Rule2,hero/rule_brass.png,декор,covered,D-278
+8,блок характеристик,A6–D7,Center/Window/Sheet/Left/StatIcon_0|Center/Window/Sheet/Left/StatName_0|Center/Window/Sheet/Left/StatValue_0,icons/hero/stat_attack.png,_build_left() и _refresh_stats(),covered,T-258
+9,блок характеристик,A6–D7,Center/Window/Sheet/Left/StatIcon_1|Center/Window/Sheet/Left/StatName_1|Center/Window/Sheet/Left/StatValue_1,icons/hero/stat_defense.png,_build_left() и _refresh_stats(),covered,T-258
+10,блок характеристик,A6–D7,Center/Window/Sheet/Left/StatIcon_2|Center/Window/Sheet/Left/StatName_2|Center/Window/Sheet/Left/StatValue_2,icons/hero/stat_magic.png,_build_left() и _refresh_stats(),covered,T-258
+11,блок характеристик,A6–D7,Center/Window/Sheet/Left/StatIcon_3|Center/Window/Sheet/Left/StatName_3|Center/Window/Sheet/Left/StatValue_3,icons/hero/stat_knowledge.png,_build_left() и _refresh_stats(),covered,T-258
+12,-,D1–E1,Center/Window/Sheet/BandMana/Mana_lbl|Center/Window/Sheet/BandMana/Mana_val,none,_build_left() и _refresh_stats(),outside-mockup,§5 зона B — ряда в макете нет
+12,-,D1–E1,Center/Window/Sheet/BandMana/ManaTrack|Center/Window/Sheet/BandMana/ManaBar,hero/bar_track.png|hero/bar_mana.png,_refresh_mana(),outside-mockup,T-257 — полоса отжата внутрь камня
+13,-,D1–E1,Center/Window/Sheet/BandMana/School_lbl|Center/Window/Sheet/BandMana/School_val,none,_magic_school(),outside-mockup,§5 зона B — слота в макете нет
+14,список надетого,A7–D10,Center/Window/Sheet/Left/EquipRow_*,hero/frame_row.png,_refresh_equip_list(),covered,T-254 · T-242 — 12 слотов против 7 строк
+14,список надетого,A7–D10,Center/Window/Sheet/Left/EquipRow_*/EquipIcon_*|Center/Window/Sheet/Left/EquipRow_*/EquipName_*,icons артефактов,_refresh_equip_list(),covered,T-254 — пустая строка скрыта
+15,фигура,E1–G6,Center/Window/Sheet/Stone/Figure,hero/figure.png,_build_right(),covered,UI-6 — арт krea2
+16,рамка куклы,E1–H6,Center/Window/Sheet/Stone/Doll/DollSlot_*,hero/slot_doll.png,_rebuild_equipped(),covered,T-294 · T-242 — 4 декоративные рамки
+16,рамка куклы,E1–H6,Center/Window/Sheet/Stone/Doll/DollIcon_*,icons артефактов,_rebuild_equipped(),covered,T-294 — иконка рядом с рамкой
+17,ячейка сетки,D6–I10,Center/Window/Sheet/Stone/Bag/GridCell_*,hero/cell_grid.png,_refresh_grid(),covered,D-280 §5-прим. — носитель 6×4 против 10×5
+18,ячейка сетки,D6–I10,Center/Window/Sheet/Stone/Bag/Items,icons артефактов,_refresh_grid() → _add_item_icon,covered,габарит и поворот — из раскладки
+19,-,-,Center/Window/Sheet/Stone/Bag/Items,none,_apply_item_marks(),outside-mockup,§3.19 — визуала редкости в макете нет
+20,карточка юнита,I1–J9,Center/Window/Sheet/Units/Bottom/Cards/Card_*,none,_build_bottom(),covered,T-317 — карточек 4; скролла нет; ростер 8 стеков
+20,карточка юнита,I1–J9,Center/Window/Sheet/Units/Bottom/Cards/Card_*/ArmySlot_*,hero/frame_card.png,декор,covered,D-278
+21,карточка юнита,I1–J9,Center/Window/Sheet/Units/Bottom/Cards/Card_*/ArmyIcon_*,units/*.png,_build_bottom() → _unit_icon(),covered,T-306 — иконка показана у заполненного слота
+22,карточка юнита,I1–J9,Center/Window/Sheet/Units/Bottom/Cards/Card_*/CardName_*,none,_build_bottom(),covered,T-270 — имена юнитов в игре по-английски
+23,карточка юнита,I1–J9,Center/Window/Sheet/Units/Bottom/Cards/Card_*/CardLv_*,none,нет,no-carrier,T-306 · Q-M121 — уровня юнита в модели нет; скрыто по значению
+24,карточка юнита,I1–J9,Center/Window/Sheet/Units/Bottom/Cards/Card_*/CardHp_*,hero/bar_track.png,нет,no-carrier,T-306 — current==max; пиксель кита `bar_hp.png` без потребителя
+25,карточка юнита,I1–J9,Center/Window/Sheet/Units/Bottom/Cards/Card_*/CardMp_*,hero/bar_track.png,нет,no-carrier,T-306 — второй шкалы у юнита нет
+26,карточка юнита,I1–J9,Center/Window/Sheet/Units/Bottom/Cards/Card_*/ArmyCount_*,none,_build_bottom(),covered,T-306 — число стека
+27,плитка-кнопка,J1,Center/Window/Sheet/Units/Close,theme,_connect_signals() → signal closed,covered,tile_brass.png без потребителя — стиль даёт тема
+27,плитка-кнопка,J9–J10,Center/Window/Sheet/Units/Quests,theme,нет,no-carrier,T-252 — журнала квестов в игре нет; скрыта а не выдумана
+28,подсказка предмета,D6–I10,Center/Window/Sheet/ItemTip/TipBox|Center/Window/Sheet/ItemTip/TipBox/TipName|Center/Window/Sheet/ItemTip/TipBox/TipDesc,theme,_update_desc(),covered,T-271 · T-256 — дом панели и тень
+28,подсказка предмета,D6–I10,Center/Window/Sheet/ItemTip/TipIcon,icons артефактов,_update_desc(),covered,T-256
+29,-,-,Center/Window/Sheet/ItemTip/TipBox/TipButtons/Equip|Center/Window/Sheet/ItemTip/TipBox/TipButtons/Remove|Center/Window/Sheet/ItemTip/TipBox/TipButtons/Dispose,theme,_connect_signals(),outside-mockup,§5 зона D — кнопок в макете нет
+30,-,H1–I6,Center/Window/Sheet/BandSkills/Skills_lbl|Center/Window/Sheet/BandSkills/Skill_*,icons/*.png,_build_left() и _skill_level(),outside-mockup,§5 зона A — реализация свёрнута в ленту BandSkills
+31,-,H1–I6,Center/Window/Sheet/BandSkills/Formations_lbl|Center/Window/Sheet/BandSkills/Formations/Form_*,theme,нет,outside-mockup,T-250 — носителя нет; §5 зона C (реализация — та же лента)
+32,-,-,Center/Window/Sheet/Stone/Overflow|Center/Window/Sheet/Stone/Overflow_lbl,theme,_refresh_grid(),outside-mockup,§5 — «Перевес» вне кадра макета; пустая полоса скрыта
+33,-,AC1,Center/Window,theme,HeroLayout.BLOCKS — долевые якоря,covered,§1 и §6 — проверка без прокрутки
++1,-,-,Center/Window/Outline,theme,декор,covered,§4 «остаётся»; типом строки макета не является
++2,-,H1–I6,Center/Window/Sheet/BandSkills/Skill_*/SkillIcon|Center/Window/Sheet/BandSkills/Skill_*/SkillLevel,icons/*.png,_build_left(),covered,часть строки 30 — иконка и уровень навыка

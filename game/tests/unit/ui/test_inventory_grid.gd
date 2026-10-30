@@ -610,3 +610,199 @@ func test_unit_cards_and_level_row_show_only_what_has_a_carrier() -> void:
 
 func _card_child(screen: Control, idx: int, what: String) -> Control:
 	return screen.get_node_or_null("%s/%s" % [_CARDS % idx, what]) as Control
+
+## --- опись строк экрана (T-247) -------------------------------------------
+##
+## Экран «Герой» собран по макету 12, и до сих пор ответ на вопрос «что на этом
+## экране есть и чем оно заполняется» жил только в прозе карты элементов
+## docs/20-ux-hero-screen.md. Опись переносит ответ в машиночитаемый носитель —
+## game/scenes/ui/artifact_inventory_screen.carriers.csv, где каждая строка
+## карты §3 стоит рядом со своим узлом, ассетом и писателем данных.
+##
+## Гард сторожит сам носитель: CSV, который никто не проверяет, врёт тише
+## прозы. Красным становится на: рассогласовании шапки COVERAGE со строками
+## `# TYPE` и со статусами строк; на пути узла, которого нет в сцене (узел
+## переименовали — опись обязана покраснеть, а не молчать); на ассете кита,
+## которого нет на диске; на строки без носителя или вне макета без ссылки на
+## билет; на текстуре кита в сцене, которую опись не назвала.
+const _CARRIERS := "res://scenes/ui/artifact_inventory_screen.carriers.csv"
+const _KIT_DIR := "res://assets/ui/hero/"
+const _CARRIER_COLS := 8
+const _CARRIER_STATUSES := ["covered", "no-carrier", "outside-mockup"]
+const _CARRIER_TYPES := 14
+
+## Разбор описи: {header, rows, types, coverage}. Коментарии — строки с `#`.
+func _carriers() -> Dictionary:
+	var txt := FileAccess.get_file_as_string(_CARRIERS)
+	assert_bool(txt != "").is_true() \
+			.override_failure_message("опись строк экрана не найдена: " + _CARRIERS)
+	var rows: Array = []
+	var types := {}
+	var coverage := {}
+	var header := PackedStringArray()
+	for line in txt.split("\n"):
+		var l := line.strip_edges()
+		if l == "":
+			continue
+		if l.begins_with("# COVERAGE"):
+			# `# COVERAGE artifact_inventory_screen: covered 13 / outside-mockup 7 / missing 1`
+			for part in l.substr(l.find(":") + 1).split("/"):
+				var words := part.strip_edges().split(" ")
+				assert_that(words.size()).is_equal(2)
+				coverage[words[0]] = int(words[1])
+		elif l.begins_with("# TYPE"):
+			# `# TYPE 04 строка уровня = missing` — номер держит порядок типов
+			# карты §4, имя связывает строку `# TYPE` со столбцом mockup_type.
+			var rhs := l.trim_prefix("# TYPE").strip_edges()
+			assert_bool(rhs.contains("=")).is_true() \
+					.override_failure_message("строка типа макета без статуса: " + l)
+			var lhs: String = rhs.split("=")[0].strip_edges()
+			var num := lhs.split(" ")[0]
+			assert_that(num).is_equal("%02d" % (types.size() + 1))
+			types[lhs.trim_prefix(num + " ")] = rhs.split("=")[1].strip_edges()
+		elif l.begins_with("#"):
+			continue
+		elif header.is_empty():
+			header = PackedStringArray(l.split(","))
+		else:
+			rows.append(l.split(","))
+	return {"header": header, "rows": rows, "types": types, "coverage": coverage}
+
+
+## 14 типов строк макета закрыты или честно не закрыты; опись им не противоречит.
+func test_carrier_inventory_accounts_for_every_mockup_row_type() -> void:
+	var inv := _carriers()
+	assert_that(Array(inv.header)).is_equal(
+			["row", "mockup_type", "mockup", "node", "asset", "data", "status", "note"])
+	assert_that(inv.types.size()).is_equal(_CARRIER_TYPES)
+	var covered := 0
+	var missing := 0
+	for kind in inv.types.values():
+		assert_bool(kind in ["covered", "missing"]).is_true() \
+				.override_failure_message("тип макета с неизвестным статусом: " + str(kind))
+		covered += 1 if kind == "covered" else 0
+		missing += 1 if kind == "missing" else 0
+	assert_that(covered + missing).is_equal(_CARRIER_TYPES)
+	assert_that(inv.coverage.get("covered", -1)).is_equal(covered)
+	assert_that(inv.coverage.get("missing", -1)).is_equal(missing)
+	# outside-mockup считается по номерам строк карты (инстансы одного типа свёрнуты
+	# в семейства), поэтому — множеством, а не суммой строк CSV.
+	var outside := {}
+	for f in inv.rows:
+		assert_that(f.size()).is_equal(_CARRIER_COLS)
+		var status: String = f[6]
+		assert_bool(status in _CARRIER_STATUSES).is_true() \
+				.override_failure_message("неизвестный статус строки %s: %s" % [f[0], status])
+		if status != "covered":
+			assert_bool(f[0] != "" and (f[7].contains("T-") or f[7].contains("Q-")
+					or f[7].contains("D-") or f[7].contains("UI-") or f[7].contains("§"))) \
+				.is_true() \
+				.override_failure_message(
+						"строка %s со статусом «%s» без ссылки на билет или раздел карты" % [f[0], status])
+		if status == "outside-mockup" and not f[0].begins_with("+"):
+			outside[f[0]] = true
+	assert_that(inv.coverage.get("outside-mockup", -1)).is_equal(outside.size())
+	# Тип макета обязан встречаться в строках: `# TYPE` без строк — это декларация,
+	# а не опись.
+	for t in inv.types.keys():
+		var named := 0
+		for f in inv.rows:
+			if f[1] == t:
+				named += 1
+		assert_bool(named > 0).is_true() \
+				.override_failure_message("тип макета «%s» не встречается ни в одной строке описи" % t)
+
+
+## Каждый путь описи живёт в сцене, каждый ассет кита — на диске.
+func test_carrier_inventory_paths_resolve_in_the_scene_and_on_disk() -> void:
+	var screen := await _mk_screen(false)
+	var inv := _carriers()
+	assert_bool(inv.rows.size() >= 33).is_true() \
+			.override_failure_message("опись обмелела: строк %d, карты §3 — 33" % inv.rows.size())
+	for f in inv.rows:
+		var status: String = f[6]
+		if f[3] == "-":
+			# «узла нет» имеет право стоять только там, где носителя действительно нет.
+			assert_that(status).is_equal("no-carrier")
+			continue
+		for pat in f[3].split("|"):
+			var p: String = pat.strip_edges()
+			assert_bool(p.begins_with("Center/")).is_true() \
+					.override_failure_message("путь в описи обязан быть полным, от корня сцены: " + p)
+			assert_bool(_resolve_node(screen, p)).is_true() \
+					.override_failure_message(
+							"строка %s: узла %s в сцене нет (опись разошлась со сценой)" % [f[0], p])
+		for tok in f[4].split("|"):
+			var a: String = tok.strip_edges()
+			if a.begins_with("hero/"):
+				assert_bool(FileAccess.file_exists(_KIT_DIR + a.trim_prefix("hero/"))).is_true() \
+						.override_failure_message("строка %s: пикселя %s нет в ките" % [f[0], a])
+			elif a.begins_with("icons/") and a.ends_with(".png") and not a.contains("*"):
+				assert_bool(FileAccess.file_exists("res://assets/ui/icons/" + a.trim_prefix("icons/"))) \
+					.is_true() \
+					.override_failure_message("строка %s: иконки %s нет" % [f[0], a])
+
+
+## Всякая текстура кита экрана обязана стоять в описи: узел с пикселем кита,
+## которого в описи нет, — это новый элемент, заведённый мимо карты макета.
+func test_carrier_inventory_names_every_hero_kit_texture() -> void:
+	var screen := await _mk_screen(false)
+	var inv := _carriers()
+	var pats := []
+	for f in inv.rows:
+		if f[3] != "-":
+			pats.append_array(f[3].split("|"))
+	var prefix := String(screen.get_path()) + "/"
+	var seen := 0
+	for node in _controls_under(screen, []):
+		if not (node is TextureRect):
+			continue
+		var tex: Texture2D = (node as TextureRect).texture
+		if tex == null or not String(tex.resource_path).begins_with(_KIT_DIR):
+			continue
+		seen += 1
+		var p := String(node.get_path()).trim_prefix(prefix)
+		var named := false
+		for pat in pats:
+			if _pattern_matches(p, pat.strip_edges()):
+				named = true
+				break
+		assert_bool(named).is_true() \
+				.override_failure_message(
+						"узел %s рисуется пикселем кита %s, но в описи его нет" % [
+							p, tex.resource_path.get_file()])
+	assert_bool(seen > 0).is_true() \
+			.override_failure_message("в сцене не нашлось ни одной текстуры кита — предпосылка теста сломана")
+
+
+## Узел или семейство (`*` — префикс имени на этом уровне) обязано найтись в сцене.
+func _resolve_node(screen: Node, path: String) -> bool:
+	var node: Node = screen
+	for seg in path.split("/"):
+		if node == null:
+			return false
+		if seg.ends_with("*"):
+			var pre := seg.trim_suffix("*")
+			var found: Node = null
+			for child in node.get_children():
+				if String(child.name).begins_with(pre):
+					found = child
+					break
+			node = found
+		else:
+			node = node.get_node_or_null(seg)
+	return node != null
+
+
+func _pattern_matches(node_path: String, pat: String) -> bool:
+	var n := node_path.split("/")
+	var p := pat.split("/")
+	if n.size() != p.size():
+		return false
+	for i in p.size():
+		if p[i].ends_with("*"):
+			if not n[i].begins_with(p[i].trim_suffix("*")):
+				return false
+		elif n[i] != p[i]:
+			return false
+	return true
