@@ -9,6 +9,22 @@ date: 2026-10-30
 
 # CHANGELOG — docs/
 
+## 2026-10-30 — T-305 шаг 3: `test_city_level.gd` разделён по носителям
+
+* **Что.** `game/tests/unit/world/test_city_level.gd` (16 кейсов) разрезан на
+  `game/tests/unit/city/test_prosperity_system.gd` (носитель
+  `game/scripts/city/prosperity_system.gd`) и
+  `game/tests/unit/world/test_city_rings_and_serialization.gd` (носитель
+  `game/scripts/world/city.gd`).
+* **Разрезан и тест.** `test_build_radius_by_level` утверждал радиус сразу у двух
+  носителей; теперь `test_build_radius_for_level_is_fixed` (prosperity) и
+  `test_building_max_distance_is_fixed_ring_three` (city). Кейсов 16 → 17.
+* **Метрика.** Оскопление не сдвинулось (`merge_files` 148, дыр 80, дубли 0, базлайн не
+  переснят), изменились только счётчики: файлов 389 → 390, кейсов 3668 → 3669. Польза —
+  в именовании носителя, а не в числе; это записано в TEST-MAP отдельно.
+* **Смешанных осталось четверо:** `test_city_navigation.gd`, `test_city_system.gd`,
+  `test_city_tech_tree.gd`, `test_city_hex_layout.gd`.
+
 ## 2026-10-30 — T-322: сезон мира — статика процесса (найдено при переезде файлов T-305)
 
 * **Симптом.** После переезда `test_city_processor.gd` в `unit/city/` два теста файла
