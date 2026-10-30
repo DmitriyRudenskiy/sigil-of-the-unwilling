@@ -1,0 +1,80 @@
+Gate local — T-315 (командный ряд боя: отключённый медальон гаснет вместе с доступностью)
+================================================================================
+head_sha: код среза 68d42010 (локально, до пуша), origin/main 071962e3
+(ребаза не потребовалось — локальный коммит поставлен поверх прилетевших 071962e3
+пересечений с файлами среза не было).
+Прогон: ./game/run_tests.sh, 2026-10-30, ОДИН прогон, снят на дереве после
+кодового коммита (в дереве оставались только неиндексированные доки и артефакты —
+тесты их не читают).
+
+GdUnit 3662 → 3664: +1 тестовый случай этим срезом (зона D), +1 — прилетевшим
+пушем арт-идентичности. Леджером сверять нечем: номера файлов не менялись.
+
+Машина шарится: чужие Xvfb :96 и :97 не трогались; ux-съёмка T-315 шла на своём
+Xvfb :92 (1920×1080, снят по окончании съёмки), MCP-съёмка — MCP_PORT=9095.
+CI не проверялся (по инструкции владельца от 2026-10-13). Док-гейты —
+./scripts/doc_gates.sh отдельным прогоном (в run_tests.sh их нет): DOC GATES:
+GREEN после gen_docs_index.py. Пиксельные кадры вне git (D-185), резерв:
+~/.local/share/sigil-reserve/battle-row-t315/.
+
+Состояние среды: MemAvailable 683–709 MB весь прогон. MCP-секция отдала один
+readiness-error (тот же класс, что Q-M115/T-172: среда, а не код) — ниже.
+
+GdUnit (unit + integration + functional)
+----------------------------------------
+Overall Summary: 3664 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (388/388)
+Executed test cases : (3664/3664)
+Total execution time: 3min 39s 423ms
+Exit code: 0 (маппинг 0/101 → гейт зелёный; до конца скрипта прогон дошёл,
+значит GdUnit не падал — красный вышел бы на строке 76)
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+
+MCP e2e (pytest + godot-mcp)
+----------------------------
+collected 114 items
+PYTEST LEDGER: passed=111 skipped=2 failed=0 errors=1 collected=114
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://...
+MCP READINESS: YELLOW — 1 error с подпиской readiness (игра не готова за 180 с):
+  - test_campaign_carrier::test_second_press_closes_city_screen :: failed on setup
+    with "godot_mcp.MCPError: игра не готова за 180 с (тулз game_eval вернул
+    ошибку: Not connected to game interaction server.)"
+MCP VERDICT: YELLOW (красный снят как readiness, не регрессия — D-265)
+Одиночный error в кампании-носителях, к правке отношения не имеет: срез меняет
+только battle_ui.gd, а test_campaign_carrier падает на setup до первого вызова.
+
+Python-секции
+-------------
+GENART: интерпретатор /home/user/.venv/map-art/bin/python — 11 passed
+READINESS-CLASSIFIER: selftest GREEN — 13 passed
+тесты самих док-проверщиков: 152 passed (в составе doc_gates.sh)
+
+Приёмка T-315 (не гейт, а критерий билета)
+------------------------------------------
+Замер `scripts/measure_medallion_row.py --disabled retreat`, канонный кадр
+1920×1080, фикстура `battle_hud_full`, кадр до = sha256 380dc39f…, после =
+7130a758…:
+  до:    retreat 0.2260 против средних 0.0516 → 4.38× → FAIL (критерий ≤ 1.5)
+  после: retreat 0.0432 против средних 0.0516 → 0.84× → PASS
+Семь включённых пластин совпали до 4-го знака — правка тронула ровно одну.
+Разбор кадра A/B и диспозиция: docs/mvp/matrix/2026-10-30/ux-battle-row-t315.md.
+
+Батарея game/tools/mut_battle_medallion_dim.sh (снималась отдельным прогоном на
+коммитном дереве, до гейта):
+  M1 (точка смены доступности теряет перекраску): 0 errors | 11 failures
+  M2 (set_rescue_enabled возвращается к прямой записи): 0 errors | 1 failures
+  M3 (set_attack_enabled возвращается к прямой записи): 0 errors | 1 failures
+  M4 (начальный запрет «Атаки» снят): 0 errors | 1 failures
+  M5 (гашение обесценено в _medallion_state): 0 errors | 11 failures
+ИТОГ: все мутанты красные (гейт держит), дерево после батареи чистое.
+
+Вердикт
+-------
+GdUnit exit 0 + smoke-прогон не сокращён + ux-review зрением (кадр A/B) → срез
+публикуется. Предмет «полупрозрачная пластина» закрыт; курсор того же стиля
+(D-293) — арт, билет остаётся открытым.

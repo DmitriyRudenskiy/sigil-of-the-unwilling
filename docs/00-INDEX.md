@@ -14,7 +14,7 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (32)
+## Реестры и процессы (35)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -28,6 +28,7 @@ date: 2026-10-14
 | [[GAP-LIST]] | Gap-лист GDD ↔ код (корзины A/B/C) | draft | 2026-10-17 |
 | [[GDLINT-PROPOSAL]] | gdlint-конфиг — предложение (раунд 12 §3) | reference | 2026-10-12 |
 | [[GDUNIT4-VACUOUS-ASSERT-ISSUE]] | Draft: upstream issue gdUnit4 — silent no-op assert without check method | draft | 2026-10-13 |
+| [[HERO-ANIM]] | Генерация анимации героев (hero_anim) | reference | 2026-10-30 |
 | [[MVP_SCOPE]] | MVP-скоуп — итог Фазы 4 | reference | 2026-10-15 |
 | [[PR-ASSET-1]] | Тело PR ASSET-1 (feat/asset-1-resources) | draft | 2026-10-15 |
 | [[PR-DOCS-ARTBIBLE]] | Тело PR docs (feat/art-bible-rev2) | archived | 2026-10-14 |
@@ -45,10 +46,12 @@ date: 2026-10-14
 | [[ux-battle-hud-t241]] | UX-review боевого HUD в наполненном состоянии (T-241) | reference | 2026-10-29 |
 | [[ux-battle-hud-t310]] | UX-review боевого HUD после снятия мёртвого `turn_line` (T-310) | reference | 2026-10-29 |
 | [[ux-hero-tip-t271]] | UX-review T-271 — посадка карточки предмета (зона D экрана героя) | reference | 2026-10-29 |
+| [[ux-battle-row-t315]] | Кадр и разбор T-315 — командный ряд боя: пластина отключённой команды | reference | 2026-10-30 |
 | [[ux-hero-bands-t257]] | UX-review T-257 — зоны переноса внутри рамки камня (экран героя) | reference | 2026-10-30 |
 | [[ux-hero-carriers-t247]] | Акт инвентаря и опись строк экрана «Герой» (T-247) | reference | 2026-10-30 |
 | [[ux-hero-doll-t258]] | UX-review T-258 — кукла экрана героя: кадр фигуры и светлая врезка | reference | 2026-10-30 |
 | [[ux-hero-grid-t255]] | UX-review T-255 — клетки, предмет и его рамки в сумке (зона D экрана героя) | reference | 2026-10-30 |
+| [[ux-hero-identity-t318]] | UX-review T-318 — идентичность героя в принятых профилях против выреза владельца | reference | 2026-10-30 |
 | [[ux-hero-unit-cards-t306]] | Кадр и разбор T-306 — карточки отряда и строка уровня экрана «Герой» | reference | 2026-10-30 |
 
 ## GDD и стиль (87)
