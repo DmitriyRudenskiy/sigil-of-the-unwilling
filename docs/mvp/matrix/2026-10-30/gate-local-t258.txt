@@ -1,0 +1,88 @@
+Gate local — T-258 (кукла экрана «Герой»: кадр фигуры против адресного блока)
+================================================================================
+head_sha: 5f9bf90d (origin/main) → код среза ef1e4feb + 7e732d88 (локально, до
+пуша). Прогон: ./game/run_tests.sh, 2026-10-30, ОДИН прогон, снят на дереве
+после кодового коммита 7e732d88 (первый коммит среза ef1e4feb содержал зелёный,
+но пустой гард — см. «что поймала батарея» ниже).
+
+Сцена и генератор этим срезом НЕ менялись: правка — тест, мутационная батарея,
+фикстура съёмки и документация. Поэтому кадр среза совпадает с кадром T-257 по
+геометрии и отличается только состоянием фикстуры (кукла вместо полос).
+
+Машина шарится: чужие Xvfb :96 и :97 не трогались, съёмка ux-review шла на
+своём Xvfb :91 (поднят и снят этим же срезом). CI не проверялся (по инструкции
+владельца от 2026-10-13). Док-гейты — ./scripts/doc_gates.sh отдельным прогоном
+(в run_tests.sh их нет). Пиксельные кадры вне git (D-185), резерв и манифест:
+~/.local/share/sigil-reserve/hero-doll-t258/.
+
+GdUnit (unit + integration + functional)
+----------------------------------------
+Overall Summary: 3658 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (388/388)
+Executed test cases : (3658/3658)
+Total execution time: 3min 41s 323ms
+Exit code: 0
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+=== путь узла из скрипта ↔ сцена (T-296) ===
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+LINT: SKIPPED (нет gdtoolkit у python3 или нет .gdlintrc в game) — жёлтый, не красный
+SCRIPT ERROR / Parse Error в журнале: 0 строк (проверено grep'ом по журналу
+прогона; отчёт снимался только после этой проверки).
+
+GdUnit-счётчик: 3657 → 3658 (+1 кейс в существующем носителе
+tests/unit/ui/test_inventory_grid.gd: 14 → 15; новых тестовых файлов нет,
+поэтому TESTMAP не двигался). Выход GdUnit: 0.
+
+MCP e2e (четвёртый уровень)
+---------------------------
+platform linux -- Python 3.12.3, pytest-9.1.1 -- /home/user/.venv/godot-mcp-tests/bin/python
+plugins: anyio-4.15.1, xdist-3.8.0, timeout-2.4.0
+timeout: 900.0s
+collecting ... collected 114 items
+PYTEST LEDGER: passed=112 skipped=2 failed=0 errors=0 collected=114
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://... (см. docs/mvp/CAPTURE-HELPER.md)
+MCP JUNIT: passed=112 skipped=2 failed=0 errors=0
+MCP VERDICT: GREEN
+112 passed, 2 skipped in 329.31s (0:05:29)
+
+Readiness-ошибок в этом прогоне нет: в отличие от прогона T-257 (111 passed +
+1 readiness error, D-265), тот же код на той же машине собрал 112 passed и
+0 errors. Расхождение оформляется как состояние среды шарящейся машины, а не
+как улучшение среза: срез не трогал ни readiness, ни сервер.
+
+Python-секции
+-------------
+GENART: интерпретатор /home/user/.venv/map-art/bin/python — 11 passed
+классификатор MCP-журнала (scripts/test_classify_mcp_junit.py) — 13 passed
+READINESS-CLASSIFIER: selftest GREEN
+Итог run_tests.sh: MCP_RC=0 → GATE_EXIT=0.
+
+Что поймала батарея до гейта
+---------------------------
+game/tools/mut_hero_doll.sh на закоммиченном дереве (база 15 test cases |
+0 errors | 0 failures):
+
+  M1 кадр урезан пополам по высоте (ровно симптом тикета) → 1 падение
+  M2 тот же размер со сдвигом на полублок                → 1 падение
+  M3 KEEP_ASPECT_CENTERED → STRETCH_SCALE                → 1 падение
+  M4 IGNORE_SIZE → KEEP_SIZE                             → 56 падений
+  ИТОГ: все мутанты красные; после батареи git status чистое
+
+Первый прогон батареи (на ef1e4feb) дал M1 и M2 ЗЕЛЁНЫМИ: проверка кадра
+стояла `assert_bool(cond) \` `.override_failure_message(...)` без `.is_true()`,
+а в GdUnit assert без check-метода не проверяет ничего. Тот же номер строки
+(492) указал scripts/ci2_vacuous_asserts.py — тот исполняется внутри гейта и
+дал бы красный на том же дереве. Исправление — 7e732d88; на нём и снят этот
+отчёт. Зазор батареи (декларируется в её шапке): доли чернил в текстуре
+нечем подделать — в репо нет ассета героя с прозраческими полями.
+
+UX-review
+---------
+docs/mvp/matrix/2026-10-30/ux-hero-doll-t258.md — кадр 1920×1080
+(~/.local/share/sigil-reserve/hero-doll-t258/hero_doll_t258.png, sha
+52f591c5e3710369a6a2904731386dc352c2c8f4a29d6e261ee166504ec6fc18), фикстура
+tools/capture/hero_doll.gd (95 строк, sha256:ab36a47a по манифесту съёмки).
