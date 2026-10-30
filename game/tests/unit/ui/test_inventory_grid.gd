@@ -488,10 +488,13 @@ func test_doll_figure_fills_its_address_block() -> void:
 	var TOL := 1.0
 	var want := Rect2(
 			stone.position + b.position / s.size * stone.size, b.size / s.size * stone.size)
+	# `.is_true()` обязателен: без check-метода GdUnit проверку не выполняет
+	# вообще, и первый прогон этой батареи оставался зелёным на M1 и M2.
 	assert_bool(abs(r.position.x - want.position.x) <= TOL
 			and abs(r.position.y - want.position.y) <= TOL
 			and abs(r.size.x - want.size.x) <= TOL
 			and abs(r.size.y - want.size.y) <= TOL) \
+		.is_true() \
 		.override_failure_message(
 				"фигура %s не совпала со своим адресным блоком %s (камень %s)" % [r, want, stone])
 	# KEEP_SIZE вместо IGNORE_SIZE делает минимумом узла размер текстуры, и якоря
