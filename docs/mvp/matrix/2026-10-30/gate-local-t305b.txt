@@ -1,0 +1,67 @@
+# Gate local — T-305 шаг 2 (переименования группы city.gd) + фикс сезона (следствие T-322)
+
+head_sha: e781c3bd (docs(mvp): T-322 — сезон как функция порядка прогона сюит)
+предок: c24361d6 (test(city): фиксация сезона мира в test_city_turn_processor)
+date: 2026-10-30
+run: ./game/run_tests.sh (локально, «local»; CI не поллился — directive 2026-10-13)
+godot: /home/user/.local/bin/godot (4.7.stable)
+
+## 1. GdUnit4 (headless)
+
+    Overall Summary: 3668 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+    Exit code: 0
+    suites: 389 (строки «Run Test Suite» в протоколе)
+    ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+    VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+    PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+    NODE-PATH-GATE: OK
+
+Счётчик тестов не изменился (3668 → 3668): шаг 2 менял имена и каталоги файлов, не тела.
+
+До фикса сезона этот же состав падал двумя кейсами (2 failures, exit 100):
+test_scheduler_city_before_economy (stone 5.8 вместо 5.2) и
+test_scheduler_logistics_and_zone_in_economy (iron 1.848 вместо 1.54). Причина и замер —
+T-322; фикс — фиксация сезона в before_test/after_test
+(game/tests/unit/city/test_city_turn_processor.gd).
+
+## 2. MCP e2e (живой Godot, Xvfb свободный дисплей)
+
+    PYTEST LEDGER: passed=110 skipped=2 failed=2 errors=0 collected=114
+    MCP JUNIT: passed=110 skipped=2 failed=2 errors=0
+    MCP READINESS: YELLOW — 2 error с подпиской readiness (игра не готова за 180 с):
+      - test_balance_probe::test_balance_probe_deterministic
+      - test_main_menu_buttons_live::test_live_menu_column_matches_contract
+    MCP VERDICT: YELLOW
+    MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265)
+    SKIPPED [1] tests/mcp/test_battle_profiling.py:33 — нет узлов городов в сцене боя
+    SKIPPED [1] tests/mcp/test_capture.py:294 — съёмка только по запросу (CAPTURE_SCENE)
+
+YELLOW, не RED: обе падали — readiness-подпись «игра не готова за 180 с», класс
+разделяемой машины (доказательная база — T-172,
+docs/mvp/matrix/2026-10-28/t172-readiness-failure-evidence.md). Ни один кейс не упал на
+проверяемом поведении.
+
+## 3. Python-секции
+
+    GENART: 11 passed (scripts/test_gen_map_art.py, /home/user/.venv/map-art/bin/python)
+    READINESS-CLASSIFIER: 13 passed + selftest GREEN (scripts/test_classify_mcp_junit.py)
+
+## 4. Документационные гейты
+
+    ./scripts/doc_gates.sh → DOC GATES: GREEN
+    (после python3 scripts/gen_docs_index.py; docs/00-INDEX.md пересобран без diff)
+
+## 5. Среда прогона (шарится машина)
+
+    free -m: доступно 759 MB при MemAvailable 0 kB (Shmem 28 551 468 kB прижимает
+    MemAvailable к нулю — известная особенность счётчика, не дефицит памяти)
+    PSI memory: some avg10=0.61 avg60=1.82
+    Чужие прогоны и Xvfb (:96, :97) не трогались; свой Godot/MCP-процесс не оставлен.
+
+## 6. Тест-леджер
+
+GdUnit: +0 добавлено / −0 удалено / quarantine 0 / нетто 3668 (было 3668 → стало 3668).
+Причина неизменности: шаг 2 — переименование и переезд файлов; фикс сезона добавляет
+before_test/after_test, но не test_* кейсы (GdUnit собирает только test_*).
+MCP: 110 passed (в прогоне T-321 было 112 passed / 2 skipped; расхождение — две
+readiness-падения вместо двух же passed-кейсов, см. §2, среда).
