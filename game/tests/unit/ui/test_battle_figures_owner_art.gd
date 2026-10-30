@@ -8,20 +8,28 @@ extends BaseTest
 ## над позой процедурно. Генерировать дорожки из статики здесь нечем: кадры дорожки
 ## обязаны совпасть силуэтом, иначе на поле мерцание.
 ##
-## Почему именно эти три ключа. Левая сторона референса владельца — пять вырезов 3.1,
-## из которых юнит есть у трёх (`swordsmen`, `archers`, `knights`); `paladin` и
-## `battle_dwarf` ждут ключа юнита и по правилу «нет совпадения силуэта — нет фигуры»
-## остаются портретом.
+## Почему тест проверяет запасной путь на подставном ключе. С тех пор как у героев
+## появились свои дорожки, `battle_view` берёт вырез только когда дорожек нет
+## (`frames_for` → null), и ни один настоящий ключ в эту ветвь не попадает:
+## `swordsmen`, `archers`, `knights` и `battle_dwarf` анимируются, `paladin` не имеет
+## ключа юнита. Значит, живой вызов запасной ветви подставляется тестом — иначе
+## проверялся бы только реестр путей, а не опора, разворот и отдача выреза.
 
 const _ViewScene := preload("res://scenes/battle_view.tscn")
 
 ## Ключи, чей вырез лежит в `assets/units/figures/`.
 const KEYS := ["swordsmen", "archers", "knights"]
 
+## Подставной ключ запасной ветви: вырез есть, дорожек нет — ровно то состояние,
+## в котором настоящий юнит стоит позой владельца.
+const PROBE := "__still_probe"
+const PROBE_CUTOUT := "res://assets/units/figures/swordsmen.png"
+
 var _view: BattleView
 
 
 func before_test() -> void:
+	CharacterFrames.still_figures[PROBE] = PROBE_CUTOUT
 	CharacterFrames.clear_cache()
 	_view = _ViewScene.instantiate()
 	add_child(_view)
@@ -31,6 +39,7 @@ func before_test() -> void:
 func after_test() -> void:
 	if is_instance_valid(_view):
 		_view.free()
+	CharacterFrames.still_figures.erase(PROBE)
 	CharacterFrames.clear_cache()
 
 
@@ -55,7 +64,7 @@ func _sprite_of(u: BattleState.BattleUnit) -> Node2D:
 ## бы юнита на походку комплекта, и расхождение никто бы не увидел.
 func test_owner_keys_have_their_cutout() -> void:
 	for key: String in KEYS:
-		var path := str(CharacterFrames.STILL_FIGURES.get(key, ""))
+		var path := str(CharacterFrames.still_figures.get(key, ""))
 		assert_that(path).is_not_empty().override_failure_message("%s: вырез не зарегистрирован" % key)
 		assert_bool(ResourceLoader.exists(path)).is_true().override_failure_message(
 			"%s: файл выреза %s не найден" % [key, path])
@@ -63,10 +72,25 @@ func test_owner_keys_have_their_cutout() -> void:
 			"%s: ключа нет в реестре юнитов — вырез некому выдать" % key)
 
 
-## Юнит стоит своим вырезом, а не портретом и не чужой походкой: `Figure` с текстурой,
-## `Anim` скрыт, буква-заглушка убрана (второй картинки того же юнита не будет).
-func test_owner_unit_stands_on_its_cutout() -> void:
+## Ключ с дорожками не отдаётся вырезу: иначе генерация кадров ничего бы не меняла —
+## вырез продолжал бы стоять перед анимацией. Именно приоритет здесь и фиксируется.
+func test_owner_keys_play_their_own_tracks() -> void:
 	for key: String in KEYS:
+		var u := _unit(key)
+		_view.create_unit_sprite(u)
+		var node := _sprite_of(u)
+		assert_that(node.get_node("Anim").visible).is_true() \
+			.override_failure_message("%s: дорожки героя не показаны" % key)
+		assert_that(node.get_node("Figure").texture).is_null() \
+			.override_failure_message("%s: вырез лёг поверх своих дорожек" % key)
+		assert_that(node.has_meta("still")).is_false() \
+			.override_failure_message("%s: юнит ушёл в запасную ветвь, хотя дорожки есть" % key)
+
+
+## Юнит без дорожек стоит своим вырезом, а не портретом и не чужой походкой: `Figure`
+## с текстурой, `Anim` скрыт, буква-заглушка убрана (второй картинки не будет).
+func test_key_without_tracks_stands_on_its_cutout() -> void:
+	for key: String in [PROBE]:
 		var u := _unit(key)
 		_view.create_unit_sprite(u)
 		var node := _sprite_of(u)
@@ -75,7 +99,7 @@ func test_owner_unit_stands_on_its_cutout() -> void:
 		assert_that(fig.texture).is_not_null().override_failure_message(
 			"%s: вырез не показан" % key)
 		assert_that(fig.texture.resource_path).is_equal(
-			str(CharacterFrames.STILL_FIGURES[key])
+			str(CharacterFrames.still_figures[key])
 		).override_failure_message("%s: показана не картинка владельца" % key)
 		assert_that(node.get_node("Anim").visible).is_false().override_failure_message(
 			"%s: походка комплекта видна под вырезом владельца" % key)
@@ -90,13 +114,17 @@ func test_owner_unit_stands_on_its_cutout() -> void:
 func test_cutouts_share_anchor_and_height() -> void:
 	var heights := {}
 	for key: String in KEYS:
-		var u := _unit(key)
-		_view.create_unit_sprite(u)
-		var fig: Sprite2D = _sprite_of(u).get_node("Figure")
-		var feet := (fig.offset.y + fig.texture.get_height() / 2.0) * fig.scale.y
+		# Меряется сама поза, а не отрисованный юнит: у этих ключов теперь свои
+		# дорожки, и на поле стоит анимация, а вырез остаётся запасным кадром.
+		var tex: Texture2D = load(str(CharacterFrames.still_figures[key])) as Texture2D
+		var fig := Sprite2D.new()
+		fig.texture = tex
+		_view.scale_still(fig, tex)
+		var feet := (fig.offset.y + tex.get_height() / 2.0) * fig.scale.y
 		assert_float(feet).is_equal_approx(0.0, 0.01).override_failure_message(
 			"%s: стопы не в позиции узла, смещены на %.1f px" % [key, feet])
-		heights[key] = fig.scale.y * float(fig.texture.get_height())
+		heights[key] = fig.scale.y * float(tex.get_height())
+		fig.free()
 	for key: String in heights:
 		assert_float(heights[key]).is_equal_approx(CharacterFrames.STILL_HEIGHT, 0.01) \
 			.override_failure_message("%s: рост выреза %.1f px вне меры ряда" % [key, heights[key]])
@@ -104,8 +132,8 @@ func test_cutouts_share_anchor_and_height() -> void:
 
 ## Разворот по стороне не трогает ни опору, ни рост (спека «Поза по стороне»).
 func test_facing_keeps_anchor_and_scale() -> void:
-	var right := _unit("knights", true)
-	var left := _unit("knights", false)
+	var right := _unit(PROBE, true)
+	var left := _unit(PROBE, false)
 	_view.create_unit_sprite(right)
 	_view.create_unit_sprite(left)
 	var a: Sprite2D = _sprite_of(right).get_node("Figure")
@@ -121,7 +149,7 @@ func test_facing_keeps_anchor_and_scale() -> void:
 ## Шаг: поза поднимается с опоры и возвращается в покой — голое перемещение было бы
 ## скольжением статичной картинки (спека «Отклик на движение»).
 func test_move_bobs_and_returns_to_rest() -> void:
-	var u := _unit("swordsmen")
+	var u := _unit(PROBE)
 	_view.create_unit_sprite(u)
 	var fig: Sprite2D = _sprite_of(u).get_node("Figure")
 	var rest: Vector2 = _sprite_of(u).get_meta("rest")
@@ -146,7 +174,7 @@ func test_move_bobs_and_returns_to_rest() -> void:
 ## Отдача от удара: сдвиг назад от противника и возврат в опору. Поза идёт по
 ## смещению, а не по позиции узла, поэтому не спорит с перемещением.
 func test_hit_recoils_and_returns_to_rest() -> void:
-	var u := _unit("knights")
+	var u := _unit(PROBE)
 	_view.create_unit_sprite(u)
 	var fig: Sprite2D = _sprite_of(u).get_node("Figure")
 	var rest: Vector2 = _sprite_of(u).get_meta("rest")

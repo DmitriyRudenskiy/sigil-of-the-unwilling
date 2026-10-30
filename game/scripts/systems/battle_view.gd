@@ -287,11 +287,13 @@ func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 	var sp: Sprite2D = n.get_node("Figure")
 	var anim: AnimatedSprite2D = n.get_node("Anim")
 	var facing := unit.side == BattleState.Side.ATTACKER
-	var still := CharacterFrames.still_texture_for(key)
-	var frames := CharacterFrames.frames_for(key) if still == null else null
+	var frames := CharacterFrames.frames_for(key)
+	# Вырез — поза, дорожки — то же тело в движении, поэтому приоритет у дорожек,
+	# а вырез остаётся запасным носителем для ключей без своих кадров.
+	var still := CharacterFrames.still_texture_for(key) if frames == null else null
 	if still != null:
-		# Арт владельца сильнее кадра комплекта: юнит стоит своим вырезом, а не
-		# чужой походкой. Опора и разворот — те же, что у дорожек (3.9).
+		# Юнит стоит своим вырезом, а не чужой походкой. Опора и разворот — те же,
+		# что у дорожек (3.9).
 		sp.texture = still
 		scale_still(sp, still)
 		n.set_meta("rest", sp.offset)

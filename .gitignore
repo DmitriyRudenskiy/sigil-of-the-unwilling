@@ -66,3 +66,12 @@ __pycache__/
 # вывод редактора, в репо лежит только `.csv` (ни одного такого файла не отслеживалось).
 *.csv.import
 *.translation
+
+# hero_anim: сырьё видеогенерации (ролики, листы, полные 81-кадровки — 661 МБ)
+# воспроизводимо прогоном scripts/hero_anim/hero_anim.py; в git попадает только
+# вердикт выбора варианта — picked.json (иначе «что именно принято» живёт в трее).
+scripts/hero_anim/out/**
+!scripts/hero_anim/out/
+!scripts/hero_anim/out/*/
+!scripts/hero_anim/out/*/*/
+!scripts/hero_anim/out/*/*/picked.json

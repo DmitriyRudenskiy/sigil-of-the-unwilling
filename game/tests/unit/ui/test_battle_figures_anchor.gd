@@ -70,7 +70,7 @@ func _feet_of(u: BattleState.BattleUnit) -> Vector2:
 ## стопы. Пересохранят с припуском — правило «низ кадра в клетку» уедет вверх, и
 ## тест обязан покраснеть, а не молча поставить фигуру на пятки.
 func test_cutouts_are_cut_tight() -> void:
-	for key: String in CharacterFrames.STILL_FIGURES:
+	for key: String in CharacterFrames.still_figures:
 		var tex: Texture2D = CharacterFrames.still_texture_for(key)
 		assert_that(tex).is_not_null()
 		var img := tex.get_image()
