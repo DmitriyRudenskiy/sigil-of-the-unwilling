@@ -1,0 +1,63 @@
+Gate local — T-300 подсрезы 2–3 (рантаймный цвет → модуль стиля)
+Дата: 2026-10-30. Дерево: d874664c (подсрез 3 поверх 86e6b1e9), push ещё не выполнен.
+Прогон: ./game/run_tests.sh целиком, лог /tmp/t300c/gate_full.log. CI не проверялся
+(поллинг CI агенту запрещён, статус ранов — зона владельца).
+
+GUNIT (headless, addons/gdunit4):
+  Overall Summary: 3662 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans
+  ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+  VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+  PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+  NODE-PATH-GATE: OK
+Счёт кейсов не изменился к прогону T-247 (3662): подсрезы правили существующие проверки,
+новых `func test_*` не заводили (зубы у гарда измеряет батарея, а не количество кейсов).
+
+MCP E2E (pytest + godot-mcp, живой Godot под Xvfb):
+  PYTEST LEDGER: passed=109 skipped=2 failed=2 errors=1 collected=114
+  MCP READINESS: YELLOW — 3 проблемы с подпиской «игра не готова за 180 с
+    (Not connected to game interaction server)»:
+      test_main_menu_buttons_live::test_disabled_credits_press_keeps_menu
+      test_settlement_storm::test_settlement_determinism
+      test_shard_pruning::test_prune_preserves_newest_shards
+  MCP VERDICT: YELLOW — красный снят как readiness, не регрессия (D-265)
+  SKIPPED (2, причина обязательна): test_battle_profiling (нет узлов городов в сцене
+    боя), test_capture (съёмка только по запросу CAPTURE_SCENE)
+Цифры совпали с прогоном T-247 (109/2 + 2 падения и 1 ошибка с той же подпиской):
+шарящаяся машина, класс Q-M115, а не дифф тикета.
+
+PYTHON-СЕКЦИИ:
+  GENART: 11 passed (scripts/test_gen_map_art.py)
+  READINESS-CLASSIFIER: selftest GREEN — 13 passed (scripts/test_classify_mcp_junit.py)
+
+ВЫВОД GEFTA (выводится, а не читается из кода запуска): nohup-обёртка не сохраняет `$?`,
+поэтому exit считается по секциям: GdUnit 0 падений + MCP VERDICT YELLOW при
+классификаторе readiness (run_tests.sh:366 maps YELLOW → MCP_RC=0) + GENART 11 passed +
+самопроверка классификатора GREEN. GATE = 0 (локальный прогон, пометка «local»).
+
+МУТАЦИОННАЯ БАТАРЕЯ (game/tools/mut_runtime_color_guard.sh, запущена на закоммиченном
+дереве d874664c; до этого тот же прогон на незакоммиченном дереве отменён, потому что
+cleanup батареи откатывает правки через `git checkout --`):
+  M1: 0 errors | 1 failures   литерал цвета в подписи города (файл вне допуска)
+  M2: 0 errors | 1 failures   снят допуск панели решения (её 4 места стали новыми)
+  M3: 0 errors | 1 failures   добавленный нарушитель в файле В допуске
+  M4: 0 errors | 1 failures   протухший допуск (нарушитель починен, строка осталась)
+  M5: 0 errors | 1 failures   снята калибровка идентичных тонов
+  M6: 0 errors | 1 failures   ослеплённый классификатор
+  M7: 0 errors | 1 failures   возвращён локальный словарь тонов (слепой участок)
+  ИТОГ: все мутанты красные (гейт держит); дерево чистое
+M7 — новый: он же доказательство, что исправление многострочных объявлений не декоративное.
+
+ЗАМЕР ПРАВИЛА (собственный код гарда, headless-зонд `load(test).new()._paint_sites()`
+по res://scripts/**/*.gd; зонд одноразовый, в репо не лёг):
+  SCAN sites=69 off=4
+    OFF res://scripts/ui/decision_panel.gd -> 138 Color.GREEN, 140 Color.ORANGE,
+                                              142 Color.RED, 144 Color.GRAY
+Сводка по допуску: было 23 места / 7 файлов (срез 1) → 16 / 4 (подсрез 2) →
+4 / 1 (подсрез 3). Оставшиеся четыре места — мёртвый класс (Q-M83), уезжают с носителем
+панели решения (T-132).
+
+UX-REVIEW: не применялся, и это не «headless не проверяет»: ни одно выражение не изменило
+вычисленное значение цвета (перенос значений один в один, включая `Color(тон, 0.68)` и
+растущий тон медальона `Color(1.18, 1.12, 0.96, 1)`), то есть тождество кадра держится на
+значениях, а не на «на глаз». Кадр не переснимался потому, что пересъёмка не могла бы
+ничего показать: сравнимых изменений в пикселях правка не содержит.
