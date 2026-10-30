@@ -22,6 +22,13 @@ const _TIP := "Center/Window/Sheet/ItemTip"
 const _DOLL := "Center/Window/Sheet/Stone/Doll"
 const _FIGURE := "Center/Window/Sheet/Stone/Figure"
 const _STONE := "Center/Window/Sheet/Stone"
+# Карточки отряда (I1–J9) и строка уровня (A5–D6) — T-306.
+const _CARDS := "Center/Window/Sheet/Units/Bottom/Cards/Card_%d"
+const _LEVEL_ROW := "Center/Window/Sheet/Left/LevelRow"
+const _CARD_N := 4
+# Настоящие стеки из реестра `units`: тест не изобретает имена и числа, а читает
+# те же объекты, что читает экран (второй носитель факта — урок D-132).
+const _ROSTER := [["swordsmen", 103], ["archers", 36], ["cavalry", 34], ["mages", 10]]
 #Зоны переноса A и C (мана + школа, навыки + построения).
 const _BANDS := ["Center/Window/Sheet/BandMana", "Center/Window/Sheet/BandSkills"]
 # Явный шаг для чистой функции раскладки: тест не зависит от размера окна.
@@ -521,3 +528,85 @@ func test_doll_figure_fills_its_address_block() -> void:
 		.override_failure_message(
 				"рисунок куклы %.2f×%.2f блока %s при аспекте текстуры %.4f" % [
 					drawn_w, drawn_h, r, aspect])
+
+
+## T-306: экран «Герой» показывает только то, у чего есть носитель.
+##
+## Тикет утверждал, что «уровня и опыта героя нет ни в одной модели». Замер это
+## опровергает и уточняет: носитель есть, но не у той модели, которую экран
+## видит. Уровень и опыт есть у членов кампанийного отряда (`state.party`,
+## `PartySystem`, `data/config/balance/xp.json`) и уже показываются на экране
+## «Отряд» («ур. 2», «XP 1200», `party_screen.gd:112-116`, гард
+## `tests/campaign/test_party_screen.gd:90`); уровень есть у D&D-профиля
+## (`DnDCombatantProfile.level`), но тот слой из продукции не вызывается (T-311).
+## У модели же, которую экран видит в единственном своём живом носителе (окно
+## «Модель героя» из настроек, `main_menu.gd:222-228`, D-255), уровня нет:
+## `HeroController` хранит только опыт (`get_xp`), да и того его писатель
+## (`world_battle_coordinator.gd:370`) живёт в архивной мирной линии.
+##
+## У карточки отряда носителя нет по-настоящему: `UnitStack` — это `count` плюс
+## `UnitStats`, ни уровня, ни текущего HP, ни второй шкалы у стека нет
+## (`current_hp` живёт у персон отряда, D-220). Поэтому имя, иконка и число
+## показываются, а `CardLv_*`/`CardHp_*`/`CardMp_*` и `LevelRow` скрыты, а не
+## обнулены (D-280, T-251).
+##
+## Гард держит обе половины: вернут скрытые метки — покраснеет; экран перестанет
+## показывать то, что показать должен, — покраснеет тоже. Батарея —
+## `game/tools/mut_hero_unit_cards.sh` (M1 вернуть метки, M2 перестать писать
+## имя, M3 показывать численность пустого слота).
+func test_unit_cards_and_level_row_show_only_what_has_a_carrier() -> void:
+	var screen := await _mk_screen(true)
+	assert_that(_hero.army).is_not_null()
+	# A) Пустой ростер — живое состояние окна модели: у нового героя армии нет,
+	# поэтому иконку и численность показывать нечем, а имя не должно печатать.
+	for i in _CARD_N:
+		var ic0 := _card_child(screen, i, "ArmyIcon_%d" % i) as TextureRect
+		var ct0 := _card_child(screen, i, "ArmyCount_%d" % i) as Label
+		var nm0 := _card_child(screen, i, "CardName_%d" % i) as Label
+		assert_that(ic0).is_not_null()
+		assert_bool(not ic0.visible).is_true() \
+				.override_failure_message("иконка карточки %d видима при пустом ростере" % i)
+		assert_bool(not ct0.visible).is_true() \
+				.override_failure_message("численность карточки %d видима при пустом ростере" % i)
+		assert_str(nm0.text).is_equal("")
+	# B) Непустой ростер из настоящих стеков: имя, иконка и численность — показаны.
+	var units: Node = Services.resolve(&"units")
+	var stacks: Array[UnitStack] = []
+	for pair in _ROSTER:
+		stacks.append(units.make_fixed_stack(String(pair[0]), int(pair[1])))
+	_hero.army.army = stacks
+	screen.set_hero(_hero)
+	await await_idle_frame()
+	for i in stacks.size():
+		var st: UnitStack = stacks[i]
+		# Носитель проверяется до экрана: пустое имя сделало бы сравнение ниже
+		# молчаливым — оно было бы зелёным при любом тексте метки.
+		assert_bool(st.get_display_name() != "").is_true() \
+				.override_failure_message("у стека %s пустое отображаемое имя" % st.get_key())
+		var ic := _card_child(screen, i, "ArmyIcon_%d" % i) as TextureRect
+		var ct := _card_child(screen, i, "ArmyCount_%d" % i) as Label
+		var nm := _card_child(screen, i, "CardName_%d" % i) as Label
+		assert_bool(ic.visible).is_true() \
+				.override_failure_message("иконка стека %s не показана" % st.get_key())
+		assert_bool(ct.visible).is_true() \
+				.override_failure_message("численность стека %s не показана" % st.get_key())
+		assert_str(nm.text).is_equal(st.get_display_name())
+		assert_str(ct.text).is_equal(str(st.count))
+	# C) Три значения карточки и строка уровня скрыты при любом ростере: у стека
+	# нет ни уровня, ни текущего HP, ни второй шкалы, у модели героя нет уровня.
+	for i in _CARD_N:
+		for key in ["CardLv_", "CardHp_", "CardMp_"]:
+			var ph := _card_child(screen, i, "%s%d" % [key, i]) as Control
+			assert_that(ph).is_not_null()
+			assert_bool(not ph.visible).is_true() \
+					.override_failure_message(
+							"%s%d видима при носителе, которого нет (T-306, D-280)" % [key, i])
+	var lv := screen.get_node_or_null(_LEVEL_ROW) as Control
+	assert_that(lv).is_not_null()
+	assert_bool(not lv.visible).is_true() \
+			.override_failure_message(
+					"строка уровня видима, хотя у модели героя уровня нет (T-306, T-251)")
+
+
+func _card_child(screen: Control, idx: int, what: String) -> Control:
+	return screen.get_node_or_null("%s/%s" % [_CARDS % idx, what]) as Control
