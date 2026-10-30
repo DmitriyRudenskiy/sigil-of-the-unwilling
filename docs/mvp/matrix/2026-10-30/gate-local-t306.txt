@@ -1,0 +1,95 @@
+Gate local — T-306 (карточки отряда и строка уровня экрана «Герой»: показано только носимое)
+================================================================================
+head_sha: код среза ba86f1b5 (локально, до пуша), origin/main 264b752b.
+Прогон: ./game/run_tests.sh, 2026-10-30, ОДИН прогон, снят на дереве после
+кодового коммита (в дереве оставались только неиндексированные доки — тесты их
+не читают). Сцена и генератор этим срезом НЕ менялись: правка — тест,
+мутационная батарея, фикстура съёмки и документация.
+
+Машина шарится: чужие Xvfb :96 и :97 не трогались; ux-съёмка смены шла на своём
+Xvfb :91. CI не проверялся (по инструкции владельца от 2026-10-13). Док-гейты —
+./scripts/doc_gates.sh отдельным прогоном (в run_tests.sh их нет): DOC GATES:
+GREEN после gen_docs_index.py. Пиксельные кадры вне git (D-185), резерв и
+манифест: ~/.local/share/sigil-reserve/hero-unit-cards-t306/.
+
+Состояние среды (важно для чтения MCP-секции): MemAvailable держался 0 kB всю
+съёмку и весь прогон (сосед strata, RSS ~12.6 GB, PID 1883360 — чужой, не
+трогал). Это тот же класс, что Q-M115 и T-172: среда, а не код.
+
+GdUnit (unit + integration + functional)
+----------------------------------------
+Overall Summary: 3659 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (388/388)
+Executed test cases : (3659/3659)
+Total execution time: 3min 18s 886ms
+Exit code: 0
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+=== путь узла из скрипта ↔ сцена (T-296) ===
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+LINT: SKIPPED (нет gdtoolkit у python3 или нет .gdlintrc в game) — жёлтый, не красный
+SCRIPT ERROR / Parse Error в журнале: 0 строк (проверено grep'ом по журналу
+прогона; отчёт снимался только после этой проверки).
+
+GdUnit-счётчик: 3658 → 3659 (+1 кейс в существующем носителе
+tests/unit/ui/test_inventory_grid.gd: 15 → 16 кейсов; новых тестовых файлов нет,
+поэтому TESTMAP не двигался: TESTMAP OK — дыр 80, групп слияния 151, дублей 0).
+Новый кейс в журнале прогона: test_unit_cards_and_level_row_show_only_what_has_a_carrier
+PASSED 12ms.
+
+MCP e2e (четвёртый уровень)
+---------------------------
+/home/user/.venv/godot-mcp-tests/bin/python -m pytest tests/mcp/ -v -rs --timeout=900
+collecting ... collected 114 items
+PYTEST LEDGER: passed=111 skipped=2 failed=0 errors=1 collected=114
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:294: съёмка только по запросу: CAPTURE_SCENE=res://... (см. docs/mvp/CAPTURE-HELPER.md)
+MCP JUNIT: passed=111 skipped=2 failed=0 errors=1
+MCP READINESS: YELLOW — 1 error с подпиской readiness (среда, не регрессия,
+D-265); жертва:
+  - test_campaign_carrier::test_party_screen_registered_in_campaign_ui_manager ::
+    failed on setup with "godot_mcp.MCPError: игра не готова за 180 с (последняя
+    ошибка: тулз game_eval вернул ошибку: Not connected to game interaction server)"
+MCP VERDICT: YELLOW
+111 passed, 2 skipped, 1 error in 486.98s (0:08:06)
+
+Читается так: красный — только падения и регрессии, а их ноль (failed=0);
+единственная ошибка помечена классификатором как readiness и снята с вердикта
+по D-265. В прошлые смены тот же код на этой же машине собирал 112 passed и
+0 errors — расхождение оформляется как состояние шарящейся машины (MemAvailable
+0 kB на всём прогоне), а не как улучшение или ухудшение среза: срез не трогал ни
+readiness, ни MCP-сервер, ни фикстуры кампанийного носителя.
+
+Python-секции
+-------------
+GENART: интерпретатор /home/user/.venv/map-art/bin/python — 11 passed
+классификатор MCP-журнала (scripts/test_classify_mcp_junit.py) — 13 passed
+READINESS-CLASSIFIER: selftest GREEN
+Итог run_tests.sh: GATE_EXIT=0 — единственная MCP-ошибка помечена классификатором
+readiness, поэтому MCP VERDICT: YELLOW, а красный не поднят (D-265).
+
+Что поймала батарея до гейта
+---------------------------
+game/tools/mut_hero_unit_cards.sh на закоммиченном дереве (база 16 test cases |
+0 errors | 0 failures, 16/16 PASSED):
+
+  M1 вернуть полоски пустых меток (ph.visible = false → true) → 12 падений
+  M2 рисовать имя независимо от наполненности ростера          → 4 падения
+  M3 показывать численность пустого слота (ct.visible = filled) → 4 падения
+  M4 показывать иконку пустого слота (ic.visible = filled)      → 4 падения
+  M5 показать строку уровня героя (lv.visible = false → true)    → 1 падение
+
+Зелёных мутантов нет (5/5 краснеют). После батареи дерево восстановлено,
+git status --porcelain пуст; пути фикстур и тестов проверены на существование
+отдельным свипом.
+
+Док-гейты (отдельный прогон ./scripts/doc_gates.sh)
+---------------------------------------------------
+DOC GATES: GREEN. Ratchet: d_without_rejected 170 (базлайн 170), dead_paths 5
+(базлайн 5 — шестая запись была битой ссылкой на этот разбор до его создания),
+q_ghost_rows 0, t_duplicate_headers 0, t_multi_footer 0. Аудит «доки ↔ код»
+снял HeroModelFactory из scripts/audit_docs_vs_code.allowlist: имя названо в
+живой заметке (docs/20-ux-hero-screen.md §3, §6.10), устаревание allowlist
+красит гейт по его же правилу. gen_docs_index.py: 118 заметок.

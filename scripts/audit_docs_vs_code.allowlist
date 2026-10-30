@@ -93,7 +93,6 @@ HeroCultures
 HeroFollowersComponent
 HeroInventoryComponent
 HeroMagicComponent
-HeroModelFactory
 HeroMovementComponent
 HeroMovementController
 HeroNeeds
