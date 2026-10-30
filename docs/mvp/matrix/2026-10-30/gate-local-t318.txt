@@ -1,0 +1,75 @@
+Gate local — T-318 (пересъёмка knights / paladin / battle_dwarf + манифест кадров)
+================================================================================
+head_sha: код среза 23227b4e (локально, до пуша; .uid фикстуры лежит в том же коммите), origin/main 3a44e60d.
+Прогон: ./game/run_tests.sh, 2026-10-30, ОДИН прогон, снят на дереве, содержимое
+файлов которого и есть этот коммит (в момент прогона кадры, манифесты,
+`check_hero_frames.py`, `integrate.py`, `doc_gates.sh` и фикстура были
+неиндексированными — закоммичено ровно то же содержимое; доки и артефакты
+тесты не читаются).
+
+CI не проверялся (по инструкции владельца от 2026-10-13). Вердикт — локальный
+прогон + ux-review (`docs/mvp/matrix/2026-10-30/ux-hero-frames-t318.md`) +
+ревью диффа владельцем в треде. Пиксельные кадры вне git (D-185): лист
+пересобирается `python3 scripts/hero_identity_audit.py`, кадр боя —
+`tools/shot_scene.gd` с фикстурой `battle_hero_frames` (команды — в ux-review).
+
+Состояние среды: MemAvailable 782 MB свободно / 2066 доступно на старте прогона
+(замер `free -m` в момент запуска, не весь прогон). Машина шарится: чужие
+Xvfb :96 и :97 не трогались; своё :92 (съёмка ux-кадров) снято до прогона.
+MCP-секция работала на порту 9090 (дефолт).
+
+GdUnit (unit + integration + functional)
+----------------------------------------
+Overall Summary: 3664 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (388/388)
+Executed test cases : (3664/3664)
+Total execution time: 3min 29s 451ms
+Exit code: 0. Счётчик случаев не изменился (3664 → 3664): смена ассетная,
+новых GdUnit-тестов не заводила — её проверяют python-гейты ниже.
+
+Сопутствующие гейты того же прогона:
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK, NODE-PATH-GATE: OK
+LINT: SKIPPED (нет gdtoolkit у python3) — уровень молчит на этой машине,
+  это среда, а не пропуск по халтуре; фиксируется здесь, чтобы не выглядело зелёным.
+
+MCP e2e (четвёртый уровень)
+---------------------------
+PYTEST LEDGER: passed=111 skipped=2 failed=0 errors=1 collected=114
+SKIPPED (2 — причина обязательна):
+  tests/mcp/test_battle_profiling.py:33 — нет узлов городов в сцене боя
+  tests/mcp/test_capture.py:294 — съёмка только по запросу (CAPTURE_SCENE=…)
+MCP READINESS: YELLOW — 1 error с подпиской readiness (среда, не регрессия,
+D-265; тот же класс, что Q-M115/T-172):
+  - test_endgame::test_endgame_victory_full_flow :: failed on setup with
+    "godot_mcp.MCPError: игра не готова за 180 с (последняя ошибка: тулз
+    game_eval вернул ошибку: Not connected to game interaction server.)"
+MCP VERDICT: YELLOW — классификатор снял красный как readiness; YELLOW ≠ RED
+(маппинг run_tests.sh), exit прогона не поднимал.
+
+Python-секции прогона
+---------------------
+GENART: 11 passed (scripts/test_gen_map_art.py)
+классификатор MCP-журнала: 13 passed; READINESS-CLASSIFIER: selftest GREEN
+
+Отсутствующий в run_tests.sh уровень смены — документ-гейты — снят отдельным
+прогоном `./scripts/doc_gates.sh` (в run_tests.sh их нет):
+  кадры героев ↔ манифест сборки integrate.py → HERO FRAMES: OK
+    (5 герой(ов), 300 кадров сверены с манифестом)
+  тесты самих проверщиков → 159 passed (13 файлов; этим срезом +7 тестов
+    `scripts/test_check_hero_frames.py`)
+  OPENSPEC SPECS: OK (87 сведённых спек)
+  TESTMAP OK: дыр 80, файлов в группах слияния 151, дублей 0
+  DOC GATES: GREEN (после python3 scripts/gen_docs_index.py)
+
+Зубы нового уровня проверены не только pytest-ом: копия дерева
+`game/assets/sprites` → один перевёрнутый байт в `knights_idle_01.png` →
+`knights: knights_idle_01.png не совпадает с манифестом (собрали другие кадры
+или перезаписали руками)`, `HERO FRAMES: RED (1 расхождений)`, код 1. Реальное
+дерево при этом не трогалось (прогон на копии, копия удалена).
+
+Итог: GdUnit 0 падений, MCP YELLOW (среда), python-секции зелёные, DOC GATES
+GREEN → гейт локально зелёный (вывод об exit=0 выведен по структуре лога:
+ни одной строки, по которой run_tests.sh ставит MCP_RC=1, в прогоне нет;
+GdUnit-красный вышел бы на строке 76 и оборвал бы прогон).
