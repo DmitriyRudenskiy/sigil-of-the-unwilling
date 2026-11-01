@@ -14,12 +14,12 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (38)
+## Реестры и процессы (41)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
 | [[BANK]] | Банк контента | reference | 2026-10-03 |
-| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-10-30 |
+| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-11-02 |
 | [[DECISIONS]] | Реестр решений и открытых вопросов | canon | 2026-10-30 |
 | [[QUESTIONS]] | Открытые вопросы — Фаза 4 (MVP и тикеты) | reference | 2026-10-24 |
 | [[ACTOR-ARMY]] | Актёрная модель армии (K-канон) | canon | 2026-10-11 |
@@ -56,6 +56,9 @@ date: 2026-10-14
 | [[ux-hero-grid-t255]] | UX-review T-255 — клетки, предмет и его рамки в сумке (зона D экрана героя) | reference | 2026-10-30 |
 | [[ux-hero-identity-t318]] | UX-review T-318 — идентичность героя в принятых профилях против выреза владельца | reference | 2026-10-30 |
 | [[ux-hero-unit-cards-t306]] | Кадр и разбор T-306 — карточки отряда и строка уровня экрана «Герой» | reference | 2026-10-30 |
+| [[ux-battle-tilt-figures]] | — | — | — |
+| [[ux-hero-screen-copy]] | — | — | — |
+| [[ux-map-screen-copy]] | — | — | — |
 
 ## GDD и стиль (87)
 
@@ -97,11 +100,11 @@ date: 2026-10-14
 | [[09-risks]] | Риски и открытые вопросы | deepened | 2026-10-21 |
 | [[10-appendix-a-races]] | Приложение А — A6-R-таблица каталога 54 | canon | 2026-10-13 |
 | [[12-asset-audit]] | Asset Audit — game/assets | snapshot | 2026-10-13 |
-| [[13-art-bible]] | Art Bible — визуальная идентичность | deepened | 2026-10-18 |
+| [[13-art-bible]] | Art Bible — визуальная идентичность | deepened | 2026-11-02 |
 | [[14-ux-battle-hud]] | UX-спека — боевой HUD (UI-2) | draft | 2026-10-28 |
 | [[15-asset-spec-artifacts]] | Asset-spec — 29 иконок артефактов (UI-4) | draft | 2026-10-30 |
 | [[16-ux-review-battle-hud]] | UX-ревью боевого HUD (UI-3, шаг 3) | draft | 2026-10-13 |
-| [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-10-18 |
+| [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-11-02 |
 | [[18-lora-style-groups]] | Теги стилей обучающей нарезки — измерено, а не на глаз | reference | 2026-10-27 |
 | [[18-system-map]] | Карта систем | reference | 2026-10-29 |
 | [[19-gdd-workflow]] | Контур фаз GDD | reference | 2026-10-27 |
