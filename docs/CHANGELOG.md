@@ -9,6 +9,22 @@ date: 2026-10-30
 
 # CHANGELOG — docs/
 
+## 2026-10-30 — T-305 шаг 5: `test_city_tech_tree.gd` рассыпан, `merge_files` 148 → 147
+
+* **Что.** 10 кейсов `game/tests/unit/test_city_tech_tree.gd` развезены по носителям:
+  `game/tests/unit/city/test_prosperity_system.gd` (+2),
+  `game/tests/unit/city/test_game_numbers_city.gd` (+1, пин `CITY_LEVEL_MAX`),
+  `game/tests/unit/test_unit_registry.gd` (+1, `make_recruit_stack`), новые
+  `game/tests/unit/world/test_city_service_recruit.gd` (4) и
+  `game/tests/unit/data/test_building_defs.gd` (2).
+* **Метрика.** `merge_files` **148 → 147** — первое улучшение оскопления в семье С-3;
+  базлайн `scripts/testmap.baseline.json` переснят, тест-файлов 391 → 392, кейсов 3669
+  (не изменилось), дыр 80, дублей 0.
+* **Приём.** Четыре из пяти адресатов уже существовали — кейсы дописаны в них, а не
+  заведены новым файлом (иначе `merge_files` вырос бы на два). Проверка `git ls-files`
+  перед созданием тест-файла отработала как часы после урока шага 4.
+* **Смешанных осталось двое:** `test_city_navigation.gd`, `test_city_hex_layout.gd`.
+
 ## 2026-10-30 — T-305 шаг 4: `test_city_system.gd` разрезан, `test_borough_rules.gd` дополнен
 
 * **Что.** `game/tests/unit/test_city_system.gd` (13 кейсов) разделён:

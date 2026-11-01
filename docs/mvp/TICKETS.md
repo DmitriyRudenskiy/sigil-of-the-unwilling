@@ -7128,6 +7128,32 @@ city_service 8), `test_city_hex_layout.gd` (hex_utils 5 / city 5 / city_factory 
 **Смешанных осталось трое:** `test_city_navigation.gd`, `test_city_tech_tree.gd`,
 `test_city_hex_layout.gd`.
 
+**Шаг 5 (2026-10-30, агент): `unit/test_city_tech_tree.gd` рассыпан по адресатам.**
+
+Файл не переименовывался — 10 его кейсов развезены по носителям, четыре из пяти
+адресатов **уже существовали** (проверка `git ls-files` перед созданием файла, урок
+шага 4):
+
+| Куда | Носитель | Кейсов |
+| --- | --- | --- |
+| `unit/city/test_prosperity_system.gd` (дописан) | `scripts/city/prosperity_system.gd` | 2 — кривая `level_up_req`, отказ на максимуме (отличается от `test_level_max` фикстурой с ресурсами) |
+| `unit/city/test_game_numbers_city.gd` (дописан) | `scripts/constants/game_numbers_city.gd` | 1 — пин `CITY_LEVEL_MAX = 11` в домене и на фасаде `GameNumbers` |
+| `unit/test_unit_registry.gd` (дописан) | реестр юнитов | 1 — `make_recruit_stack` (трое тиров, метка `magic_weapon`) |
+| `unit/data/test_building_defs.gd` (новый) | `scripts/data/building_defs.gd` | 2 — `min_city_level` определения, разбор `military_chain` |
+| `unit/world/test_city_service_recruit.gd` (новый) | `scripts/world/city_service.gd` | 4 — `recruit_military`: пачка, тир по уровню, серебро, отказы |
+
+**Впервые в семье С-3 метрика сдвинулась в лучшую сторону:** `merge_files`
+**148 → 147**, базлайн переснят (`scripts/testmap.baseline.json`), тест-файлов
+391 → 392, кейсов 3669 (не изменилось). Сдвиг объясним и не является «улучшением ради
+улучшения»: файл-смесь лежал в группе слияния `scripts/world/city.gd`, а два новых
+файла попали под носители, у которых меньше трёх тест-файлов, то есть в группы слияния
+не вошли.
+
+**Запрет шага.** Не заводить новый файл там, где есть файл носителя: четыре кейса
+дописаны в существующие файлы именно поэтому, иначе `merge_files` вырос бы на два.
+
+**Смешанных осталось двое:** `test_city_navigation.gd`, `test_city_hex_layout.gd`.
+
 **Зависит:** T-227 · **Блокирует:** — · **Владелец:** агент · **Статус:** открыт (С-3а закрыт,
 С-3 продолжат: группа `city.gd` — 12 файлов)
 
