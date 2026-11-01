@@ -172,7 +172,8 @@ def test_baseline_snapshot_carries_the_ratchet_keys(monkeypatch, tmp_path):
     snap = json.loads((root / "scripts" / "testmap.baseline.json").read_text(encoding="utf-8"))
     assert snap["gd_files"] == 1 and snap["gd_tests"] == 1
     assert snap["holes"] == 1
-    assert {"merge_groups", "merge_files", "duplicate_groups", "py_files", "py_tests"} <= set(snap)
+    assert {"merge_groups", "merge_files", "duplicate_groups", "py_files", "py_tests",
+            "name_collisions"} <= set(snap)
 
 
 BLANK_PREFIX = (
@@ -210,12 +211,14 @@ def _measure(holes=1, merge_files=0, dupes=0):
         "coverage": {"production_files": 5, "covered": 5 - holes,
                      "holes": ["scripts/core/x%d.gd" % i for i in range(holes)]},
         "merge_groups": [("scripts/core/sys.gd", ["a", "b", "c"])] if merge_files else [],
+        "name_collisions": {},
         "duplicates": [["x::t", "y::t"]] * dupes,
     }
 
 
 BASE = {"gd_files": 2, "gd_tests": 4, "py_files": 1, "py_tests": 2,
-        "holes": 1, "merge_groups": 0, "merge_files": 0, "duplicate_groups": 0}
+        "holes": 1, "merge_groups": 0, "merge_files": 0, "duplicate_groups": 0,
+        "name_collisions": 0}
 
 
 def test_check_passes_at_baseline():
@@ -263,3 +266,35 @@ def test_check_baseline_key_set_must_match_metrics():
     assert code == 2 and "НЕ СООТВЕТСТВУЕТ МЕТРИКАМ" in lines[0]
     code, lines = tm.check(_measure(), dict(BASE, q_ghost_rows=0))
     assert code == 2 and "лишних" in lines[0] and "q_ghost_rows" in lines[0]
+
+
+def test_two_test_files_under_one_basename_are_a_collision(monkeypatch, tmp_path):
+    """T-323: `merges()` ключует группы по basename, поэтому два файла-тёзки —
+    одна строка отчёта на двоих. Метрика обязана это видеть, а не сливать их."""
+    _patch(monkeypatch, _mk(tmp_path, {
+        "game/scripts/world/foo.gd": "func x() -> void:\n\tpass\n",
+        "game/tests/unit/test_foo_a.gd": "extends BaseTest\nfunc test_a() -> void:\n\tpass\n",
+        "game/tests/campaign/test_foo_a.gd": "extends BaseTest\nfunc test_a2() -> void:\n\tpass\n",
+        "game/tests/unit/test_foo_b.gd": "extends BaseTest\nfunc test_b() -> void:\n\tpass\n",
+    }))
+    coll = tm.name_collisions()
+    assert list(coll) == ["test_foo_a.gd"]
+    assert coll["test_foo_a.gd"] == ["tests/campaign/test_foo_a.gd", "tests/unit/test_foo_a.gd"]
+    assert tm.snapshot(tm.measure())["name_collisions"] == 1
+
+
+def test_collision_count_is_a_ratchet_key(monkeypatch, tmp_path):
+    """Без ключа рэтчета нового тёзку можно привносить в репозиторий бесконечно, а
+    `merge_files` тем временем считает два файла за один."""
+    game = _mk(tmp_path, {
+        "game/scripts/world/foo.gd": "func x() -> void:\n\tpass\n",
+        "game/tests/unit/test_foo_a.gd": "extends BaseTest\nfunc test_a() -> void:\n\tpass\n",
+        "game/tests/campaign/test_foo_a.gd": "extends BaseTest\nfunc test_a2() -> void:\n\tpass\n",
+    })
+    _patch(monkeypatch, game)
+    assert "name_collisions" in tm.BASE_KEYS and "name_collisions" in tm.RATCHET_KEYS
+    m = tm.measure()
+    code, lines = tm.check(m, {**tm.snapshot(m), "name_collisions": 0})
+    assert code == 1 and any("name_collisions" in ln for ln in lines)
+    code, lines = tm.check(m, tm.snapshot(m))
+    assert code == 0 and any("коллизий имён 1" in ln for ln in lines)

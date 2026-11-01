@@ -186,6 +186,22 @@ def merges() -> list[tuple[str, list[str]]]:
     )
 
 
+def name_collisions() -> dict[str, list[str]]:
+    """Базовые имена тест-файлов, под которыми лежат два разных файла (T-323).
+
+    `merges()` складывает в группу `tp.name` — basename без каталога. Два файла-тёзки
+    (`tests/campaign/test_battle_terrain.gd` и `tests/unit/systems/test_battle_terrain.gd`)
+    дают в отчёте одну строку на двоих: «сколько файлов на носителе» перестаёт быть
+    числом файлов, а слияние реального файла в такую группу метрика не видит. Метрика
+    поднимает это Красным рэтчета, а не молчит: молча живущая коллизия превращает
+    `merge_files` в декорацию.
+    """
+    by: dict[str, list[str]] = collections.defaultdict(list)
+    for tp in test_files():
+        by[tp.name].append(tp.relative_to(GAME).as_posix())
+    return {k: sorted(v) for k, v in sorted(by.items()) if len(v) > 1}
+
+
 def _norm(body: str) -> str:
     s = _COMMENT_RE.sub("", body)
     s = re.sub(r'"[^"]*"', "S", s)
@@ -239,6 +255,7 @@ def measure() -> dict:
         "py_tests": sum(len(re.findall(r"^def test_", _read(p), re.M)) for p in py),
         "coverage": coverage(),
         "merge_groups": merges(),
+        "name_collisions": name_collisions(),
         "duplicates": duplicates(),
     }
 
@@ -250,9 +267,9 @@ def baseline_path() -> Path:
 #: Метрики, которые рэтчет считает направленной регрессией (больше — хуже).
 #: `merge_groups` и число файлов/тестов в рэтчете НЕ входят: группы могут расти
 #: без роста числа файлов, а сами файлы при сведении (С-3) только уменьшаются.
-RATCHET_KEYS = ("holes", "merge_files", "duplicate_groups")
+RATCHET_KEYS = ("holes", "merge_files", "duplicate_groups", "name_collisions")
 BASE_KEYS = ("gd_files", "gd_tests", "py_files", "py_tests", "holes",
-             "merge_groups", "merge_files", "duplicate_groups")
+             "merge_groups", "merge_files", "duplicate_groups", "name_collisions")
 
 
 def snapshot(m: dict) -> dict:
@@ -264,6 +281,7 @@ def snapshot(m: dict) -> dict:
         "holes": len(cov["holes"]), "merge_groups": len(m["merge_groups"]),
         "merge_files": sum(len(v) for _, v in m["merge_groups"]),
         "duplicate_groups": len(m["duplicates"]),
+        "name_collisions": len(m["name_collisions"]),
     }
 
 
@@ -307,6 +325,9 @@ def check(m: dict, base):
     if better:
         note += " · улучшение против базлайна (" + ", ".join(
             f"{k} {b}→{v}" for k, b, v in better) + " — зафиксируй --write-baseline)"
+    if snap["name_collisions"]:
+        note += (f" · коллизий имён {snap['name_collisions']} (T-323: два файла под одним "
+                 "basename, группа слияния считает их как один)")
     return 0, [note]
 
 
@@ -344,6 +365,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"групп слияния (≥3 файла на носителе): {len(m['merge_groups'])}, "
           f"файлов в них: {sum(len(v) for _, v in m['merge_groups'])}")
     print(f"групп межфайловых дублей тел: {len(m['duplicates'])}")
+    print(f"коллизий базовых имён тест-файлов: {len(m['name_collisions'])}")
     if not a.top:
         return 0
     print("\nдыры (крупнейшие):")
@@ -354,6 +376,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  {len(v):3} файла → {k}")
         for name in v:
             print(f"          {name}")
+    if m["name_collisions"]:
+        print("\nколлизии имён (два файла под одним basename, T-323):")
+        for name, paths in m["name_collisions"].items():
+            print(f"  {name}")
+            for p in paths:
+                print(f"          {p}")
     print("\nдубли тел (разные файлы):")
     for g in m["duplicates"][: a.top]:
         print("  " + " = ".join(g))

@@ -5,6 +5,7 @@
  "holes": 80,
  "merge_files": 141,
  "merge_groups": 27,
+ "name_collisions": 2,
  "py_files": 35,
  "py_tests": 109
 }
