@@ -123,3 +123,18 @@ func test_restore_order_capital_then_captured_villages() -> void:
 		assert_that(save_centers[v2.uid]).is_equal(v2.center)
 	assert_that(m2.cities.size()).is_equal(3)
 	m2.free()
+
+# Прежний дом — unit/world/test_city_hex_layout.gd (шаг 6 T-305, 2026-10-30).
+func test_core_cells_diamond() -> void:
+	var center := Vector2i(10, 10)
+	var cells: Array[Vector2i] = CityFactory.core_cells_for(center)
+	assert_that(cells.size()).is_equal(4)
+	assert_bool(bool(cells.has(center))).is_true()
+	assert_bool(bool(cells.has(center + Vector2i(1, 0)))).is_true()
+	assert_bool(bool(cells.has(center + Vector2i(0, 1)))).is_true()
+	assert_bool(bool(cells.has(center + Vector2i(1, 1)))).is_true()
+
+func test_create_village_fills_core_cells() -> void:
+	var c := CityFactory.create_village(Vector2i(10, 10), "Test")
+	assert_that(c.core_cells.size()).is_equal(4)
+	assert_bool(bool(c.core_cells.has(c.center))).is_true()

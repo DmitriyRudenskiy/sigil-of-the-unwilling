@@ -104,3 +104,47 @@ func test_check_to_dict_payload_cannot_override_ok_reason() -> void:
 	var d2 := ok_c.to_dict()
 	assert_bool(d2["ok"]).is_true()
 	assert_that(d2["reason"]).is_equal("")
+
+# Прежний дом — unit/world/test_city_hex_layout.gd (шаг 6 T-305, 2026-10-30):
+# first_free_build_cell перебирает кольца вокруг ядра, поэтому фикстура —
+# деревня из CityFactory (ядро заполнено), а не член c из before_test().
+func _hex_city() -> City:
+	return CityFactory.create_village(Vector2i(10, 10), "Test")
+
+func _building_at(cell: Vector2i) -> UniqueBuilding:
+	var b := UniqueBuilding.new()
+	b.cell = cell
+	b.def = BuildingDefs.market()
+	b.level = 1
+	return b
+
+func test_first_free_build_cell_skips_core() -> void:
+	var v := _hex_city()
+	var cell := CityBuildingService.first_free_build_cell(v, BuildingDefs.market())
+	assert_bool(bool(cell != Vector2i(-1, -1))).is_true()
+	assert_bool(bool(not v.core_cells.has(cell))).override_failure_message("предложено ядро: " + str(cell)).is_true()
+
+func test_first_free_build_cell_no_beyond_ring_3() -> void:
+	var v := _hex_city()
+	# занять все клетки колец 1–3 (вокруг ядра, D6)
+	for r in range(1, 4):
+		for cell in HexUtils.cells_in_core_ring(v.center, r):
+			v.buildings.append(_building_at(cell))
+	var cell := CityBuildingService.first_free_build_cell(v, BuildingDefs.market())
+	assert_that(cell).is_equal(Vector2i(-1, -1))
+
+func test_first_free_build_cell_finds_free_in_ring() -> void:
+	# City.new() без village-kit — рабочие не занимают клетки
+	var v := City.new()
+	v.center = Vector2i(10, 10)
+	v.core_cells = CityFactory.core_cells_for(v.center)
+	# занять всё кроме одной клетки кольца 1 (вокруг ядра, D6)
+	var free_cell: Vector2i = Vector2i(-1, -1)
+	for r in range(1, 4):
+		for cell in HexUtils.cells_in_core_ring(v.center, r):
+			if cell == v.center + Vector2i(0, -1):
+				free_cell = cell
+				continue
+			v.buildings.append(_building_at(cell))
+	var found := CityBuildingService.first_free_build_cell(v, BuildingDefs.market())
+	assert_that(found).is_equal(free_cell)

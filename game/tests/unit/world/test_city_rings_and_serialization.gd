@@ -71,3 +71,10 @@ func test_serialize_clamps() -> void:
 	restored.deserialize({"level": 99, "prosperity": -5.0})
 	assert_that(restored.level).is_equal(GameNumbers.CITY_LEVEL_MAX)
 	assert_bool(absf(restored.prosperity - 0.0) < 1e-9).is_true()
+
+func test_core_cells_block_building() -> void:
+	# Прежний дом — unit/world/test_city_hex_layout.gd (шаг 6 T-305): деревня из
+	# CityFactory, ядро заполнено; предмет — City.cell_is_built.
+	var v := CityFactory.create_village(Vector2i(10, 10), "Test")
+	for cc in v.core_cells:
+		assert_bool(bool(v.cell_is_built(cc))).override_failure_message(str(cc)).is_true()
