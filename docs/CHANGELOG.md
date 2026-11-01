@@ -9,6 +9,22 @@ date: 2026-10-30
 
 # CHANGELOG — docs/
 
+## 2026-10-30 — T-305 шаг 6: `test_city_hex_layout.gd` рассыпан, `merge_files` 147 → 146
+
+* **Что.** 11 кейсов `game/tests/unit/world/test_city_hex_layout.gd` дописаны в пять
+  **уже существовавших** файлов носителей — `test_city_serializer.gd` (+2),
+  `test_map_renderer.gd` (+2), `test_city_factory_persistence.gd` (+2),
+  `test_city_building_service.gd` (+3), `test_city_rings_and_serialization.gd` (+1);
+  новых файлов не заводили.
+* **Леджер тестов: 3669 → 3668 (−1, слияние).** `test_building_max_distance_fixed_3`
+  (уровни 1, 12) — подмножество `test_building_max_distance_is_fixed_ring_three`
+  (уровни 1, 3, 12) того же носителя; дубль сведён в одно место, обоснование в треде
+  T-305. Межфайловые дубли тел оскопление считает падением, поэтому выбор был между
+  дублем и зафиксированным слиянием.
+* **Метрика.** `merge_files` **147 → 146** (второе движение подряд), файлов 392 → 391,
+  дыр 80, дублей 0, базлайн переснят.
+* **Смешанной осталась одна:** `test_city_navigation.gd`.
+
 ## 2026-10-30 — T-305 шаг 5: `test_city_tech_tree.gd` рассыпан, `merge_files` 148 → 147
 
 * **Что.** 10 кейсов `game/tests/unit/test_city_tech_tree.gd` развезены по носителям:

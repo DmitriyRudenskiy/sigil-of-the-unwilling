@@ -7154,6 +7154,31 @@ city_service 8), `test_city_hex_layout.gd` (hex_utils 5 / city 5 / city_factory 
 
 **Смешанных осталось двое:** `test_city_navigation.gd`, `test_city_hex_layout.gd`.
 
+**Шаг 6 (2026-10-30, агент): `unit/world/test_city_hex_layout.gd` рассыпан, все пять адресатов существовали.**
+
+Ни одного нового файла не заводили — 11 кейсов дописаны в существующие файлы носителей:
+
+| Куда | Носитель | Кейсов |
+| --- | --- | --- |
+| `unit/world/test_city_serializer.gd` | `scripts/world/city_serializer.gd` | +2 — миграция без `core_cells`, круговой прогон ядра |
+| `unit/world/test_map_renderer.gd` | `scripts/world/map_renderer.gd` | +2 — `rebuild_city_zones`: кэш ядра/колец и замена набора городов |
+| `unit/world/test_city_factory_persistence.gd` | `scripts/world/city_factory.gd` | +2 — ромб ядра, `create_village` заполняет ядро |
+| `unit/world/test_city_building_service.gd` | `scripts/world/city_building_service.gd` | +3 — `first_free_build_cell`: пропускает ядро, сдаётся после кольца 3, находит единственную свободную |
+| `unit/world/test_city_rings_and_serialization.gd` | `scripts/world/city.gd` | +1 — `cell_is_built` на клетках ядра |
+
+**Тестовый леджер: 3669 → 3668 (−1, слияние, не потеря).** Кейс
+`test_building_max_distance_fixed_3` (уровни 1 и 12) — подмножество уже жившего в
+`test_city_rings_and_serialization.gd` кейса `test_building_max_distance_is_fixed_ring_three`
+(уровни 1, 3, 12, тот же носитель и то же утверждение). Оставить копию означало бы
+завести межфайловый дубль (оскопление считает дубли падением); удалить без записи —
+тихая потеря. Зафиксировано здесь: утверждение живёт в одном месте, покрыто шире.
+
+**Метрика.** `merge_files` **147 → 146** (второе движение подряд), тест-файлов
+392 → 391, дыр 80, дублей 0, базлайн переснят.
+
+**Смешанной осталась одна:** `test_city_navigation.gd` (functional, `marker_layer` +
+`WorldBootstrap`) — разбор по тем же правилам, если носителей честно два и более.
+
 **Зависит:** T-227 · **Блокирует:** — · **Владелец:** агент · **Статус:** открыт (С-3а закрыт,
 С-3 продолжат: группа `city.gd` — 12 файлов)
 
