@@ -44,6 +44,9 @@ run "провенанс ассетов game/assets (строка на кажды
 # заметила бы подмену: шестьдесят кадров `knights` несли другого персонажа, потому что
 # вердикт зрения не был привязан к файлам (T-318).
 run "кадры героев ↔ манифест сборки integrate.py" "$PY" scripts/check_hero_frames.py
+# Геометрия того же комплекта: идентичность байтов держит check_hero_frames, а
+# кадр правильной подписи и кривой опоры проходит его молча (3.6, alpha-battle-field).
+run "аудит комплекта фигур (альфа, холст, опора, рост)" "$PY" scripts/audit_hero_frames.py
 
 TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 	scripts/test_classify_mcp_junit.py scripts/test_gdd_gate.py scripts/test_gdd_grounding.py
@@ -52,6 +55,7 @@ TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 	scripts/test_check_openspec_specs.py scripts/test_check_node_paths.py
 	scripts/test_check_save_matrix.py scripts/test_check_asset_provenance.py
 	scripts/test_check_hero_frames.py
+	scripts/test_audit_hero_frames.py
 	scripts/test_scenario_matrix.py)
 # Отсутствующий файл списка — КРАСНЫЙ, а не «молча не досчитались»: ровно так список
 # и жил, пока в нём значился test_check_docs_links.py, которого никогда не было
