@@ -9,6 +9,23 @@ date: 2026-10-30
 
 # CHANGELOG — docs/
 
+## 2026-10-30 — T-305 шаг 7: `test_city_navigation.gd` рассыпан, семейство смесей закрыто
+
+* **Что.** 7 кейсов `game/tests/functional/test_city_navigation.gd` разъехались по
+  носителям: 3 метки — в новый `game/tests/functional/ui/test_marker_layer_city_markers.gd`
+  (`scripts/ui/marker_layer.gd`), 2 маршрутизации клика — в
+  `game/tests/integration/test_event_router.gd`, 1 бутстрап пары городов — в
+  `game/tests/functional/test_world_bootstrap.gd`, подпись кнопки «Выход из города» —
+  слиянием в `game/tests/functional/test_city_screen.gd`.
+* **Леджер: 3668 → 3667 (−1, слияние).** `test_exit_button_renamed_and_closes`
+  повторял `close_requested` соседнего кейса того же носителя; уникальное утверждение
+  (подпись кнопки) дописано в `test_close_button_emits_close_requested`, который к тому
+  же работает на принудительных 1920×1080 вместо дефолтных 64×64.
+* **Побочная находка.** Прежний файл перекрывал `after_test()` без `super` и терял сброс
+  паузы из `BaseTest`; новый файл вызывает `super.after_test()`.
+* **Метрика.** `merge_files` **146 → 145** (третье движение подряд), файлов 391, дыр 80,
+  дублей 0, базлайн переснят. Городских файлов-смесей не осталось.
+
 ## 2026-10-30 — T-305 шаг 6: `test_city_hex_layout.gd` рассыпан, `merge_files` 147 → 146
 
 * **Что.** 11 кейсов `game/tests/unit/world/test_city_hex_layout.gd` дописаны в пять
