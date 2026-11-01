@@ -149,3 +149,25 @@ func test_processor_prosperity_and_level_up() -> void:
 	assert_that(got.size()).is_equal(1)
 	assert_that(got[0][0]).is_equal(c.uid)
 	assert_that(got[0][1]).is_equal(2)
+func _city_at(level: int) -> City:
+	# Прежний дом — unit/test_city_tech_tree.gd (шаг 5 T-305).
+	var c := City.new()
+	c.display_name = "Тест"
+	c.center = Vector2i(10, 10)
+	c.level = level
+	c.storage[&"industry"] = 100.0
+	c.storage[&"silver"] = 100.0
+	return c
+
+func test_level_up_req_scales() -> void:
+	# Прежний дом — unit/test_city_tech_tree.gd (шаг 5 T-305).
+	var first: float = ProsperitySystem.level_up_req(2)
+	var last: float = ProsperitySystem.level_up_req(11)
+	assert_bool(last > first).is_true()
+
+func test_can_level_up_blocked_at_max() -> void:
+	# Прежний дом — unit/test_city_tech_tree.gd (шаг 5 T-305). От test_level_max
+	# отличается фикстурой: ресурсы и последователи есть, уровень 11 — отказ.
+	var c := _city_at(11)
+	var check: Dictionary = ProsperitySystem.can_level_up(c)
+	assert_bool(bool(check.get("ok", false))).is_false()
