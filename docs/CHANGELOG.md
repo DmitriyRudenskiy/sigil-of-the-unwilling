@@ -9,6 +9,24 @@ date: 2026-10-30
 
 # CHANGELOG — docs/
 
+## 2026-10-30 — T-305 шаг 8: аудит групп слияния, два имени приведены в соответствие
+
+* **Мерка исправлена по ходу дела.** Доминанту носителя считали по вызовам
+  (`Class.method`/`Class.field`), а не по подстроке: `PopUnit.State.WORKER` и
+  `BattleState.Side` — перечисления, а не обращения к логике. Прежний замер завышал число
+  «переприписанных» файлов втрое (57 кандидатов против 11 настоящих).
+* **Переименовано два файла:** `unit/test_event_bus.gd` → `unit/test_game_event_bus.gd`
+  (`before_test` держит `GameEventBusAutoload`), `unit/entities/test_follower_race_class.gd`
+  → `test_follower_system_race_class.gd` (12 вызовов `FollowerSystem` против 3).
+  `merge_files` **145 → 141**, групп **28 → 27**, кейсов 3667 без изменений.
+* **Отказ от переименований — тоже результат.** `test_rescue_action.gd` требует редиректа в
+  живой строке тикета, `test_smoldering_city.gd` и `test_follower_path_id.gd` метрику не
+  двигают, а доминанта `test_save_v3.gd` (`BuildingDefs`, 11 вызовов) — фикстура, а не
+  предмет: имя по ней было бы новой ложью.
+* **T-323.** `scripts/testmap.py:182` ключует группы по basename; в репозитории два
+  файла-тёзки (`test_battle_terrain.gd`, `test_inventory_grid.gd`), и `test_inventory_grid.gd`
+  числится в группах двух носителей сразу.
+
 ## 2026-10-30 — T-305 шаг 7: `test_city_navigation.gd` рассыпан, семейство смесей закрыто
 
 * **Что.** 7 кейсов `game/tests/functional/test_city_navigation.gd` разъехались по
