@@ -77,6 +77,98 @@ func test_campaign_mode_is_passed_to_scheduler_from_city_manager() -> void:
 	assert_float(city.food_stockpile).is_equal_approx(9.9, 0.0001)
 	assert_that(String(city.resource_ctx.get_ledger()[0].source)).is_equal("campaign:resident_food")
 
+class NavMockMovement extends Node:
+	signal reach_preview_changed(path: Array)
+	signal reach_preview_cleared()
+
+class NavMockHero extends Node:
+	signal hero_moved(cell: Vector2i)
+	signal hero_entered_village(cell: Vector2i)
+	var current_cell := Vector2i(-1, -1)
+	var clicked: Array = []
+	var movement: NavMockMovement
+	func _init_moved() -> void:
+		movement = NavMockMovement.new()
+		movement.name = "MockMovement"
+		add_child(movement)
+	func on_map_clicked(cell: Vector2i) -> void:
+		clicked.append(cell)
+
+# Прежний дом — functional/test_city_navigation.gd (шаг 7 T-305, 2026-10-30):
+# здесь предмет — выбор цели в WorldEventRouter, поэтому карта настоящая.
+func _make_two_cities() -> Dictionary:
+	var h := Node2D.new()
+	h.name = "RouterCitiesHolder"
+	_main_root().add_child(h)
+	auto_free(h)
+	var mg: MapGenerator = MapGenerator.new()
+	mg.name = "MapGenerator"
+	mg.seed_value = 42
+	h.add_child(mg)
+	assert_bool(mg.has_valid_tilemap()).is_true()
+	var R = WorldBootstrap.BootstrapResult.new()
+	R.map_gen = mg
+	WorldBootstrap._create_cities(h, R)
+	var capital: City = R.cities.capital
+	var second: City = null
+	for city in R.cities.cities:
+		if city != capital:
+			second = city
+	return {"mg": mg, "cities": R.cities, "capital": capital, "second": second, "holder": h}
+
+func _main_root() -> Node:
+	return Engine.get_main_loop().root
+
+func _make_router(mg: MapGenerator, cities: CityManager, hero: NavMockHero) -> WorldEventRouter:
+	var r = auto_free(WorldEventRouter.new())
+	r.name = "EventRouter"
+	_main_root().add_child(r)
+	r.setup(hero, mg, null, cities, null, null, null, null, null, null, null)
+	return r
+
+func test_city_marker_click_routes_path_to_city() -> void:
+	var w := _make_two_cities()
+	var hero := NavMockHero.new()
+	hero.current_cell = Vector2i(0, 0)
+	hero._init_moved()
+	var router := _make_router(w.mg, w.cities, hero)
+	var ml = auto_free( MarkerLayer.new())
+	ml.name = "MarkerLayer"
+	_main_root().add_child(ml)
+	ml.setup(w.mg)
+	ml.set_city_markers(w.cities.cities)
+	ml.city_marker_clicked.connect(router._on_city_marker_clicked)
+	ml.city_marker_clicked.emit(w.second)
+	assert_that(hero.clicked.size()).is_equal(1)
+	var target: Vector2i = hero.clicked[0]
+	assert_bool(w.mg.is_walkable(target)).is_true()
+	assert_bool(target != hero.current_cell).is_true()
+	router.free()
+	ml.free()
+	hero.free()
+
+func test_city_marker_click_to_unwalkable_center_uses_nearby() -> void:
+	var w := _make_two_cities()
+	var capital: City = w.capital
+	w.mg.model.set_terrain(capital.center, HexUtils.Terrain.MOUNTAIN)
+	var hero := NavMockHero.new()
+	hero.current_cell = Vector2i(0, 0)
+	hero._init_moved()
+	var router := _make_router(w.mg, w.cities, hero)
+	var ml = auto_free( MarkerLayer.new())
+	ml.name = "MarkerLayer"
+	_main_root().add_child(ml)
+	ml.setup(w.mg)
+	ml.set_city_markers(w.cities.cities)
+	ml.city_marker_clicked.connect(router._on_city_marker_clicked)
+	ml.city_marker_clicked.emit(capital)
+	assert_that(hero.clicked.size()).is_equal(1)
+	assert_bool(w.mg.is_walkable(hero.clicked[0])).is_true()
+	router.free()
+	ml.free()
+	hero.free()
+
+
 func after_test() -> void:
 	_router.queue_free()
 	_hero.free()
