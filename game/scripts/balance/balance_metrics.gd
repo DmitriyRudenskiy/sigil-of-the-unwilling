@@ -7,7 +7,7 @@ extends SceneTree
 ## с базовой стройкой ферм), k_mig (0.25 × 8 = 2 ≈ рождаемость), взаимная
 ## сбалансированность троих против босса (K-M15), Престиж-коридор хода 21
 ## (500–999), parity-начисление. Харнесс — только метрики; гейт — тесты
-## tests/balance/test_t041_anchors.gd. Запуск: godot --headless --path game
+## tests/smoke/test_t041_anchors.gd. Запуск: godot --headless --path game
 ## --script res://scripts/balance/balance_metrics.gd
 
 const SEED := 12345

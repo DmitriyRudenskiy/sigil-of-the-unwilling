@@ -20,8 +20,8 @@ timeout() {
 set -u
 cd "$(dirname "$0")/.."
 GODOT="${GODOT_BIN:-$HOME/.local/bin/godot}"
-TESTS=(res://tests/functional/ui/test_ui_responsive.gd)
-F=tests/functional/ui/test_ui_responsive.gd
+TESTS=(res://tests/slow/test_ui_responsive.gd)
+F=tests/slow/test_ui_responsive.gd
 rc=0
 
 run() {

@@ -25,7 +25,7 @@ timeout() {
 # Запуск: bash game/tools/mut_save_sections.sh   (из корня репо, дерево чистое)
 set -u
 G=${GODOT_BIN:-/home/user/.local/bin/godot}
-TEST=res://tests/campaign/test_mvp_save.gd
+TEST=res://tests/smoke/test_mvp_save.gd
 COMP=game/scripts/campaign/campaign_composition.gd
 POP=game/scripts/campaign/population_system.gd
 FAILED=0

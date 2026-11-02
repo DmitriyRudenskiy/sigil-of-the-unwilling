@@ -88,8 +88,8 @@ date: 2026-10-29
 
 - **Точка входа мирового режима заморожена** (D-157): `scenes/archive/world.tscn`.
   Замер 2026-10-29 по `grep -rn "archive/world.tscn"` по `.gd`/`.tscn`: сцену
-  грузят **только тесты** (`tests/functional/test_world_bootstrap.gd`,
-  `test_world_scenario.gd`, `test_scene_boot.gd`, `tests/unit/probe/test_trader_role.gd`,
+  грузят **только тесты** (`tests/slow/test_world_bootstrap.gd`,
+  `test_world_scenario.gd`, `tests/smoke/test_scene_boot.gd`, `tests/slow/test_trader_role.gd`,
   `tests/unit/data/test_audio_world_entry.gd`) — из production ни одна кнопка
   к ней не ведёт. Судьба слоя (удаление vs носитель) — [[QUESTIONS]] Q-M117.
 - **Но сам слой не мёртв:** у **15 из 19** есть production-потребитель вне
@@ -486,7 +486,7 @@ scope не сокращает.
   Пункт `morale` — то же основание, что и у снятия шкалы «морали» (K-M14):
   производное состояние не хранится, а пересчитывается.
 - **Проверка**: `MvpSaveSchema` валидирует наличие секций, их типы и отсутствие
-  производных ключей; тесты — `tests/campaign/test_mvp_save.gd`,
+  производных ключей; тесты — `tests/smoke/test_mvp_save.gd`,
   `tests/campaign/test_campaign_victory.gd`, `tests/campaign/test_turn_driver.gd`.
 - **Хроника** (`chronicle_log.gd`) — отдельный писатель, секции `chronicle` в
   схеме нет; описание хроники в [[08-tech]] обязано это отражать.

@@ -1,8 +1,10 @@
 {
  "duplicate_groups": 0,
  "gd_files": 388,
- "gd_tests": 3654,
+ "gd_tests": 3664,
  "holes": 80,
+ "local_builder_files": 46,
+ "local_builders": 61,
  "merge_files": 151,
  "merge_groups": 28,
  "py_files": 35,

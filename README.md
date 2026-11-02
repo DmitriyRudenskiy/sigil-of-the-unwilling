@@ -160,7 +160,11 @@ rm -rf /tmp/gdunit4-install
 
 ```bash
 # Полный прогон (gdUnit4 + MCP + структурные проверки) — единственная точка входа
-cd game && bash tests/run_all.sh
+cd game && bash run_tests.sh
+
+# Срез — быстрая обратная связь вместо «проверю потом»; НЕ основание для push (D-224)
+cd game && bash run_tests.sh --tier=smoke   # ~9 с: критичный путь (tests/smoke/)
+cd game && bash run_tests.sh --tier=fast    # ~2 мин: весь gdUnit4 кроме tests/slow/
 
 # Только gdUnit4 (headless)
 cd game && godot --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests

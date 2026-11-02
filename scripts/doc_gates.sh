@@ -46,7 +46,8 @@ TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 	scripts/test_gen_map_art.py scripts/test_testmap.py
 	scripts/test_check_hero_layout_map.py
 	scripts/test_check_openspec_specs.py scripts/test_check_node_paths.py
-	scripts/test_check_save_matrix.py scripts/test_check_asset_provenance.py)
+	scripts/test_check_save_matrix.py scripts/test_check_asset_provenance.py
+	scripts/test_check_test_tiers.py)
 # Отсутствующий файл списка — КРАСНЫЙ, а не «молча не досчитались»: ровно так список
 # и жил, пока в нём значился test_check_docs_links.py, которого никогда не было
 # (T-223). Проверщик без теста и проверщик, которого нет, — один и тот же класс.

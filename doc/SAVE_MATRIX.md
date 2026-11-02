@@ -35,7 +35,7 @@
   Вершины: `game/tests/campaign/test_cutover_composite.gd::test_save_load_roundtrip`,
   `game/tests/campaign/test_campaign_victory.gd::test_full_campaign_victory_save_roundtrip`.
 - **Слепое место контракта:** под-ключ, пустой с обеих сторон, потерей не считается.
-  Зубы — `game/tests/campaign/test_mvp_save.gd::test_finished_campaign_leaves_no_empty_save_section`
+  Зубы — `game/tests/smoke/test_mvp_save.gd::test_finished_campaign_leaves_no_empty_save_section`
   (завершённая кампания обязана оставлять нетривиальным каждый покрываемый
   под-ключ), батарея —
   `game/tools/mut_save_sections.sh` (M1 `map.threats`, M2 `city.sm`, M3 `birth_carry`).
@@ -134,7 +134,7 @@
   намеренно.
 - `game/tests/ui/test_save_load_screen.gd` — UI-слой слотов (пустые слоты,
   удаление), состояние не сериализуется.
-- `game/tests/campaign/test_mvp_save.gd::test_round_trip_i1` — round-trip
+- `game/tests/smoke/test_mvp_save.gd::test_round_trip_i1` — round-trip
   **менеджера** на рукописном литерале состояния, а не пары
   `build_save_state`/`load_save_state`. Пара покрыта другими кейсами того же файла
   и вершинами из §1.1.

@@ -45,6 +45,10 @@ EXCLUDED_PREFIXES = (
 )
 
 _FUNC_RE = re.compile(r"^func\s+(test_\w+)\s*\(", re.M)
+#: Локальные билдеры подготовки (`_make_*`) — метрика дедупа подготовки (срез
+#: test-suite-restructure). Имена именно такие, потому что так их завели; комментарий
+#: с образцом кода не должен притворяться билдером, поэтому текст снимается по _COMMENT_RE.
+_BUILDER_RE = re.compile(r"^\s*func\s+_make_\w+\s*\(", re.M)
 _CLASS_RE = re.compile(r"^class_name\s+(\w+)", re.M)
 _COMMENT_RE = re.compile(r"#.*")
 _AUTOLOAD_RE = re.compile(r'^(\w+)="\*?(res://[^"]+)"', re.M)
@@ -229,14 +233,35 @@ def duplicates() -> list[list[str]]:
     )
 
 
+def local_builders() -> tuple[int, int, list[tuple[int, str]]]:
+    """Локальная подготовка в сюитах: (файлов со своим билдером, всего билдеров, список).
+
+    Метрика среза test-suite-restructure: дедуп подготовки измеряется не числом
+    тестов (его сводить нельзя), а тем, сколько раз одна и та же сборка объекта
+    написана руками. Основа — имена `_make_*` (так их завели; 76 файлов / 82 билдера
+    на 2026-11-02), цель — `tests/helpers/factories.gd`.
+    """
+    per_file = [
+        (len(_BUILDER_RE.findall(_COMMENT_RE.sub("", _read(p)))), p.relative_to(GAME).as_posix())
+        for p in test_files()
+    ]
+    per_file = [x for x in per_file if x[0]]
+    per_file.sort(key=lambda x: (-x[0], x[1]))
+    return len(per_file), sum(n for n, _ in per_file), per_file
+
+
 def measure() -> dict:
     gd = test_files()
     py = py_test_files()
+    builders = local_builders()
     return {
         "gd_files": len(gd),
         "gd_tests": sum(len(_FUNC_RE.findall(_read(p))) for p in gd),
         "py_files": len(py),
         "py_tests": sum(len(re.findall(r"^def test_", _read(p), re.M)) for p in py),
+        "local_builder_files": builders[0],
+        "local_builders": builders[1],
+        "builder_files": builders[2],
         "coverage": coverage(),
         "merge_groups": merges(),
         "duplicates": duplicates(),
@@ -250,9 +275,12 @@ def baseline_path() -> Path:
 #: Метрики, которые рэтчет считает направленной регрессией (больше — хуже).
 #: `merge_groups` и число файлов/тестов в рэтчете НЕ входят: группы могут расти
 #: без роста числа файлов, а сами файлы при сведении (С-3) только уменьшаются.
-RATCHET_KEYS = ("holes", "merge_files", "duplicate_groups")
+#: `local_builder_files` — Сюда же (срез test-suite-restructure): свод Preparation
+#: вниз разрешено, вверх — только с пересозданием базлайна в диффе.
+RATCHET_KEYS = ("holes", "merge_files", "duplicate_groups", "local_builder_files")
 BASE_KEYS = ("gd_files", "gd_tests", "py_files", "py_tests", "holes",
-             "merge_groups", "merge_files", "duplicate_groups")
+             "merge_groups", "merge_files", "duplicate_groups",
+             "local_builder_files", "local_builders")
 
 
 def snapshot(m: dict) -> dict:
@@ -264,6 +292,8 @@ def snapshot(m: dict) -> dict:
         "holes": len(cov["holes"]), "merge_groups": len(m["merge_groups"]),
         "merge_files": sum(len(v) for _, v in m["merge_groups"]),
         "duplicate_groups": len(m["duplicates"]),
+        "local_builder_files": m["local_builder_files"],
+        "local_builders": m["local_builders"],
     }
 
 
@@ -303,7 +333,7 @@ def check(m: dict, base):
             "  легитимное ухудшение (носитель нечего покрывать) — EXCLUDED_PREFIXES с причиной",
             "  или python3 scripts/testmap.py --write-baseline (строка в диффе, на ревью).",
         ]
-    note = f"TESTMAP OK: дыр {snap['holes']}, файлов в группах слияния {snap['merge_files']}, дублей {snap['duplicate_groups']}"
+    note = f"TESTMAP OK: дыр {snap['holes']}, файлов в группах слияния {snap['merge_files']}, дублей {snap['duplicate_groups']}, локальных билдеров в {snap['local_builder_files']} файл."
     if better:
         note += " · улучшение против базлайна (" + ", ".join(
             f"{k} {b}→{v}" for k, b, v in better) + " — зафиксируй --write-baseline)"
@@ -344,6 +374,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"групп слияния (≥3 файла на носителе): {len(m['merge_groups'])}, "
           f"файлов в них: {sum(len(v) for _, v in m['merge_groups'])}")
     print(f"групп межфайловых дублей тел: {len(m['duplicates'])}")
+    print(f"локальных билдеров `_make_*`: {m['local_builders']} в {m['local_builder_files']} файлах "
+          f"(носитель — tests/helpers/factories.gd)")
     if not a.top:
         return 0
     print("\nдыры (крупнейшие):")
@@ -357,6 +389,9 @@ def main(argv: list[str] | None = None) -> int:
     print("\nдубли тел (разные файлы):")
     for g in m["duplicates"][: a.top]:
         print("  " + " = ".join(g))
+    print("\nлокальные билдеры (кандидаты в общий помощник):")
+    for n, name in m["builder_files"][: a.top]:
+        print(f"  {n:3} билдера  {name}")
     return 0
 
 

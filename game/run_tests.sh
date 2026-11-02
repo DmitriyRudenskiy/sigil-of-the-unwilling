@@ -57,17 +57,100 @@ if [ -z "$GODOT" ]; then
 fi
 echo "GODOT: $GODOT"
 
+# Слои прогона (срез test-suite-restructure, 2026-11-02): `smoke` — критичный путь
+# headless (бюджет 30 с), `fast` — все GdUnit-проверки без живого Godot (бюджет
+# 3 мин), `full` — сегодняшний гейт целиком (GdUnit + MCP e2e + python-уровни).
+# Слой задаётся МЕСТОМ В ДЕРЕВЕ (tests/smoke, tests/slow) и штатной фильтрацией
+# GdUnit `-a`/`-i`: списка-манифеста «файлы слоя» нет и не заведётся — он расходится
+# с деревом в первый же день и не краснеет, когда файл переименовали.
+# Дефолт `full`: ни один существующий вызов (report.sh, CI) поведения не меняет.
+# Зелёный smoke/fast основанием для push не является (D-224: вердикт = полный прогон).
+TIER="full"
+for arg in "$@"; do
+	case "$arg" in
+		--tier=*) TIER="${arg#--tier=}" ;;
+		-h | --help)
+			cat <<'USAGE'
+usage: run_tests.sh [--tier=smoke|fast|full] [--help]
+  smoke — критичный путь (game/tests/smoke), headless, бюджет 30 с
+  fast  — все GdUnit-проверки кроме game/tests/slow, headless, бюджет 3 мин
+  full  — полный гейт: GdUnit + MCP e2e + python-уровни (по умолчанию)
+Env как раньше: SKIP_GDUNIT=1, MCP_WORKERS=N, GODOT_BIN, MCP_PYTEST_PY, GEN_PY.
+USAGE
+			exit 0
+			;;
+		*)
+			echo "run_tests.sh: неизвестный аргумент «${arg}» (--help)" >&2
+			exit 2
+			;;
+	esac
+done
+case "$TIER" in
+	smoke | fast | full) : ;;
+	*)
+		echo "run_tests.sh: --tier=$TIER — нет такого слоя (smoke|fast|full)" >&2
+		exit 2
+		;;
+	esac
+if [ "${SKIP_GDUNIT:-0}" = "1" ] && [ "$TIER" != "full" ]; then
+	echo "run_tests.sh: слой $TIER без GdUnit не имеет смысла — прогон ничего не измерил бы" >&2
+	exit 2
+fi
+echo "TIER: $TIER"
+
+# Что слой ИСКЛЮЧАЕТ — подстроки путей без `res://` (одна и та же подстрока режет и
+# `source_file` раннера, и дерево `tests/` в читателе полноты):
+#   слой   — tests/slow работает только в full (fast = всё остальное);
+#   карантин — нестабильные сюиты, реестр game/tests/quarantine.txt.
+GD_SKIP=()
+GD_ROOT="game/tests"
+GD_INCLUDE="res://tests"
+if [ "$TIER" = "smoke" ]; then
+	# Каталог слоя он и есть корень замера полноты: сверять нужно со своим поддеревом.
+	GD_ROOT="game/tests/smoke"
+	GD_INCLUDE="res://tests/smoke"
+elif [ "$TIER" = "fast" ]; then
+	GD_SKIP+=(tests/slow)
+fi
+
+# Карантин нестабильных GdUnit-сюит — тем же форматом, что tests/mcp/quarantine.txt
+# («<подстрока пути><tab><ГГГГ-ММ-ДД><tab><причина>»). Просроченная строка и запись,
+# не режущая ни один файл (опечатка: `-i` тогда не исключил бы НИЧЕГО, а карантин
+# выглядел бы работающим), красят прогон до запуска.
+if command -v python3 >/dev/null 2>&1; then
+	if QUAR_ROWS="$(cd .. && python3 scripts/check_test_tiers.py quarantine --root game/tests 2>&1)"; then
+		if [ -n "$QUAR_ROWS" ]; then
+			while IFS=$'\t' read -r q_needle q_until q_reason; do
+				[ -z "$q_needle" ] && continue
+				GD_SKIP+=("$q_needle")
+				echo "QUARANTINE: $q_needle — вне прогонов до $q_until: $q_reason"
+			done <<< "$QUAR_ROWS"
+		else
+			echo "QUARANTINE: 0 (game/tests/quarantine.txt пуст)"
+		fi
+	else
+		echo "QUARANTINE: RED — $QUAR_ROWS"
+		exit 1
+	fi
+else
+	echo "QUARANTINE: SKIPPED (python3 не найден — реестр не прочитан, изолированные сюиты остались в прогоне)"
+fi
+GD_EXCLUDE=()
+for gd_skip in ${GD_SKIP[@]+"${GD_SKIP[@]}"}; do
+	GD_EXCLUDE+=(-i "$gd_skip")
+done
+
 # SKIP_GDUNIT=1 — MCP-only прогон (CI-2 эшелонирование, раунд 7 §1.3: GdUnit —
 # отдельный шаг, MCP-шаг не прогоняет GdUnit повторно).
 if [ "${SKIP_GDUNIT:-0}" != "1" ]; then
-echo "=== gdUnit4: unit + integration + functional ==="
+	echo "=== gdUnit4: слой $TIER ($GD_INCLUDE, исключений: ${#GD_EXCLUDE[@]}) ==="
 # Pre-import to refresh the global class cache (class_name).
 "$GODOT" --headless --path . --import >/dev/null 2>&1
 # CI-4 (раунд 11 §4, D-168): лог в файл — файл-level orphan-гейт (allowlist)
 # парсит per-suite «Statistics: … N orphans» после «Run Test Suite: <path>».
 GDUNIT_LOG="$(mktemp)"
 set -o pipefail
-"$GODOT" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests 2>&1 | tee "$GDUNIT_LOG"
+"$GODOT" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a "$GD_INCLUDE" ${GD_EXCLUDE[@]+"${GD_EXCLUDE[@]}"} 2>&1 | tee "$GDUNIT_LOG"
 RC=${PIPESTATUS[0]}
 set +o pipefail
 # Политика orphan (CI-2, T-114): 0 = pass; 101 = только orphan-предупреждения
@@ -107,6 +190,25 @@ if [ -f "$ORPHAN_ALLOWLIST" ]; then
 else
 	echo "ORPHAN-GATE: SKIPPED (нет $ORPHAN_ALLOWLIST — создайте хотя бы заголовок)"
 fi
+# Полнота сбора: слой не имеет права быть тихой выборкой. Сравниваем то, что раннер
+# реально собрал (строки «Run Test Suite:» в логе), с деревом tests/ за вычетом
+# исключений слоя; smoke к тому же обязан быть непустым (пустой слой, зелёный
+# тишиной, — тот же дефект, что уровень без причины, T-281).
+if command -v python3 >/dev/null 2>&1; then
+	COV_ARGS=(coverage --log "$GDUNIT_LOG" --root "$GD_ROOT" --scope "$TIER")
+	for gd_skip in ${GD_SKIP[@]+"${GD_SKIP[@]}"}; do
+		COV_ARGS+=(--exclude "$gd_skip")
+	done
+	[ "$TIER" = "smoke" ] && COV_ARGS+=(--require-nonempty)
+	if ! COV="$(cd .. && python3 scripts/check_test_tiers.py "${COV_ARGS[@]}" 2>&1)"; then
+		echo "TIER COVERAGE: RED — $COV"
+		rm -f "$GDUNIT_LOG"
+		exit 1
+	fi
+	echo "TIER COVERAGE: OK ($COV; слой $TIER)"
+else
+	echo "TIER COVERAGE: SKIPPED (python3 не найден — полноту сбора слоя никто не сверил)"
+fi
 rm -f "$GDUNIT_LOG"
 if [ "$ORPHAN_RED" -ne 0 ]; then
 	exit 1
@@ -121,7 +223,11 @@ echo "=== lint: gdlint (T-141, report-only) ==="
 # (падение на росте против базы) — вторая половина T-141, не подключена: конфиг линтера
 # сам помечен «report-only, до утверждения владельцем».
 LINT_PY="${LINT_PY:-python3}"
-if "$LINT_PY" -c 'import gdtoolkit.linter' 2>/dev/null && [ -f .gdlintrc ]; then
+if [ "$TIER" != "full" ]; then
+	# Report-only уровень стоит 16 с (замер 2026-11-02) — в бюджет smoke не влезает,
+	# а сигнала для падения не даёт ни в одном слое.
+	echo "LINT: SKIPPED (report-only, не входит в слой $TIER; полный прогон: game/run_tests.sh)"
+elif "$LINT_PY" -c 'import gdtoolkit.linter' 2>/dev/null && [ -f .gdlintrc ]; then
 	# Знаменатель печатается раздельно (D-210: мера печатает охват). Корзин — ТРИ, а не две:
 	# внутри tools/ лежит tools/mcp (77 из 78 находок tools/) — закоммиченная и пропатченная
 	# в репо копия серверной части godot-mcp (отличается от копии в addons/, preload'ит
@@ -177,6 +283,16 @@ if command -v python3 >/dev/null 2>&1; then
 	fi
 else
 	echo "NODE-PATH-GATE: SKIPPED (python3 не найден — уровень молчит, зафиксировать в отчёте)"
+fi
+if [ "$TIER" != "full" ]; then
+	echo ""
+	# «Не мерили» обязано быть видно (T-281): читатель строки «всё зелёное» обязан
+	# видеть, какие уровни вообще не запускались и где их взять.
+	echo "NOT MEASURED: MCP e2e (живой Godot, ~305 с) — не входит в слой $TIER; game/run_tests.sh без флага"
+	echo "NOT MEASURED: python-уровни (генератор арта T-150, классификатор D-265) — не входят в слой $TIER"
+	echo "NOT MEASURED: gdlint (report-only) — не входит в слой $TIER"
+	echo "TIER $TIER: зелёный прогон НЕ является основанием для push — публикация требует зелёного full (D-224)."
+	exit 0
 fi
 echo ""
 echo "=== MCP tests (tugcantopaloglu/godot-mcp) ==="

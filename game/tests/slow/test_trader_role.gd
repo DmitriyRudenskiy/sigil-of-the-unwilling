@@ -1,5 +1,10 @@
 extends BaseTest
 
+## Слой `slow` (срез test-suite-restructure): 33.2 с на 4 проверки isolated — 18% всего
+## GdUnit-прогона; пятерка `tests/slow/` по A/B (`full` − `fast`) стоит 83 с из 184 с
+## (замер 2026-11-02, «Стоимость прогона» в docs/mvp/TEST-MAP.md).
+## В `--tier=fast` не входит, собирается `full` (game/run_tests.sh без флага).
+
 ## Профиль Торговца на архивном мире. Оба кейса когда-то были сняты одним skip'ом
 ## «дрейф калибровки после слияния» (ветка `fix/world-session-baseline`). Пересъёмка
 ## 2026-10-25 (`GdUnitCmdTool.gd`, headless) показала, что обоснование ложно, а

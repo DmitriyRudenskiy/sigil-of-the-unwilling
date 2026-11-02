@@ -1,6 +1,10 @@
 # TASK_18 B2.3: WorldBootstrap — бутстрап мира и связность результата.
 extends BaseTest
 
+## Слой `slow` (срез test-suite-restructure): 4.5 с на 8 проверок при медиане сюиты
+## ~0.2 с (замер 2026-11-02, «Стоимость прогона» в docs/mvp/TEST-MAP.md) — строит мир.
+## В `--tier=fast` не входит, собирается `full`.
+
 
 var _nodes: Array[Node] = []
 

@@ -203,10 +203,11 @@ def test_shared_prefix_before_blank_line_is_not_a_duplicate(monkeypatch, tmp_pat
     assert tm.duplicates() == []
 
 
-def _measure(holes=1, merge_files=0, dupes=0):
+def _measure(holes=1, merge_files=0, dupes=0, builders=0):
     """Синтетический вывод measure() — ровно той формы, что читает snapshot()."""
     return {
         "gd_files": 2, "gd_tests": 4, "py_files": 1, "py_tests": 2,
+        "local_builder_files": builders, "local_builders": builders,
         "coverage": {"production_files": 5, "covered": 5 - holes,
                      "holes": ["scripts/core/x%d.gd" % i for i in range(holes)]},
         "merge_groups": [("scripts/core/sys.gd", ["a", "b", "c"])] if merge_files else [],
@@ -215,7 +216,8 @@ def _measure(holes=1, merge_files=0, dupes=0):
 
 
 BASE = {"gd_files": 2, "gd_tests": 4, "py_files": 1, "py_tests": 2,
-        "holes": 1, "merge_groups": 0, "merge_files": 0, "duplicate_groups": 0}
+        "holes": 1, "merge_groups": 0, "merge_files": 0, "duplicate_groups": 0,
+        "local_builder_files": 0, "local_builders": 0}
 
 
 def test_check_passes_at_baseline():
@@ -242,6 +244,35 @@ def test_check_fails_on_new_duplicate():
     code, lines = tm.check(_measure(dupes=1), dict(BASE))
     assert code == 1
     assert any("duplicate_groups" in ln for ln in lines)
+
+
+def test_check_fails_on_new_local_builder_file():
+    """Новой файл со своим билдером preparation — регрессия дедупа (срез
+    test-suite-restructure): подготовку пишут в помощник, а не в сюиту."""
+    code, lines = tm.check(_measure(builders=1), dict(BASE))
+    assert code == 1
+    assert any("local_builder_files" in ln for ln in lines)
+
+
+def test_local_builders_counts_files_not_comment_lines(monkeypatch, tmp_path):
+    """Метрика считает файлы (цель — «сколько файлов готовят руками», а не «сколько
+    строк»), комментарий-образец билдером не считается, а сам помощник набора —
+    тем более (в нём нет `func test_`)."""
+    _patch(monkeypatch, _mk(tmp_path, {
+        "game/scripts/core/sys.gd": "class_name System\nfunc x() -> void:\n\tpass\n",
+        "game/tests/unit/test_a.gd":
+            "extends BaseTest\nfunc _make_unit() -> Node:\n\treturn Node.new()\n"
+            "func _make_city() -> Node:\n\treturn Node.new()\n"
+            "func test_a() -> void:\n\tpass\n",
+        "game/tests/unit/test_b.gd":
+            "extends BaseTest\n# func _make_unit() — образец, не билдер\n"
+            "func test_b() -> void:\n\tpass\n",
+        "game/tests/helpers/factories.gd":
+            "extends RefCounted\nstatic func _make_hero() -> Node:\n\treturn Node.new()\n",
+    }))
+    files, total, per_file = tm.local_builders()
+    assert (files, total) == (1, 2)
+    assert per_file == [(2, "tests/unit/test_a.gd")]
 
 
 def test_check_accepts_improvement_but_asks_to_rebase():
