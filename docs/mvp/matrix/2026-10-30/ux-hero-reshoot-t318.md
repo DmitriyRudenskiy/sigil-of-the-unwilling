@@ -82,3 +82,8 @@ cell, зелёной каймы по контуру нет, алебарда и 
 
 См. также: `docs/mvp/HERO-ANIM.md` (порядок прогона), `D-297`/`D-298` в
 `docs/DECISIONS.md`, первый аудит — `ux-hero-identity-t318.md`.
+
+Имена наборов в этой записи — прежние, под ними вариант принимался и переснимался;
+с 2026-11-02 (D-298) носитель называется внешностью: `swordsmen` → `blackblade`,
+`archers` → `greenhood`, `knights` → `silverhalberd`, `paladin` → `goldmace`,
+`battle_dwarf` → `barehammer` (байты кадров при переименовании не менялись).
