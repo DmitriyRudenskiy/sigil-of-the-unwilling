@@ -184,6 +184,15 @@ def measure() -> dict[str, int]:
 DEAD_PATH_PREFIX = ("docs/", "game/", "scripts/", "openspec/", "design/", "tools/",
                     "assets/")
 DEAD_PATH_EXEMPT = ("CHANGELOG", "DECISIONS", "QUESTIONS")
+# Классы не-ссылок (T-332) — пояснены в докстринге `dead_paths`.
+# «нет» ищется не по всей строке, а в окне вокруг упоминания: строка вида
+# «текстуры перекрашены (…), нет состояний danger/selected» содержит «нет» про
+# другое, и ссылка на удалённый инструмент в ней остаётся красной. Окно после —
+# 40 знаков: в `18-system-map.md:431` («сцен `A` и `B` в репо нет») от упоминания
+# до «нет» 31 знак через второе имя в бэктиках.
+ABSENT_MARK = re.compile(r"(?:\bнет\b|\bне стало\b|\botсутству|\bудал[её]н|\bболее не\b)")
+ABSENT_BEFORE, ABSENT_AFTER = 20, 40
+TMP_PATH = re.compile(r"(?:^|/)tmp/")
 
 
 def redirect_row(l: str) -> bool:
@@ -219,28 +228,46 @@ def ghost_rows() -> int:
 
 
 def dead_paths() -> list[str]:
-    """Пути в backticks внутри GDD-секций, которых нет в репозитории.
+    """Пути в бэктиках внутри GDD-секций, которых нет в репозитории.
 
     Реестры (`CHANGELOG`/`DECISIONS`/`QUESTIONS`) — история: они вне выборки GDD-секций
     (нет ведущей цифры) и дополнительно исключены по имени; имеют право ссылаться на
     путь, который существовал тогда. Живой документ такого права
     не имеет: ссылка на несуществующий носитель читается как подтверждение.
     Путь разрешается и от корня репо, и от `game/` (в доках — res//-конвенция).
+
+    Два класса не-ссылок (T-332), из-за которых счётчик краснел на строках, где
+    мёртвый путь не выдаётся за живой:
+    * строка явно утверждает отсутствие рядом с упоминанием («сцен `X.tscn` в репо
+      нет», «носитель удалён») — это запись о долге, а не ссылка на носитель;
+    * пути под `tmp/` — пиксели и кадры в git не идут (D-185), такой путь живёт ровно
+      до следующего прогона и является доказательством замера, а не носителем.
+    Риск правила: строка вида «носителя `X` нет» больше не краснеет, даже если док
+    рядом на него ссылается; проверяющий читает строку, а не абзац — сознательная
+    плата за то, чтобы зелёный гейт значил «живых битых ссылок нет», а не «мы
+    привыкли к красному».
     """
     bad = []
     for f in sorted(DOCS.glob("[0-9]*.md")):
         if any(e in f.stem for e in DEAD_PATH_EXEMPT):
             continue
-        for raw in sorted(set(re.findall(r"`([^`\s]+)`", f.read_text(encoding="utf-8")))):
-            if not raw.startswith(DEAD_PATH_PREFIX) or any(
-                    c in raw for c in "*…<>{}"):
-                continue
-            rel = raw.split(":")[0]
-            if "." not in rel.rsplit("/", 1)[-1]:
-                continue
-            if (ROOT / rel).exists() or (ROOT / "game" / rel).exists():
-                continue
-            bad.append(f"{f.name}: {raw}")
+        hits = set()
+        for line in f.read_text(encoding="utf-8").splitlines():
+            for m in set(re.finditer(r"`([^`\s]+)`", line)):
+                raw = m.group(1)
+                if not raw.startswith(DEAD_PATH_PREFIX) or any(
+                        c in raw for c in "*…<>{}"):
+                    continue
+                rel = raw.split(":")[0]
+                if "." not in rel.rsplit("/", 1)[-1]:
+                    continue
+                if TMP_PATH.search(rel) or (ROOT / rel).exists() or (ROOT / "game" / rel).exists():
+                    continue
+                window = line[max(0, m.start() - ABSENT_BEFORE): m.end() + ABSENT_AFTER]
+                if ABSENT_MARK.search(window):
+                    continue
+                hits.add(f"{f.name}: {raw}")
+        bad.extend(sorted(hits))
     return bad
 
 

@@ -284,6 +284,26 @@ def test_registries_are_exempt_from_dead_paths(world, monkeypatch):
     assert not any("nope.gd" in d for d in gate.dead_paths())
 
 
+def test_absence_lines_and_tmp_shots_are_not_dead_paths(world, monkeypatch):
+    """«сцен `X.tscn` в репо нет» и кадр в `tmp/` — не битая ссылка (T-332).
+
+    Оба класса красили ratchet на строках, где никто не выдаёт мёртвый путь за
+    живой, и зелёного гейта было не дождаться; обычная ссылка в том же файле
+    обязана остаться красной.
+    """
+    docs, _ = world
+    (docs / "01-core-loop.md").write_text(
+        "сцен `game/assets/ui/panels/decision_panel.tscn` в репо нет\n"
+        "кадр замера: `game/tmp/shots/probe.png`, 1920×1080\n"
+        "а это ссылка на носитель: `game/scripts/really_gone.gd`\n",
+        encoding="utf-8")
+    monkeypatch.setattr(gate, "ROOT", world[0].parent)
+    got = gate.dead_paths()
+    assert not any("decision_panel" in d for d in got), got
+    assert not any("probe.png" in d for d in got), got
+    assert any("really_gone.gd" in d for d in got), got
+
+
 def test_duplicate_risk_number_is_red(world):
     _green_baseline(world)
     r = world[0] / "09-risks.md"

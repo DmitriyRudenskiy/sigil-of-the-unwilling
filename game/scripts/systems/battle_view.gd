@@ -345,10 +345,14 @@ func update_unit_count(unit: BattleState.BattleUnit) -> void:
 	if cl != null:
 		cl.text = str(unit.get_count())
 
-func flash_unit(unit: BattleState.BattleUnit) -> void:
+## Удар: вспышка мода + отдача позой. Возвращает **твин позы** (или твин вспышки, если
+## позы нет): тест мотает его `custom_step`-ом, а не ловит по часам — под загрузкой
+## полного прогона 100 мс реального времени не содержат ни одного тика твина, и сэмпл
+## снимался в нуле (T-333). Вызывающий код бойца значение не читает.
+func flash_unit(unit: BattleState.BattleUnit) -> Tween:
 	var node := _find_node(unit)
 	if node == null:
-		return
+		return null
 	var an := _anim_of(node)
 	if an != null:
 		_play_once(an, &"hit")
@@ -371,6 +375,8 @@ func flash_unit(unit: BattleState.BattleUnit) -> void:
 		var rt := create_tween()
 		rt.tween_property(fig, "offset:x", rest.x - faces.x * kick, GameNumbers.HIT_FLASH_SEC)
 		rt.tween_property(fig, "offset:x", rest.x, GameNumbers.HIT_FLASH_RECOVER_SEC)
+		return rt
+	return tw
 
 func remove_unit(unit: BattleState.BattleUnit) -> void:
 	var node := _find_node(unit)

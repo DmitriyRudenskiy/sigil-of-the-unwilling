@@ -3,7 +3,7 @@
  "q_without_priority": 115,
  "d_without_rejected": 170,
  "risks_without_number": 10,
- "dead_paths": 5,
+ "dead_paths": 4,
  "q_ghost_rows": 0,
  "t_duplicate_headers": 0,
  "t_multi_footer": 0

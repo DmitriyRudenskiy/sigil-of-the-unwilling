@@ -178,13 +178,20 @@ func test_hit_recoils_and_returns_to_rest() -> void:
 	_view.create_unit_sprite(u)
 	var fig: Sprite2D = _sprite_of(u).get_node("Figure")
 	var rest: Vector2 = _sprite_of(u).get_meta("rest")
-	_view.flash_unit(u)
-	await await_millis(100)
+	var rt := _view.flash_unit(u)
+	assert_that(rt).is_not_null() \
+		.override_failure_message("у позы отдачи нет твина — мотать нечем")
+	# Тот же приём, что у соседнего кейса про шаг: твин перематывается по шагу, а не
+	# ловится по часам. `flash_unit` не отдавал твин наружу, и сэмпл снимался до старта
+	# твина — кейс краснел только в составе `full`, где процессы загружаются плотнее (T-333).
+	rt.pause()
+	rt.custom_step(GameNumbers.HIT_FLASH_SEC)
 	assert_float(fig.offset.x).is_less(rest.x - 0.001) \
 		.override_failure_message("отдача атакующего обязана уйти назад по x (получено %.1f)" % fig.offset.x)
 	assert_float((rest.x - fig.offset.x) * fig.scale.x).is_greater_equal(2.0) \
 		.override_failure_message("отдача на экране меньше 2 px — анимация невидима")
-	await await_millis(400)
+	rt.play()
+	await rt.finished
 	assert_vector(fig.offset).is_equal(rest) \
 		.override_failure_message("после удара поза не вернулась в покой")
 
