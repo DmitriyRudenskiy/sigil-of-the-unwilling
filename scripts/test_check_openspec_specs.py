@@ -75,6 +75,11 @@ def test_repo_carrier_is_clean() -> None:
 def test_delta_headers_remain_legal_in_changes() -> None:
     """Обратная половина правила: в changes/ дельта-заголовки живы — значит проверка
    scope'ится сведёнными спеками, а не всем openspec/ подряд."""
-    deltas = [p for p in (cs.REPO / "openspec" / "changes").glob("*/specs/*/spec.md")
+    # Глоб рекурсивный, включая changes/archive/: с 2026-11-02 активной смены в
+    # репо нет (копи-цикл свёрнут целиком), и прежний glob `*/specs/*/spec.md`
+    # умирал с сообщением «не осталось ни одной дельты» ровно в тот момент, когда
+    # процесс доведён до конца. Дельта в архиве легальна тем же правилом: сведённые
+    # спеки — другой носитель, их проверяет test_repo_carrier_is_clean.
+    deltas = [p for p in (cs.REPO / "openspec" / "changes").glob("**/specs/*/spec.md")
               if cs.DELTA_HEADER.search(p.read_text(encoding="utf-8"))]
     assert deltas, "в changes/ не осталось ни одной дельты — под вопросом сам критерий"

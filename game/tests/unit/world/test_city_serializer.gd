@@ -208,3 +208,22 @@ func test_migrate_v1_to_v2() -> void:
 	CitySerializer.deserialize(c2, d)
 	assert_that(c2.scale_tier).is_equal(0)
 	assert_float(c2.auto_resource_mult).is_equal_approx(1.0, 0.0001)
+
+# Прежний дом — unit/world/test_city_hex_layout.gd (шаг 6 T-305, 2026-10-30).
+func _village() -> City:
+	return CityFactory.create_village(Vector2i(10, 10), "Test")
+
+func test_serializer_migration_without_core_cells() -> void:
+	var c := _village()
+	var d := CitySerializer.serialize(c)
+	d.erase("core_cells")
+	var c2 := City.new()
+	CitySerializer.deserialize(c2, d)
+	assert_that(c2.core_cells).is_equal(CityFactory.core_cells_for(c2.center))
+
+func test_serializer_roundtrip_core_cells() -> void:
+	var c := _village()
+	var d := CitySerializer.serialize(c)
+	var c2 := City.new()
+	CitySerializer.deserialize(c2, d)
+	assert_that(c2.core_cells).is_equal(c.core_cells)

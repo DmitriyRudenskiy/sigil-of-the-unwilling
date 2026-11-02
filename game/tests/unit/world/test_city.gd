@@ -8,11 +8,26 @@ extends BaseTest
 ## без правок, единственное изменение — общий `preload` фабрик.
 ##
 ## Что осталось отдельными файлами сознательно: у `test_city_housing.gd` свой
-## `before_test` (другая фикстура города), у `test_city_processor.gd`/
-## `test_city_reputation.gd` носитель — `city_turn_processor.gd`, у
-## `test_city_arena.gd` — `city_check.gd`, у `test_smoldering_city.gd` —
-## `settlement/SmolderingCity.gd` (в группу city.gd их попадал приписывает эвристика
-## имени, а не проверяемый код).
+## `before_test` (другая фикстура города), у `test_smoldering_city.gd` носитель —
+## `settlement/SmolderingCity.gd` (production-файл с заглавной буквы, поэтому в группу
+## city.gd их приписывает эвристика имени, а не проверяемый код).
+##
+## Шаг 2 (2026-10-30, T-305): четыре файла переименованы по фактическому носителю —
+## `test_city_processor.gd` → `city/test_city_turn_processor.gd` (12 вызовов
+## `CityTurnProcessor`), `test_city_reputation.gd` → `city/test_reputation_system.gd`
+## (30 — `ReputationSystem`), `test_city_persistence.gd` →
+## `test_city_factory_persistence.gd` (7 — `CityFactory`), `test_city_arena.gd` →
+## `test_arena_ring_system.gd` (32 — `ArenaRingSystem`, 16 — `ArenaTurnRunner`).
+## Эрратум отчёта 2026-10-27: первым двум там значился носитель `city_check.gd`.
+## В `test_city_processor.gd` обращений к `CityCheck` нет вовсе, в `test_city_arena.gd`
+## их шесть — и все шесть это аннотации типа результата (`var res: CityCheck =
+## ArenaTurnRunner.place_building(...)`), а не предмет проверки: считалось по подстроке.
+##
+## Не переименованы сознательно: `test_city_level.gd`, `test_city_navigation.gd`,
+## `test_city_system.gd`, `test_city_tech_tree.gd`, `test_city_hex_layout.gd` — в каждом
+## от двух до трёх равноправных носителей (например, в `test_city_system.gd` — рост
+## населения, borough-правила и стройки), имя под один из них было бы новой ложью;
+## правильный шаг для них — разделение файла, а не переименование.
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
 

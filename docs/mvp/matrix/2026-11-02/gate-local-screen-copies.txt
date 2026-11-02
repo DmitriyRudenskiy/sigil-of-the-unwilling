@@ -1,0 +1,50 @@
+=== gate local (screen copies: alpha-battle-field, hero-screen-full-copy, map-screen-full-copy) — 2026-11-02, local ===
+head_sha до push: 72bfe528
+
+--- GdUnit4 (headless) ---
+Overall Summary: 3667 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (391/391)
+Executed test cases : (3667/3667)
+Exit code: 0
+ORPHAN-GATE: ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+LINT: LINT: SKIPPED (нет gdtoolkit у python3 или нет .gdlintrc в /home/user/sigil-of-the-unwilling/game)
+
+--- MCP e2e (pytest) ---
+PYTEST LEDGER: passed=110 skipped=2 failed=1 errors=1 collected=114
+  - test_balance_probe::test_balance_probe_deterministic :: godot_mcp.MCPError: игра не готова за 180 с (последняя ошибк�
+  - test_dest_marker_boot::test_dest_marker_leaves_on_teardown :: failed on setup with "godot_mcp.MCPError: игра не готова за 180 с (п
+MCP READINESS: YELLOW — 2 error с подпиской readiness (игра не готова за): среда, не регрессия (D-265); тесты обязан переснять владелец либо повторный прогон:
+MCP VERDICT: YELLOW
+MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265)
+
+--- doc_gates.sh ---
+  dead_paths: 5 (базлайн 5) OK
+  q_ghost_rows: 0 (базлайн 0) OK
+  t_duplicate_headers: 0 (базлайн 0) OK
+  t_multi_footer: 0 (базлайн 0) OK
+GDD-GATE: GREEN
+OK: контур фаз GDD (состояния, поля реестров, ratchet)
+OK: провенанс ассетов game/assets (строка на каждый файл)
+HERO FRAMES: OK (5 герой(ов), 300 кадров сверены с манифестом)
+OK: кадры героев ↔ манифест сборки integrate.py
+OK: аудит комплекта фигур (альфа, холст, опора, рост)
+OK: тесты самих проверщиков (15 файлов, 9.1.1)
+OPENSPEC SPECS: OK (проверено 89 сведённых спек)
+TESTMAP OK: дыр 80, файлов в группах слияния 141, дублей 0 · коллизий имён 2 (T-323: два файла под одним basename, группа слияния считает их как один)
+DOC GATES: GREEN
+
+--- воспроизведение ---
+  ./game/run_tests.sh                 # GdUnit4 + MCP e2e (Xvfb поднимается сам)
+  ./scripts/doc_gates.sh              # связность docs, спекы, TESTMAP, провенанс, фигуры
+  лог полного прогона этой смены: tmp/gate_screencopies.log (gitignored, не доказательство;
+  доказательство — строки выше)
+
+--- тестовый леджер смены ---
++добавлено: 13 py-тестов аудитора кадров фигур (scripts/test_audit_hero_frames.py);
+−удалено: 0; quarantine: 0; нетто: +13 py / 0 gd.
+GdUnit: было 3667 → стало 3667 (смена документационная, гейт не двигался);
+TESTMAP: дыр 80 / файлов в группах слияния 141 / дублей 0 / name_collisions 2 — без
+сдвига рэтчета. Причина: правки коснулись docs/, openspec/ и двух py-скриптов.

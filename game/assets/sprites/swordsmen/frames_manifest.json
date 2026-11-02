@@ -1,0 +1,286 @@
+{
+ "backfilled": true,
+ "canvas": 512,
+ "clips": {
+  "attack": {
+   "picked": "scripts/hero_anim/out/swordsmen/attack/picked.json",
+   "variant": 4
+  },
+  "hit": {
+   "picked": "scripts/hero_anim/out/swordsmen/hit/picked.json",
+   "variant": 4
+  },
+  "idle": {
+   "picked": "scripts/hero_anim/out/swordsmen/idle/picked.json",
+   "variant": 1
+  },
+  "turn": {
+   "picked": "scripts/hero_anim/out/swordsmen/turn/picked.json",
+   "variant": 1
+  },
+  "walk": {
+   "picked": "scripts/hero_anim/out/swordsmen/walk/picked.json",
+   "variant": 2
+  }
+ },
+ "feet_y": 448,
+ "figure_h": 384,
+ "frames": {
+  "swordsmen_attack_01.png": {
+   "sha256": "b4439b18aaff22afda3de7e8d365317f5d276d2f8d16e17eb0bfa63dcfe4b91e",
+   "track": "attack"
+  },
+  "swordsmen_attack_02.png": {
+   "sha256": "c837d03d8630e8beb2fe6934b551dde2318dfa68a8dd6f0b5110bcbd2aba6f88",
+   "track": "attack"
+  },
+  "swordsmen_attack_03.png": {
+   "sha256": "4dd97c7b120001e800cc5aefba8f3ff4bc7a43f90314da1fc8494bc1156e74b6",
+   "track": "attack"
+  },
+  "swordsmen_attack_04.png": {
+   "sha256": "322d904288fc1e2a8e00b73fb5ed16ca3d2bd06b6e6e8e8c7bc3b2d630912451",
+   "track": "attack"
+  },
+  "swordsmen_attack_05.png": {
+   "sha256": "aaec2e0bb21c6a1864c9eb96d4036581f42bc372b40864a631b089131e94d895",
+   "track": "attack"
+  },
+  "swordsmen_attack_06.png": {
+   "sha256": "1efe2f23767291f847189634d1a991b7b058a3aca292ab10470e4d1cae7e145c",
+   "track": "attack"
+  },
+  "swordsmen_attack_07.png": {
+   "sha256": "7243401a94d0f02944a83b796e1d421b31f9565c0d50d409a8d88ecd9a989e7e",
+   "track": "attack"
+  },
+  "swordsmen_attack_08.png": {
+   "sha256": "53fa2ca9f8a68daa9eb09cae0f55706027e9dffd86f077cc6162d0d200b053c3",
+   "track": "attack"
+  },
+  "swordsmen_attack_09.png": {
+   "sha256": "88a7a38219aadc4c9df151dd33a3029980e324498bc898ff9db9214dccd4b12c",
+   "track": "attack"
+  },
+  "swordsmen_attack_10.png": {
+   "sha256": "f09f1a98e0ff1de32e25d176b9c864ecd645ec1bfe742ef5f64f85bb2c25b2a3",
+   "track": "attack"
+  },
+  "swordsmen_attack_11.png": {
+   "sha256": "57eb37fd07961df4b8bccc26af47ae2a32b6ef1ae3cd95cc2e919f06798232f1",
+   "track": "attack"
+  },
+  "swordsmen_attack_12.png": {
+   "sha256": "5bffa2b8aa4a76579a126bbb2f54fca4030bb83c2edbc6eaa0fdaf346a9ec17c",
+   "track": "attack"
+  },
+  "swordsmen_hit_01.png": {
+   "sha256": "14d28c5cba259dc2c3b66dbf9fe332cf6cd308a8d04b860e57149923faa752e2",
+   "track": "hit"
+  },
+  "swordsmen_hit_02.png": {
+   "sha256": "dffec7548335f48cf7951cdc5bdfb2e8be913f2e9af59f1db9616dcfb7b44b83",
+   "track": "hit"
+  },
+  "swordsmen_hit_03.png": {
+   "sha256": "6ea8d07a49900f90d75e59847d3e0b87e7c63d49c5a0211e5214063cd049a6f3",
+   "track": "hit"
+  },
+  "swordsmen_hit_04.png": {
+   "sha256": "6446700df77799957fcf211023c67c06821a32b6f27374687b6dcdf6b3126f54",
+   "track": "hit"
+  },
+  "swordsmen_hit_05.png": {
+   "sha256": "f3d48e33ecac86158e704fa2f727e56aeb1fca81ab0f5dc91754861b4772aea4",
+   "track": "hit"
+  },
+  "swordsmen_hit_06.png": {
+   "sha256": "d89f2c8c8dcb9fac3d7eeda2366911092f0f2636fe416e24f72f7cb725191ae3",
+   "track": "hit"
+  },
+  "swordsmen_hit_07.png": {
+   "sha256": "b7e1b0e0becad68ccd03a5d2c3d3d8a6e6e1654fe051d884555ac7b0e456f059",
+   "track": "hit"
+  },
+  "swordsmen_hit_08.png": {
+   "sha256": "d8c89d1ac0cfcdc4f9fcbc2f7f29ac71e01906292ca6a362e61da9c95c31f586",
+   "track": "hit"
+  },
+  "swordsmen_hit_09.png": {
+   "sha256": "905c1db7700b41d947550a1e7615f18cffbd9e61bd5f322007568c4591bb0881",
+   "track": "hit"
+  },
+  "swordsmen_hit_10.png": {
+   "sha256": "a7f5a58929d1f77101455b1bcd8d07b4b7c1f313ab4a1007eb2d4ddc3586f61f",
+   "track": "hit"
+  },
+  "swordsmen_hit_11.png": {
+   "sha256": "ee3d526d06844ec3bc98d9f1615995f592b8ce44b6e786e6854609064660223e",
+   "track": "hit"
+  },
+  "swordsmen_hit_12.png": {
+   "sha256": "b9adf87d4d03bdf06225e49c32559ab8699b97dafce9a0526de7c81cb6347646",
+   "track": "hit"
+  },
+  "swordsmen_idle_01.png": {
+   "sha256": "4a8ee77013b75a7413645634d5b38e16ca1cc5b0214eab17157e52ce71c8ceaf",
+   "track": "idle"
+  },
+  "swordsmen_idle_02.png": {
+   "sha256": "6c0971c45d06e46a452aa32b755baabc9657f092c28611b5ac9e1a1b88baf0fd",
+   "track": "idle"
+  },
+  "swordsmen_idle_03.png": {
+   "sha256": "0089253a87091226d8d94743c438662af0350b85bc57ba86a1a02c0bb04bdbfa",
+   "track": "idle"
+  },
+  "swordsmen_idle_04.png": {
+   "sha256": "bc71a0580ea5d0187ded02fadc7092af2a17c527ea6b86496adb2871630791a7",
+   "track": "idle"
+  },
+  "swordsmen_idle_05.png": {
+   "sha256": "fde0e6eb950d97c7268633bc4ec9d17ea6d28bc7cd9d1d9e914ec17761888d51",
+   "track": "idle"
+  },
+  "swordsmen_idle_06.png": {
+   "sha256": "13808c3d276aad1dd4d5433c237c5818c35c7316d8b01aa302a613bb4fb359d3",
+   "track": "idle"
+  },
+  "swordsmen_idle_07.png": {
+   "sha256": "a4249af94836ccef3afb6dc5a7b773901e747fcb9efd76b792041286b37641a4",
+   "track": "idle"
+  },
+  "swordsmen_idle_08.png": {
+   "sha256": "37a3f4a2f94be99fda1a0de4ef9a27e9dfc1e3ec86b608db3d6f2c90a34654d4",
+   "track": "idle"
+  },
+  "swordsmen_idle_09.png": {
+   "sha256": "a0a34b36a4085909e97c8874c40fb348d374634946a166cb15ed3c1fc2b26235",
+   "track": "idle"
+  },
+  "swordsmen_idle_10.png": {
+   "sha256": "bf11c7e185831f36fa188de3025507e5488a1fba0785e92e00a711b1d4921a2a",
+   "track": "idle"
+  },
+  "swordsmen_idle_11.png": {
+   "sha256": "9b25c74d9d6f95419403db3f6c5f14f4d1b223c23a2a766ba567dc3433ddd874",
+   "track": "idle"
+  },
+  "swordsmen_idle_12.png": {
+   "sha256": "a5bba4bb1d2bc32cf60d6e78124e009be49e198a561f2d18b389600e5d97e252",
+   "track": "idle"
+  },
+  "swordsmen_turn_01.png": {
+   "sha256": "ea5b4cb5ed0f00d3ad743f86158717903817954c2b9726fdaa923f565add12eb",
+   "track": "turn"
+  },
+  "swordsmen_turn_02.png": {
+   "sha256": "e47f35bcd9a43b6b4124ab9f9df5a82321c4e88618eef9d9e2155380da845580",
+   "track": "turn"
+  },
+  "swordsmen_turn_03.png": {
+   "sha256": "6663d3ec656253b984c65693351cc40bee8d952d785c15a9856f305d9c955b4c",
+   "track": "turn"
+  },
+  "swordsmen_turn_04.png": {
+   "sha256": "0b26c4374598f7dba3ca286e54da2d1a02b6f49f36009d78752c3ffe84a72cb3",
+   "track": "turn"
+  },
+  "swordsmen_turn_05.png": {
+   "sha256": "10673b644bd005417b1ecb4c584b31cbd2b2c037ea96617715c81ffb7d570162",
+   "track": "turn"
+  },
+  "swordsmen_turn_06.png": {
+   "sha256": "1102f9f7ce1aad0bef0fae48fe05483f9d3320f40286b659fc15bd1eea9771ca",
+   "track": "turn"
+  },
+  "swordsmen_turn_07.png": {
+   "sha256": "443adf48e48d4200bc07bf43965669a83dce54b30313ad8b02de019a9e7589d1",
+   "track": "turn"
+  },
+  "swordsmen_turn_08.png": {
+   "sha256": "9c38357d56eb30d0a85dd47f898b98abe139861e54c29bbec8a561d640634661",
+   "track": "turn"
+  },
+  "swordsmen_turn_09.png": {
+   "sha256": "c80cf42d7766e952bf15b8df4143bf3d1f46ae8c186a59830ed849bb9d8539ab",
+   "track": "turn"
+  },
+  "swordsmen_turn_10.png": {
+   "sha256": "a7b4faddee34abf3f1e312624973aa77629e6b6836ef6e72ceb5c7f80ca45391",
+   "track": "turn"
+  },
+  "swordsmen_turn_11.png": {
+   "sha256": "b91b917f9cb144b6a46b5c4d25365c8ee249a156d2c03152684154c35d938d86",
+   "track": "turn"
+  },
+  "swordsmen_turn_12.png": {
+   "sha256": "4747fa87ad1a418b90c0b692bd3b053caf3565d9b41e2b660fc24b4e09f575c0",
+   "track": "turn"
+  },
+  "swordsmen_walk_01.png": {
+   "sha256": "685322bd5e541ec6878e96187b7308a02652a32cfd66e4094cab830762e7f559",
+   "track": "walk"
+  },
+  "swordsmen_walk_02.png": {
+   "sha256": "fecaf391ccd1d56de8b82b523e282d198c4c0bf9ca1af7c8304851ac333de8f9",
+   "track": "walk"
+  },
+  "swordsmen_walk_03.png": {
+   "sha256": "faed5343cb550baba48693bcbb63459a685b96888a0e9b0a2a95ed919119ac24",
+   "track": "walk"
+  },
+  "swordsmen_walk_04.png": {
+   "sha256": "17beaf846e542c3ef20321c360dc9d7d938704e38d876438726921fad1eec467",
+   "track": "walk"
+  },
+  "swordsmen_walk_05.png": {
+   "sha256": "e5a98c2440142c89359d7b181443e35b4a3c0cd2d63467cf31246bbc365d5c33",
+   "track": "walk"
+  },
+  "swordsmen_walk_06.png": {
+   "sha256": "42867652c4ad84fed665fb1e343ad12a5b90bd694818eed2b71f05ed3a87b3b8",
+   "track": "walk"
+  },
+  "swordsmen_walk_07.png": {
+   "sha256": "32e4981f4a5ac7fb4e4f15e94fbd901ae2ec2e5d0395ecdc1ff40ef918848e29",
+   "track": "walk"
+  },
+  "swordsmen_walk_08.png": {
+   "sha256": "3fb03322811018e5c8914b78ab2bf72c54da01accc502386b31dc5805144b0fa",
+   "track": "walk"
+  },
+  "swordsmen_walk_09.png": {
+   "sha256": "197f55748d8c5d78e9725805024406420ad58fa8a80e4d77dbf1dc94cb035edc",
+   "track": "walk"
+  },
+  "swordsmen_walk_10.png": {
+   "sha256": "fd1eb9d3fa1030b5573eec6ba4bbbf57e0f1b1b552f39019d5c2d19b8a157e72",
+   "track": "walk"
+  },
+  "swordsmen_walk_11.png": {
+   "sha256": "d74fbefcae45ba9ede40a7990e098d5df514649409f98485df6463ae75ceb54e",
+   "track": "walk"
+  },
+  "swordsmen_walk_12.png": {
+   "sha256": "c399e1f95a67a89662f1b0d79626d6b14aad9dd7a8a44ab9b30a6f720f98a9cb",
+   "track": "walk"
+  }
+ },
+ "frames_per_track": 12,
+ "hero": "swordsmen",
+ "loop_window": {
+  "attack": 0,
+  "hit": 0,
+  "idle": 40,
+  "turn": 0,
+  "walk": 40
+ },
+ "skip_start": {
+  "attack": 0,
+  "hit": 0,
+  "idle": 24,
+  "turn": 0,
+  "walk": 24
+ }
+}

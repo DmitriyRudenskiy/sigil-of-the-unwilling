@@ -14,12 +14,12 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (37)
+## Реестры и процессы (43)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
 | [[BANK]] | Банк контента | reference | 2026-10-03 |
-| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-10-30 |
+| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-11-02 |
 | [[DECISIONS]] | Реестр решений и открытых вопросов | canon | 2026-10-30 |
 | [[QUESTIONS]] | Открытые вопросы — Фаза 4 (MVP и тикеты) | reference | 2026-10-24 |
 | [[ACTOR-ARMY]] | Актёрная модель армии (K-канон) | canon | 2026-10-11 |
@@ -33,8 +33,9 @@ date: 2026-10-14
 | [[PR-ASSET-1]] | Тело PR ASSET-1 (feat/asset-1-resources) | draft | 2026-10-15 |
 | [[PR-DOCS-ARTBIBLE]] | Тело PR docs (feat/art-bible-rev2) | archived | 2026-10-14 |
 | [[PR-UI-PHASE5]] | Тело PR фазы 5 (feat/ui-phase5) | archived | 2026-10-14 |
+| [[SCENARIO-MATRIX]] | Матрица сценариев «роль × класс» — прогон, отчёт, история | reference | 2026-10-30 |
 | [[TEST-MAP]] | Карта тестов: покрытие меньшим количеством тестов | reference | 2026-11-02 |
-| [[TICKETS]] | Тикеты MVP (T-001…T-113) | reference | 2026-10-25 |
+| [[TICKETS]] | Тикеты MVP (T-001…T-113) | reference | 2026-11-02 |
 | [[VERDICT-REQUEST]] | Вердикты владельца — блокирующие решения (verdict-request) | reference | 2026-10-26 |
 | [[f-plan]] | F-план — приёмка Д1/Д2 и сведение расхождений | draft | 2026-10-04 |
 | [[README]] | Снимок матрицы автопилота 2026-10-26 | reference | 2026-10-26 |
@@ -47,14 +48,19 @@ date: 2026-10-14
 | [[ux-battle-hud-t310]] | UX-review боевого HUD после снятия мёртвого `turn_line` (T-310) | reference | 2026-10-29 |
 | [[ux-hero-tip-t271]] | UX-review T-271 — посадка карточки предмета (зона D экрана героя) | reference | 2026-10-29 |
 | [[session-2026-10-30-hero-art]] | Саммари смены 2026-10-30 — идентичность героя, имена наборов, дорожки | reference | 2026-10-30 |
+| [[t321-rest-trace]] | T-321 — трасса потребности REST: Городостроитель × Разбойник умирает от шкалы отдыха | reference | 2026-10-30 |
 | [[ux-battle-row-t315]] | Кадр и разбор T-315 — командный ряд боя: пластина отключённой команды | reference | 2026-10-30 |
 | [[ux-hero-bands-t257]] | UX-review T-257 — зоны переноса внутри рамки камня (экран героя) | reference | 2026-10-30 |
 | [[ux-hero-carriers-t247]] | Акт инвентаря и опись строк экрана «Герой» (T-247) | reference | 2026-10-30 |
 | [[ux-hero-doll-t258]] | UX-review T-258 — кукла экрана героя: кадр фигуры и светлая врезка | reference | 2026-10-30 |
+| [[ux-hero-frames-t318]] | ux-review T-318 — переснятые профили и дорожки knights / paladin / battle_dwarf | reference | 2026-10-30 |
 | [[ux-hero-grid-t255]] | UX-review T-255 — клетки, предмет и его рамки в сумке (зона D экрана героя) | reference | 2026-10-30 |
 | [[ux-hero-identity-t318]] | UX-review T-318 — идентичность героя в принятых профилях против выреза владельца | reference | 2026-10-30 |
 | [[ux-hero-reshoot-t318]] | Пересъёмка профилей T-318 — вердикт зрением | reference | 2026-10-30 |
 | [[ux-hero-unit-cards-t306]] | Кадр и разбор T-306 — карточки отряда и строка уровня экрана «Герой» | reference | 2026-10-30 |
+| [[ux-battle-tilt-figures]] | — | — | — |
+| [[ux-hero-screen-copy]] | — | — | — |
+| [[ux-map-screen-copy]] | — | — | — |
 
 ## GDD и стиль (87)
 
@@ -96,11 +102,11 @@ date: 2026-10-14
 | [[09-risks]] | Риски и открытые вопросы | deepened | 2026-10-21 |
 | [[10-appendix-a-races]] | Приложение А — A6-R-таблица каталога 54 | canon | 2026-10-13 |
 | [[12-asset-audit]] | Asset Audit — game/assets | snapshot | 2026-10-13 |
-| [[13-art-bible]] | Art Bible — визуальная идентичность | deepened | 2026-10-18 |
+| [[13-art-bible]] | Art Bible — визуальная идентичность | deepened | 2026-11-02 |
 | [[14-ux-battle-hud]] | UX-спека — боевой HUD (UI-2) | draft | 2026-10-28 |
-| [[15-asset-spec-artifacts]] | Asset-spec — 29 иконок артефактов (UI-4) | draft | 2026-10-13 |
+| [[15-asset-spec-artifacts]] | Asset-spec — 29 иконок артефактов (UI-4) | draft | 2026-10-30 |
 | [[16-ux-review-battle-hud]] | UX-ревью боевого HUD (UI-3, шаг 3) | draft | 2026-10-13 |
-| [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-10-18 |
+| [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-11-02 |
 | [[18-lora-style-groups]] | Теги стилей обучающей нарезки — измерено, а не на глаз | reference | 2026-10-27 |
 | [[18-system-map]] | Карта систем | reference | 2026-10-29 |
 | [[19-gdd-workflow]] | Контур фаз GDD | reference | 2026-10-27 |

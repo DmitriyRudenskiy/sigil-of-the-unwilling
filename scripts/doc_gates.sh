@@ -40,6 +40,13 @@ run "контур фаз GDD (состояния, поля реестров, rat
 # Уровень здесь, а не в game/run_tests.sh: чистый Python по дереву ассетов, Godot
 # для него поднимать не за чем (T-261).
 run "провенанс ассетов game/assets (строка на каждый файл)" "$PY" scripts/check_asset_provenance.py
+# Кадры героев — бинарники, и до этого уровня в репозитории не было машины, которая
+# заметила бы подмену: шестьдесят кадров `knights` несли другого персонажа, потому что
+# вердикт зрения не был привязан к файлам (T-318).
+run "кадры героев ↔ манифест сборки integrate.py" "$PY" scripts/check_hero_frames.py
+# Геометрия того же комплекта: идентичность байтов держит check_hero_frames, а
+# кадр правильной подписи и кривой опоры проходит его молча (3.6, alpha-battle-field).
+run "аудит комплекта фигур (альфа, холст, опора, рост)" "$PY" scripts/audit_hero_frames.py
 
 TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 	scripts/test_classify_mcp_junit.py scripts/test_gdd_gate.py scripts/test_gdd_grounding.py
@@ -47,6 +54,9 @@ TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 	scripts/test_check_hero_layout_map.py
 	scripts/test_check_openspec_specs.py scripts/test_check_node_paths.py
 	scripts/test_check_save_matrix.py scripts/test_check_asset_provenance.py
+	scripts/test_check_hero_frames.py
+	scripts/test_audit_hero_frames.py
+	scripts/test_scenario_matrix.py
 	scripts/test_check_test_tiers.py)
 # Отсутствующий файл списка — КРАСНЫЙ, а не «молча не досчитались»: ровно так список
 # и жил, пока в нём значился test_check_docs_links.py, которого никогда не было

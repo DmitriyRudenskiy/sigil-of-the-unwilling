@@ -98,3 +98,51 @@ func test_boot_endgame_wired() -> void:
 	var wc := await _boot_world()
 	var R = wc._bootstrap_result
 	assert_bool(R.endgame is EndgameController).is_true()
+
+# --- пара городов из бутстрапа (прежний дом — functional/test_city_navigation.gd,
+# шаг 7 T-305, 2026-10-30): предмет — WorldBootstrap._create_cities.
+
+func _make_two_cities() -> Dictionary:
+	# Прежний дом — functional/test_city_navigation.gd (шаг 7 T-305, 2026-10-30).
+	var h := Node2D.new()
+	h.name = "TwoCitiesHolder"
+	get_tree().root.add_child(h)
+	_nodes.append(h)
+	var mg: MapGenerator = MapGenerator.new()
+	mg.name = "MapGenerator"
+	mg.seed_value = 42
+	h.add_child(mg)
+	assert_bool(mg.has_valid_tilemap()).is_true()
+	var R = WorldBootstrap.BootstrapResult.new()
+	R.map_gen = mg
+	WorldBootstrap._create_cities(h, R)
+	var capital: City = R.cities.capital
+	var second: City = null
+	for city in R.cities.cities:
+		if city != capital:
+			second = city
+	return {"mg": mg, "cities": R.cities, "capital": capital, "second": second}
+
+func test_bootstrap_creates_two_cities() -> void:
+	var w: Dictionary = _make_two_cities()
+	var cities = w.cities
+	assert_that(cities.cities.size()).is_equal(2)
+	var capital: City = w.capital
+	assert_that(capital).is_not_null()
+	assert_bool(capital.is_capital).is_true()
+	assert_that(capital.display_name).is_equal("Перворечье")
+	var capitals := 0
+	for city in cities.cities:
+		if city.is_capital:
+			capitals += 1
+	assert_that(capitals).is_equal(1)
+	var second: City = w.second
+	assert_that(second).is_not_null()
+	assert_bool(second.is_capital).is_false()
+	assert_that(second.display_name).is_equal("Город 2")
+	assert_that(second.owner).is_equal(&"player")
+	var d := HexUtils.hex_distance(capital.center, second.center)
+	assert_int(d).is_greater(8)
+	assert_int(d).is_less(25)
+	assert_bool(w.mg.is_walkable(second.center)).is_true()
+	assert_bool(w.mg.is_walkable(capital.center)).is_true()

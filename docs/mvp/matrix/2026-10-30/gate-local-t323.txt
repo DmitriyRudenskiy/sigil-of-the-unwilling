@@ -1,0 +1,63 @@
+head_sha: c109c4cb
+date: 2026-10-30
+task: T-323 (б) — коллизии базовых имён тест-файлов стали метрикой рэтчета
+runner: локальная машина (local), game/run_tests.sh + ./scripts/doc_gates.sh
+
+== 1. Что менялось ==
+Носитель метрики: scripts/testmap.py (name_collisions(), ключи snapshot/BASE_KEYS/
+RATCHET_KEYS, секция отчёта «коллизии имён», хвост строки TESTMAP OK),
+scripts/test_testmap.py (+2 теста), scripts/testmap.baseline.json (переснят только по
+новой метрике). Ни один тест игры не изменён; production-код не изменён.
+
+== 2. Метрика TESTMAP ==
+  name_collisions   — → 2   (новая метрика, в рэтчете)
+  merge_files        141    (не изменилась)
+  merge_groups        27
+  holes                 80
+  duplicate_groups       0
+  gd_files             391
+  gd_tests            3667
+Коллизии, влезшие в новую метрику:
+  test_battle_terrain.gd  ← tests/campaign/, tests/unit/systems/
+  test_inventory_grid.gd  ← tests/unit/entities/, tests/unit/ui/
+TESTMAP OK: дыр 80, файлов в группах слияния 141, дублей 0 · коллизий имён 2
+--check exit 0.
+
+== 3. GdUnit (headless) ==
+Overall Summary: 3667 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans
+Exit code: 0
+Игровой набор не затрагивался: правка только в python-носителе метрик.
+
+== 4. Прочие гейты прогона ==
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK, NODE-PATH-GATE: OK
+LINT: SKIPPED (нет gdtoolkit у python3) — жёлтый уровень, не падение
+
+== 5. MCP e2e ==
+PYTEST LEDGER: passed=112 skipped=2 failed=0 errors=0 collected=114
+MCP VERDICT: GREEN
+Readiness-ошибок нет; второй прогон подряд без них (шаг 7 давал 4 ошибки того же класса
+D-265/T-172 — число зависит от загрузки машины, а не от кода).
+
+== 6. Python-уровни ==
+scripts/test_testmap.py: 18 passed (из них 2 новых: обнаружение коллизии и её рэтчет)
+GENART: 11 passed (scripts/test_gen_map_art.py)
+READINESS-CLASSIFIER: selftest GREEN (13 passed)
+Проверка: scripts/test_testmap.py входит в список TESTS носителя scripts/doc_gates.sh
+(строка 50), то есть новые тесты закрыты гейтом, а не только локальным запуском.
+
+== 7. Doc gates ==
+DOC GATES: GREEN (check_docs_links, gen_docs_index, gdd_gate, audit_docs_vs_code,
+check_openspec_specs, check_save_matrix, check_node_paths, check_asset_provenance,
+check_ui_assets, check_hero_frames, check_hero_layout_map, TESTMAP-рэтчет,
+checker-тесты списка TESTS)
+TICKETS append-only: удалённая строка одна — собственный футер T-323 со строкой
+«Статус», заменён на тот же футер с расширенным статусом. Тела тикетов не правились.
+Свип примесей: CJK/zero-width нет; кириллица+латиница в одном слове — только исторические
+вхождения в архивных записях CHANGELOG и артефакта; в новом тексте исправлено до коммита.
+
+== 8. Итог ==
+GATE (local): 0 — GdUnit 3667/3667 exit 0, MCP GREEN (112/2/0), checker-тесты зелёные
+(18 testmap + 11 GENART + 13 классификатор), DOC GATES GREEN. CI не проверялся (по
+инструкции).

@@ -1,0 +1,81 @@
+---
+title: "Локальный гейт: test_city_navigation рассыпан (T-305 шаг 7)"
+tags: [mvp, gate, local, t305, testmap]
+status: reference
+date: 2026-10-30
+head_sha: 4b9829cf
+---
+
+# Локальный гейт — шаг 7: городских файлов-смесей не осталось
+
+Прогон: `./game/run_tests.sh`, лог `tmp/gate_t305g.log` (gitignored). Гарды документов —
+отдельный вызов `./scripts/doc_gates.sh` на финальном состоянии. CI не запускался
+(поллинг CI агенту запрещён, D-224).
+
+## 1. GdUnit
+
+| Метрика | Значение |
+| --- | --- |
+| Кейсов | **3667 / 3667** |
+| Ошибок / падений | **0 / 0** |
+| Орфанов | 0 |
+| Код выхода | **0** |
+| Тест-файлов `.gd` | 391 (−`test_city_navigation.gd`, +`test_marker_layer_city_markers.gd`) |
+
+**Леджер: 3668 → 3667 (−1, слияние, не потеря).** `test_exit_button_renamed_and_closes`
+повторял `close_requested` соседнего `test_close_button_emits_close_requested` того же
+носителя и с той же фикстурой (которая к тому же принудительно ставит 1920×1080 вместо
+дефолтных 64×64, то есть проверяет развёрнутую подпись шапки). Уникальное утверждение —
+подпись кнопки «Выход из города» — дописано в существующий кейс.
+
+Переехавшие кейсы не изменили поведения: проверки роутера на настоящей карте и
+бутстрап пары городов проходят в новых файлах так же, как проходили в старом; смена
+порядка сьютов (шаги переехали из `functional/` в `integration/`) регрессий не вскрыла,
+в том числе сезонной связанности T-322.
+
+## 2. Гарды
+
+`ORPHAN-GATE` OK (сирот 0) · `VACUOUS-ASSERT-GATE` OK · `PATH-GATE` OK ·
+`NODE-PATH-GATE` OK.
+
+## 3. TESTMAP / DOC GATES
+
+`TESTMAP OK: дыр 80, файлов в группах слияния 145, дублей 0` · `DOC GATES: GREEN`.
+
+`merge_files` **145** — третье движение подряд (148 → 147 → 146 → 145); базлайн переснят
+(`gd_files` 391, `gd_tests` 3667).
+
+## 4. MCP e2e — ЖЁЛТЫЙ (три readiness-ошибки)
+
+`PYTEST LEDGER: passed=109 skipped=2 failed=0 errors=3 collected=114` (843.33 с) ·
+`MCP VERDICT: YELLOW`.
+
+Все три — `failed on setup with "MCPError: игра не готова за 180 с"`:
+`test_battle_full_e2e::test_full_battle_runs_to_winner`,
+`test_dest_marker_boot::test_dest_marker_is_mounted_after_world_boot`,
+`test_session_reset::test_session_reset_caches`. Класс readiness (D-265, T-172); набор
+красных в третий раз за день не совпадает с предыдущими прогонами, ни один ассерт не
+ослаблен, skip'ов не добавлял; `passed + skipped + failed + errors = 114 = collected`.
+
+Сводка прогонов этого дня (одно семейство проверок, `collected=114`):
+
+| Прогон | passed | skipped | failed | errors | время |
+| --- | --- | --- | --- | --- | --- |
+| `gate-local-t305c.txt` | 111 | 2 | 0 | 1 | 497.91 с |
+| `gate-local-t305d.txt` | 108 | 2 | 0 | 4 | 1024.94 с |
+| `gate-local-t305e.txt` | 112 | 2 | 0 | 0 | 312.31 с |
+| `gate-local-t305f.txt` | 111 | 2 | 0 | 1 | 490.99 с |
+| **этот** | **109** | **2** | **0** | **3** | **843.33 с** |
+
+Зелёных 108…112 при постоянном `collected=114`, время 5…17 мин — readiness-ошибки
+следуют за загрузкой машины, а за состоянием кода.
+
+## 5. Прочее
+
+`GENART: 11 passed` · `READINESS-CLASSIFIER: 13 passed` + selftest GREEN.
+
+## 6. Что показывает прогон
+
+Городская семья С-3 закрыта: `test_city_system`, `test_city_level`, `test_city_tech_tree`,
+`test_city_hex_layout`, `test_city_navigation` разведены по носителям, `merge_files`
+за три шага упал с 148 до 145 при неизменных дырах (80) и дублях (0).

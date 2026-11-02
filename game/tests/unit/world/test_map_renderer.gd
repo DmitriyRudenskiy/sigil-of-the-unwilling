@@ -374,3 +374,43 @@ func test_generated_frame_shows_all_four_variants() -> void:
 			full += 1
 	assert_that(roomy).is_greater(0)
 	assert_that(full).is_equal(roomy)
+
+# Прежний дом — unit/world/test_city_hex_layout.gd (шаг 6 T-305, 2026-10-30):
+# rebuild_city_zones — метод рендерера, а не «прототип планировки города».
+func _village_at(center: Vector2i) -> City:
+	return CityFactory.create_village(center, "Test")
+
+func test_rebuild_city_zones_cache() -> void:
+	var c := _village_at(Vector2i(10, 10))
+	var renderer := MapRenderer.new(null)
+	renderer.rebuild_city_zones([c])
+	# ядро — ring 0
+	for cc in c.core_cells:
+		assert_bool(bool(renderer.city_zones.has(cc))).override_failure_message(str(cc)).is_true()
+		assert_int(int(renderer.city_zones[cc].ring)).is_equal(0)
+	# кольцо 1 — ring 1 (кроме занятых ядром)
+	var ring1 := HexUtils.ring(c.center, 1)
+	var ring1_count := 0
+	for cell in ring1:
+		if not c.core_cells.has(cell):
+			assert_bool(bool(renderer.city_zones.has(cell))).is_true()
+			assert_int(int(renderer.city_zones[cell].ring)).is_equal(1)
+			ring1_count += 1
+	# (1,1) в аксиальных координатах — расстояние 2, в кольце 1 только (1,0) и (0,1)
+	assert_that(ring1_count).is_equal(4)
+	# D6: граница — кольцо 3 вокруг ядра; кольцо 4 (по ядру) вне зоны
+	var ring3c := HexUtils.cells_in_core_ring(c.center, 3)
+	var ring4c := HexUtils.cells_in_core_ring(c.center, 4)
+	assert_bool(bool(renderer.city_zones.has(ring3c[0]))).is_true()
+	assert_bool(bool(not renderer.city_zones.has(ring4c[0]))).is_true()
+
+func test_rebuild_city_zones_replaces() -> void:
+	var c1 := _village_at(Vector2i(10, 10))
+	var c2 := _village_at(Vector2i(30, 30))
+	var renderer := MapRenderer.new(null)
+	renderer.rebuild_city_zones([c1, c2])
+	assert_bool(bool(renderer.city_zones.has(c1.center))).is_true()
+	assert_bool(bool(renderer.city_zones.has(c2.center))).is_true()
+	renderer.rebuild_city_zones([c2])
+	assert_bool(bool(not renderer.city_zones.has(c1.center))).is_true()
+	assert_bool(bool(renderer.city_zones.has(c2.center))).is_true()

@@ -62,6 +62,10 @@ func test_close_button_emits_close_requested() -> void:
 	screen.close_requested.connect(func(): emitted[0] = true)
 	var btn := screen.get_node("ScreenMargin/ScreenLayout/ScreenHeader/HeaderRow/Close") as Button
 	assert_that(btn).is_not_null()
+	# Прежний дом — functional/test_city_navigation.gd (test_exit_button_renamed_and_closes,
+	# шаг 7 T-305, 2026-10-30): кнопка обязана называться «Выход из города».
+	# Отдельный кейс не заведён: он повторял бы и фикстуру, и проверку close_requested.
+	assert_bool(btn.text.contains("Выход из города")).is_true()
 	btn.emit_signal("pressed")
 	assert_bool(emitted[0]).is_true()
 

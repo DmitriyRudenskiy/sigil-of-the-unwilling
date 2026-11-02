@@ -1,0 +1,272 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_01.png" id="1_h0001"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_02.png" id="2_h0002"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_03.png" id="3_h0003"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_04.png" id="4_h0004"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_05.png" id="5_h0005"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_06.png" id="6_h0006"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_07.png" id="7_h0007"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_08.png" id="8_h0008"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_09.png" id="9_h0009"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_10.png" id="10_h0010"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_11.png" id="11_h0011"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_idle_12.png" id="12_h0012"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_01.png" id="13_h0013"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_02.png" id="14_h0014"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_03.png" id="15_h0015"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_04.png" id="16_h0016"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_05.png" id="17_h0017"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_06.png" id="18_h0018"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_07.png" id="19_h0019"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_08.png" id="20_h0020"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_09.png" id="21_h0021"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_10.png" id="22_h0022"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_11.png" id="23_h0023"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_walk_12.png" id="24_h0024"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_01.png" id="25_h0025"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_02.png" id="26_h0026"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_03.png" id="27_h0027"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_04.png" id="28_h0028"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_05.png" id="29_h0029"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_06.png" id="30_h0030"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_07.png" id="31_h0031"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_08.png" id="32_h0032"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_09.png" id="33_h0033"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_10.png" id="34_h0034"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_11.png" id="35_h0035"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_attack_12.png" id="36_h0036"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_01.png" id="37_h0037"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_02.png" id="38_h0038"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_03.png" id="39_h0039"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_04.png" id="40_h0040"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_05.png" id="41_h0041"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_06.png" id="42_h0042"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_07.png" id="43_h0043"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_08.png" id="44_h0044"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_09.png" id="45_h0045"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_10.png" id="46_h0046"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_11.png" id="47_h0047"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_hit_12.png" id="48_h0048"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_01.png" id="49_h0049"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_02.png" id="50_h0050"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_03.png" id="51_h0051"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_04.png" id="52_h0052"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_05.png" id="53_h0053"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_06.png" id="54_h0054"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_07.png" id="55_h0055"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_08.png" id="56_h0056"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_09.png" id="57_h0057"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_10.png" id="58_h0058"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_11.png" id="59_h0059"]
+[ext_resource type="Texture2D" path="res://assets/sprites/swordsmen/swordsmen_turn_12.png" id="60_h0060"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_h0001")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_h0002")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_h0003")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_h0004")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_h0005")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_h0006")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_h0007")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_h0008")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_h0009")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_h0010")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_h0011")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_h0012")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_h0013")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_h0014")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_h0015")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_h0016")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_h0017")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_h0018")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_h0019")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_h0020")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_h0021")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_h0022")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_h0023")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_h0024")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("25_h0025")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_h0026")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_h0027")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_h0028")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_h0029")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_h0030")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_h0031")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_h0032")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_h0033")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_h0034")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35_h0035")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_h0036")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("37_h0037")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_h0038")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39_h0039")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40_h0040")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41_h0041")
+}, {
+"duration": 1.0,
+"texture": ExtResource("42_h0042")
+}, {
+"duration": 1.0,
+"texture": ExtResource("43_h0043")
+}, {
+"duration": 1.0,
+"texture": ExtResource("44_h0044")
+}, {
+"duration": 1.0,
+"texture": ExtResource("45_h0045")
+}, {
+"duration": 1.0,
+"texture": ExtResource("46_h0046")
+}, {
+"duration": 1.0,
+"texture": ExtResource("47_h0047")
+}, {
+"duration": 1.0,
+"texture": ExtResource("48_h0048")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("49_h0049")
+}, {
+"duration": 1.0,
+"texture": ExtResource("50_h0050")
+}, {
+"duration": 1.0,
+"texture": ExtResource("51_h0051")
+}, {
+"duration": 1.0,
+"texture": ExtResource("52_h0052")
+}, {
+"duration": 1.0,
+"texture": ExtResource("53_h0053")
+}, {
+"duration": 1.0,
+"texture": ExtResource("54_h0054")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55_h0055")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56_h0056")
+}, {
+"duration": 1.0,
+"texture": ExtResource("57_h0057")
+}, {
+"duration": 1.0,
+"texture": ExtResource("58_h0058")
+}, {
+"duration": 1.0,
+"texture": ExtResource("59_h0059")
+}, {
+"duration": 1.0,
+"texture": ExtResource("60_h0060")
+}],
+"loop": 0,
+"name": &"turn",
+"speed": 8.0
+}]
+
+]

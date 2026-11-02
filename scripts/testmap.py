@@ -190,6 +190,22 @@ def merges() -> list[tuple[str, list[str]]]:
     )
 
 
+def name_collisions() -> dict[str, list[str]]:
+    """Базовые имена тест-файлов, под которыми лежат два разных файла (T-323).
+
+    `merges()` складывает в группу `tp.name` — basename без каталога. Два файла-тёзки
+    (`tests/campaign/test_battle_terrain.gd` и `tests/unit/systems/test_battle_terrain.gd`)
+    дают в отчёте одну строку на двоих: «сколько файлов на носителе» перестаёт быть
+    числом файлов, а слияние реального файла в такую группу метрика не видит. Метрика
+    поднимает это Красным рэтчета, а не молчит: молча живущая коллизия превращает
+    `merge_files` в декорацию.
+    """
+    by: dict[str, list[str]] = collections.defaultdict(list)
+    for tp in test_files():
+        by[tp.name].append(tp.relative_to(GAME).as_posix())
+    return {k: sorted(v) for k, v in sorted(by.items()) if len(v) > 1}
+
+
 def _norm(body: str) -> str:
     s = _COMMENT_RE.sub("", body)
     s = re.sub(r'"[^"]*"', "S", s)
@@ -264,6 +280,7 @@ def measure() -> dict:
         "builder_files": builders[2],
         "coverage": coverage(),
         "merge_groups": merges(),
+        "name_collisions": name_collisions(),
         "duplicates": duplicates(),
     }
 
@@ -277,9 +294,11 @@ def baseline_path() -> Path:
 #: без роста числа файлов, а сами файлы при сведении (С-3) только уменьшаются.
 #: `local_builder_files` — Сюда же (срез test-suite-restructure): свод Preparation
 #: вниз разрешено, вверх — только с пересозданием базлайна в диффе.
-RATCHET_KEYS = ("holes", "merge_files", "duplicate_groups", "local_builder_files")
+#: `name_collisions` — два файла под одним базовым именем (T-323).
+RATCHET_KEYS = ("holes", "merge_files", "duplicate_groups", "local_builder_files",
+                "name_collisions")
 BASE_KEYS = ("gd_files", "gd_tests", "py_files", "py_tests", "holes",
-             "merge_groups", "merge_files", "duplicate_groups",
+             "merge_groups", "merge_files", "duplicate_groups", "name_collisions",
              "local_builder_files", "local_builders")
 
 
@@ -294,6 +313,7 @@ def snapshot(m: dict) -> dict:
         "duplicate_groups": len(m["duplicates"]),
         "local_builder_files": m["local_builder_files"],
         "local_builders": m["local_builders"],
+        "name_collisions": len(m["name_collisions"]),
     }
 
 
@@ -337,6 +357,9 @@ def check(m: dict, base):
     if better:
         note += " · улучшение против базлайна (" + ", ".join(
             f"{k} {b}→{v}" for k, b, v in better) + " — зафиксируй --write-baseline)"
+    if snap["name_collisions"]:
+        note += (f" · коллизий имён {snap['name_collisions']} (T-323: два файла под одним "
+                 "basename, группа слияния считает их как один)")
     return 0, [note]
 
 
@@ -376,6 +399,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"групп межфайловых дублей тел: {len(m['duplicates'])}")
     print(f"локальных билдеров `_make_*`: {m['local_builders']} в {m['local_builder_files']} файлах "
           f"(носитель — tests/helpers/factories.gd)")
+    print(f"коллизий базовых имён тест-файлов: {len(m['name_collisions'])}")
     if not a.top:
         return 0
     print("\nдыры (крупнейшие):")
@@ -386,6 +410,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  {len(v):3} файла → {k}")
         for name in v:
             print(f"          {name}")
+    if m["name_collisions"]:
+        print("\nколлизии имён (два файла под одним basename, T-323):")
+        for name, paths in m["name_collisions"].items():
+            print(f"  {name}")
+            for p in paths:
+                print(f"          {p}")
     print("\nдубли тел (разные файлы):")
     for g in m["duplicates"][: a.top]:
         print("  " + " = ".join(g))

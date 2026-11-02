@@ -23,7 +23,7 @@ const KEYS := ["swordsmen", "archers", "knights"]
 ## Подставной ключ запасной ветви: вырез есть, дорожек нет — ровно то состояние,
 ## в котором настоящий юнит стоит позой владельца.
 const PROBE := "__still_probe"
-const PROBE_CUTOUT := "res://assets/units/figures/blackblade.png"
+const PROBE_CUTOUT := "res://assets/units/figures/swordsmen.png"
 
 var _view: BattleView
 

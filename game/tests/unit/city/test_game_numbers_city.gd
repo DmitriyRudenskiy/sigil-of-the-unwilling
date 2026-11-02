@@ -431,3 +431,9 @@ func test_deception_tables_are_within_their_dice() -> void:
 		last = surcharge
 	assert_that(ids[0]).is_equal("none")
 	assert_that(float((severities[0] as Dictionary).get("surcharge", -1.0))).is_equal(0.0)
+# Прежний дом — unit/test_city_tech_tree.gd (шаг 5 T-305, 2026-10-30): значение
+# CITY_LEVEL_MAX живёт здесь, в домене GameNumbersCity; фасад GameNumbers обязан
+# отдавать то же число (скан фасада выше это и проверяет для всех констант).
+func test_city_level_max_is_11() -> void:
+	assert_that(GameNumbersCity.CITY_LEVEL_MAX).is_equal(11)
+	assert_that(GameNumbers.CITY_LEVEL_MAX).is_equal(11)

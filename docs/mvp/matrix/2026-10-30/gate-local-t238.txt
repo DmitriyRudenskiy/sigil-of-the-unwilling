@@ -1,0 +1,86 @@
+Gate local — T-238 (матрица сценариев: драйвер, полнота, история + полный прогон 5×11)
+=====================================================================================
+head_sha: код среза — локальный коммит над origin/main `821221c4` (пуш тем же
+коммитом), доки и артефакты — вторым коммитом. Прогон снят на дереве, содержимое
+файлов которого и есть код-коммит: `game/tools/matrix_report.gd`,
+`game/tests/unit/probe/test_scenario_pilot.gd`, `scripts/scenario_matrix.py`,
+`scripts/test_scenario_matrix.py`, `scripts/doc_gates.sh`,
+`scripts/testmap.baseline.json` были неиндексированными; доки тесты не читают.
+
+CI не проверялся (по инструкции владельца от 2026-10-13). Вердикт — локальный
+прогон + ревью диффа владельцем в треде. Пикселей срез не производит: артефакты
+замера — `docs/mvp/matrix/2026-10-30/matrix-full.json` и
+`docs/mvp/matrix/history.jsonl` (первая запись), они в том же пуше.
+
+Состояние среды: MemAvailable 714 MB на старте прогона (замер `free -m`, не весь
+прогон). Машина шарится: чужие Xvfb :96 и :97 не трогались; матрица и гейт
+исполнялись последовательно, живых Godot одновременно — не более двух (матрица к
+тому времени завершилась). MCP-секция — порт 9090, воркеров 1 (дефолт
+`MCP_WORKERS`).
+
+GdUnit (unit + integration + functional)
+----------------------------------------
+Overall Summary: 3668 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (389/389)
+Executed test cases : (3668/3668)
+Total execution time: 3min 10s 19ms
+Exit code: 0. Счётчик случаев +1 (3667 → 3668) — новый
+`test_matrix_cell_product_has_no_duplicates` в
+`tests/unit/probe/test_scenario_pilot.gd`; базлайн рэтчета переснят
+(`scripts/testmap.baseline.json`, `gd_tests` 3667 → 3668, `holes`/`merge_files`
+не двигались — новая проверка легла в существующий файл, оскопления не прибавилось).
+
+Сопутствующие гейты того же прогона:
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK, NODE-PATH-GATE: OK
+LINT: SKIPPED (нет gdtoolkit у python3) — уровень молчит на этой машине, это
+  среда, а не пропуск по халтуре; фиксируется здесь, чтобы не выглядело зелёным.
+
+MCP e2e (четвёртый уровень)
+---------------------------
+PYTEST LEDGER: passed=110 skipped=2 failed=1 errors=1 collected=114
+SKIPPED (2 — причина обязательна):
+  test_battle_profiling.py:33 — нет узлов городов в сцене боя
+  test_capture.py:294 — съёмка только по запросу: CAPTURE_SCENE=res://...
+MCP JUNIT: passed=110 skipped=2 failed=1 errors=1
+MCP READINESS: YELLOW — 2 error с подпиской readiness (игра не готова за 180 с):
+  - test_balance_probe::test_balance_probe_deterministic
+  - test_campaign_carrier::test_counter_bar_shows_the_live_campaign_carrier
+MCP VERDICT: YELLOW → «красный снят как readiness, не регрессия (D-265)», exit 0.
+Число пройденных тестов против прошлого записанного прогона не изменилось (110);
+срез не трогает ни сцены, ни UI, ни загрузку — ни один MCP-тест матрицу не читает.
+
+Python-секции того же прогона
+-----------------------------
+GENART: 11 passed (интерпретатор /home/user/.venv/map-art/bin/python)
+READINESS-CLASSIFIER: selftest GREEN (13 passed)
+Итог `./game/run_tests.sh`: MCP_RC=0 (ни одна метка красных веток в журнале не
+печатавалась; «MCP READINESS: YELLOW — красный снят как readiness» — ветка 3/0).
+
+Док-гейты (`./scripts/doc_gates.sh`): DOC GATES GREEN
+-----------------------------------------------------
+Тесты самих проверщиков: 184 passed (было 159; +25 — новые
+`scripts/test_scenario_matrix.py`, добавлен в список TESTS гейта).
+OPENSPEC SPECS: OK (проверено 87 сведённых спек)
+TESTMAP OK: дыр 80, файлов в группах слияния 152, дублей 0
+HERO FRAMES: OK (5 герой(ов), 300 кадров), провенанс ассетов: OK
+gdd_gate, ссылки docs/, BANK — OK
+
+Что проверялось вне гейта (носитель T-238 живёт не в GdUnit)
+------------------------------------------------------------
+1. Инвентарь: `matrix_report.gd -- --list` → 55 строк `MATRIX-CELL`,
+   `MATRIX-INV|roles=5|classes=11|cells=55`.
+2. Живые прогоны драйвера: 1 клетка × 20 ходов → 3 с, cells=1 goal=1/1;
+   `--roles collector` (11 классов × 60 ходов) → 1 мин 07 с, goal=10/11,
+   survived=10/11; `--full` (55 клеток, 5 процессов) → ≈17 мин,
+   goal=31/55, survived=50/55, ошибок нет, `MATRIX-ERRORS` не напечатан (exit 0).
+3. Самопроверка разбора и плана: `scripts/test_scenario_matrix.py` — 25 passed
+   (`/home/user/.venv/godot-mcp-tests/bin/python -m pytest`).
+4. Мутанты разбора (подставной Godot через `--godot`, живой прогон не участвует):
+   M1 пропущенная клетка → `MATRIX-ERRORS|нет строки прогона: collector×fighter`,
+   exit 1; M2 дубль + строка вне плана → exit 1, три сообщения; M3 клетка-ошибка
+   → exit 1 с причиной `бой-висяк`, соседняя клетка сохранила числа; M4 подставная
+   запись истории «раньше было лучше» → две `MATRIX-CMP|regression`,
+   `MATRIX-WARNING`, exit 0. Подставной history-файл и JSON-отчёты мутантов в git
+   не вошли: они ничего не измеряют, их назначение — быть красными.

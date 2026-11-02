@@ -77,3 +77,17 @@ func test_unit_report_invariants() -> void:
 			assert_bool((tag as String).is_empty()).is_false()
 		checked += 1
 	assert_that(checked).is_equal(keys.size())
+func test_make_recruit_stack_tiers() -> void:
+	# Прежний дом — unit/test_city_tech_tree.gd (шаг 5 T-305): make_recruit_stack
+	# — метод реестра юнитов, а не дерева построек.
+	var reg: Node = Services.resolve(&"units")
+	var base: UnitStats = reg.get_definition("swordsmen")
+	var t1: UnitStack = reg.make_recruit_stack("swordsmen", 20, 1)
+	var t2: UnitStack = reg.make_recruit_stack("swordsmen", 20, 2)
+	var t3: UnitStack = reg.make_recruit_stack("swordsmen", 20, 3)
+	assert_int(t1.stats.attack).is_equal(base.attack)
+	assert_int(t2.stats.attack).is_equal(int(round(base.attack * 1.6)))
+	assert_int(t3.stats.attack).is_equal(int(round(base.attack * 2.66)))
+	assert_bool(t3.stats.tags.has("magic_weapon")).is_true()
+	assert_bool(t1.stats.tags.has("magic_weapon")).is_false()
+	assert_int(t1.count).is_equal(20)

@@ -1,0 +1,70 @@
+head_sha: fd6ea44b
+date: 2026-10-30
+task: T-305 шаг 8 — аудит 28 групп слияния, два имени приведены к носителю
+runner: локальная машина (local), game/run_tests.sh + ./scripts/doc_gates.sh
+
+== 1. Что менялось ==
+Только два имени тест-файлов (ни одной строки тела не изменено, `git show --stat`
+по коммиту 54199cff: 4 files changed, 0 insertions(+), 0 deletions(-)):
+  unit/test_event_bus.gd                  -> unit/test_game_event_bus.gd
+  unit/entities/test_follower_race_class.gd -> unit/entities/test_follower_system_race_class.gd
+Доказательства — в записи шага 8 тикета T-305. Плюс документация (TICKETS, TEST-MAP,
+CHANGELOG) и пересъёмка базлайна TESTMAP.
+
+== 2. Метрика TESTMAP ==
+  merge_files   145 -> 141
+  merge_groups   28 -> 27
+  holes            80
+  dups              0
+  gd_files        391
+  gd_tests       3667   (не изменилось: переименование, не изменение тела)
+Минус четыре, а не два: группа scripts/entities/follower.gd с уходом файла
+опустилась до двух файлов и перестала превышать порог >=3, из подсчёта вышли все её
+файлы. TESTMAP OK: дыр 80, файлов в группах слияния 141, дублей 0.
+
+== 3. GdUnit (headless) ==
+Overall Summary: 3667 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans
+Exit code: 0
+Точечный прогон двух переехавших файлов до полного гейта:
+  res://tests/unit/test_game_event_bus.gd
+  res://tests/unit/entities/test_follower_system_race_class.gd
+  Overall Summary: 25 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans
+  Exit code: 0
+
+== 4. Прочие гейты прогона ==
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK
+NODE-PATH-GATE: OK
+LINT: SKIPPED (нет gdtoolkit у python3) — жёлтый уровень, не падение
+
+== 5. MCP e2e ==
+PYTEST LEDGER: passed=112 skipped=2 failed=0 errors=0 collected=114
+MCP JUNIT: passed=112 skipped=2 failed=0 errors=0
+MCP VERDICT: GREEN   (352.76s)
+SKIPPED [1] tests/mcp/test_battle_profiling.py:33 — нет узлов городов в сцене боя
+SKIPPED [1] tests/mcp/test_capture.py:294 — съёмка только по запросу CAPTURE_SCENE
+Readiness-ошибок в этом прогоне нет: в отличие от прогонов шагов 4 и 7 (1 и 4 ошибки
+класса «игра не готова за 180 с»), машина была свободнее — время MCP-секции 352 с
+против 843 с шагом ранее. Число readiness-ошибок до 4 в предыдущих прогонах — класс
+D-265/T-172 (разделённая машина), а не регрессия: код этих прогонов не менял ни один
+тест-файл уровня MCP.
+
+== 6. Python-уровни ==
+GENART: 11 passed (scripts/test_gen_map_art.py)
+READINESS-CLASSIFIER: selftest GREEN (13 passed, scripts/test_classify_mcp_junit.py)
+CHECKER: 13 passed
+
+== 7. Doc gates ==
+DOC GATES: GREEN (check_docs_links.py, gen_docs_index.py, gdd_gate, audit_docs_vs_code,
+check_openspec_specs, check_save_matrix, check_node_paths, check_asset_provenance,
+check_ui_assets, check_hero_frames, check_hero_layout_map, TESTMAP рэтчет)
+TICKETS append-only: git diff -U0 docs/mvp/TICKETS.md | grep '^-[^-]' -> 0 строк
+CHANGELOG append-only: 0 удалённых строк
+Свип примесей: CJK/zero-width — нет; кириллица+латиница в одном слове — новый текст чист
+(найдена и исправлена латиническая вставка в слове «фиксируем» до коммита; девять исторических таких же слов в
+архивных записях не тронуты).
+
+== 8. Итог ==
+GATE (local): 0 — GdUnit 3667/3667 exit 0, MCP GREEN (112/2/0), checker-тесты 13 +
+GENART 11 + классификатор GREEN, DOC GATES GREEN. CI не проверялся (по инструкции).

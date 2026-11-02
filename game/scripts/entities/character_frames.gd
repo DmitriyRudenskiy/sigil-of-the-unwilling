@@ -14,18 +14,12 @@ class_name CharacterFrames
 ## подставлять вместо них человеческий силуэт — врать игроку о том, кто стоит в клетке.
 ## Проверено тестом `tests/unit/ui/test_battle_figures_animated.gd`.
 const ANIMATED := {
-	# Свои дорожки героев (генерация `scripts/hero_anim`): нарисованы вправо, поэтому
-	# каждое имя стоит и в `FACES_RIGHT`.
-	# Имя набора — внешность, а не класс (владелец, 2026.10.30): `blackblade`, а не
-	# `swordsmen`. Класс в реестре общий на несколько ключей — `champions` и `guardians`
-	# стоят на одном `knight`, `druid` и `great_druid` на одном `priest`, — поэтому
-	# имя-класс не отвечает, какой именно персонаж нарисован, и два «паладина»
-	# расходятся только картинкой. Ключ юнита (левая колонка) — игровая данные, он
-	# не переименовывается.
-	"swordsmen": "blackblade",
-	"knights": "silverhalberd",
-	"archers": "greenhood",
-	"battle_dwarf": "barehammer",
+	# Свои дорожки героя (генерация `scripts/hero_anim`): нарисованы вправо, поэтому
+	# каждый имя стоит и в `FACES_RIGHT`.
+	"swordsmen": "swordsmen",
+	"knights": "knights",
+	"archers": "archers",
+	"battle_dwarf": "battle_dwarf",
 	"champions": "knight",
 	"guardians": "knight",
 	"pikeman": "spearman",
@@ -59,9 +53,9 @@ const STILL_HEIGHT := 96.0
 # проверить запасной путь на живом ключе — иначе ветвь «вырез без дорожек»
 # остаётся кодом без проверяющего вызова.
 static var still_figures := {
-	"swordsmen": "res://assets/units/figures/blackblade.png",
-	"archers": "res://assets/units/figures/greenhood.png",
-	"knights": "res://assets/units/figures/silverhalberd.png",
+	"swordsmen": "res://assets/units/figures/swordsmen.png",
+	"archers": "res://assets/units/figures/archers.png",
+	"knights": "res://assets/units/figures/knights.png",
 }
 
 
@@ -78,7 +72,7 @@ static func still_rest_offset(tex: Texture2D) -> Vector2:
 ## противнику. Исключения нарисованы вправо: без списка они смотрели бы от
 ## противника, а тестом «по стороне» этого не поймать — разворот-то есть.
 const FACES_RIGHT := [
-	"wolf", "blackblade", "silverhalberd", "greenhood", "barehammer", "goldmace",
+	"wolf", "swordsmen", "knights", "archers", "battle_dwarf", "paladin",
 ]
 
 
