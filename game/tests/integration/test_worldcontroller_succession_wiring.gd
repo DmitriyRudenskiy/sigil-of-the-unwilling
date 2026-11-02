@@ -6,12 +6,6 @@ extends BaseTest
 
 
 
-func _make_follower(uid: int, path: StringName) -> Follower:
-	var f := Follower.new()
-	f.uid = uid
-	f.path = path
-	return f
-
 func _make_city(uid: int, name: StringName) -> City:
 	var c := City.new()
 	c.uid = uid
@@ -34,7 +28,7 @@ func _make_wc(cities: Array[City], controller: SuccessionController) -> WorldCon
 
 func test_plan_succession_returns_same_path() -> void:
 	var h := TestFactories.make_hero(&"archivist")
-	h.followers = [_make_follower(1, &"archivist")]
+	h.followers = [TestFactories.make_follower(1, &"archivist")]
 
 	var mgr = auto_free( CityManager.new())
 	mgr.register_city(_make_city(2, &"Highhold"))
@@ -53,7 +47,7 @@ func test_plan_succession_returns_same_path() -> void:
 
 func test_plan_succession_null_when_no_follower() -> void:
 	var h := TestFactories.make_hero(&"archivist")
-	h.followers = [_make_follower(5, &"warrior")]
+	h.followers = [TestFactories.make_follower(5, &"warrior")]
 
 	var controller := SuccessionController.new()
 	var wc := _make_wc([_make_city(2, &"Highhold")], controller)

@@ -12,18 +12,11 @@ from __future__ import annotations
 
 import pytest
 
-from conftest import _wait_for_scene
+from conftest import boot_menu
 
 COLUMN = [
     "NewGameButton", "ContinueButton", "SettingsButton", "CreditsButton", "ExitButton",
 ]
-
-
-def _boot_menu(mcp):
-    mcp.run_scene("res://scenes/main_menu.tscn")
-    mcp.wait_ready()
-    _wait_for_scene(mcp, "main_menu")
-    mcp.wait_frames(10)
 
 
 def _buttons(mcp) -> list:
@@ -43,7 +36,7 @@ def _buttons(mcp) -> list:
 @pytest.mark.smoke
 def test_live_menu_column_matches_contract(mcp):
     """Пять пунктов в порядке макета, все видимы, тексты не пусты."""
-    _boot_menu(mcp)
+    boot_menu(mcp)
     rows = _buttons(mcp)
     assert [r["name"] for r in rows] == COLUMN, f"состав колонки разошёлся с макетом: {rows}"
     for r in rows:
@@ -53,7 +46,7 @@ def test_live_menu_column_matches_contract(mcp):
 
 def test_live_disabled_states(mcp):
     """AC3/AC6: «Титры» и «Выход» отключены, «Новая игра» и «Настройки» доступны."""
-    _boot_menu(mcp)
+    boot_menu(mcp)
     states = {r["name"]: r["disabled"] for r in _buttons(mcp)}
     assert states["CreditsButton"] is True, f"«Титры» без носителя обязаны быть отключены: {states}"
     assert states["ExitButton"] is True, f"«Выход» обязана быть отключена (AC6): {states}"
@@ -63,7 +56,7 @@ def test_live_disabled_states(mcp):
 
 def test_disabled_credits_press_keeps_menu(mcp):
     """Нажатие отключённого пункта не меняет сцену (проводка обработчика в живой игре)."""
-    _boot_menu(mcp)
+    boot_menu(mcp)
     before = mcp.execute_code(
         "var s = get_tree().current_scene\n"
         'return {"marker": s.get_script().resource_path if s.get_script() else str(s)}'

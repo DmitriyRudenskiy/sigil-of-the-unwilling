@@ -257,6 +257,18 @@ def _wait_for_scene(mcp, marker: str, timeout: float = 60.0) -> None:
     raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
 
 
+def boot_menu(mcp) -> None:
+    """Меню поднято так, как его видит игрок: сцена, готовность, кадр на отрисовку кнопок.
+
+    Общий носитель (срез test-suite-restructure 7.3) — две копии `_boot_menu` жили
+    в test_settings_menu.py и test_main_menu_buttons_live.py дословно.
+    """
+    mcp.run_scene("res://scenes/main_menu.tscn")
+    mcp.wait_ready()
+    _wait_for_scene(mcp, "main_menu")
+    mcp.wait_frames(10)
+
+
 @pytest.fixture
 def full_cycle(mcp):
     """Полный цикл (cutover D-157): меню → создание персонажа → main.tscn

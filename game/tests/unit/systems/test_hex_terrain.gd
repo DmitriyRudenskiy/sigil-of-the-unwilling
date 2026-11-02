@@ -12,13 +12,6 @@ extends BaseTest
 const _BT := preload("res://scripts/systems/hex_terrain.gd")
 const T := _BT.TerrainType
 
-func _make_state(atk_key: String, def_key: String, atk_count: int, def_count: int) -> BattleState:
-	var state := BattleState.new()
-	var atk: Array[UnitStack] = [Units.make_fixed_stack(atk_key, atk_count)]
-	var def: Array[UnitStack] = [Units.make_fixed_stack(def_key, def_count)]
-	state.place_army(atk, def)
-	return state
-
 # --- Модификаторы типов (чистые, детерминированные) ---
 
 func test_defense_multipliers() -> void:
@@ -84,7 +77,7 @@ func test_set_and_clear_terrain() -> void:
 	assert_int(state.get_hex_terrain(cell)).is_equal(T.PLAIN)
 
 func test_water_blocks_movement() -> void:
-	var state := _make_state("swordsmen", "goblins", 20, 20)
+	var state := TestFactories.make_battle_state("swordsmen", "goblins", 20, 20, Units)
 	var water_cell := Vector2i(8, 5)
 	state.set_terrain(water_cell, T.WATER)
 	var atk = state.get_units_by_side(BattleState.Side.ATTACKER)[0]

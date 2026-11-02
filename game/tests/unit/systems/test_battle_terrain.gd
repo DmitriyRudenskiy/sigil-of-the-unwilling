@@ -5,14 +5,6 @@ extends BaseTest
 ## blocked terrain, and the no-terrain regression guard.
 
 
-func _make_unit(key: String, attack: int, hp: int, speed: int, defense: int, side: int) -> BattleState.BattleUnit:
-	var stats := UnitStats.new(key, key, attack, attack, hp, speed, defense, [])
-	var stack := UnitStack.new(stats, 10)
-	var u := BattleState.BattleUnit.new(stack)
-	u.side = side
-	return u
-
-
 func test_defense_bonus_table() -> void:
 	assert_float(BattleTerrain.defense_bonus(BattleTerrain.FOREST)).is_equal(0.30)
 	assert_float(BattleTerrain.defense_bonus(BattleTerrain.HILL)).is_equal(0.50)
@@ -39,7 +31,7 @@ func test_world_to_battle_mapping() -> void:
 
 func test_water_blocks_movement() -> void:
 	var state := BattleState.new()
-	var u := _make_unit("militia", 4, 40, 5, 3, BattleState.Side.ATTACKER)
+	var u := TestFactories.make_unit_with_stats("militia", 4, 40, 5, 3, BattleState.Side.ATTACKER)
 	u.cell = Vector2i(8, 5)
 	state.attacker_units.append(u)
 	var water_cell := Vector2i(9, 5)
@@ -53,7 +45,7 @@ func test_forest_reduces_reach() -> void:
 	# Speed 3 on an all-forest board: 2 forest hexes cost 2.5 (reachable),
 	# 3 cost 3.75 (not reachable). Plain BFS would allow 3 hexes.
 	var state := BattleState.new()
-	var u := _make_unit("militia", 4, 40, 3, 3, BattleState.Side.ATTACKER)
+	var u := TestFactories.make_unit_with_stats("militia", 4, 40, 3, 3, BattleState.Side.ATTACKER)
 	u.cell = Vector2i(8, 5)
 	state.attacker_units.append(u)
 	var map: Dictionary = {}
@@ -82,8 +74,8 @@ func test_defense_bonus_in_margin() -> void:
 	# def +2 → margin 1; forest (+30%) → def +1 → margin 2.
 	var mk := func(terrain: String) -> Dictionary:
 		var state := BattleState.new()
-		var atk := _make_unit("militia", 6, 40, 5, 0, BattleState.Side.ATTACKER)
-		var def := _make_unit("goblins", 3, 10, 5, 3, BattleState.Side.DEFENDER)
+		var atk := TestFactories.make_unit_with_stats("militia", 6, 40, 5, 0, BattleState.Side.ATTACKER)
+		var def := TestFactories.make_unit_with_stats("goblins", 3, 10, 5, 3, BattleState.Side.DEFENDER)
 		atk.cell = Vector2i(8, 4)
 		def.cell = Vector2i(8, 5)
 		state.attacker_units.append(atk)
@@ -108,8 +100,8 @@ func test_hill_attack_bonus() -> void:
 	# Атакующий на холме (+20% atk): margin 3 → 4 (Триумф, урон ×2).
 	var mk := func(atk_terrain: String) -> Dictionary:
 		var state := BattleState.new()
-		var atk := _make_unit("militia", 6, 40, 5, 0, BattleState.Side.ATTACKER)
-		var def := _make_unit("goblins", 3, 10, 5, 3, BattleState.Side.DEFENDER)
+		var atk := TestFactories.make_unit_with_stats("militia", 6, 40, 5, 0, BattleState.Side.ATTACKER)
+		var def := TestFactories.make_unit_with_stats("goblins", 3, 10, 5, 3, BattleState.Side.DEFENDER)
 		atk.cell = Vector2i(8, 4)
 		def.cell = Vector2i(8, 5)
 		state.attacker_units.append(atk)
@@ -151,7 +143,7 @@ func test_placement_avoids_water() -> void:
 func test_no_terrain_behavior_unchanged() -> void:
 	# Regression guard: empty terrain map -> plain BFS reachability (speed = hexes).
 	var state := BattleState.new()
-	var u := _make_unit("militia", 4, 40, 5, 3, BattleState.Side.ATTACKER)
+	var u := TestFactories.make_unit_with_stats("militia", 4, 40, 5, 3, BattleState.Side.ATTACKER)
 	# Клетка 5 гексов от цели влезает и в поле 11×9 (прежний 17-широкий запас не
 	# нужен): старт у левого края, 5 и 6 гексов по той же строке.
 	u.cell = Vector2i(4, 4)

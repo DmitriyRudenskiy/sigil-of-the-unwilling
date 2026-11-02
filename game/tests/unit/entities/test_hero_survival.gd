@@ -60,12 +60,6 @@ func _survival_hero(path := &"warrior") -> HeroController:
 	h.add_child(h.movement)
 	return h
 
-func _make_follower(uid: int, path: StringName) -> Follower:
-	var f := Follower.new()
-	f.uid = uid
-	f.path = path
-	return f
-
 func _make_city() -> City:
 	var c := City.new()
 	c.uid = _next_uid()
@@ -321,7 +315,7 @@ func _setup_death_with_resurrection() -> Dictionary:
 	var hero := _survival_hero()
 	hero.movement = HeroMovementController.new()
 	hero.add_child(hero.movement)
-	hero.followers.append(_make_follower(1, &"warrior"))
+	hero.followers.append(TestFactories.make_follower(1, &"warrior"))
 	var parent := _hero_in_tree(hero)
 	wc._hero = hero
 	var death := _MockDeath.new()
@@ -386,7 +380,7 @@ func test_wc_second_death_in_cycle_no_resurrection() -> void:
 	var hero: HeroController = s["hero"]
 	var death: Node = s["death"]
 	wc._on_resurrection_chosen()
-	hero.followers.append(_make_follower(9, &"warrior"))
+	hero.followers.append(TestFactories.make_follower(9, &"warrior"))
 	wc._on_hero_died(&"exhaustion")
 	assert_that(wc._hero_lifecycle._deceased_hero).is_null()
 	assert_that(wc._hero_lifecycle._resurrection_city).is_null()
@@ -418,7 +412,7 @@ func test_wc_no_temple_corpse_freed() -> void:
 	var plain := _make_city()
 	var wc := _make_wc([plain])
 	var hero := _survival_hero()
-	hero.followers.append(_make_follower(2, &"warrior"))
+	hero.followers.append(TestFactories.make_follower(2, &"warrior"))
 	var parent := _hero_in_tree(hero)
 	wc._hero = hero
 	var death := _MockDeath.new()
@@ -440,13 +434,13 @@ func test_wc_fresh_cycle_resurrection_again() -> void:
 	var death: Node = s["death"]
 	wc._on_resurrection_chosen()
 	var hero: HeroController = wc._hero
-	hero.followers.append(_make_follower(9, &"warrior"))
+	hero.followers.append(TestFactories.make_follower(9, &"warrior"))
 	wc._on_hero_died(&"burnout")
 	assert_that(wc._hero_lifecycle._resurrection_city).is_null()
 	var succ: Node = wc._hero_lifecycle._pending_successor
 	wc._execute_succession()
 	var new_hero: HeroController = wc._hero
-	new_hero.followers.append(_make_follower(10, &"warrior"))
+	new_hero.followers.append(TestFactories.make_follower(10, &"warrior"))
 	city.storage[&"industry"] = float(GameNumbers.SUCCESSION_RESURRECT_IND)
 	city.storage[&"gold"] = float(GameNumbers.SUCCESSION_RESURRECT_GOLD)
 	wc._on_hero_died(&"exhaustion")

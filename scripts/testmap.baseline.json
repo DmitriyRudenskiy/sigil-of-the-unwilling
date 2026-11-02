@@ -3,11 +3,11 @@
  "gd_files": 391,
  "gd_tests": 3667,
  "holes": 80,
- "local_builder_files": 48,
- "local_builders": 63,
+ "local_builder_files": 45,
+ "local_builders": 57,
  "merge_files": 141,
  "merge_groups": 27,
  "name_collisions": 2,
  "py_files": 35,
- "py_tests": 109
+ "py_tests": 110
 }

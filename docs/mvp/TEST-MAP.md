@@ -249,6 +249,10 @@ Borough **дописаны в уже существовавший** `unit/world/
 Леджер: **+0 / −2 / quarantine 0**, нетто **−2**, было 3464 → стало **3462**.
 `duplicate_groups` 2 → **0**.
 
+Пути таблицы — снимок 2026-10-27: с 2026-11-03 `tests/ui/…` лежит в `tests/unit/ui/…`
+(срез `test-suite-restructure` 6.4 — каталоги-однодневки `tests/systems`, `tests/ui`,
+`tests/spell_validation` сведены туда, где у носителя уже есть каталог).
+
 ### С-2 · Матрица гардов темы вместо одиннадцати файлов
 
 `test_*_theme_carrier.gd` (8 файлов, 67 тестов) + `test_campaign_*_carrier.gd`

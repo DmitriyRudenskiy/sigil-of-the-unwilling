@@ -135,15 +135,19 @@ mkdir -p openspec/changes/<change-name>/
 ### Запуск инструментов разработки
 
 ```bash
-# Генерация иконок
-godot --path game --script scripts/build/gen_resource_icons.gd
+# Генерация иконок ресурсов (21 PNG 32×32 по формуле арт-библии §7.1)
+cd game && python3 tools/gen_resource_icons.py
 
-# Валидация заклинаний
-godot --path game --script tools/spell_validation/validate_spells.gd
+# Кадр ОДНОЙ сцены для шага разработки (без MCP-сервера и порта, ~0.4 с)
+godot --path game -s res://tools/shot_scene.gd -- --scene=res://scenes/main_menu.tscn --out=/tmp/shot.png
 
-# Запуск сценариев тестирования
-godot --path game --script tools/scenarios/<scenario>.gd
+# Диагностика (регистры кампейн-запасов)
+godot --headless --path game -s res://tools/diag_stocks_registers.gd
 ```
+
+Валидация `data/spells.json` отдельным инструментом больше не запускается: после
+`c90bf2d8` (снесены stand-alone тулзы) она живёт только как проверка юнит-теста
+`tests/unit/core/test_spells_json.gd` на носителе `tests/helpers/spell_validation/`.
 
 ### Тестирование
 

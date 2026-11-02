@@ -66,6 +66,16 @@ static func make_battle_unit_raw(key: String, count: int, side: int) -> BattleSt
 	u.max_count = count
 	return u
 
+# Статы юнита задаёт вызывающий: terrain/iniciative-тестам нужны свои attack/hp/speed/defense,
+# а make_battle_unit_raw выше держит фиксированные статы. Тело — дословный перенос двух
+# совпадавших локальных `_make_unit` (срез test-suite-restructure 7.1).
+static func make_unit_with_stats(key: String, attack: int, hp: int, speed: int, defense: int, side: int) -> BattleState.BattleUnit:
+	var stats := UnitStats.new(key, key, attack, attack, hp, speed, defense, [])
+	var stack := UnitStack.new(stats, 10)
+	var u := BattleState.BattleUnit.new(stack)
+	u.side = side
+	return u
+
 static func make_city_with_temple(uid: int = 1, stronghold: int = 2, temple_level: int = 2) -> City:
 	var city := make_city(uid, stronghold)
 	var ub := UniqueBuilding.new()

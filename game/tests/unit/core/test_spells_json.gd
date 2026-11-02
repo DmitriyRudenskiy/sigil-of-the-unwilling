@@ -1,6 +1,6 @@
 extends BaseTest
 
-const _Validator = preload("res://tests/spell_validation/spell_validator.gd")
+const _Validator = preload("res://tests/helpers/spell_validation/spell_validator.gd")
 
 const JSON_PATH := "res://assets/data/spells.json"
 

@@ -5,18 +5,11 @@ Settings (autoload), сохраняем и проверяем персистен
 """
 from __future__ import annotations
 
-from conftest import _wait_for_scene
-
-
-def _boot_menu(mcp):
-    mcp.run_scene("res://scenes/main_menu.tscn")
-    mcp.wait_ready()
-    _wait_for_scene(mcp, "main_menu")
-    mcp.wait_frames(10)
+from conftest import boot_menu
 
 
 def test_settings_screen_opens_from_menu(mcp):
-    _boot_menu(mcp)
+    boot_menu(mcp)
 
     mcp.execute_code("get_tree().current_scene._on_settings()\nreturn {\"ok\": true}")
     mcp.wait_frames(5)
@@ -29,7 +22,7 @@ def test_settings_screen_opens_from_menu(mcp):
 
 
 def test_settings_change_persists(mcp):
-    _boot_menu(mcp)
+    boot_menu(mcp)
 
     mcp.execute_code(
         "Settings.set_master_volume(77)\n"

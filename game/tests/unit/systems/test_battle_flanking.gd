@@ -22,17 +22,10 @@ func _def_at(cell: Vector2i, facing: int) -> BattleState.BattleUnit:
 	d.facing = facing
 	return d
 
-func _make_state(atk_key: String, def_key: String, atk_count: int, def_count: int) -> BattleState:
-	var state := BattleState.new()
-	var atk: Array[UnitStack] = [Units.make_fixed_stack(atk_key, atk_count)]
-	var def: Array[UnitStack] = [Units.make_fixed_stack(def_key, def_count)]
-	state.place_army(atk, def)
-	return state
-
 # --- Facing при размещении ---
 
 func test_facing_set_on_placement() -> void:
-	var s := _make_state("swordsmen", "goblins", 20, 20)
+	var s := TestFactories.make_battle_state("swordsmen", "goblins", 20, 20, Units)
 	for u in s.get_units_by_side(BattleState.Side.ATTACKER):
 		assert_int(u.facing).is_equal(0).override_failure_message("attacker must face east (bit 0)")
 	for u in s.get_units_by_side(BattleState.Side.DEFENDER):
@@ -116,7 +109,7 @@ func test_triumph_doubles_damage() -> void:
 # --- Сквозная интеграция через resolver ---
 
 func test_resolver_wires_rear_aspect() -> void:
-	var s := _make_state("swordsmen", "goblins", 20, 5)
+	var s := TestFactories.make_battle_state("swordsmen", "goblins", 20, 5, Units)
 	var a = s.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var d = s.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	d.cell = Vector2i(10, 5)
@@ -127,7 +120,7 @@ func test_resolver_wires_rear_aspect() -> void:
 	assert_int(int(res["margin"])).is_greater(0)
 
 func test_resolver_front_attack_margin() -> void:
-	var s := _make_state("swordsmen", "goblins", 20, 5)
+	var s := TestFactories.make_battle_state("swordsmen", "goblins", 20, 5, Units)
 	var a = s.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var d = s.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	d.cell = Vector2i(10, 5)

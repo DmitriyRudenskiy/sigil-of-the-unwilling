@@ -5,16 +5,8 @@ extends BaseTest
 ## determinism by seed.
 
 
-func _make_unit(key: String, attack: int, hp: int, speed: int, defense: int, side: int) -> BattleState.BattleUnit:
-	var stats := UnitStats.new(key, key, attack, attack, hp, speed, defense, [])
-	var stack := UnitStack.new(stats, 10)
-	var u := BattleState.BattleUnit.new(stack)
-	u.side = side
-	return u
-
-
 func _make_dnd_unit(key: String, dexterity: int, speed: int, side: int) -> BattleState.BattleUnit:
-	var u := _make_unit(key, 4, 50, speed, 3, side)
+	var u := TestFactories.make_unit_with_stats(key, 4, 50, speed, 3, side)
 	var p := DnDCombatantProfile.new(key, key)
 	p.abilities = DNDAbilityScores.new(10, dexterity, 10, 10, 10, 10)
 	u.dnd_profile = p
@@ -22,7 +14,7 @@ func _make_dnd_unit(key: String, dexterity: int, speed: int, side: int) -> Battl
 
 
 func test_stack_unit_initiative_equals_speed() -> void:
-	var u := _make_unit("militia", 4, 40, 7, 3, BattleState.Side.ATTACKER)
+	var u := TestFactories.make_unit_with_stats("militia", 4, 40, 7, 3, BattleState.Side.ATTACKER)
 	assert_int(u.get_initiative()).is_equal(7)
 
 
@@ -41,7 +33,7 @@ func test_dnd_unit_initiative_is_10_plus_dex_mod() -> void:
 func test_queue_ordered_by_initiative() -> void:
 	var state := BattleState.new()
 	# Fast stack unit (speed 9, initiative 9) vs DnD unit DEX 18 (initiative 14).
-	var fast := _make_unit("archer", 4, 30, 9, 2, BattleState.Side.ATTACKER)
+	var fast := TestFactories.make_unit_with_stats("archer", 4, 30, 9, 2, BattleState.Side.ATTACKER)
 	var dexy := _make_dnd_unit("rogue", 18, 2, BattleState.Side.DEFENDER)
 	state.attacker_units.append(fast)
 	state.defender_units.append(dexy)
@@ -54,7 +46,7 @@ func test_queue_ordered_by_initiative() -> void:
 
 func test_legacy_flag_keeps_speed_order() -> void:
 	var state := BattleState.new()
-	var fast := _make_unit("archer", 4, 30, 9, 2, BattleState.Side.ATTACKER)
+	var fast := TestFactories.make_unit_with_stats("archer", 4, 30, 9, 2, BattleState.Side.ATTACKER)
 	var dexy := _make_dnd_unit("rogue", 18, 2, BattleState.Side.DEFENDER)
 	state.attacker_units.append(fast)
 	state.defender_units.append(dexy)
@@ -68,8 +60,8 @@ func test_legacy_flag_keeps_speed_order() -> void:
 func test_tie_breakers_hp_side_uid() -> void:
 	var state := BattleState.new()
 	# Equal initiative (speed 5): higher HP first.
-	var hp_high := _make_unit("heavy", 5, 70, 5, 5, BattleState.Side.DEFENDER)
-	var hp_low := _make_unit("militia", 4, 40, 5, 3, BattleState.Side.DEFENDER)
+	var hp_high := TestFactories.make_unit_with_stats("heavy", 5, 70, 5, 5, BattleState.Side.DEFENDER)
+	var hp_low := TestFactories.make_unit_with_stats("militia", 4, 40, 5, 3, BattleState.Side.DEFENDER)
 	state.defender_units.append(hp_low)
 	state.defender_units.append(hp_high)
 	state.build_queue()
@@ -79,8 +71,8 @@ func test_tie_breakers_hp_side_uid() -> void:
 
 	# Equal initiative + HP: attacker side first.
 	var state2 := BattleState.new()
-	var atk_u := _make_unit("militia", 4, 40, 5, 3, BattleState.Side.ATTACKER)
-	var def_u := _make_unit("militia", 4, 40, 5, 3, BattleState.Side.DEFENDER)
+	var atk_u := TestFactories.make_unit_with_stats("militia", 4, 40, 5, 3, BattleState.Side.ATTACKER)
+	var def_u := TestFactories.make_unit_with_stats("militia", 4, 40, 5, 3, BattleState.Side.DEFENDER)
 	state2.attacker_units.append(atk_u)
 	state2.defender_units.append(def_u)
 	state2.build_queue()
@@ -93,9 +85,9 @@ func test_queue_deterministic_same_seed() -> void:
 	# Queue order is seed-independent (pure sorting) — same input, same order.
 	var state := BattleState.new()
 	var a := _make_dnd_unit("rogue", 18, 2, BattleState.Side.ATTACKER)
-	var b := _make_unit("archer", 4, 30, 9, 2, BattleState.Side.ATTACKER)
+	var b := TestFactories.make_unit_with_stats("archer", 4, 30, 9, 2, BattleState.Side.ATTACKER)
 	var c := _make_dnd_unit("fighter", 14, 4, BattleState.Side.DEFENDER)
-	var d := _make_unit("heavy", 5, 70, 4, 5, BattleState.Side.DEFENDER)
+	var d := TestFactories.make_unit_with_stats("heavy", 5, 70, 4, 5, BattleState.Side.DEFENDER)
 	state.attacker_units.append(a)
 	state.attacker_units.append(b)
 	state.defender_units.append(c)
