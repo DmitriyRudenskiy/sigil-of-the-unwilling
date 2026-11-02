@@ -72,10 +72,15 @@ for arg in "$@"; do
 		-h | --help)
 			cat <<'USAGE'
 usage: run_tests.sh [--tier=smoke|fast|full] [--help]
-  smoke — критичный путь (game/tests/smoke), headless, бюджет 30 с
+  smoke — критичный путь (game/tests/smoke), headless; MCP_SMOKE=1 добавляет 2 MCP-теста живым Godot, бюджет 30 с
+        команда: -a res://tests/smoke | не мерит: живой Godot (UI, сцены, клики), python-уровни, lint
   fast  — все GdUnit-проверки кроме game/tests/slow, headless, бюджет 3 мин
+        команда: -a res://tests -i res://tests/slow | не мерит: живой Godot, python-уровни, lint
   full  — полный гейт: GdUnit + MCP e2e + python-уровни (по умолчанию)
+        команда: -a res://tests + pytest tests/mcp/ | не мерит: звук, playtest, ручной ux-review
 Env как раньше: SKIP_GDUNIT=1, MCP_WORKERS=N, GODOT_BIN, MCP_PYTEST_PY, GEN_PY.
+MCP_SMOKE=1 — вместе со слоем smoke поднять живой Godot и прогнать MCP-тесты с
+  маркером smoke (меню → мир). По умолчанию слой smoke остаётся headless.
 USAGE
 			exit 0
 			;;
@@ -284,18 +289,40 @@ if command -v python3 >/dev/null 2>&1; then
 else
 	echo "NODE-PATH-GATE: SKIPPED (python3 не найден — уровень молчит, зафиксировать в отчёте)"
 fi
-if [ "$TIER" != "full" ]; then
+# MCP-слой smoke (T-329, срез test-suite-restructure 5.3): живой Godot в слое
+# smoke поднимается только по явному запросу — readiness одной пауки съедает
+# бюджет 30 с, поэтому по умолчанию слой остаётся headless, а «сколько собрано»
+# печатается отдельной строкой (collect-only Godot не поднимает).
+MCP_SET=""
+MCP_RUN=0
+if [ "$TIER" = "full" ]; then
+	MCP_RUN=1
+elif [ "$TIER" = "smoke" ] && [ "${MCP_SMOKE:-0}" = "1" ]; then
+	MCP_RUN=1
+	MCP_SET="smoke"
+fi
+if [ "$MCP_RUN" != "1" ]; then
 	echo ""
 	# «Не мерили» обязано быть видно (T-281): читатель строки «всё зелёное» обязан
 	# видеть, какие уровни вообще не запускались и где их взять.
 	echo "NOT MEASURED: MCP e2e (живой Godot, ~305 с) — не входит в слой $TIER; game/run_tests.sh без флага"
+	if [ "$TIER" = "smoke" ]; then
+		MCP_COLLECT_PY="${MCP_PYTEST_PY:-/home/user/.venv/godot-mcp-tests/bin/python}"
+		[ -x "$MCP_COLLECT_PY" ] || MCP_COLLECT_PY="$(command -v python3 || true)"
+		if [ -n "$MCP_COLLECT_PY" ] && "$MCP_COLLECT_PY" -c 'import mcp, anyio' >/dev/null 2>&1; then
+			MCP_SMOKE_N="$("$MCP_COLLECT_PY" -m pytest tests/mcp/ -m smoke --collect-only -q 2>/dev/null | grep -oE '[0-9]+/[0-9]+ tests collected' | head -1)"
+			echo "MCP SMOKE: собрано ${MCP_SMOKE_N:-?} — в слой не входят; запуск: MCP_SMOKE=1 ./run_tests.sh --tier=smoke"
+		else
+			echo "MCP SMOKE: SKIPPED (интерпретатор с mcp+anyio не найден — сколько тестов помечено, не проверено)"
+		fi
+	fi
 	echo "NOT MEASURED: python-уровни (генератор арта T-150, классификатор D-265) — не входят в слой $TIER"
 	echo "NOT MEASURED: gdlint (report-only) — не входит в слой $TIER"
 	echo "TIER $TIER: зелёный прогон НЕ является основанием для push — публикация требует зелёного full (D-224)."
 	exit 0
 fi
 echo ""
-echo "=== MCP tests (tugcantopaloglu/godot-mcp) ==="
+echo "=== MCP tests (tugcantopaloglu/godot-mcp)${MCP_SET:+ — только слой $MCP_SET} ==="
 MCP_SERVER="${GODOT_MCP_SERVER:-$PWD/addons/godot-mcp/build/index.js}"
 if [ ! -f "$MCP_SERVER" ]; then
 	echo "PYTEST: SKIPPED (no MCP server: $MCP_SERVER; build: cd addons/godot-mcp && npm ci && npm run build)"
@@ -372,6 +399,10 @@ fi
 MCP_LOG="$(mktemp)"
 # D-265: машинно-читаемый журнал той же секции (по нему readiness отличается от регрессии).
 JUNIT_MCP="$(mktemp)"
+# Фильтр по маркеру: слой smoke с MCP_SMOKE=1 берёт только помеченное (T-329);
+# полный прогон — весь набор (пустой массив = никакого `-m`).
+MCP_MARK=()
+[ -n "$MCP_SET" ] && MCP_MARK=(-m "$MCP_SET")
 JUNIT_PERF="$(mktemp)"
 PERF_IGNORE=()
 [ "$PERF_SERIAL" -eq 1 ] && PERF_IGNORE=(--ignore=tests/mcp/test_hexutils_perf.py)
@@ -385,9 +416,9 @@ export GODOT_BIN="$GODOT"
 # -rs (T-281): причины пропуска в коротком резюме — см. блок PYTEST SKIPPED ниже.
 "$PYTEST_PY" -m pytest tests/mcp/ -v -rs --timeout=900 --tb=short --durations=25 \
 	--junitxml="$JUNIT_MCP" \
-	${PERF_IGNORE[@]+"${PERF_IGNORE[@]}"} ${PYTEST_WORKER_ARGS[@]+"${PYTEST_WORKER_ARGS[@]}"} 2>&1 | tee "$MCP_LOG"
+	${MCP_MARK[@]+"${MCP_MARK[@]}"} ${PERF_IGNORE[@]+"${PERF_IGNORE[@]}"} ${PYTEST_WORKER_ARGS[@]+"${PYTEST_WORKER_ARGS[@]}"} 2>&1 | tee "$MCP_LOG"
 MCP_RC=${PIPESTATUS[0]}
-if [ "$PERF_SERIAL" -eq 1 ]; then
+if [ "$PERF_SERIAL" -eq 1 ] && [ -z "$MCP_SET" ]; then
 	echo "MCP: perf-стадия — serial (test_hexutils_perf.py; D-177: свободный CPU)"
 	"$PYTEST_PY" -m pytest tests/mcp/test_hexutils_perf.py -v -rs --timeout=900 --tb=short \
 		--junitxml="$JUNIT_PERF" \
@@ -412,8 +443,18 @@ def sumre(pat: str) -> int:
 
 # Оба формата (взаимоисключаемы в рамках стадии; по стадиям — сумма):
 # serial: «collected N items»; xdist: «N workers [M items]».
-collected = sumre(r"collected (\d+) items") + sum(
-    int(m[1]) for m in re.findall(r"(\d+) workers \[(\d+) items\]", text))
+# `-m <маркер>` (слой smoke с MCP_SMOKE=1, T-329): pytest дописывает
+# «/ 112 deselected / 2 selected», и при фильтре «собрано» != «в свите» — без
+# поправки равненство «сумма == collected» краснеет на здоровом прогоне.
+# При маркере берётся явное «K selected»: такой прогон одностадийный (perf-стадия
+# при фильтре не запускается), а складывать «collected» с «workers [M items]» под
+# xdist значило бы считать вдвое.
+sel = sumre(r"/ (\d+) selected")
+if sel:
+    collected = sel
+else:
+    collected = sumre(r"collected (\d+) items") + sum(
+        int(m[1]) for m in re.findall(r"(\d+) workers \[(\d+) items\]", text))
 lines = [l for l in text.splitlines() if re.match(r"=+ .* in [0-9.]+s.* =+$", l)]
 
 

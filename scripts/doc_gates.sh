@@ -124,6 +124,16 @@ if python3 scripts/testmap.py --check; then
 fi
 echo ""
 
+# «Слои прогона» в TEST-MAP — из `run_tests.sh --help`, а не из головы (срез 8.1):
+# ручная таблица уже описывала набор, которого больше нет.
+echo "=== таблица слоёв прогона: док ↔ раннер (срез 8.1) ==="
+if python3 scripts/gen_tier_table.py --check; then
+	: ; else
+	echo "  починка: python3 scripts/gen_tier_table.py --write"
+	FAIL=1
+fi
+echo ""
+
 echo "=========================================="
 if [ "$FAIL" -eq 0 ]; then
 	if [ "$YELLOW" -gt 0 ]; then

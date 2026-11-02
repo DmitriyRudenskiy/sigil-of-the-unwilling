@@ -10,6 +10,8 @@ smoke; здесь — состояние пунктов в запущенной 
 """
 from __future__ import annotations
 
+import pytest
+
 from conftest import _wait_for_scene
 
 COLUMN = [
@@ -36,6 +38,9 @@ def _buttons(mcp) -> list:
     )
 
 
+# smoke-пара (T-329): меню живое + мир живой — два факта, без которых
+# остальной свит не о чем. В слой smoke попадает только по MCP_SMOKE=1.
+@pytest.mark.smoke
 def test_live_menu_column_matches_contract(mcp):
     """Пять пунктов в порядке макета, все видимы, тексты не пусты."""
     _boot_menu(mcp)

@@ -104,6 +104,7 @@ return {"found": true, "under_root": under_root}
 """
 
 
+@pytest.mark.smoke  # smoke-пара (T-329): ботстрэп дошёл до мира — fixture full_game
 def test_dest_marker_is_mounted_after_world_boot(full_game):
     assert full_game.execute_code(FIND_CTRL).get("found"), (
         "HeroVisualController не найден в дереве — fixture не дошла до ботстрэпа"
