@@ -64,14 +64,14 @@ with tempfile.TemporaryDirectory() as tmp:
         ok("units" in str(exc) and "11" in str(exc) and "12" in str(exc), f"сообщение о count: {exc}")
 
     subjects = [it["id"] for c in SPEC["categories"].values() for it in c["items"]]
-    ok(len(subjects) == 77, f"сюжетов {len(subjects)} != 77")
+    ok(len(subjects) == 79, f"сюжетов {len(subjects)} != 79")
     ok(len(SPEC["variants"]) == 5, "вариантов != 5")
 
-    # --- перечисление: 385 артефактов, по одному на пару (вариант, сюжет), фильтры
+    # --- перечисление: 395 артефактов (79 сюжетов × 5 вариантов), фильтры
     arts = g.artifacts(SPEC, model="krea2")
-    ok(len(arts) == 385, f"артефактов {len(arts)} != 385")
-    ok(len({(x["variant"], x["id"]) for x in arts}) == 385, "есть пара (вариант, сюжет) без повтора")
-    ok(len(g.artifacts(SPEC, variants=[SPEC["variants"][0]["id"]])) == 77, "фильтр по варианту")
+    ok(len(arts) == 395, f"артефактов {len(arts)} != 395")
+    ok(len({(x["variant"], x["id"]) for x in arts}) == 395, "есть пара (вариант, сюжет) без повтора")
+    ok(len(g.artifacts(SPEC, variants=[SPEC["variants"][0]["id"]])) == 79, "фильтр по варианту")
     ok(len(g.artifacts(SPEC, categories=["ui"])) == 25, "фильтр по категории ui")
     ok(len(g.artifacts(SPEC, only=["cursor_default"])) == 5, "фильтр --only")
     ok(all(x["path"].as_posix().startswith("concept_art/") for x in arts), "путь вне concept_art/")
