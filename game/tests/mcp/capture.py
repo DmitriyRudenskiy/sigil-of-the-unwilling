@@ -73,6 +73,20 @@ def sha256_hex(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+def pointer_xy(text: str) -> tuple[float, float] | None:
+    """«(1592.0, 632.0)» → (1592.0, 632.0); нераспознанное — None, не падение.
+
+    Мера вердикта «наведение украл настоящий указатель» (замер T-280): сравниваются
+    числа координат вьюпорта, а не строки путей узлов — чужой путь выглядит
+    правдоподобно и на него нельзя опереться в вердикте (T-334).
+    """
+    try:
+        a, b = text.strip("()").split(",")
+        return float(a), float(b)
+    except (AttributeError, ValueError):
+        return None
+
+
 def pin_window_code(size: tuple[int, int]) -> str:
     """GDScript выставления кадра: канонический размер без ухода в полный экран.
 

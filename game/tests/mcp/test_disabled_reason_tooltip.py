@@ -123,15 +123,6 @@ return {"ok": true, "at": str(center)}
 """
 
 
-def _xy(text: str) -> tuple[float, float] | None:
-    """«(1592.0, 632.0)» → (1592.0, 632.0); нераспознанное — None, не падение."""
-    try:
-        a, b = text.strip("()").split(",")
-        return float(a), float(b)
-    except (AttributeError, ValueError):
-        return None
-
-
 
 def test_disabled_button_tooltip_reaches_the_screen(mcp: Any) -> None:
     size = capture.canonical_size()
@@ -167,7 +158,7 @@ def test_disabled_button_tooltip_reaches_the_screen(mcp: Any) -> None:
         # Наведение не наше. Два разных verdict: сломанный тест среды (мышь ушла с
         # кнопки сама — значит, в игру пришли события настоящего указателя) и
         # настоящая регрессия (координата вьюпорта осталась нашей, а hover чужой).
-        ours, seen = _xy(hover.get("at", "")), _xy(probe.get("mouse", ""))
+        ours, seen = capture.pointer_xy(hover.get("at", "")), capture.pointer_xy(probe.get("mouse", ""))
         moved = ours is not None and seen is not None and (abs(ours[0] - seen[0]) > 2 or abs(ours[1] - seen[1]) > 2)
         if moved:
             pytest.skip(

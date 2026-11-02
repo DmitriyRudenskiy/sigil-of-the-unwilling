@@ -50,6 +50,25 @@ def test_canonical_size_дефолт_и_override():
     assert capture.canonical_size({capture.SIZE_ENV: "1024x768"}) == (1024, 768)
 
 
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("(1592.0, 632.0)", (1592.0, 632.0)),
+        ("(0,0)", (0.0, 0.0)),
+        ("(1592.5, -3.5)", (1592.5, -3.5)),
+        # Нераспознанное — None: вердикт «указатель сдвинул наведение» не имеет права
+        # падать на формате (T-334), молча считать его «не сдвинул» — тоже.
+        ("", None),
+        ("(1592.0)", None),
+        ("(a, b)", None),
+        ("ничего", None),
+        (None, None),
+    ],
+)
+def test_pointer_xy_разбирает_координату_или_нет(text, expected):
+    assert capture.pointer_xy(text) == expected
+
+
 def test_png_size_читает_IHDR():
     assert capture.png_size(_png(1920, 1080)) == (1920, 1080)
 

@@ -20,6 +20,14 @@
 3. Таймер показа подсказки не ускоряется (синглтона `GUI` в этой сборке нет): между
    наведением и кадром — 1.6 с реального времени и 30 кадров, иначе кадр был бы
    зелёным враньём.
+4. Настоящий указатель машины (не Xvfb) успевает подослать своё событие между
+   наведением и проверкой, и hover уходит на чужой контрол — путь того выглядит
+   правдоподобно (замер T-334: в полном прогоне FAIL, в изоляции PASS).
+   Повторное наведение перед зондом (приём T-280 у соседа) здесь НЕ работает: у панели
+   с `tooltip_text` синтетическое движение сбрасывает таймер подсказки — замер того же
+   дерева: с ре-наведением `tooltip_labels` пуст, без него 1 подпись (6.1 с).
+   Поэтому вердикт разводится без ре-наведения, по координате вьюпорта: чужая
+   координата — среда (`pytest.skip`), наша координата при чужом hover — регрессия (FAIL).
 
 Текст подсказки выбран так, чтобы не совпадать с подписью на самой пластине
 («Значение: 60 (TooltipLabel)») — точное совпадение с `tooltip_text` оставляет ровно
@@ -33,6 +41,8 @@ from __future__ import annotations
 
 import time
 from typing import Any
+
+import pytest
 
 import capture
 
@@ -95,6 +105,8 @@ return {{
     "tooltip_labels": labels,
     "tooltip_owners": plates,
     "hovered": str(hovered.get_path()) if hovered != null else "ничего",
+    "mouse": str(get_tree().root.get_mouse_position()),
+    "driver": str(DisplayServer.get_name()),
 }}
 """
 
@@ -118,11 +130,26 @@ def test_tooltip_plate_is_drawn_by_real_hover(mcp: Any) -> None:
     mcp.wait_frames(30)
 
     probe = mcp.execute_code(PROBE_CODE) or {}
-    assert probe.get("hovered") == hover["plate_path"], (
-        f"событие мыши не попало на пластину (наведён: {probe.get('hovered')!r}, ждали "
-        f"{hover['plate_path']!r}, экран {hover['screen']}, геометрия "
-        f"{hover['viewport_rect']}) — без настоящего наведения кадр ничего не доказывает"
-    )
+    if probe.get("hovered") != hover["plate_path"]:
+        # Два разных verdict (та же развилка, что у соседа): сломанный тест среды —
+        # настоящий указатель унёс мышь с пластины; настоящая регрессия — координата
+        # осталась нашей, а наведение чужое.
+        ours, seen = capture.pointer_xy(hover.get("at", "")), capture.pointer_xy(probe.get("mouse", ""))
+        moved = ours is not None and seen is not None and (abs(ours[0] - seen[0]) > 2 or abs(ours[1] - seen[1]) > 2)
+        if moved:
+            pytest.skip(
+                f"среда, не регрессия (T-334): настоящий указатель ({seen}) сдвинул наведение "
+                f"с пластины (наведён {probe.get('hovered')!r}, драйвер "
+                f"{probe.get('driver')!r}, ждали {ours}); под Xvfb без указателя тест "
+                "исполняется целиком"
+            )
+        assert False, (
+            f"событие мыши не попало на пластину (наведён: {probe.get('hovered')!r}, ждали "
+            f"{hover['plate_path']!r}, экран {hover['screen']}, мышь вьюпорта "
+            f"{probe.get('mouse')!r}, драйвер {probe.get('driver')!r}, геометрия "
+            f"{hover['viewport_rect']}) — координата наша, значит наведение потеряно "
+            "кодом, а не средой"
+        )
     labels = probe.get("tooltip_labels", [])
     assert len(labels) == 1, (
         f"подсказка не дорисовалась до кадра (ожидась 1 видимая подпись с текстом "
