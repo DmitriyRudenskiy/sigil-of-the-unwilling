@@ -226,9 +226,10 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 
 ## MCP e2e (4-й уровень верификации)
 
-- Тесты: `game/tests/mcp/` (pytest: 57 collected → 55 passed + 2 skipped на main `98d18666`; из них
-  15 — логика хелпера съёмки без Godot, 1 — съёмка по запросу `CAPTURE_SCENE`, см.
-  `docs/mvp/CAPTURE-HELPER.md`) — MCP-секция `game/run_tests.sh`. Источник истины по числу —
+- Тесты: `game/tests/mcp/` (pytest: 122 collected → 120 passed + 2 skipped на main `ec7beb74`;
+  из них 35 — логика хелпера съёмки и разбор координат без Godot, 1 из них — съёмка
+  по запросу `CAPTURE_SCENE`, см. `docs/mvp/CAPTURE-HELPER.md`) — MCP-секция `game/run_tests.sh`.
+  Источник истины по числу —
   строка `PYTEST LEDGER` в протоколе гейта, а не это предложение.
 - venv: `/home/user/.venv/godot-mcp-tests` (pytest, pytest-timeout, pytest-xdist, mcp, anyio);
   **Параллельные MCP-воркеры (ci-speedup):** `MCP_WORKERS=N` (дефолт 1) →
