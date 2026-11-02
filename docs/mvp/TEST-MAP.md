@@ -587,7 +587,7 @@ tracked-файл** (отловлено по изменённому `git status`,
 
 | Что | Мера | Значение |
 | --- | --- | --- |
-| GdUnit, полный свит (`--tier=full`) | `Total execution time` раннера | **3 мин 24 с** (391 файл / 3669 тестов; 2026-11-02 было 388/3664 за 3 мин 04 с) |
+| GdUnit, полный свит (`--tier=full`) | `Total execution time` раннера | **3 мин 33 с** (391 файл / 3667 тестов; 2026-11-02 было 388/3664 за 3 мин 04 с) |
 | GdUnit, `--tier=fast` | `Total execution time` раннера | **1 мин 41 с** (383 файла / 3621 тест) |
 | `tests/slow/` (5 файлов = 1.3% файлов) | A/B: `full` − `fast` | **83 с = 45% GdUnit-времени** |
 | те же 5 файлов поштучно (isolated) | `Total execution time` каждого | `test_trader_role` 33.2 с · `test_ui_responsive` 27.7 с · `test_runtime_integration` 5.5 с · `test_road_art` 4.9 с · `test_world_bootstrap` 4.8 с (сумма 76 с ≈ A/B-разнице) |
