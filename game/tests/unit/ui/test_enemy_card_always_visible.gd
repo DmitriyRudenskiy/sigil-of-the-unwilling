@@ -161,3 +161,87 @@ func test_card_is_filled_on_the_first_frame_of_a_started_battle() -> void:
 	assert_str(_label(ui, "tc_caption").text).is_equal("Противник")
 	assert_str(_label(ui, "tc_name").text).is_not_empty()
 	assert_str(_label(ui, "tc_hp_row/tc_hp").text).is_not_empty()
+
+
+## ── T-326: геометрия подписи (правый край — внутри пластины) ──────────────────
+##
+## Почему это здесь, а не в новом файле: носитель проверки — `scripts/ui/battle_ui.gd`,
+## его группа в `docs/mvp/TEST-MAP.md` и так осколота (12 файлов), и
+## `python3 scripts/testmap.py --check` на новый файл отвечает `merge_files +1`.
+##
+## Повод. UX-review «Карты кампании» (2026-11-02,
+## `docs/mvp/matrix/2026-11-02/ux-map-screen-copy.md`, расхождение 2) прочитал в
+## ячейке G10 «…еле…» и «…особности — задача», то есть обрезку с многоточием и
+## «коробочку отсутствующего глифа». На живом кадре (`tools/shot_scene.gd`:
+## `main.tscn` + `campaign_hud_plain`, отдельно `battle.tscn` + `battle_hud_full`)
+## обе строки печатаются целиком, и многоточие им взяться негде: Godot подрезает
+## строку только при `clip_text` или `autowrap`, а у `tc_caption` (`battle_ui.gd:306`)
+## и у `AbilityTodoNote` (`campaign_hud.gd:904`) не включено ни то ни другое — ни в
+## коде, ни в теме. Обрезанным оказался кроп ревью (цитата обрывается на середине
+## слова), а «коробочкой» — декоративная «С» титульного шрифта на кегле 16. Саму
+## строку полосы даёт заглушка макета 10 D-281 (`campaign.todo_abilities`,
+## `locale/ru.po:1173`), и её сводит не эта запись, а T-244.
+## Симптом закрыт как «не воспроизводится». Осталась мера, которую не держал никто:
+## ширина подписи под ширину пластины. Заодно фиксируется выключенная подрезка —
+## чтобы через полгода не гадали, откуда в этой полосе возьмётся «…».
+
+## Внутренний rect пластины: то, что оставляет детям StyleBox `PanelCard`.
+func _inner_rect(card: Control) -> Rect2:
+	var r := card.get_global_rect()
+	var sb: StyleBox = card.get_theme_stylebox("panel")
+	assert_bool(sb != null).is_true().override_failure_message(
+		"у пластины нет StyleBox «panel» — мерить «влезает ли подпись» нечем")
+	if sb == null:
+		return r
+	return r.grow_individual(
+		-sb.content_margin_left, -sb.content_margin_top,
+		-sb.content_margin_right, -sb.content_margin_bottom)
+
+
+## Правый край строки — внутри пластины; подрезка и перенос — выключены.
+func _assert_row_fits(ui: CanvasLayer, key: String, what: String) -> void:
+	var lbl := _label(ui, key)
+	var inner := _inner_rect(ui.get_node("target_card") as Control)
+	assert_bool(not lbl.clip_text).is_true().override_failure_message(
+		"%s: включён clip_text — строка начнёт обрезаться, а не печататься целиком" % what)
+	assert_int(lbl.autowrap_mode).is_equal(TextServer.AUTOWRAP_OFF) \
+		.override_failure_message("%s: включён autowrap — перенос меняет высоту карточки" % what)
+	var got := lbl.get_global_rect()
+	assert_bool(got.size.x > 0.0).is_true().override_failure_message(
+		"%s не разложен (rect %s) — строка невидима, мерить нечего" % [what, got])
+	assert_bool(got.end.x <= inner.end.x + 0.5).is_true().override_failure_message(
+		"%s: подпись %.0f..%.0f вылезает за пластину (внутренний край %.0f, текст «%s»)" % [
+			what, got.position.x, got.end.x, inner.end.x, lbl.text])
+
+
+## Юнит с dnd-профилем — носителем строки способностей (`battle_ui.gd:334`): без
+## профиля строка скрыта, и кейс про неё мерил бы пустоту.
+func _profiled_unit() -> BattleState.BattleUnit:
+	var unit := _enemy(true)
+	var profile := DnDCombatantProfile.new("goblins", "Гоблин")
+	profile.level = 1
+	unit.dnd_profile = profile
+	return unit
+
+
+## Обе подписи окна: «Цель» — путь контроллера (`battle_controller.gd:107`),
+## «Противник» — путь наведения мыши (`battle_ui.gd:358`).
+func test_both_captions_fit_their_plate() -> void:
+	for caption: String in ["Цель", "Противник"]:
+		var ui: CanvasLayer = _ui()
+		ui.show_target_card(_profiled_unit(), caption)
+		await await_millis(50)
+		assert_str(_label(ui, "tc_caption").text).is_equal(caption)
+		_assert_row_fits(ui, "tc_caption", "подпись «%s»" % caption)
+
+
+## Строка способностей — самая широкая в окне («СИЛ … · ЛОВ … · ТЕЛ … ·» на первой
+## строке из двух): именно ей лезть за пластину первой, если пластина сузится.
+func test_abilities_row_fits_its_plate() -> void:
+	var ui: CanvasLayer = _ui()
+	ui.show_target_card(_profiled_unit(), "Цель")
+	await await_millis(50)
+	var row := _label(ui, "tc_abilities")
+	assert_bool(row.visible).is_true().override_failure_message(
+		"строка способностей скрыта при dnd-профиле — проверять нечего, а должна")
+	_assert_row_fits(ui, "tc_abilities", "строка способностей")
