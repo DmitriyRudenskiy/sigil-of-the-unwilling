@@ -69,6 +69,26 @@ def test_pointer_xy_разбирает_координату_или_нет(text, 
     assert capture.pointer_xy(text) == expected
 
 
+class _Указатель:
+    """Замена mcp: отдаёт заранее заготовленные отсчёты координаты вьюпорта."""
+
+    def __init__(self, answers: list[str]) -> None:
+        self.answers = list(answers)
+
+    def execute_code(self, _code: str) -> dict:
+        return {"mouse": self.answers.pop(0)}
+
+
+def test_pointer_is_moving_видит_чужое_движение_но_не_шум():
+    # Чужой ход туда-сюда — среда: отсчётов не равны между собой, вердикт «двигает».
+    assert capture.pointer_is_moving(_Указатель(["(5.0, 5.0)", "(700.0, 500.0)"] * 3), pause=0)
+    # Указатель припаркован (наше синтетическое наведение его не двигает) — не среда.
+    assert not capture.pointer_is_moving(_Указатель(["(1592.0, 632.0)"] * 5), pause=0)
+    # Нераспознанный отсчёт — «не знаем»: невердикт среды не должен прятать регрессию.
+    assert not capture.pointer_is_moving(_Указатель(["ничего"] * 5), pause=0)
+    assert not capture.pointer_is_moving(_Указатель(["(5.0, 5.0)", "ничего", "(700.0, 500.0)", "(5.0, 5.0)", "(5.0, 5.0)"]), pause=0)
+
+
 def test_png_size_читает_IHDR():
     assert capture.png_size(_png(1920, 1080)) == (1920, 1080)
 

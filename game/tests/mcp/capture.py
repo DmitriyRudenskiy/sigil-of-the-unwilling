@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import os
 import subprocess
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -85,6 +86,33 @@ def pointer_xy(text: str) -> tuple[float, float] | None:
         return float(a), float(b)
     except (AttributeError, ValueError):
         return None
+
+
+POINTER_CODE = 'return {"mouse": str(get_tree().root.get_mouse_position())}'
+
+
+def pointer_is_moving(mcp: Any, samples: int = 5, pause: float = 0.23) -> bool:
+    """Двигает ли указателем кто-то другой, пока тест ждёт таймер подсказки.
+
+    Замер T-335 на X-контуре (2026-11-04): чужой `XWarpPointer` каждые 0.7 с держит
+    `hovered` нашим — наведение удерживает синтетическое событие, — и при этом не даёт
+    подсказке дорисоваться. Отличить это от регрессии по одному замеру нельзя.
+    Равенство «нашей» координаты мерилом быть не может: синтетическое наведение
+    X-указатель не двигает, и на десктопе он припаркован где попало (проверено —
+    зелёный прогон начал скипаться). Нераспознанный отсчёт = «не знаем» = False,
+    чтобы невердикт среды не прятал настоящую регрессию.
+
+    Интервал намеренно кривой (0.23 с, пять отсчётов): с паузой 0.5 с и периодом
+    чужого движения 0.3 с все отсчёты попадали в одну фазу чередования (замер на
+    X-контуре: `(700.0, 500.0)` трижды → красный остался красным). Окно ~1.2 с
+    перекрывает и медленные чередования.
+    """
+    seen = []
+    for _ in range(samples):
+        if seen:
+            time.sleep(pause)
+        seen.append(pointer_xy(str((mcp.execute_code(POINTER_CODE) or {}).get("mouse", ""))))
+    return None not in seen and len(set(seen)) > 1
 
 
 def pin_window_code(size: tuple[int, int]) -> str:
