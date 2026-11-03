@@ -23,6 +23,11 @@
    `true`. Гипотеза «неактивное окно» на Xvfb не проверяема и потому мертва, а скип по
    `focused` в тесте — разрыватель только для хоста с настоящим WM.
 
+Кроме фаз, зонд умеет режим «шума» (`--hostile СЕК`): бесконечные настоящие движения
+указателя с заданным периодом — тем же X-клиентом, каким фазы 2–4 снимают одно событие.
+Им проверяются вердикты «указателем владеет не кто-то другой» (замер 2026-11-04, см.
+`capture.pointer_is_moving`).
+
 Почему X-средства, а не внутриигровые: `Input.warp_mouse` ломает наведение (замер
 2026-10-25 в докстринге соседа), а `XWarpPointer`/XTEST из отдельного X-клиента — ровно
 то, что производит физическая мышь на уровне протокола X, на том же DISPLAY, где живёт
@@ -180,3 +185,50 @@ def test_t335_probe_tooltip_motion_and_focus(mcp: Any) -> None:
         f"`window_is_focused` всё-таки заметил чужой X-фокус ({labels(focus)}): "
         "на этом DISPLAY скип по фокусу жив, гипотезу T-335 надо перепроверять"
     )
+
+
+def hostile_loop(period: float) -> None:
+    """Бесконечные настоящие движения указателя, раз в `period` секунд. Остановка — Ctrl-C.
+
+    Тот же X-клиент и тот же DISPLAY, что у окна Godot — ровно то, что производит
+    физическая мышь на уровне протокола.
+
+        cd game && DISPLAY=:94 python3 tests/mcp/probe_t335_focus.py --hostile 0.7 &
+        pytest tests/mcp/test_disabled_reason_tooltip.py -q -s   # ждём skipped, не failed
+
+    Позиция ставится **абсолютно** (`root.warp_pointer`), а не через `_X.warp`: тот зовёт
+    `Display.warp_pointer`, которая смещает текущую координату (замер на X-контуре,
+    2026-11-04: (960,540) + (300,300) → (1260,840)), и на третьем-четвёртом шаге указатель
+    намертво встаёт в угол (1919,1079), где дальнейшие смещения события не производят —
+    шум выключался бы сам через ~3 с. Одиночным фазам 2–4 это безразлично (им нужно одно
+    движение), генератору шума — нет.
+
+    Период выбирается по симптому: 0.7 с — замеры пользователя (медленные чередования),
+    0.3 с — часто (проверка окна выборки `capture.pointer_is_moving`).
+    """
+    x = _X()
+    i = 0
+    while True:
+        ax, ay = (480, 380) if i % 2 == 0 else (900, 620)
+        x.root.warp_pointer(ax, ay)
+        x.d.sync()
+        i += 1
+        print(f"warp#{i}→({ax},{ay})", flush=True)
+        time.sleep(period)
+
+
+if __name__ == "__main__":
+    import argparse
+    import sys
+
+    ap = argparse.ArgumentParser(description="зонд T-335: фазы — pytest'ом, шум — отсюда")
+    ap.add_argument("--hostile", type=float, metavar="СЕК",
+                    help="режим шума: двигать чужой указатель раз в СЕК секунд")
+    args = ap.parse_args()
+    if args.hostile:
+        hostile_loop(args.hostile)
+    else:
+        sys.exit(
+            "фазы снимает pytest (`pytest tests/mcp/probe_t335_focus.py -q -s --timeout=900`); "
+            "здесь только `--hostile СЕК`"
+        )
