@@ -262,6 +262,11 @@ Xvfb» (было в T-335/T-336) — не блок и не причина пер
   по запросу `CAPTURE_SCENE`, см. `docs/mvp/CAPTURE-HELPER.md`) — MCP-секция `game/run_tests.sh`.
   Источник истины по числу —
   строка `PYTEST LEDGER` в протоколе гейта, а не это предложение.
+- Зонды по запросу — `game/tests/mcp/probe_*.py`: имя вне `test_*` выбрано намеренно,
+  `pytest tests/mcp/` их не собирает (иначе в каждом прогоне гейта висел бы лишний скип),
+  звать руками по докстрингу файла. Первый — `probe_t335_focus.py` (T-335): настоящее
+  движение указателя (`XWarpPointer`) и чужое окно с `set_input_focus` на том же DISPLAY,
+  чем замеряется «среда/регрессия» без второго компьютера.
 - venv: python MCP-тестов — из настройки машины (`MCP_PYTEST_PY`; pytest,
   pytest-timeout, pytest-xdist, mcp, anyio);
   **Параллельные MCP-воркеры (ci-speedup):** `MCP_WORKERS=N` (дефолт 1) →

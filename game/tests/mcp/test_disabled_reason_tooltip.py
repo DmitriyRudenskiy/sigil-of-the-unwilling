@@ -108,18 +108,30 @@ return {"want": want, "tooltip_labels": nodes, "hovered": str(hovered.get_path()
 	"focused": str(DisplayServer.window_is_focused(0))}
 """
 
-# Повторное синтетическое наведение перед самым зондом: настоящий указатель машины
-# (не Xvfb) успевает подослать своё событие между наведением и проверкой.
+# Перевыпуск наведения перед самым зондом: настоящий указатель машины (не Xvfb) успевает
+# подослать своё событие между наведением и проверкой.
+#
+# Движений ровно два, «вне кнопки → обратно», и это не косметика (замер T-335, X-контур,
+# 2026-11-04, `tests/mcp/probe_t335_focus.py`): настоящее событие указателя закрывает
+# всплывающую подсказку, а синтетическое наведение на ту же кнопку, на которой наведение
+# уже стоит, `NOTIFICATION_MOUSE_ENTER` не перевыпускает — таймер подсказки (1 с) не
+# стартует заново, и зонд видит `tooltip_labels: []` при живом `hovered`. Ровно этот
+# симптом T-335 и считался «многофайловой сессией». Кадр замера: одно наведение →
+# подсказки нет; движение «вне кнопки → обратно» + те же 1.6 с → подсказка есть, в новом
+# `@PopupPanel` (старый попап к этому моменту уничтожен).
 REHOVER_CODE = """
 var scene: Node = get_tree().current_scene
 var button: Button = scene.get_node_or_null("RightColumn/ContinueButton") as Button
 if button == null:
 	return {"ok": false}
 var center: Vector2 = button.get_global_rect().get_center()
-var motion := InputEventMouseMotion.new()
-motion.position = center
-motion.global_position = center
-Input.parse_input_event(motion)
+# Точка в 300 px под кнопкой — вне её, но внутри той же колонки; важна не она, а смена
+# наводимого контрола, без неё ENTER не перевыпускается.
+for pos: Vector2 in [center + Vector2(0, 300), center]:
+	var motion := InputEventMouseMotion.new()
+	motion.position = pos
+	motion.global_position = pos
+	Input.parse_input_event(motion)
 return {"ok": true, "at": str(center)}
 """
 
@@ -148,13 +160,21 @@ def test_disabled_button_tooltip_reaches_the_screen(mcp: Any) -> None:
     # снимался бы до появления подсказки и оставался зелёным.
     time.sleep(1.6)
     mcp.wait_frames(30)
-    # Наведение обновляется прямо перед зондом: на машине с настоящим указателем
-    # событие от него прилетает после нашего и снимает hover (замер смены T-280:
-    # 4 падения / 1 проход на том же дереве).
-    mcp.execute_code(REHOVER_CODE)
-    mcp.wait_frames(2)
-
     probe = mcp.execute_code(PROBE_CODE) or {}
+    if not probe.get("tooltip_labels"):
+        # Повтор с переводом наведения (замер T-335, см. REHOVER_CODE): настоящее
+        # событие указателя закрывает подсказку, а наведение на ту же кнопку её не
+        # возвращает. Таймер после перевыпуска ENTER снова требует свои 1.6 с, поэтому
+        # попытка одна и сразу со всем ожиданием, а не «ещё кадрик».
+        mcp.execute_code(REHOVER_CODE)
+        time.sleep(1.6)
+        mcp.wait_frames(30)
+        mcp.execute_code(REHOVER_CODE)
+        mcp.wait_frames(2)
+        probe = mcp.execute_code(PROBE_CODE) or {}
+    # Наведение сверяется по второму зонду: на машине с настоящим указателем событие от
+    # него прилетает после нашего и снимает hover (замер смены T-280: 4 падения / 1 проход
+    # на том же дереве).
     if probe.get("hovered") != hover["button_path"]:
         # Наведение не наше. Два разных verdict: сломанный тест среды (мышь ушла с
         # кнопки сама — значит, в игру пришли события настоящего указателя) и
@@ -174,10 +194,12 @@ def test_disabled_button_tooltip_reaches_the_screen(mcp: Any) -> None:
             f"{probe.get('mouse')!r}, драйвер {probe.get('driver')!r}) — координата наша, "
             "значит наведение потеряно кодом, а не средой"
         )
-    # T-335: в многофайловой сессии pytest hover оставался нашим, а подпись подсказки
-    # не дорисовывалась. Гипотеза — окно к моменту зонда не в фокусе (подсказка за
-    # таймером в неактивном окне не досчитывается), поэтому фокус окна снимается здесь
-    # же, где позиция мыши и драйвер: неактивное окно — среда, а не регрессия.
+    # T-335: hover остаётся нашим, а подписи подсказки нет. Причина измерена (см.
+    # REHOVER_CODE и `probe_t335_focus.py`) — настоящее событие указателя, а не фокус
+    # окна: под Xvfb `window_is_focused(0)` остаётся `true` даже когда X-фокус перехвачен
+    # чужим окном (замер: `X-фокус→0x400000`, `focused=true`), поэтому ветка ниже —
+    # разрыватель для хоста с настоящим WM, а не то, что сработало бы здесь. Поле
+    # печатается во всех вердиктах, чтобы «среда» и «регрессия» были различимы.
     focused = probe.get("focused")
     assert focused in ("true", "false"), (
         f"зонд не вернул фокус окна (значения 'true'/'false'), вернул: {focused!r} — значит "
