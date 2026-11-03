@@ -42,18 +42,30 @@ cleanup_mcp() {
 trap cleanup_mcp EXIT
 trap 'exit 130' INT
 trap 'exit 131' TERM
-# Порядок разрешения Godot (2026-10-04, флаг 8): $GODOT_BIN → $GODOT (legacy) →
-# command -v godot → дефолты ОС (путь бинаря задокументирован в AGENTS.md)
+# Настройки машины (2026-11-03): пути бинарей, venv и адрес X-хоста принадлежат
+# машине, а не проекту, — в репозитории их не было и нет. Файл живёт вне дерева;
+# переменная из окружения перекрывает его значение (в файле все присваивания вида
+# `: "${VAR:=…}"`). Свой путь — SOTU_MACHINE_ENV; отсутствие файла штатно: тогда
+# работают только переменные окружения и PATH.
+SOTU_MACHINE_ENV="${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}"
+if [ -r "$SOTU_MACHINE_ENV" ]; then
+	# shellcheck disable=SC1090
+	. "$SOTU_MACHINE_ENV"
+	echo "MACHINE CONFIG: $SOTU_MACHINE_ENV"
+else
+	echo "MACHINE CONFIG: нет ($SOTU_MACHINE_ENV) — только окружение и PATH"
+fi
+
+# Порядок разрешения Godot (2026-10-04, флаг 8; с 2026-11-03 — без угадывания пути
+# по ОС): $GODOT_BIN (окружение либо настройка машины) → $GODOT (legacy) →
+# command -v godot → явная ошибка с именем настройки.
 GODOT="${GODOT_BIN:-${GODOT:-}}"
 if [ -z "$GODOT" ]; then
 	GODOT="$(command -v godot || true)"
 fi
-if [ -z "$GODOT" ]; then
-	case "$(uname -s)" in
-		Darwin) GODOT="/Applications/Godot.app/Contents/MacOS/Godot" ;;
-		*) GODOT="$HOME/.local/bin/godot" ;;
-	esac
-
+if [ -z "$GODOT" ] || [ ! -x "$GODOT" ]; then
+	echo "GODOT не найден (пробовали GODOT_BIN/GODOT и PATH). Путь — в настройку машины: $SOTU_MACHINE_ENV (GODOT_BIN=/путь/к/godot)" >&2
+	exit 3
 fi
 echo "GODOT: $GODOT"
 
@@ -79,6 +91,12 @@ usage: run_tests.sh [--tier=smoke|fast|full] [--help]
   full  — полный гейт: GdUnit + MCP e2e + python-уровни (по умолчанию)
         команда: -a res://tests + pytest tests/mcp/ | не мерит: звук, playtest, ручной ux-review
 Env как раньше: SKIP_GDUNIT=1, MCP_WORKERS=N, GODOT_BIN, MCP_PYTEST_PY, GEN_PY.
+Настройки машины — SOTU_MACHINE_ENV (файл вне репозитория, по умолчанию
+  ~/.pi/agent/env/sotu-machine.env): GODOT_BIN, MCP_PYTEST_PY, адрес X-хоста
+  MCP_SSH_HOST (+MCP_REMOTE_DIR_BASE). В репозитории
+  путей и адресов машины нет: X — настроенный ресурс, а не «та самая машина»,
+  при заданном MCP_SSH_HOST MCP-секция исполняется на X-хосте из проверяемого
+  рабочего дерева.
 MCP_SMOKE=1 — вместе со слоем smoke поднять живой Godot и прогнать MCP-тесты с
   маркером smoke (меню → мир). По умолчанию слой smoke остаётся headless.
 USAGE
@@ -147,10 +165,15 @@ done
 
 # SKIP_GDUNIT=1 — MCP-only прогон (CI-2 эшелонирование, раунд 7 §1.3: GdUnit —
 # отдельный шаг, MCP-шаг не прогоняет GdUnit повторно).
+# Pre-import: кэш глобальных классов (class_name) и `.godot/imported` для ассетов.
+# С 2026-11-03 — вне ветки GdUnit: MCP-прогон на свежем дереве (делегация на
+# X-контур, SKIP_GDUNIT=1) тоже поднимает живой Godot, а без импорта сцена
+# теряет ext_resource («referenced non-existent resource at: res://…/skip.png»)
+# и уровень краснеет на дереве, с которым ничего не делали. Раньше это маскировал
+# локальный .godot, переживающий прогоны.
+"$GODOT" --headless --path . --import >/dev/null 2>&1
 if [ "${SKIP_GDUNIT:-0}" != "1" ]; then
 	echo "=== gdUnit4: слой $TIER ($GD_INCLUDE, исключений: ${#GD_EXCLUDE[@]}) ==="
-# Pre-import to refresh the global class cache (class_name).
-"$GODOT" --headless --path . --import >/dev/null 2>&1
 # CI-4 (раунд 11 §4, D-168): лог в файл — файл-level orphan-гейт (allowlist)
 # парсит per-suite «Statistics: … N orphans» после «Run Test Suite: <path>».
 GDUNIT_LOG="$(mktemp)"
@@ -307,7 +330,7 @@ if [ "$MCP_RUN" != "1" ]; then
 	# видеть, какие уровни вообще не запускались и где их взять.
 	echo "NOT MEASURED: MCP e2e (живой Godot, ~305 с) — не входит в слой $TIER; game/run_tests.sh без флага"
 	if [ "$TIER" = "smoke" ]; then
-		MCP_COLLECT_PY="${MCP_PYTEST_PY:-/home/user/.venv/godot-mcp-tests/bin/python}"
+		MCP_COLLECT_PY="${MCP_PYTEST_PY:-python3}"  # venv — из настроек машины
 		[ -x "$MCP_COLLECT_PY" ] || MCP_COLLECT_PY="$(command -v python3 || true)"
 		if [ -n "$MCP_COLLECT_PY" ] && "$MCP_COLLECT_PY" -c 'import mcp, anyio' >/dev/null 2>&1; then
 			MCP_SMOKE_N="$("$MCP_COLLECT_PY" -m pytest tests/mcp/ -m smoke --collect-only -q 2>/dev/null | grep -oE '[0-9]+/[0-9]+ tests collected' | head -1)"
@@ -324,14 +347,71 @@ fi
 echo ""
 echo "=== MCP tests (tugcantopaloglu/godot-mcp)${MCP_SET:+ — только слой $MCP_SET} ==="
 MCP_SERVER="${GODOT_MCP_SERVER:-$PWD/addons/godot-mcp/build/index.js}"
+# MCP e2e-тесты запускают живой Godot (не headless) — нужен X-дисплей.
+# X — не свойство «той самой машины», а настроенный ресурс (2026-11-03). Порядок:
+# 1) MCP_SSH_HOST (настройка машины) — секция исполляется там, где X есть (блок
+#    ниже); 2) заданный DISPLAY — используется как есть; 3) локальный Xvfb на
+#    свободном номере (машина шарится: чужие дисплеи, в т.ч. с auth, не убиваем;
+#    :99 исключён). Ни одного — явный SKIPPED с именем ручки.
+if [ -n "${MCP_SSH_HOST:-}" ] && [ -z "${SOTU_ON_X_HOST:-}" ]; then
+	SOTU_SHA="$(git -C .. rev-parse --short HEAD 2>/dev/null || echo worktree)"
+	SOTU_REMOTE="${MCP_REMOTE_DIR_BASE:-/tmp/sotu-mcp}/$SOTU_SHA"
+	echo "MCP: X-контур $MCP_SSH_HOST:$SOTU_REMOTE (MCP_SSH_HOST из настроек машины; GdUnit уже снят локально)"
+	# Переносится ПРОВЕРЯЕМОЕ РАБОЧЕЕ ДЕРЕВО, а не HEAD: tar берёт файлы по
+	# git ls-files (незакоммиченные правки участвуют) + собранный JS-бандл
+	# godot-mcp (`build/`, gitignored: он результат source/ той же версии).
+	# `node_modules` аддона едет обязательно: build/index.js — не самодостаточный
+	# бандл, он импортирует `@modelcontextprotocol/sdk`; без зависимостей сервер
+	# не стартует, и все тесты, поднимающие Godot, падают одним и тем же
+	# «MCPError(-32000, 'Connection closed')» (замер 2026-11-03: 61 такая же
+	# ошибка на 60 прохождений — молча, без единой строки о зависимостях).
+	# 106 МБ по LAN — секунда. Путь в ls-files — от корня репо, поэтому оба шага
+	# в подоболочке из `..`.
+	# --no-mac-metadata/--no-xattrs: без них bsdtar (macOS) кладёт рядом с каждым
+	# файлом AppleDouble-дубль `._*` (замер: 4707 файлов → 5717) и pax-заголовок
+	# provenance, на который GNU tar ругается строкой на каждый файл.
+	SOTU_TAR=()
+	[ "$(uname -s)" = "Darwin" ] && SOTU_TAR=(--no-mac-metadata --no-xattrs)
+	if ! ( cd .. && { git ls-files -z game scripts; \
+			find game/addons/godot-mcp/build game/addons/godot-mcp/node_modules -type f -print0 2>/dev/null; } | \
+		tar "${SOTU_TAR[@]+"${SOTU_TAR[@]}"}" --null -T - -cf - | gzip -1 ) | \
+		ssh -q "$MCP_SSH_HOST" "rm -rf '$SOTU_REMOTE' && mkdir -p '$SOTU_REMOTE' && tar -xzf - -C '$SOTU_REMOTE' --warning=no-unknown-keyword"; then
+		echo "PYTEST: SKIPPED (дерево не выложено на $MCP_SSH_HOST — MCP-уровень не мерился; сними MCP_SSH_HOST для локального X)"
+		exit 0
+	fi
+	# Удалённый прогон — тот же скрипт целиком, только без GdUnit (он измерен здесь)
+	# и с запретом рекурсивной делегации. Хвостовые python-секции исполняются там же:
+	# вердикты не теряются, а удваивается только их ~10 с. Env-расширения передаются
+	# явно; остальное — настройка машины на самом хосте. GdUnit не переснимается
+	# только на full (на smoke SKIP_GDUNIT был бы «прогон ничего не мерил»).
+	SOTU_FWD="SOTU_ON_X_HOST=1"
+	[ "$TIER" = "full" ] && SOTU_FWD="$SOTU_FWD SKIP_GDUNIT=1"
+	[ "${MCP_SMOKE:-0}" = "1" ] && SOTU_FWD="$SOTU_FWD MCP_SMOKE=1"
+	[ -n "${MCP_WORKERS:-}" ] && SOTU_FWD="$SOTU_FWD MCP_WORKERS=$MCP_WORKERS"
+	# Ключи прогона — те же, что переданы здесь; пустого аргумента быть не должно:
+	# `printf '%q '` без аргументов выдаёт `''`, а удалённый скрипт честно
+	# отказывается от неизвестного аргумента «» (замер 2026-11-03).
+	SOTU_ARGS=""
+	[ "$#" -gt 0 ] && SOTU_ARGS="$(printf '%q ' "$@")"
+	ssh -q "$MCP_SSH_HOST" "cd '$SOTU_REMOTE/game' && $SOTU_FWD bash run_tests.sh $SOTU_ARGS"
+	MCP_RC=$?
+	echo "MCP: вердикт снят на $MCP_SSH_HOST (rc=$MCP_RC); рабочий каталог прогона удалён"
+	ssh -q "$MCP_SSH_HOST" "rm -rf '$SOTU_REMOTE'" || true
+	exit "$MCP_RC"
+fi
 if [ ! -f "$MCP_SERVER" ]; then
 	echo "PYTEST: SKIPPED (no MCP server: $MCP_SERVER; build: cd addons/godot-mcp && npm ci && npm run build)"
 	exit 0
 fi
-# MCP e2e-тесты запускают живой Godot (не headless) — нужен X-дисплей.
-# Машина шарится: чужие Xvfb (в т.ч. с auth) могут работать — чужие процессы не
-# убиваем, только свободный дисплей: скан :97 → :91–:98 (:99 исключён — auth).
-# При заданном DISPLAY используется он.
+# Зависимости аддона — не «деталь сборки», а условие того, что сервер вообще
+# запустится: build/index.js импортирует @modelcontextprotocol/sdk. Без проверки
+# уровень молча краснел 61 одинаковой «Connection closed» (2026-11-03).
+# node_modules — сосед build/, не его вложение.
+if [ ! -d "$(dirname "$(dirname "$MCP_SERVER")")/node_modules" ]; then
+	echo "PYTEST: SKIPPED (нет node_modules у $MCP_SERVER — npm ci в game/addons/godot-mcp/; без них сервер не стартует)"
+	echo "MCP VERDICT: SKIPPED (зависимости godot-mcp не установлены — уровень не мерился)"
+	exit 0
+fi
 XVFB_PID=""
 if [ -z "${DISPLAY:-}" ] && command -v Xvfb >/dev/null 2>&1; then
 	for d in 97 91 92 93 94 95 96 98; do
@@ -345,18 +425,19 @@ if [ -z "${DISPLAY:-}" ] && command -v Xvfb >/dev/null 2>&1; then
 		XVFB_PID=""
 	done
 	if [ -z "$XVFB_PID" ]; then
-		echo "PYTEST: SKIPPED (свободного Xvfb-дисплея :91–:98 нет — машина шарится? укажите DISPLAY)"
+		echo "PYTEST: SKIPPED (X-дисплея нет: DISPLAY не задан, свободного Xvfb :91–:98 не нашли, MCP_SSH_HOST не задан — настройка машины $SOTU_MACHINE_ENV)"
 		exit 0
 	fi
 fi
-# venv MCP-тестов: путь зафиксирован в AGENTS.md (Linux). На машинах без этого
-# venv (macOS, 2026-10-04) — системный python3 с mcp+anyio (проверено: 38/1).
-PYTEST_PY="${MCP_PYTEST_PY:-/home/user/.venv/godot-mcp-tests/bin/python}"
+# venv MCP-тестов: путь — настройка машины (MCP_PYTEST_PY), в репозитории его нет.
+# Если venv не задан/не исполняемый — системный python3 с mcp+anyio (проверяемая
+# конфигурация, владелец 2026-10-04: MCP-секция исполняется, а не пропускается).
+PYTEST_PY="${MCP_PYTEST_PY:-}"
 if [ ! -x "$PYTEST_PY" ]; then
 	if command -v python3 >/dev/null 2>&1 && python3 -c 'import mcp, anyio' 2>/dev/null; then
 		PYTEST_PY="$(command -v python3)"
 	else
-		echo "PYTEST: SKIPPED (no venv: $PYTEST_PY и нет python3 с mcp+anyio; create: python3 -m venv /home/user/.venv/godot-mcp-tests && $PYTEST_PY -m pip install pytest pytest-timeout mcp anyio)"
+		echo "PYTEST: SKIPPED (MCP_PYTEST_PY не задан/не исполняемый: «$PYTEST_PY», и нет python3 с mcp+anyio; настройка машины $SOTU_MACHINE_ENV: python3 -m venv <путь> && <путь>/bin/pip install pytest pytest-timeout mcp anyio)"
 		[ -n "$XVFB_PID" ] && kill "$XVFB_PID" 2>/dev/null || true
 		exit 0
 	fi
@@ -532,12 +613,13 @@ fi
 # и кратность MAP_FOG_DIM проверялись бы только руками. Секция не молчит: нет pytest/PIL —
 # явная строка SKIPPED (конвенция MCP-секции).
 echo "=== python: генератор арта карты (scripts/test_gen_map_art.py) ==="
-# T-289 (D-166-семья): уровень желтел на этой машине, хотя интерпретатор с pytest+PIL
-# установлен — `/home/user/.venv/map-art` (замер 2026-10-29: pytest 9.1.1, PIL 13.0.0,
-# 11 тестов уровня проходят за 2.3 с). Проверка `import pytest, PIL` отвечала честно
-# про не тот интерпретатор: дефолт был `python3`. Перебираем кандидатов и ПЕЧАТАЕМ
-# выбранного — жёлтый обязан называть причину, а не прикрываться дефолтом.
-GEN_CANDIDATES=("${GEN_PY:-}" "/home/user/.venv/map-art/bin/python" "python3")
+# T-289 (D-166-семья): уровень желтел, хотя интерпретатор с pytest+PIL был установлен
+# (замер 2026-10-29: pytest 9.1.1, PIL 13.0.0, 11 тестов уровня за 2.3 с) — проверка
+# `import pytest, PIL` отвечала честно про не тот интерпретатор, дефолт был `python3`.
+# Перебираем кандидатов и ПЕЧАТАЕМ выбранного — жёлтый обязан называть причину. С 2026-11-03
+# среди кандидатов нет пути чужой машины: venv с PIL задаёт настройка машины (GEN_PY,
+# а где её нет — MCP_PYTEST_PY, его venv тоже носит Pillow).
+GEN_CANDIDATES=("${GEN_PY:-}" "${MCP_PYTEST_PY:-}" "python3")
 GEN_PY=""
 for gen_cand in "${GEN_CANDIDATES[@]}"; do
 	[ -n "$gen_cand" ] || continue
@@ -551,7 +633,7 @@ if [ -n "$GEN_PY" ]; then
 	"$GEN_PY" -m pytest ../scripts/test_gen_map_art.py -q --tb=short 2>&1 | tail -5
 	[ "${PIPESTATUS[0]}" -ne 0 ] && MCP_RC=1
 else
-	echo "GENART: SKIPPED (ни один кандидат не импортирует pytest+PIL: ${GEN_CANDIDATES[*]} — pip install pytest pillow)"
+	echo "GENART: SKIPPED (ни один кандидат не импортирует pytest+PIL: ${GEN_CANDIDATES[*]} — GEN_PY в настройку машины $SOTU_MACHINE_ENV)"
 fi
 
 # Сами-тест классификатора (D-265): тот решает, что считать жёлтым, и обязан краснеть сам,

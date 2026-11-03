@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Проверка `check_hero_frames.py` (T-318).
 
-Запуск: /home/user/.venv/map-art/bin/python -m pytest scripts/test_check_hero_frames.py -q
+Запуск: $MCP_PYTEST_PY -m pytest  # интерпретатор с pytest — из настроек машины scripts/test_check_hero_frames.py -q
 (в общем гейте уровень живёт в `scripts/doc_gates.sh` рядом с провенансом ассетов.)
 """
 import hashlib

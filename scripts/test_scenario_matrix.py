@@ -6,7 +6,7 @@ Godot не нужен: разбор, план, сверка полноты, ду
 Драйвер без этой самопроверки — тот же риск, что матрица без инструментов: молчаливый
 недобор (2026-10-26: 11 строк `error=?` отработали кодом 0).
 
-Запуск: `/home/user/.venv/godot-mcp-tests/bin/python -m pytest scripts/test_scenario_matrix.py -q`
+Запуск: `$MCP_PYTEST_PY -m pytest  # интерпретатор с pytest — из настроек машины scripts/test_scenario_matrix.py -q`
 (системный python3 pytest не содержит).
 """
 

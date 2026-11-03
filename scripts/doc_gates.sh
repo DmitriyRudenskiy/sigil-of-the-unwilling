@@ -12,6 +12,11 @@ cd "$(dirname "$0")/.."
 FAIL=0
 YELLOW=0
 PY=${PYTHON:-python3}
+# Настройки машины: пути бинарей и venv живут не в репозитории (AGENTS.md
+# § «Настройки машины»); переменная окружения перекрывает файл.
+SOTU_MACHINE_ENV=${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}
+# shellcheck disable=SC1090
+[ -f "$SOTU_MACHINE_ENV" ] && . "$SOTU_MACHINE_ENV"
 
 run() { # run "<название>" <команда...>
 	local name=$1; shift
@@ -66,11 +71,12 @@ EXIST=()
 for t in "${TESTS[@]}"; do
 	if [ -f "$t" ]; then EXIST+=("$t"); else MISSING+=("$t"); fi
 done
-# Интерпретатор с pytest: явный PYTEST_PY → PYTHON → venv MCP (путь фиксирован
-# AGENTS.md, его же использует game/run_tests.sh). Молчать уровень не имеет права:
-# если pytest нигде не найден — YELLOW с причиной, а не зелёный пропуск (D-265).
+# Интерпретатор с pytest: явный PYTEST_PY → PYTHON → venv MCP-тестов из настроек
+# машины (MCP_PYTEST_PY, его же читает game/run_tests.sh) → python3. Молчать
+# уровень не имеет права: если pytest нигде не найден — YELLOW с причиной, а не
+# зелёный пропуск (D-265).
 pick_pytest_py() {
-	local c cand=("${PYTEST_PY:-}" "$PY" /home/user/.venv/godot-mcp-tests/bin/python)
+	local c cand=("${PYTEST_PY:-}" "$PY" "${MCP_PYTEST_PY:-}" python3)
 	for c in "${cand[@]}"; do
 		[ -n "$c" ] && "$c" -c "import pytest" >/dev/null 2>&1 && { echo "$c"; return 0; }
 	done
@@ -93,7 +99,7 @@ elif PPP=$(pick_pytest_py); then
 		FAIL=1
 	fi
 else
-	echo "YELLOW: pytest недоступен (ни PYTEST_PY/PYTHON, ни venv godot-mcp-tests) — ${#EXIST[@]} файлов уровня не исполнены"
+	echo "YELLOW: pytest недоступен (ни PYTEST_PY/PYTHON, ни MCP_PYTEST_PY из настроек машины) — ${#EXIST[@]} файлов уровня не исполнены"
 	YELLOW=$((YELLOW + 1))
 fi
 

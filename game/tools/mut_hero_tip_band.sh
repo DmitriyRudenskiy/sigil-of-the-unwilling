@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Настройки машины (GODOT_BIN, venv pytest — не в репозитории; AGENTS.md
+# § «Настройки машины»). Ошибка «unbound variable» ниже = файл настроек машины
+# не заполнен, а не «скрипт сломался».
+. "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
+
 # Мутационная батарея геометрии панели предмета (T-271).
 #
 # Что под защитой. Панель предмета («Equip»/«Remove»/«Dispose» + описание)
@@ -23,7 +28,7 @@
 #
 # Запуск: bash game/tools/mut_hero_tip_band.sh   (из корня репо, дерево чистое)
 set -u
-G=${GODOT_BIN:-/home/user/.local/bin/godot}
+G=${GODOT_BIN:?GODOT_BIN — укажи в настройках машины ~/.pi/agent/env/sotu-machine.env}
 TIP=res://tests/unit/ui/test_inventory_grid.gd
 SCREEN=game/scripts/ui/artifact_inventory_screen.gd
 LAYOUT=game/scripts/ui/hero_layout.gd

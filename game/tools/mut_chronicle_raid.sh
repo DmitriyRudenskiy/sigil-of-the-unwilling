@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Настройки машины (GODOT_BIN, venv pytest — не в репозитории; AGENTS.md
+# § «Настройки машины»). Ошибка «unbound variable» ниже = файл настроек машины
+# не заполнен, а не «скрипт сломался».
+. "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
+
 # `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без этого
 # shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит»,
 # ничего не прогнав: отсутствующая команда = «тоже красный».
@@ -12,11 +17,11 @@ timeout() {
 # (восстановление — `git checkout --`), каждая мутация проверяется на применимость,
 # восстановление — сразу после прогона.
 set -u
-cd /home/user/sigil-of-the-unwilling/game || exit 2
-git -C /home/user/sigil-of-the-unwilling diff --quiet || { echo "РАБОЧЕЕ ДЕРЕВО ГРЯЗНОЕ — выходим"; exit 2; }
-GODOT=/home/user/.local/bin/godot
+cd "$(cd "$(dirname "$0")/.." && pwd)" || exit 2
+git -C "$(cd "$(dirname "$0")/../.." && pwd)" diff --quiet || { echo "РАБОЧЕЕ ДЕРЕВО ГРЯЗНОЕ — выходим"; exit 2; }
+GODOT="${GODOT_BIN:?GODOT_BIN — настройки машины}"
 SUITE=res://tests/functional/ui/test_campaign_chronicle_carrier.gd
-PY=/home/user/.venv/map-art/bin/python
+PY="${GEN_PY:?GEN_PY — настройки машины}"
 
 run_suite() {
   local out rc
@@ -38,7 +43,7 @@ if s.count(old) != 1:
     raise SystemExit(f"МУТАЦИЯ НЕ ОДНОЗНАЧНА: count={s.count(old)}")
 p.write_text(s.replace(old, new, 1), encoding="utf-8")
 PY
-  if git -C /home/user/sigil-of-the-unwilling diff --quiet; then
+  if git -C "$(cd "$(dirname "$0")/../.." && pwd)" diff --quiet; then
     echo "$1: МУТАЦИЯ НЕ ПРИМЕНИЛАСЬ — красный не засчитывается"
     return 3
   fi
@@ -47,7 +52,7 @@ PY
   else
     echo "$1: красным подтверждён"
   fi
-  git -C /home/user/sigil-of-the-unwilling checkout -- .
+  git -C "$(cd "$(dirname "$0")/../.." && pwd)" checkout -- .
 }
 
 echo "M1 — бит первого рейда не пишется вовсе"
@@ -73,4 +78,4 @@ check_and_run M4 scripts/campaign/campaign_composition.gd \
 
 echo "БАЗА (все мутации сняты):"
 run_suite
-git -C /home/user/sigil-of-the-unwilling diff --quiet && echo "дерево чистое" || echo "ДЕРЕВО ГРЯЗНОЕ"
+git -C "$(cd "$(dirname "$0")/../.." && pwd)" diff --quiet && echo "дерево чистое" || echo "ДЕРЕВО ГРЯЗНОЕ"

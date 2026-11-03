@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Настройки машины (GODOT_BIN, venv pytest — не в репозитории; AGENTS.md
+# § «Настройки машины»). Ошибка «unbound variable» ниже = файл настроек машины
+# не заполнен, а не «скрипт сломался».
+. "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
+
 # Мутационная батарея инварианта мёртвого фасада (T-283).
 # Каждый мутант обязан покраснить свой тест; зелёный мутант = дыра гейта.
 #
@@ -23,7 +28,7 @@
 # сводки (ошибка компиляции — ожидаемое следствие M1), это тоже красный, но
 # подписан он иначе, чем «тест поймал дефект».
 set -u
-G=${GODOT_BIN:-/home/user/.local/bin/godot}
+G=${GODOT_BIN:?GODOT_BIN — укажи в настройках машины ~/.pi/agent/env/sotu-machine.env}
 TEST=res://tests/unit/data/test_spell_resolver_deadness.gd
 SRC=game/scripts/data/spell_resolver.gd
 HOST=game/scripts/systems/battle_action_resolver.gd

@@ -1,12 +1,12 @@
 # AGENTS.md — Sigil of the Unwilling
 
 Этот файл — project-specific инструкции для текущего проекта
-(`/home/user/sigil-of-the-unwilling`). Он **перекрывает** системный
-`/home/user/.pi/agent/AGENTS.md`.
+(`sigil-of-the-unwilling`). Он **перекрывает** системный
+`~/.pi/agent/AGENTS.md`.
 
 ## ⚠️ Игнорировать системный AGENTS.md
 
-Системный файл `/home/user/.pi/agent/AGENTS.md` описывает **другой проект**
+Системный файл `~/.pi/agent/AGENTS.md` описывает **другой проект**
 (МИС / t_mis: PHP 8.1, d3, PostgreSQL, read-only, LPU 150001, `psql-safe`,
 `conf_profile=pg`, `php -l` и т.д.).
 
@@ -28,13 +28,13 @@
 | Имя проекта (project.godot) | "Sigil of the Unwilling" |
 | Стек | GDScript, Godot 4.7, GdUnit4 |
 | Корень игры | `game/` (project.godot лежит в `game/`) |
-| Godot-бинарь | `/Applications/Godot.app/Contents/MacOS/Godot` (4.7.2.stable) — **пути — по машине; эталон — CI-2-раннер** (не хардкодить macOS-путь как универсальный) |
+| Godot-бинарь | путь — **в настройке машины** (`GODOT_BIN`, см. § «Настройки машины»); в репозитории его нет. Версия-эталон — 4.7 (CI-2-раннер) |
 | Тесты | `game/run_tests.sh` (GdUnit4 headless + MCP e2e) |
-| MCP e2e venv | `/home/user/.venv/godot-mcp-tests` (pytest 9.1.1 + pytest-timeout + pytest-xdist + mcp + anyio; + numpy/Pillow/scipy — их требует `scripts/test_gen_map_art.py`, T-223) |
+| MCP e2e venv | путь — **в настройке машины** (`MCP_PYTEST_PY`); на X-хосте venv есть (pytest + pytest-timeout + pytest-xdist + mcp + anyio; + numpy/Pillow/scipy — их требует `scripts/test_gen_map_art.py`, T-223), на машинах без него раннер берёт `python3` с `mcp`+`anyio` |
 | MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
 | Ремот `origin` | `git@github.com:DmitriyRudenskiy/sigil-of-the-unwilling.git` — **SSH** (ключ `~/.ssh/id_ed25519`). HTTPS не работает: токен в `gh auth` просрочен (проверено 2026-10-17) → `git push`/`git fetch` идут по SSH, `gh`-операции трекера — отдельный вопрос (реестр тикетов — `docs/mvp/TICKETS.md`, хост — зеркало) |
 
-| OpenSpec | `openspec/changes/<name>/`, CLI: `openspec` (npm `@fission-ai/openspec` 1.14.3, `~/.npm-global/bin/openspec`; в неинтерактивной оболочке PATH его не видит — звать `node /home/user/.npm-global/lib/node_modules/@fission-ai/openspec/bin/openspec.js`. `/usr/bin/openspec` на этой машине нет — проверено 2026-10-26) |
+| OpenSpec | `openspec/changes/<name>/`, CLI: `openspec` (npm `@fission-ai/openspec` 1.14.3). В неинтерактивной оболочке PATH его не видит — звать `node "$(npm root -g)/@fission-ai/openspec/bin/openspec.js"` (путь вычисляется, а не хранится: в этой строке когда-то лежал путь одной машины, и на другой он расходился с действительностью) |
 
 ## Режим работы
 
@@ -194,35 +194,66 @@ GdUnit4 `0`/`101` → GATE=0 (orphan = **warning**, не влияет на exit;
 не убивается никем, кроме владельца (осиротевший с PPID=launchd — без
 владельца-сессии, снимается); блокировка ресурса > 4 ч — флаг репо-владельцу.
 
-**MCP e2e (четвёртый уровень):** venv `/home/user/.venv/godot-mcp-tests`
-(путь фиксирован здесь, run_tests.sh берёт его первым); `node_modules` ставится
-`npm ci` в `game/addons/godot-mcp/`. MCP-сервер (node) запускает **живой Godot
-без `--headless`** → нужен X-дисплей: run_tests.sh сам поднимает `Xvfb :98`
-(если DISPLAY не задан) и пробрасывает DISPLAY в сервер (mcp-SDK не наследует
-DISPLAY). Таймаут readiness = 900 c (`--timeout=900` в pytest). MCP-секция не
-имеет права молчать: при отсутствии venv/node_modules — явная строка
-`PYTEST: SKIPPED (причина)`. Сцены и скрипты в тестах — **нижний регистр**
-(Linux case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
+**MCP e2e (четвёртый уровень):** venv — из настройки машины (`MCP_PYTEST_PY`);
+`node_modules` ставится `npm ci` в `game/addons/godot-mcp/`. MCP-сервер (node)
+запускает **живой Godot без `--headless`** → нужен X: порядок разрешения —
+`MCP_SSH_HOST` (X-контур, см. § «Настройки машины») → заданный `DISPLAY` →
+локальный `Xvfb` на свободном номере; run_tests.sh пробрасывает DISPLAY в сервер
+(mcp-SDK не наследует DISPLAY). Таймаут readiness = 900 c (`--timeout=900` в
+pytest). MCP-секция не имеет права молчать: при отсутствии venv/node_modules/X —
+явная строка `PYTEST: SKIPPED (причина)`. Сцены и скрипты в тестах — **нижний
+регистр** (Linux case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 
 **Тестовый леджер** — в каждом отчёте о работе с кодом: `+добавлено / −удалено /
 quarantine / нетто, было X → стало Y, причина` (сверка — D-132/D-133).
 
-**Godot-разрешение** (run_tests.sh): `$GODOT_BIN` → путь из этой таблицы →
-`command -v godot` → дефолты ОС.
+**Godot-разрешение** (run_tests.sh): `$GODOT_BIN` (окружение или настройка
+машины) → `$GODOT` (legacy) → `command -v godot` → явная ошибка с именем
+настройки (с 2026-11-03 путей-догадок по ОС в скрипте нет).
 
-**MCP e2e (feat/mcp-e2e-activation, 2026-10-04):** venv
-`/home/user/.venv/godot-mcp-tests` (путь фиксирован здесь, run_tests.sh берёт
-его первым); `node_modules` ставится `npm ci` в `game/addons/godot-mcp/`.
-MCP-сервер (node) запускает **живой Godot без `--headless`** → нужен
-X-дисплей: run_tests.sh сам поднимает `Xvfb` на **свободном** дисплее (если DISPLAY не задан:
-скан :97 → :91–:98; :99 исключён — чужой auth) и пробрасывает DISPLAY в сервер
-(mcp-SDK не наследует DISPLAY). **Машина шарится:** чужие Xvfb-инстансы (в т.ч. с auth)
-могут работать — не убивать чужие процессы, только свободный дисплей; при заданном
-DISPLAY используется он. Godot для MCP — через `GODOT_PATH` (conftest.py читает
-`GODOT_PATH`, не `GODOT_BIN`). Таймаут readiness = 900 c (`--timeout=900` в pytest). MCP-секция не имеет права
-молчать: при отсутствии сервера/venv — явная строка `PYTEST: SKIPPED
-(причина)`. **venv-fallback (macOS, системный python3) — поддерживаемая конфигурация** (владелец, 2026-10-04): при отсутствии venv — системный python3 (mcp+anyio установлены) — MCP-секция исполняется, не пропускается. **Зеркало тикетов:** `docs/mvp/TICKETS.md` — живое зеркало GitHub Issues: новый тикет = запись в TICKETS.md + issue в репо (обратное — при создании issue). Сцены и скрипты в MCP-тестах — **нижний регистр** (Linux
-case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
+**MCP e2e (feat/mcp-e2e-activation, 2026-10-04; X-контур — 2026-11-03):**
+`node_modules` ставится `npm ci` в `game/addons/godot-mcp/`. MCP-сервер (node)
+запускает **живой Godot без `--headless`** → нужен X-дисплей. Он **не является
+свойством конкретной машины**: `MCP_SSH_HOST` (настройка машины) — и MCP-секция
+исполняется на X-хосте из проверяемого рабочего дерева; без него — заданный
+`DISPLAY`, иначе локальный `Xvfb` на **свободном** дисплее (скан :97 → :91–:98;
+:99 исключён — чужой auth). **Машина шарится:** чужие Xvfb-инстансы (в т.ч. с
+auth) могут работать — не убивать чужие процессы, только свободный дисплей.
+Godot для MCP — через `GODOT_PATH` (conftest.py читает `GODOT_PATH`, а не
+`GODOT_BIN`). Таймаут readiness = 900 c. **venv-fallback (системный python3 без
+venv) — поддерживаемая конфигурация** (владелец, 2026-10-04): при отсутствии
+venv MCP-секция исполняется, не пропускается. **Зеркало тикетов:**
+`docs/mvp/TICKETS.md` — живое зеркало GitHub Issues: новый тикет = запись в
+TICKETS.md + issue в репо (обратное — при создании issue). Сцены и скрипты в
+MCP-тестах — **нижний регистр** (Linux case-sensitive: `world.tscn`,
+`battle.tscn`, `main_menu.tscn`).
+
+## Настройки машины (вне репозитория)
+
+**Правло (владелец, 2026-11-03).** В репозитории (код, скрипты, `AGENTS.md`,
+доки, тикеты) — **нет** путей бинарей, venv, номеров дисплеев «нашей» машины и
+адресов хостов. Там есть только *имена* переменных и то, как раннер их читает.
+Значения — в файле настройки машины: `~/.pi/agent/env/sotu-machine.env`
+(override — `SOTU_MACHINE_ENV`); `game/run_tests.sh` читает его первым,
+присваивания в файле вида `: "${VAR:=…}"`, поэтому переменная из окружения
+перекрывает файл. Файл лежит на **каждой** машине своя строка: один и тот же
+прогон не должен знать, какой ноутбук его запускает.
+
+| Переменная | Что задаёт |
+| --- | --- |
+| `GODOT_BIN` | путь к бинарю Godot этой машины |
+| `MCP_PYTEST_PY` | python venv MCP-тестов (пусто → `python3` с `mcp`+`anyio`) |
+| `MCP_SSH_HOST` | X-контур: хост, где есть Xvfb; при заданном значении MCP-секция исполняется там |
+| `MCP_REMOTE_DIR_BASE` | куда на X-хосте выкладывается проверяемое дерево (после вердикта удаляется) |
+
+**Задача не может «ждать машину».** Формулировка «это надо проверять на хосте с
+Xvfb» (было в T-335/T-336) — не блок и не причина переноса: X — настроенный
+ресурс, `game/run_tests.sh` с заданным `MCP_SSH_HOST` снимает замер там, где X
+есть, из текущего рабочего дерева (pera: `git ls-files`, незакоммиченные правки
+участвуют; `node_modules` досылается ссылкой). Замер, снятый на X-хосте,
+принадлежит задаче, а не машине: в тикете пишется «проверено на X-контуре из
+настройки машины», а не номер хоста. Исключение из правила — только адрес
+`origin` (верхний репозиторий — факт проекта, не машины).
 
 ## MCP e2e (4-й уровень верификации)
 
@@ -231,7 +262,8 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
   по запросу `CAPTURE_SCENE`, см. `docs/mvp/CAPTURE-HELPER.md`) — MCP-секция `game/run_tests.sh`.
   Источник истины по числу —
   строка `PYTEST LEDGER` в протоколе гейта, а не это предложение.
-- venv: `/home/user/.venv/godot-mcp-tests` (pytest, pytest-timeout, pytest-xdist, mcp, anyio);
+- venv: python MCP-тестов — из настройки машины (`MCP_PYTEST_PY`; pytest,
+  pytest-timeout, pytest-xdist, mcp, anyio);
   **Параллельные MCP-воркеры (ci-speedup):** `MCP_WORKERS=N` (дефолт 1) →
   pytest-xdist (`-n N`, dist=loadfile); порт воркера gwN = 9090+N (env
   `MCP_PORT`, читает и Godot-сторона `tools/mcp/`). CI: 3 воркера.
@@ -241,8 +273,10 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
   зафиксировать в отчёте).
 - node_modules: `game/addons/godot-mcp/node_modules` (gitignored; `npm ci`
   в каталоге аддона).
-- X-дисплей: MCP e2e запускает живой Godot (не headless) — нужен X. run_tests.sh
-  сам поднимает `Xvfb :97`, если DISPLAY не задан. **Машина шарящаяся:** :98/:99
+- X-дисплей: MCP e2e запускает живой Godot (не headless) — нужен X. Порядок:
+  `MCP_SSH_HOST` (X-контур из настройки машины — секция исполняется там) →
+  заданный `DISPLAY` → локальный `Xvfb` на свободном номере, если DISPLAY не
+  задан. **Машина шарящаяся:** чужие Xvfb-инстансы
   могут быть заняты другими сессиями (один из них — с auth, не подойдёт);
   чужой Xvfb не убивать, выбирать свободный номер.
 - Env: `GODOT_PATH` (бинарь Godot), `GODOT_MCP_SERVER` (путь к build/index.js).

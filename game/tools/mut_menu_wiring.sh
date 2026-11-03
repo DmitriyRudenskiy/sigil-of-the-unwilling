@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Настройки машины (GODOT_BIN, venv pytest — не в репозитории; AGENTS.md
+# § «Настройки машины»). Ошибка «unbound variable» ниже = файл настроек машины
+# не заполнен, а не «скрипт сломался».
+. "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
+
 # Мутационная батарея инварианта проводки главного меню (T-299, носитель
 # точки входа загрузок — T-307).
 #
@@ -21,7 +26,7 @@
 # на ошибке разбора, а классификатор-черновик прочитал это как «никто не
 # покраснел».
 set -u
-G=${GODOT_BIN:-/home/user/.local/bin/godot}
+G=${GODOT_BIN:?GODOT_BIN — укажи в настройках машины ~/.pi/agent/env/sotu-machine.env}
 SRC=game/scripts/ui/main_menu.gd
 TESTF=game/tests/unit/ui/test_main_menu_structure.gd
 TEST=res://tests/unit/ui/test_main_menu_structure.gd

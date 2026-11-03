@@ -6,7 +6,7 @@ RED, а ложный GREEN молча сломанного сканера (пе�
 как «измеритель сломался»). Поэтому здесь есть и красный кейс (сломанный путь
 обязан быть красным), и кейс нижней границы (пустой скан красит).
 
-Запуск: /home/user/.venv/godot-mcp-tests/bin/python -m pytest scripts/test_check_node_paths.py -q
+Запуск: $MCP_PYTEST_PY -m pytest  # интерпретатор с pytest — из настроек машины scripts/test_check_node_paths.py -q
 """
 
 import os

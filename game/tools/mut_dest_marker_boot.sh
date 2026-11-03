@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Настройки машины (GODOT_BIN, venv pytest — не в репозитории; AGENTS.md
+# § «Настройки машины»). Ошибка «unbound variable» ниже = файл настроек машины
+# не заполнен, а не «скрипт сломался».
+. "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
+
 # `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без этого
 # shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит»,
 # ничего не прогнав: отсутствующая команда = «тоже красный».
@@ -16,9 +21,9 @@ cd "$(dirname "$0")/.." || exit 1
 export DISPLAY="${DISPLAY:-:96}" MCP_PORT="${MCP_PORT:-9478}" \
   GODOT_MCP_SERVER="$PWD/addons/godot-mcp/build/index.js" \
   GODOT_PROJECT_PATH="$PWD" \
-  GODOT_PATH="${GODOT_PATH:-$HOME/.local/bin/godot}" \
-  GODOT_BIN="${GODOT_BIN:-$HOME/.local/bin/godot}"
-PY="${PYTEST_PY:-/home/user/.venv/godot-mcp-tests/bin/python}"
+  GODOT_PATH="${GODOT_PATH:-${GODOT_BIN:?GODOT_BIN — настройки машины}}" \
+  GODOT_BIN="${GODOT_BIN:?GODOT_BIN — настройки машины}"
+PY="${PYTEST_PY:-${MCP_PYTEST_PY:?MCP_PYTEST_PY — настройки машины}}"
 CTRL=scripts/entities/hero_visual_controller.gd
 BAK=/tmp/mut_dest_marker_ctrl.gd
 cp "$CTRL" "$BAK"

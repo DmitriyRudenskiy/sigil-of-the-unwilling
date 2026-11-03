@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Настройки машины (GODOT_BIN, venv pytest — не в репозитории; AGENTS.md
+# § «Настройки машины»). Ошибка «unbound variable» ниже = файл настроек машины
+# не заполнен, а не «скрипт сломался».
+. "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
+
 # Мутационная батарея кадра куклы экрана «Герой» (T-258).
 #
 # Что под защитой. `Figure` — TextureRect с арт `hero/figure.png` (428×478),
@@ -33,7 +38,7 @@
 #
 # Запуск: bash game/tools/mut_hero_doll.sh   (из корня репо, дерево чистое)
 set -u
-G=${GODOT_BIN:-/home/user/.local/bin/godot}
+G=${GODOT_BIN:?GODOT_BIN — укажи в настройках машины ~/.pi/agent/env/sotu-machine.env}
 TEST=res://tests/unit/ui/test_inventory_grid.gd
 GEN=game/scripts/build/gen_inventory_scene.gd
 SCENE=game/scenes/ui/artifact_inventory_screen.tscn

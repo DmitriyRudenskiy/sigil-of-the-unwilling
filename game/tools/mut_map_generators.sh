@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Настройки машины (GODOT_BIN, venv pytest — не в репозитории; AGENTS.md
+# § «Настройки машины»). Ошибка «unbound variable» ниже = файл настроек машины
+# не заполнен, а не «скрипт сломался».
+. "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
+
 # `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без этого
 # shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит»,
 # ничего не прогнав: отсутствующая команда = «тоже красный».
@@ -19,7 +24,7 @@ timeout() {
 #         ONLY="M6 M8" bash game/tools/mut_map_generators.sh
 set -u
 cd "$(dirname "$0")/.." || exit 1
-G="${GODOT_BIN:-$(command -v godot || echo /home/user/.local/bin/godot)}"
+G="${GODOT_BIN:-$(command -v godot)}"  # GODOT_BIN — из настроек машины
 TEST="res://tests/unit/world/test_map_generators.gd"
 MOUNTAIN=scripts/world/map_mountain_generator.gd
 RIVER=scripts/world/map_river_generator.gd

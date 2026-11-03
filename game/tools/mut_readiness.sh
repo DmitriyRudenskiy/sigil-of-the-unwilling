@@ -12,6 +12,11 @@
 #   5. явная stop() не защищена от retry-цикла.
 #  10. «ноль» в снимке среды печатается как «не прочитано» (см. MUT10 ниже).
 set -u
+# Настройки машины: пути бинарей и venv живут не в репозитории (AGENTS.md
+# § «Настройки машины»); переменная окружения перекрывает файл.
+SOTU_MACHINE_ENV=${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}
+# shellcheck disable=SC1090
+[ -f "$SOTU_MACHINE_ENV" ] && . "$SOTU_MACHINE_ENV"
 G="${GODOT_BIN:-$HOME/.local/bin/godot}"
 S=tools/mcp/mcp_interaction_server.gd
 T=tests/unit/core/test_mcp_server.gd
@@ -75,7 +80,7 @@ done
 # MUT6 — счётчик живых движков в стенде. Мутация живёт не в GD-файле, а в
 # godot_mcp.py, и проверяется не GdUnit, а pytest-файлом про саму наблюдаемость.
 H=tests/mcp/godot_mcp.py
-PYTEST_PY="${PYTEST_PY:-/home/user/.venv/godot-mcp-tests/bin/python}"
+PYTEST_PY="${PYTEST_PY:-${MCP_PYTEST_PY:-python3}}"
 run_pytest_cases() {
   (cd "$ROOT" && DISPLAY="${DISPLAY:-:96}" MCP_PORT="$PORT" \
     GODOT_PROJECT_PATH="$ROOT" \

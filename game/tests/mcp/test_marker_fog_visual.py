@@ -109,6 +109,7 @@ var df: PackedByteArray = fg.get_data()
 var hidden := 0
 var leaks := 0
 var first := ""
+var ring := ""
 var n: int = da.size()
 var i := 0
 while i < n:
@@ -119,11 +120,25 @@ while i < n:
             and abs(dg[i + 2] - vb) <= void_tol:
         leaks += 1
         if first == "":
+            var w: int = a.get_width()
+            var h: int = a.get_height()
             var px: int = int(i / 4.0)
-            first = "%d,%d" % [px % a.get_width(), int(px / a.get_width())]
+            var y: int = int(px / w)
+            var x: int = px % w
+            first = "%d,%d" % [x, y]
+            # Окрестность 3x3 той же точки (T-336): «одна точка» не различает край
+            # спрайта и настоящий прокол маркера, а 9 пар цветов (фон | кадр с
+            # маркерами) различают — на границе спрайта соседние пиксели тоже
+            # отличаются, при проколе вокруг пустой фон.
+            if x > 0 and y > 0 and x < w - 1 and y < h - 1:
+                for dy in range(-1, 2):
+                    for dx in range(-1, 2):
+                        var j := ((y + dy) * w + (x + dx)) * 4
+                        ring += "%d,%d,%d|%d,%d,%d " % [dg[j], dg[j + 1], dg[j + 2],
+                            df[j], df[j + 1], df[j + 2]]
     i += 4
 return {"ok": true, "hidden": hidden, "leaks": leaks, "first": first,
-    "void": [vr, vg, vb], "frame": [a.get_width(), a.get_height()]}
+    "ring": ring, "void": [vr, vg, vb], "frame": [a.get_width(), a.get_height()]}
 """
 
 _COMPARE = _COMPARE.replace("{void_tol}", str(VOID_TOLERANCE))
@@ -181,5 +196,7 @@ def test_markers_do_not_shine_through_fog(full_game):
     assert res["leaks"] == 0, (
         f"{res['leaks']} пикселей маркеров нарисованы поверх пустого "
         f"(неисследованного) фона {res['void']}, первая точка: {res['first']} — "
-        "маркерный слой раскрывает скрытую карту (T-165)"
+        "маркерный слой раскрывает скрытую карту (T-165). "
+        f"Окрестность 3x3 «фон|кадр»: {res['ring']}"
+        " — если у соседей тоже фон и тоже расхождение, это край спрайта (T-336)."
     )
