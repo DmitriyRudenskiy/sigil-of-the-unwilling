@@ -1150,6 +1150,15 @@ msgstr "В меню"
 msgid "campaign.menu_hint"
 msgstr "Сохранить кампанию и вернуться в главное меню"
 
+msgid "campaign.save"
+msgstr "Сохранить"
+
+msgid "campaign.save_hint"
+msgstr "Записать кампанию в слот: «Продолжить» и «Загрузить» в меню начнут с этого места"
+
+msgid "campaign.save_failed"
+msgstr "Сохранение не записано"
+
 msgid "campaign.turn"
 msgstr "Ход"
 

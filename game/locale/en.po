@@ -1150,6 +1150,15 @@ msgstr "Menu"
 msgid "campaign.menu_hint"
 msgstr "Save the campaign and return to the main menu"
 
+msgid "campaign.save"
+msgstr "Save"
+
+msgid "campaign.save_hint"
+msgstr "Write the campaign to a slot: "Continue" and "Load" in the menu resume from here"
+
+msgid "campaign.save_failed"
+msgstr "Save could not be written"
+
 msgid "campaign.turn"
 msgstr "Turn"
 

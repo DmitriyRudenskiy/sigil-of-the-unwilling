@@ -68,6 +68,8 @@ const CITY_SCREEN_NAME := "CityScreen"
 const PARTY_BUTTON_NAME := "PartyButton"
 const PARTY_SCREEN_NAME := "PartyScreen"
 const SETTINGS_BUTTON_NAME := "SettingsButton"
+## T-307 (D-301 (в)): «Сохранить» в слое кампании.
+const SAVE_BUTTON_NAME := "SaveButton"
 const MENU_BUTTON_NAME := "MenuButton"
 const SETTINGS_SCREEN_NAME := "SettingsScreen"
 const CHRONICLE_BUTTON_NAME := "ChronicleButton"
@@ -115,6 +117,7 @@ var _top_row: Control = null
 var _city_button: Button = null
 var _party_button: Button = null
 var _settings_button: Button = null
+var _save_button: Button = null
 var _chronicle_button: Button = null
 var _menu_button: Button = null
 var _turn_button: Button = null
@@ -123,6 +126,10 @@ var _turn_button: Button = null
 var _turn_handling: bool = false
 var _turn_enabled: bool = false
 var _ui_manager: CampaignUIManager = null
+## Носитель записи кампании — действие хоста (`main.save_campaign_slot`):
+## сериализует тот, кто держит состояние, а не слой (D-200). Пустой Callable —
+## кампания не поднята, кнопка выключена с причиной.
+var _save_callable: Callable = Callable()
 var _party: Array = []
 var _party_capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY
 ## Носитель ленты (D-240) и состояние открытости хроники. Состояние держится
@@ -329,6 +336,19 @@ func _build() -> void:
 	_settings_button.pressed.connect(_on_settings_pressed)
 	_top_row.add_child(_settings_button)
 
+	_save_button = Button.new()
+	_save_button.name = SAVE_BUTTON_NAME
+	_save_button.text = GameText.campaign_save()
+	_save_button.tooltip_text = GameText.campaign_save_hint()
+	_save_button.custom_minimum_size = Vector2(140, 40)
+	# До привязки хоста кнопки нет: записывать умеет не слой, а носитель кампании,
+	# и обещать нажатие без него — тот же брак, что «Город» без города. Вход в
+	# меню D-205 вычеркнул «Загрузить», а записи в живом прохождении и вовсе ни
+	# где не было — кроме вынужденного автосейва и выхода в меню (T-307).
+	_save_button.disabled = true
+	_save_button.pressed.connect(_on_save_pressed)
+	_top_row.add_child(_save_button)
+
 	_menu_button = Button.new()
 	_menu_button.name = MENU_BUTTON_NAME
 	_menu_button.text = GameText.campaign_menu()
@@ -367,7 +387,8 @@ func _build() -> void:
 	for entry in [
 		[&"tile_city", _city_button], [&"tile_party", _party_button],
 		[&"tile_menu", _menu_button], [&"button_book", _chronicle_button],
-		[&"button_gear", _settings_button], [&"turn_button", _turn_button],
+		[&"button_gear", _settings_button], [&"button_save", _save_button],
+		[&"turn_button", _turn_button],
 	]:
 		var button: Button = entry[1]
 		button.theme_type_variation = &"ButtonAction"
@@ -1249,6 +1270,15 @@ func bind_settings(settings: Node) -> void:
 		_settings_button.disabled = false
 
 
+## Действие записи кампании (T-307, D-301 (в)): писатель — хост, слой зовёт его
+## и показывает результат. Своего словаря сейва у слоя нет (D-200), и второй
+## способ сериализовать кампанию тут не заведётся.
+func bind_save(saver: Callable) -> void:
+	_save_callable = saver
+	if _save_button != null:
+		_save_button.disabled = not saver.is_valid()
+
+
 func open_settings_screen() -> void:
 	if settings_screen == null:
 		return
@@ -1276,6 +1306,21 @@ func _on_settings_pressed() -> void:
 		close_settings_screen()
 	else:
 		open_settings_screen()
+
+
+## Запись слота и честный ответ прямо на кнопке: исход — свежий факт об этом
+## контроле, поэтому он становится подсказкой (причина отказа видна без журнала,
+## столп 1). Молча проглоченная ошибка сейва = потерянный ход (тот же урок, что
+## у автосейва в `main.gd`).
+func _on_save_pressed() -> void:
+	if not _save_callable.is_valid():
+		return
+	var result: Dictionary = _save_callable.call()
+	if bool(result.get("ok", false)):
+		_save_button.tooltip_text = GameText.save_ok()
+	else:
+		_save_button.tooltip_text = "%s — %s" % [
+			GameText.campaign_save_failed(), str(result.get("message", ""))]
 
 
 func _on_settings_screen_closed() -> void:

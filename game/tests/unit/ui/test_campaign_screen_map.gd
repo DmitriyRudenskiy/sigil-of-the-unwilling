@@ -14,9 +14,10 @@ extends BaseTest
 const ScreenMap := preload("res://scripts/ui/campaign_screen_map.gd")
 const Counters := preload("res://scripts/ui/campaign_counters.gd")
 
-## Разбор макета 2026-10-28: 37 элементов в шести блоках. Число — знаменатель
-## `COVERAGE n/m`; правка числа = правка разбора макета, а не «ещё узел добавили».
-const EXPECTED_ELEMENTS := 37
+## Разбор макета 2026-10-28: 37 элементов в шести блоках + амендмент D-301 (в)
+## от 2026-11-05 — `button_save` (T-307): 38. Число — знаменатель `COVERAGE n/m`;
+## правка числа = правка разбора макета, а не «ещё узел добавили».
+const EXPECTED_ELEMENTS := 38
 
 
 func test_registry_size_is_the_mockup_inventory() -> void:

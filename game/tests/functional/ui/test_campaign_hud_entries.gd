@@ -26,6 +26,7 @@ const MAIN_SCENE_PATH := "res://scenes/main/main.tscn"
 const TOP_BUTTONS_PATH := "CampaignHUD/CampaignHud/TopButtons"
 const SETTINGS_BUTTON_PATH := TOP_BUTTONS_PATH + "/SettingsButton"
 const MENU_BUTTON_PATH := TOP_BUTTONS_PATH + "/MenuButton"
+const SAVE_BUTTON_PATH := TOP_BUTTONS_PATH + "/SaveButton"
 const TURN_BUTTON_PATH := TOP_BUTTONS_PATH + "/TurnButton"
 const CITY_BUTTON_PATH := TOP_BUTTONS_PATH + "/CityButton"
 const SETTINGS_SCREEN_PATH := "CampaignHUD/CampaignHud/SettingsScreen"
@@ -218,6 +219,31 @@ func test_exit_save_works_without_autosave() -> void:
 		.override_failure_message("выход в меню сохраняет всегда: %s" % str(result.get("message", ""))) \
 		.is_true()
 	assert_bool(MvpSaveManager.has_save_in_slot(MvpSaveManager.CAMPAIGN_SLOT)).is_true()
+
+
+## T-307 (D-301 (в)): «Сохранить» в слое — живой вход, а не нарисованная кнопка.
+## До правки записать кампанию игрок мог только косвенно: автосейвом по настройке
+## или выходом в меню; кнопки, делающей это по требованию, не было ни в одном слое.
+func test_save_button_writes_the_campaign_slot() -> void:
+	await _mount()
+	var settings: Object = _settings()
+	assert_object(settings).is_not_null()
+	_auto_save_before = bool(settings.auto_save)
+	# Запись по требованию не должна быть следствием переключателя.
+	settings.auto_save = false
+	MvpSaveManager.delete_slot(MvpSaveManager.CAMPAIGN_SLOT)
+
+	var button: Button = _main.get_node(SAVE_BUTTON_PATH) as Button
+	assert_object(button).is_not_null().override_failure_message("в слое нет кнопки «Сохранить»")
+	assert_str(button.text).is_equal(GameText.campaign_save())
+	assert_str(button.tooltip_text).is_equal(GameText.campaign_save_hint())
+
+	await _press(SAVE_BUTTON_PATH)
+	assert_bool(MvpSaveManager.has_save_in_slot(MvpSaveManager.CAMPAIGN_SLOT)) \
+		.override_failure_message("нажатие «Сохранить» не создало кампанийный слот").is_true()
+	assert_str(button.tooltip_text) \
+		.override_failure_message("исход записи обязан быть виден на самой кнопке") \
+		.is_equal(GameText.save_ok())
 
 
 func after_test() -> void:
