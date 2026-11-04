@@ -14,7 +14,7 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (43)
+## Реестры и процессы (44)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -34,6 +34,7 @@ date: 2026-10-14
 | [[PR-DOCS-ARTBIBLE]] | Тело PR docs (feat/art-bible-rev2) | archived | 2026-10-14 |
 | [[PR-UI-PHASE5]] | Тело PR фазы 5 (feat/ui-phase5) | archived | 2026-10-14 |
 | [[SCENARIO-MATRIX]] | Матрица сценариев «роль × класс» — прогон, отчёт, история | reference | 2026-10-30 |
+| [[SCENE-SLICE-MEASURE]] | Scene slice measurements (kit battlefield) | reference | 2026-11-08 |
 | [[TEST-MAP]] | Карта тестов: покрытие меньшим количеством тестов | reference | 2026-11-03 |
 | [[TICKETS]] | Тикеты MVP (T-001…T-113) | reference | 2026-11-04 |
 | [[VERDICT-REQUEST]] | Вердикты владельца — блокирующие решения (verdict-request) | reference | 2026-10-26 |

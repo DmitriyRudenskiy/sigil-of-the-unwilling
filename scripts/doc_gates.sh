@@ -103,6 +103,24 @@ else
 	YELLOW=$((YELLOW + 1))
 fi
 
+# Самопроверка измерителей сцен (шаг 0 нарезки, мир-карта). Скрипты производят
+# доказательства, на которые ссылается `docs/mvp/SCENE-SLICE-MEASURE.md`, — значит их
+# синтетический тест обязан краснеть в гейте, а не молчать до следующего замера.
+# numpy/cv2 — не зависимость гейта: без них жёлтый с причиной (D-265), красный — только
+# когда зависимости есть и проверка упала.
+echo "=== измерители сцен: синтетическая самопроверка (шаг 0 нарезки) ==="
+for s in scripts/measure_scene_lattice.py scripts/measure_scene_clusters.py; do
+	if ! "$PY" -c "import numpy, cv2" >/dev/null 2>&1; then
+		echo "YELLOW: numpy/cv2 нет — $s не исполнен"; YELLOW=$((YELLOW + 1)); continue
+	fi
+	if "$PY" "$s" --self-test > /dev/null 2>&1; then
+		echo "OK: $s --self-test"
+	else
+		echo "RED: $s --self-test (подробности: $PY $s --self-test)"; FAIL=1
+	fi
+done
+echo ""
+
 # Карта тестов — КРАСНЫЙ уровень (С-5; слово владельца «встраивай», 2026-10-27).
 # Рэтчет сверяется с scripts/testmap.baseline.json и краснеет, если дыр, дублей или
 # оскопления стало больше базлайна: «новый тикет = новый файл» перестаёт быть бесплатным.
