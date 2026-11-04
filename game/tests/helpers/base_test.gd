@@ -36,3 +36,24 @@ func after_test() -> void:
 	var pc := get_node_or_null("/root/PauseController")
 	if pc != null and pc.has_method("force_release_all"):
 		pc.force_release_all()
+
+## Изоляция сезона (T-322, Q-M130 → (а+в), D-308). `WorldSeasons._turn_count` —
+## статика процесса: кампанийный ход (`world_event_router.gd`), поднятие мира из
+## сейва и `set_turns()` оставляют счётчик чужим, и сезон следующего теста
+## оказывается суммой всех ранее прогнанных сюит. Сброс в `before_test` был бы
+## буквой решения (а) дословно, но 94 сюит объявляют собственный `before_test` и
+## ни одна не зовёт `super.before_test()` (замер 2026-11-08: `grep -rl
+## 'func before_test(' tests` = 94, `super.before_test` = 0) — то есть четверть
+## набора сброс бы молча пропустила. Отсюда два носителя: `_init` срабатывает по
+## одному разу на сюиту и переопределить его нечем (сюитных `_init` в наборе
+## нет), `before_test` докрывает кейс-к-кейсу там, где сюита себя не переопределила.
+## Дыра остаётся: кейсы внутри 94 сюжет по-прежнему читают то, что оставил
+## предыдущий кейс; это фиксирует гард, а не молчание.
+static func _season_reset() -> void:
+	WorldSeasons.reset()
+
+func _init() -> void:
+	_season_reset()
+
+func before_test() -> void:
+	_season_reset()
