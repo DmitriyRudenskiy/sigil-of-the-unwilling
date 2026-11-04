@@ -297,6 +297,192 @@
      1470,
      1070
     ]
+   },
+   "cell_profile": {
+    "cells": 163,
+    "cell_px": [
+     109.0,
+     101.3
+    ],
+    "downscale": [
+     0.7523,
+     0.8092
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.058,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 163,
+      "max_cluster": 1,
+      "max_cluster_share": 0.006,
+      "median_cluster": 1,
+      "cover80_clusters": 131,
+      "singleton_share": 1.0,
+      "tone_spread": 1094.6
+     },
+     "rms_8": {
+      "clusters": 73,
+      "max_cluster": 27,
+      "max_cluster_share": 0.166,
+      "median_cluster": 1,
+      "cover80_clusters": 41,
+      "singleton_share": 0.387,
+      "tone_spread": 1375.6
+     },
+     "rms_16": {
+      "clusters": 38,
+      "max_cluster": 67,
+      "max_cluster_share": 0.411,
+      "median_cluster": 1,
+      "cover80_clusters": 7,
+      "singleton_share": 0.19,
+      "tone_spread": 1425.6
+     },
+     "rms_32": {
+      "clusters": 4,
+      "max_cluster": 120,
+      "max_cluster_share": 0.736,
+      "median_cluster": 19,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1477.3
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 163,
+      "max_cluster": 1,
+      "max_cluster_share": 0.006,
+      "median_cluster": 1,
+      "cover80_clusters": 131,
+      "singleton_share": 1.0,
+      "tone_spread": 1058.0
+     },
+     "rms_8": {
+      "clusters": 65,
+      "max_cluster": 52,
+      "max_cluster_share": 0.319,
+      "median_cluster": 1,
+      "cover80_clusters": 33,
+      "singleton_share": 0.35,
+      "tone_spread": 1385.4
+     },
+     "rms_16": {
+      "clusters": 35,
+      "max_cluster": 69,
+      "max_cluster_share": 0.423,
+      "median_cluster": 1,
+      "cover80_clusters": 6,
+      "singleton_share": 0.166,
+      "tone_spread": 1422.5
+     },
+     "rms_32": {
+      "clusters": 4,
+      "max_cluster": 144,
+      "max_cluster_share": 0.883,
+      "median_cluster": 7,
+      "cover80_clusters": 1,
+      "singleton_share": 0.0,
+      "tone_spread": 1564.7
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 163,
+      "max_cluster": 1,
+      "max_cluster_share": 0.006,
+      "median_cluster": 1,
+      "cover80_clusters": 131,
+      "singleton_share": 1.0,
+      "tone_spread": 66.9
+     },
+     "corr_75": {
+      "clusters": 157,
+      "max_cluster": 5,
+      "max_cluster_share": 0.031,
+      "median_cluster": 1,
+      "cover80_clusters": 125,
+      "singleton_share": 0.945,
+      "tone_spread": 66.7
+     },
+     "corr_50": {
+      "clusters": 111,
+      "max_cluster": 6,
+      "max_cluster_share": 0.037,
+      "median_cluster": 1,
+      "cover80_clusters": 79,
+      "singleton_share": 0.521,
+      "tone_spread": 67.8
+     },
+     "corr_25": {
+      "clusters": 37,
+      "max_cluster": 31,
+      "max_cluster_share": 0.19,
+      "median_cluster": 2,
+      "cover80_clusters": 14,
+      "singleton_share": 0.104,
+      "tone_spread": 69.4
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 65,
+     "cells": 163,
+     "verdict": "163 клеток → 65 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 34.7,
+     "p10_db": 31.0,
+     "cells": 163,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#e9ba71",
+       "share": 0.371,
+       "de": 25.0,
+       "band": "#cdbe9b",
+       "in_band": false
+      },
+      {
+       "tone": "#7d9c2d",
+       "share": 0.209,
+       "de": 27.4,
+       "band": "#92a26a",
+       "in_band": false
+      },
+      {
+       "tone": "#93ab33",
+       "share": 0.16,
+       "de": 30.3,
+       "band": "#92a26a",
+       "in_band": false
+      },
+      {
+       "tone": "#c19150",
+       "share": 0.089,
+       "de": 27.8,
+       "band": "#cdbe9b",
+       "in_band": false
+      },
+      {
+       "tone": "#586732",
+       "share": 0.087,
+       "de": 11.4,
+       "band": "#6d6d47",
+       "in_band": true
+      }
+     ],
+     "in_band_share": 0.087,
+     "in_band_share_recolored": 0.779
+    },
+    "sha256": "f16f99e55c77503f1c1c4d7f5c73d5cf4ded15f48422f2a1ae2b29e3d24d0af0"
    }
   },
   "1793630023618-025bda8a-33e7-4635-9ba1-08073f87492a-01a19cad-ad81-7f35-abf0-ddc6b064f7a4.png": {
@@ -570,6 +756,192 @@
      1484,
      1060
     ]
+   },
+   "cell_profile": {
+    "cells": 176,
+    "cell_px": [
+     103.0,
+     96.0
+    ],
+    "downscale": [
+     0.7961,
+     0.8542
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.158,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 176,
+      "max_cluster": 1,
+      "max_cluster_share": 0.006,
+      "median_cluster": 1,
+      "cover80_clusters": 141,
+      "singleton_share": 1.0,
+      "tone_spread": 1559.1
+     },
+     "rms_8": {
+      "clusters": 105,
+      "max_cluster": 39,
+      "max_cluster_share": 0.222,
+      "median_cluster": 1,
+      "cover80_clusters": 70,
+      "singleton_share": 0.551,
+      "tone_spread": 1616.0
+     },
+     "rms_16": {
+      "clusters": 59,
+      "max_cluster": 53,
+      "max_cluster_share": 0.301,
+      "median_cluster": 1,
+      "cover80_clusters": 24,
+      "singleton_share": 0.284,
+      "tone_spread": 1611.4
+     },
+     "rms_32": {
+      "clusters": 3,
+      "max_cluster": 85,
+      "max_cluster_share": 0.483,
+      "median_cluster": 68,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1367.3
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 176,
+      "max_cluster": 1,
+      "max_cluster_share": 0.006,
+      "median_cluster": 1,
+      "cover80_clusters": 141,
+      "singleton_share": 1.0,
+      "tone_spread": 1497.0
+     },
+     "rms_8": {
+      "clusters": 97,
+      "max_cluster": 42,
+      "max_cluster_share": 0.239,
+      "median_cluster": 1,
+      "cover80_clusters": 62,
+      "singleton_share": 0.506,
+      "tone_spread": 1535.7
+     },
+     "rms_16": {
+      "clusters": 44,
+      "max_cluster": 49,
+      "max_cluster_share": 0.278,
+      "median_cluster": 1,
+      "cover80_clusters": 11,
+      "singleton_share": 0.182,
+      "tone_spread": 1532.0
+     },
+     "rms_32": {
+      "clusters": 3,
+      "max_cluster": 88,
+      "max_cluster_share": 0.5,
+      "median_cluster": 87,
+      "cover80_clusters": 2,
+      "singleton_share": 0.006,
+      "tone_spread": 1350.1
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 175,
+      "max_cluster": 2,
+      "max_cluster_share": 0.011,
+      "median_cluster": 1,
+      "cover80_clusters": 140,
+      "singleton_share": 0.989,
+      "tone_spread": 68.4
+     },
+     "corr_75": {
+      "clusters": 169,
+      "max_cluster": 5,
+      "max_cluster_share": 0.028,
+      "median_cluster": 1,
+      "cover80_clusters": 134,
+      "singleton_share": 0.949,
+      "tone_spread": 68.3
+     },
+     "corr_50": {
+      "clusters": 137,
+      "max_cluster": 9,
+      "max_cluster_share": 0.051,
+      "median_cluster": 1,
+      "cover80_clusters": 102,
+      "singleton_share": 0.659,
+      "tone_spread": 69.4
+     },
+     "corr_25": {
+      "clusters": 64,
+      "max_cluster": 24,
+      "max_cluster_share": 0.136,
+      "median_cluster": 1,
+      "cover80_clusters": 30,
+      "singleton_share": 0.188,
+      "tone_spread": 70.2
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 97,
+     "cells": 176,
+     "verdict": "176 клеток → 97 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 35.8,
+     "p10_db": 32.7,
+     "cells": 176,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#d3e2f8",
+       "share": 0.338,
+       "de": 16.2,
+       "band": "#95cde5",
+       "in_band": false
+      },
+      {
+       "tone": "#8cb33a",
+       "share": 0.32,
+       "de": 32.2,
+       "band": "#92a26a",
+       "in_band": false
+      },
+      {
+       "tone": "#607f3c",
+       "share": 0.108,
+       "de": 17.5,
+       "band": "#92a26a",
+       "in_band": false
+      },
+      {
+       "tone": "#9ebbe2",
+       "share": 0.098,
+       "de": 13.2,
+       "band": "#95cde5",
+       "in_band": false
+      },
+      {
+       "tone": "#6e819d",
+       "share": 0.081,
+       "de": 16.8,
+       "band": "#486f77",
+       "in_band": false
+      }
+     ],
+     "in_band_share": 0.0,
+     "in_band_share_recolored": 0.845
+    },
+    "sha256": "126aa8180175d035e2c875ec14e09e64d129f306284313101d211d1baccaccd4"
    }
   },
   "1793630103023-4c022438-746d-48d8-8d47-f140386a0d81-01a19cae-de17-7aeb-9945-8af33e4ef3eb.png": {
@@ -843,6 +1215,192 @@
      1470,
      1070
     ]
+   },
+   "cell_profile": {
+    "cells": 200,
+    "cell_px": [
+     109.0,
+     85.3
+    ],
+    "downscale": [
+     0.7523,
+     0.9609
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.34,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 172,
+      "max_cluster": 29,
+      "max_cluster_share": 0.145,
+      "median_cluster": 1,
+      "cover80_clusters": 132,
+      "singleton_share": 0.855,
+      "tone_spread": 1229.2
+     },
+     "rms_8": {
+      "clusters": 123,
+      "max_cluster": 37,
+      "max_cluster_share": 0.185,
+      "median_cluster": 1,
+      "cover80_clusters": 83,
+      "singleton_share": 0.575,
+      "tone_spread": 1157.9
+     },
+     "rms_16": {
+      "clusters": 57,
+      "max_cluster": 42,
+      "max_cluster_share": 0.21,
+      "median_cluster": 1,
+      "cover80_clusters": 17,
+      "singleton_share": 0.21,
+      "tone_spread": 1269.7
+     },
+     "rms_32": {
+      "clusters": 4,
+      "max_cluster": 87,
+      "max_cluster_share": 0.435,
+      "median_cluster": 55,
+      "cover80_clusters": 3,
+      "singleton_share": 0.0,
+      "tone_spread": 1588.5
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 173,
+      "max_cluster": 28,
+      "max_cluster_share": 0.14,
+      "median_cluster": 1,
+      "cover80_clusters": 133,
+      "singleton_share": 0.86,
+      "tone_spread": 1086.6
+     },
+     "rms_8": {
+      "clusters": 112,
+      "max_cluster": 30,
+      "max_cluster_share": 0.15,
+      "median_cluster": 1,
+      "cover80_clusters": 72,
+      "singleton_share": 0.515,
+      "tone_spread": 1072.8
+     },
+     "rms_16": {
+      "clusters": 33,
+      "max_cluster": 57,
+      "max_cluster_share": 0.285,
+      "median_cluster": 1,
+      "cover80_clusters": 6,
+      "singleton_share": 0.1,
+      "tone_spread": 1332.3
+     },
+     "rms_32": {
+      "clusters": 3,
+      "max_cluster": 152,
+      "max_cluster_share": 0.76,
+      "median_cluster": 45,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1420.3
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 174,
+      "max_cluster": 27,
+      "max_cluster_share": 0.135,
+      "median_cluster": 1,
+      "cover80_clusters": 134,
+      "singleton_share": 0.865,
+      "tone_spread": 68.4
+     },
+     "corr_75": {
+      "clusters": 145,
+      "max_cluster": 27,
+      "max_cluster_share": 0.135,
+      "median_cluster": 1,
+      "cover80_clusters": 105,
+      "singleton_share": 0.66,
+      "tone_spread": 69.3
+     },
+     "corr_50": {
+      "clusters": 113,
+      "max_cluster": 36,
+      "max_cluster_share": 0.18,
+      "median_cluster": 1,
+      "cover80_clusters": 73,
+      "singleton_share": 0.49,
+      "tone_spread": 70.0
+     },
+     "corr_25": {
+      "clusters": 58,
+      "max_cluster": 37,
+      "max_cluster_share": 0.185,
+      "median_cluster": 1,
+      "cover80_clusters": 20,
+      "singleton_share": 0.18,
+      "tone_spread": 70.3
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 112,
+     "cells": 200,
+     "verdict": "200 клеток → 112 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 37.0,
+     "p10_db": 33.5,
+     "cells": 200,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#96b234",
+       "share": 0.268,
+       "de": 33.1,
+       "band": "#92a26a",
+       "in_band": false
+      },
+      {
+       "tone": "#000000",
+       "share": 0.213,
+       "de": 16.0,
+       "band": "#1d2829",
+       "in_band": false
+      },
+      {
+       "tone": "#5a682c",
+       "share": 0.19,
+       "de": 14.0,
+       "band": "#6d6d47",
+       "in_band": false
+      },
+      {
+       "tone": "#656b46",
+       "share": 0.13,
+       "de": 3.1,
+       "band": "#6d6d47",
+       "in_band": true
+      },
+      {
+       "tone": "#798c31",
+       "share": 0.117,
+       "de": 20.3,
+       "band": "#92a26a",
+       "in_band": false
+      }
+     ],
+     "in_band_share": 0.13,
+     "in_band_share_recolored": 0.951
+    },
+    "sha256": "9e7031d6626c06c7550f0ef6ec0883464426f0cb44158adc7bfefdf1a9b2ed1e"
    }
   },
   "1793630189379-90ea3ba9-f438-4cb2-9f59-213b969688b7-01a19cb0-305f-7e3b-b3f5-b188014aa81b.png": {
@@ -1358,6 +1916,199 @@
      1536,
      1024
     ]
+   },
+   "cell_profile": {
+    "cells": 203,
+    "cell_px": [
+     99.0,
+     90.7
+    ],
+    "downscale": [
+     0.8283,
+     0.9045
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.469,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 193,
+      "max_cluster": 9,
+      "max_cluster_share": 0.044,
+      "median_cluster": 1,
+      "cover80_clusters": 153,
+      "singleton_share": 0.941,
+      "tone_spread": 1651.5
+     },
+     "rms_8": {
+      "clusters": 131,
+      "max_cluster": 21,
+      "max_cluster_share": 0.103,
+      "median_cluster": 1,
+      "cover80_clusters": 91,
+      "singleton_share": 0.596,
+      "tone_spread": 1527.1
+     },
+     "rms_16": {
+      "clusters": 62,
+      "max_cluster": 52,
+      "max_cluster_share": 0.256,
+      "median_cluster": 1,
+      "cover80_clusters": 22,
+      "singleton_share": 0.271,
+      "tone_spread": 1696.3
+     },
+     "rms_32": {
+      "clusters": 7,
+      "max_cluster": 108,
+      "max_cluster_share": 0.532,
+      "median_cluster": 8,
+      "cover80_clusters": 2,
+      "singleton_share": 0.005,
+      "tone_spread": 1852.7
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 196,
+      "max_cluster": 8,
+      "max_cluster_share": 0.039,
+      "median_cluster": 1,
+      "cover80_clusters": 156,
+      "singleton_share": 0.961,
+      "tone_spread": 1606.4
+     },
+     "rms_8": {
+      "clusters": 128,
+      "max_cluster": 45,
+      "max_cluster_share": 0.222,
+      "median_cluster": 1,
+      "cover80_clusters": 88,
+      "singleton_share": 0.596,
+      "tone_spread": 1426.2
+     },
+     "rms_16": {
+      "clusters": 59,
+      "max_cluster": 34,
+      "max_cluster_share": 0.167,
+      "median_cluster": 1,
+      "cover80_clusters": 19,
+      "singleton_share": 0.212,
+      "tone_spread": 1664.9
+     },
+     "rms_32": {
+      "clusters": 5,
+      "max_cluster": 112,
+      "max_cluster_share": 0.552,
+      "median_cluster": 6,
+      "cover80_clusters": 2,
+      "singleton_share": 0.005,
+      "tone_spread": 1779.6
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 196,
+      "max_cluster": 6,
+      "max_cluster_share": 0.03,
+      "median_cluster": 1,
+      "cover80_clusters": 156,
+      "singleton_share": 0.956,
+      "tone_spread": 69.4
+     },
+     "corr_75": {
+      "clusters": 184,
+      "max_cluster": 6,
+      "max_cluster_share": 0.03,
+      "median_cluster": 1,
+      "cover80_clusters": 144,
+      "singleton_share": 0.867,
+      "tone_spread": 69.5
+     },
+     "corr_50": {
+      "clusters": 116,
+      "max_cluster": 27,
+      "max_cluster_share": 0.133,
+      "median_cluster": 1,
+      "cover80_clusters": 76,
+      "singleton_share": 0.448,
+      "tone_spread": 70.6
+     },
+     "corr_25": {
+      "clusters": 45,
+      "max_cluster": 34,
+      "max_cluster_share": 0.167,
+      "median_cluster": 3,
+      "cover80_clusters": 20,
+      "singleton_share": 0.084,
+      "tone_spread": 70.4
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 128,
+     "cells": 203,
+     "verdict": "203 клеток → 128 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 37.3,
+     "p10_db": 33.7,
+     "cells": 203,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#92af33",
+       "share": 0.28,
+       "de": 32.2,
+       "band": "#92a26a",
+       "in_band": false
+      },
+      {
+       "tone": "#713023",
+       "share": 0.227,
+       "de": 38.0,
+       "band": "#6d6d47",
+       "in_band": false
+      },
+      {
+       "tone": "#736b6d",
+       "share": 0.159,
+       "de": 17.5,
+       "band": "#486f77",
+       "in_band": false
+      },
+      {
+       "tone": "#020101",
+       "share": 0.134,
+       "de": 15.7,
+       "band": "#1d2829",
+       "in_band": false
+      },
+      {
+       "tone": "#373333",
+       "share": 0.087,
+       "de": 9.4,
+       "band": "#1d2829",
+       "in_band": true
+      },
+      {
+       "tone": "#60832c",
+       "share": 0.081,
+       "de": 22.8,
+       "band": "#92a26a",
+       "in_band": false
+      }
+     ],
+     "in_band_share": 0.087,
+     "in_band_share_recolored": 0.682
+    },
+    "sha256": "2e91c7232df6172e1446bf8b2eb874e9b06c768bb0eae206091e33fc3d56b60f"
    }
   },
   "1793630374414-ca9dd1ee-f541-4157-a842-588f3175ef3b-01a19cb3-0db1-73b0-8d78-f250d6226242.png": {
@@ -1883,6 +2634,185 @@
      1536,
      1024
     ]
+   },
+   "cell_profile": {
+    "cells": 176,
+    "cell_px": [
+     107.0,
+     93.3
+    ],
+    "downscale": [
+     0.7664,
+     0.8785
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.103,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 176,
+      "max_cluster": 1,
+      "max_cluster_share": 0.006,
+      "median_cluster": 1,
+      "cover80_clusters": 141,
+      "singleton_share": 1.0,
+      "tone_spread": 1263.6
+     },
+     "rms_8": {
+      "clusters": 94,
+      "max_cluster": 35,
+      "max_cluster_share": 0.199,
+      "median_cluster": 1,
+      "cover80_clusters": 59,
+      "singleton_share": 0.472,
+      "tone_spread": 1466.4
+     },
+     "rms_16": {
+      "clusters": 50,
+      "max_cluster": 55,
+      "max_cluster_share": 0.312,
+      "median_cluster": 1,
+      "cover80_clusters": 15,
+      "singleton_share": 0.199,
+      "tone_spread": 1503.7
+     },
+     "rms_32": {
+      "clusters": 5,
+      "max_cluster": 80,
+      "max_cluster_share": 0.455,
+      "median_cluster": 11,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1591.6
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 176,
+      "max_cluster": 1,
+      "max_cluster_share": 0.006,
+      "median_cluster": 1,
+      "cover80_clusters": 141,
+      "singleton_share": 1.0,
+      "tone_spread": 1197.4
+     },
+     "rms_8": {
+      "clusters": 91,
+      "max_cluster": 41,
+      "max_cluster_share": 0.233,
+      "median_cluster": 1,
+      "cover80_clusters": 56,
+      "singleton_share": 0.466,
+      "tone_spread": 1395.7
+     },
+     "rms_16": {
+      "clusters": 36,
+      "max_cluster": 58,
+      "max_cluster_share": 0.33,
+      "median_cluster": 2,
+      "cover80_clusters": 10,
+      "singleton_share": 0.097,
+      "tone_spread": 1456.7
+     },
+     "rms_32": {
+      "clusters": 5,
+      "max_cluster": 82,
+      "max_cluster_share": 0.466,
+      "median_cluster": 9,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1652.1
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 176,
+      "max_cluster": 1,
+      "max_cluster_share": 0.006,
+      "median_cluster": 1,
+      "cover80_clusters": 141,
+      "singleton_share": 1.0,
+      "tone_spread": 67.7
+     },
+     "corr_75": {
+      "clusters": 166,
+      "max_cluster": 5,
+      "max_cluster_share": 0.028,
+      "median_cluster": 1,
+      "cover80_clusters": 131,
+      "singleton_share": 0.915,
+      "tone_spread": 67.6
+     },
+     "corr_50": {
+      "clusters": 106,
+      "max_cluster": 11,
+      "max_cluster_share": 0.062,
+      "median_cluster": 1,
+      "cover80_clusters": 71,
+      "singleton_share": 0.438,
+      "tone_spread": 69.7
+     },
+     "corr_25": {
+      "clusters": 40,
+      "max_cluster": 21,
+      "max_cluster_share": 0.119,
+      "median_cluster": 2,
+      "cover80_clusters": 16,
+      "singleton_share": 0.091,
+      "tone_spread": 69.9
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 91,
+     "cells": 176,
+     "verdict": "176 клеток → 91 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 34.1,
+     "p10_db": 31.7,
+     "cells": 176,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#ecbb72",
+       "share": 0.342,
+       "de": 25.6,
+       "band": "#cdbe9b",
+       "in_band": false
+      },
+      {
+       "tone": "#85ab35",
+       "share": 0.342,
+       "de": 30.7,
+       "band": "#92a26a",
+       "in_band": false
+      },
+      {
+       "tone": "#5f8247",
+       "share": 0.096,
+       "de": 16.0,
+       "band": "#92a26a",
+       "in_band": false
+      },
+      {
+       "tone": "#b38762",
+       "share": 0.08,
+       "de": 22.6,
+       "band": "#cdbe9b",
+       "in_band": false
+      }
+     ],
+     "in_band_share": 0.0,
+     "in_band_share_recolored": 0.855
+    },
+    "sha256": "5a14482b852d1d185d2a9f8124a0ecbe8904b326032b0cd207a2cfc9723c514f"
    }
   },
   "1793630714620-904115ac-f371-4f4d-9cdb-4c542aa01f9e-01a19cb8-3639-7e14-8fee-5cef01c85e25.png": {
@@ -3165,6 +4095,185 @@
      1470,
      1070
     ]
+   },
+   "cell_profile": {
+    "cells": 156,
+    "cell_px": [
+     103.0,
+     109.3
+    ],
+    "downscale": [
+     0.7961,
+     0.75
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.103,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 141,
+      "max_cluster": 6,
+      "max_cluster_share": 0.038,
+      "median_cluster": 1,
+      "cover80_clusters": 110,
+      "singleton_share": 0.859,
+      "tone_spread": 1360.1
+     },
+     "rms_8": {
+      "clusters": 66,
+      "max_cluster": 24,
+      "max_cluster_share": 0.154,
+      "median_cluster": 1,
+      "cover80_clusters": 35,
+      "singleton_share": 0.359,
+      "tone_spread": 1393.2
+     },
+     "rms_16": {
+      "clusters": 31,
+      "max_cluster": 54,
+      "max_cluster_share": 0.346,
+      "median_cluster": 1,
+      "cover80_clusters": 6,
+      "singleton_share": 0.154,
+      "tone_spread": 1404.2
+     },
+     "rms_32": {
+      "clusters": 2,
+      "max_cluster": 81,
+      "max_cluster_share": 0.519,
+      "median_cluster": 78,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1140.7
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 139,
+      "max_cluster": 6,
+      "max_cluster_share": 0.038,
+      "median_cluster": 1,
+      "cover80_clusters": 108,
+      "singleton_share": 0.846,
+      "tone_spread": 1316.0
+     },
+     "rms_8": {
+      "clusters": 57,
+      "max_cluster": 45,
+      "max_cluster_share": 0.288,
+      "median_cluster": 1,
+      "cover80_clusters": 26,
+      "singleton_share": 0.333,
+      "tone_spread": 1341.8
+     },
+     "rms_16": {
+      "clusters": 23,
+      "max_cluster": 48,
+      "max_cluster_share": 0.308,
+      "median_cluster": 1,
+      "cover80_clusters": 5,
+      "singleton_share": 0.103,
+      "tone_spread": 1328.5
+     },
+     "rms_32": {
+      "clusters": 2,
+      "max_cluster": 80,
+      "max_cluster_share": 0.513,
+      "median_cluster": 78,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1088.9
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 156,
+      "max_cluster": 1,
+      "max_cluster_share": 0.006,
+      "median_cluster": 1,
+      "cover80_clusters": 125,
+      "singleton_share": 1.0,
+      "tone_spread": 68.1
+     },
+     "corr_75": {
+      "clusters": 137,
+      "max_cluster": 8,
+      "max_cluster_share": 0.051,
+      "median_cluster": 1,
+      "cover80_clusters": 106,
+      "singleton_share": 0.833,
+      "tone_spread": 69.2
+     },
+     "corr_50": {
+      "clusters": 94,
+      "max_cluster": 33,
+      "max_cluster_share": 0.212,
+      "median_cluster": 1,
+      "cover80_clusters": 63,
+      "singleton_share": 0.513,
+      "tone_spread": 70.1
+     },
+     "corr_25": {
+      "clusters": 46,
+      "max_cluster": 34,
+      "max_cluster_share": 0.218,
+      "median_cluster": 1,
+      "cover80_clusters": 17,
+      "singleton_share": 0.173,
+      "tone_spread": 70.2
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 57,
+     "cells": 156,
+     "verdict": "156 клеток → 57 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 36.4,
+     "p10_db": 31.8,
+     "cells": 156,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#e9be75",
+       "share": 0.315,
+       "de": 23.9,
+       "band": "#cdbe9b",
+       "in_band": false
+      },
+      {
+       "tone": "#34afb0",
+       "share": 0.299,
+       "de": 25.5,
+       "band": "#95cde5",
+       "in_band": false
+      },
+      {
+       "tone": "#157685",
+       "share": 0.133,
+       "de": 11.6,
+       "band": "#486f77",
+       "in_band": true
+      },
+      {
+       "tone": "#f4cd86",
+       "share": 0.094,
+       "de": 22.4,
+       "band": "#cdbe9b",
+       "in_band": false
+      }
+     ],
+     "in_band_share": 0.133,
+     "in_band_share_recolored": 0.832
+    },
+    "sha256": "c513b958679ef327d0c5f32df0b7f1d83c0818d5c80afd4aacfa9e2b9d6a9d13"
    }
   },
   "1793631425594-81708aca-7041-47fd-b57e-bf67e423ffd5-01a19cc3-0d07-70c4-bf54-401f6d252e00.png": {
@@ -3690,6 +4799,178 @@
      1536,
      1024
     ]
+   },
+   "cell_profile": {
+    "cells": 182,
+    "cell_px": [
+     103.0,
+     96.0
+    ],
+    "downscale": [
+     0.7961,
+     0.8542
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.086,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 174,
+      "max_cluster": 3,
+      "max_cluster_share": 0.016,
+      "median_cluster": 1,
+      "cover80_clusters": 138,
+      "singleton_share": 0.923,
+      "tone_spread": 1297.7
+     },
+     "rms_8": {
+      "clusters": 101,
+      "max_cluster": 34,
+      "max_cluster_share": 0.187,
+      "median_cluster": 1,
+      "cover80_clusters": 65,
+      "singleton_share": 0.505,
+      "tone_spread": 1437.9
+     },
+     "rms_16": {
+      "clusters": 59,
+      "max_cluster": 52,
+      "max_cluster_share": 0.286,
+      "median_cluster": 1,
+      "cover80_clusters": 23,
+      "singleton_share": 0.231,
+      "tone_spread": 1478.2
+     },
+     "rms_32": {
+      "clusters": 4,
+      "max_cluster": 93,
+      "max_cluster_share": 0.511,
+      "median_cluster": 43,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1487.7
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 172,
+      "max_cluster": 3,
+      "max_cluster_share": 0.016,
+      "median_cluster": 1,
+      "cover80_clusters": 136,
+      "singleton_share": 0.901,
+      "tone_spread": 1270.2
+     },
+     "rms_8": {
+      "clusters": 100,
+      "max_cluster": 34,
+      "max_cluster_share": 0.187,
+      "median_cluster": 1,
+      "cover80_clusters": 64,
+      "singleton_share": 0.473,
+      "tone_spread": 1406.5
+     },
+     "rms_16": {
+      "clusters": 43,
+      "max_cluster": 62,
+      "max_cluster_share": 0.341,
+      "median_cluster": 1,
+      "cover80_clusters": 12,
+      "singleton_share": 0.143,
+      "tone_spread": 1459.7
+     },
+     "rms_32": {
+      "clusters": 4,
+      "max_cluster": 93,
+      "max_cluster_share": 0.511,
+      "median_cluster": 43,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1526.2
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 179,
+      "max_cluster": 4,
+      "max_cluster_share": 0.022,
+      "median_cluster": 1,
+      "cover80_clusters": 143,
+      "singleton_share": 0.978,
+      "tone_spread": 66.3
+     },
+     "corr_75": {
+      "clusters": 167,
+      "max_cluster": 6,
+      "max_cluster_share": 0.033,
+      "median_cluster": 1,
+      "cover80_clusters": 131,
+      "singleton_share": 0.879,
+      "tone_spread": 66.5
+     },
+     "corr_50": {
+      "clusters": 107,
+      "max_cluster": 13,
+      "max_cluster_share": 0.071,
+      "median_cluster": 1,
+      "cover80_clusters": 71,
+      "singleton_share": 0.451,
+      "tone_spread": 69.5
+     },
+     "corr_25": {
+      "clusters": 51,
+      "max_cluster": 39,
+      "max_cluster_share": 0.214,
+      "median_cluster": 1,
+      "cover80_clusters": 20,
+      "singleton_share": 0.143,
+      "tone_spread": 70.1
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 100,
+     "cells": 182,
+     "verdict": "182 клеток → 100 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 35.2,
+     "p10_db": 31.7,
+     "cells": 182,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#d2e4f8",
+       "share": 0.362,
+       "de": 15.7,
+       "band": "#95cde5",
+       "in_band": false
+      },
+      {
+       "tone": "#e8ba79",
+       "share": 0.245,
+       "de": 21.4,
+       "band": "#cdbe9b",
+       "in_band": false
+      },
+      {
+       "tone": "#8aa8cb",
+       "share": 0.105,
+       "de": 15.9,
+       "band": "#95cde5",
+       "in_band": false
+      }
+     ],
+     "in_band_share": 0.0,
+     "in_band_share_recolored": 0.914
+    },
+    "sha256": "42688530e880e4b1351337dba5e4da23ee31e02b084587a7bc0a9d3ff2136b06"
    }
   },
   "1793632186230-39ef79a1-45de-4eef-b7bf-1992a99d2995-01a19cce-a3ec-763c-a004-a6aaf296d8ba.png": {
@@ -5456,6 +6737,199 @@
      1536,
      1024
     ]
+   },
+   "cell_profile": {
+    "cells": 169,
+    "cell_px": [
+     109.0,
+     98.7
+    ],
+    "downscale": [
+     0.7523,
+     0.8311
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.469,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 167,
+      "max_cluster": 2,
+      "max_cluster_share": 0.012,
+      "median_cluster": 1,
+      "cover80_clusters": 134,
+      "singleton_share": 0.976,
+      "tone_spread": 1077.4
+     },
+     "rms_8": {
+      "clusters": 112,
+      "max_cluster": 28,
+      "max_cluster_share": 0.166,
+      "median_cluster": 1,
+      "cover80_clusters": 79,
+      "singleton_share": 0.574,
+      "tone_spread": 1071.6
+     },
+     "rms_16": {
+      "clusters": 26,
+      "max_cluster": 54,
+      "max_cluster_share": 0.32,
+      "median_cluster": 1,
+      "cover80_clusters": 6,
+      "singleton_share": 0.101,
+      "tone_spread": 1130.3
+     },
+     "rms_32": {
+      "clusters": 2,
+      "max_cluster": 92,
+      "max_cluster_share": 0.544,
+      "median_cluster": 84,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 946.2
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 168,
+      "max_cluster": 2,
+      "max_cluster_share": 0.012,
+      "median_cluster": 1,
+      "cover80_clusters": 135,
+      "singleton_share": 0.988,
+      "tone_spread": 991.0
+     },
+     "rms_8": {
+      "clusters": 95,
+      "max_cluster": 18,
+      "max_cluster_share": 0.107,
+      "median_cluster": 1,
+      "cover80_clusters": 62,
+      "singleton_share": 0.467,
+      "tone_spread": 1012.8
+     },
+     "rms_16": {
+      "clusters": 10,
+      "max_cluster": 61,
+      "max_cluster_share": 0.361,
+      "median_cluster": 5,
+      "cover80_clusters": 3,
+      "singleton_share": 0.012,
+      "tone_spread": 1171.1
+     },
+     "rms_32": {
+      "clusters": 1,
+      "max_cluster": 169,
+      "max_cluster_share": 1.0,
+      "median_cluster": 169,
+      "cover80_clusters": 1,
+      "singleton_share": 0.0,
+      "tone_spread": 0.0
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 168,
+      "max_cluster": 2,
+      "max_cluster_share": 0.012,
+      "median_cluster": 1,
+      "cover80_clusters": 135,
+      "singleton_share": 0.988,
+      "tone_spread": 66.6
+     },
+     "corr_75": {
+      "clusters": 160,
+      "max_cluster": 3,
+      "max_cluster_share": 0.018,
+      "median_cluster": 1,
+      "cover80_clusters": 127,
+      "singleton_share": 0.905,
+      "tone_spread": 66.6
+     },
+     "corr_50": {
+      "clusters": 101,
+      "max_cluster": 13,
+      "max_cluster_share": 0.077,
+      "median_cluster": 1,
+      "cover80_clusters": 68,
+      "singleton_share": 0.485,
+      "tone_spread": 69.0
+     },
+     "corr_25": {
+      "clusters": 53,
+      "max_cluster": 28,
+      "max_cluster_share": 0.166,
+      "median_cluster": 1,
+      "cover80_clusters": 21,
+      "singleton_share": 0.183,
+      "tone_spread": 69.8
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 95,
+     "cells": 169,
+     "verdict": "169 клеток → 95 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 36.0,
+     "p10_db": 32.5,
+     "cells": 169,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#6a7e78",
+       "share": 0.264,
+       "de": 12.1,
+       "band": "#486f77",
+       "in_band": false
+      },
+      {
+       "tone": "#cad7ea",
+       "share": 0.238,
+       "de": 14.8,
+       "band": "#95cde5",
+       "in_band": false
+      },
+      {
+       "tone": "#69743e",
+       "share": 0.137,
+       "de": 10.0,
+       "band": "#6d6d47",
+       "in_band": true
+      },
+      {
+       "tone": "#abbfdd",
+       "share": 0.127,
+       "de": 12.2,
+       "band": "#95cde5",
+       "in_band": false
+      },
+      {
+       "tone": "#839ab3",
+       "share": 0.093,
+       "de": 19.6,
+       "band": "#95cde5",
+       "in_band": false
+      },
+      {
+       "tone": "#010101",
+       "share": 0.082,
+       "de": 15.7,
+       "band": "#1d2829",
+       "in_band": false
+      }
+     ],
+     "in_band_share": 0.137,
+     "in_band_share_recolored": 0.944
+    },
+    "sha256": "02c5572bbb02655766fbb63f2a1cdc9554ccef8218159195ef73ac9f75c5a6e9"
    }
   },
   "1793632909351-d45d6187-7828-441b-9789-25d9561c3af8-01a19cd9-b358-7795-8adf-d3e54d10190c.png": {
@@ -7947,6 +9421,192 @@
      1536,
      1024
     ]
+   },
+   "cell_profile": {
+    "cells": 255,
+    "cell_px": [
+     97.0,
+     77.3
+    ],
+    "downscale": [
+     0.8454,
+     1.0603
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.529,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 216,
+      "max_cluster": 39,
+      "max_cluster_share": 0.153,
+      "median_cluster": 1,
+      "cover80_clusters": 165,
+      "singleton_share": 0.839,
+      "tone_spread": 1547.3
+     },
+     "rms_8": {
+      "clusters": 130,
+      "max_cluster": 50,
+      "max_cluster_share": 0.196,
+      "median_cluster": 1,
+      "cover80_clusters": 79,
+      "singleton_share": 0.478,
+      "tone_spread": 1542.8
+     },
+     "rms_16": {
+      "clusters": 78,
+      "max_cluster": 59,
+      "max_cluster_share": 0.231,
+      "median_cluster": 1,
+      "cover80_clusters": 27,
+      "singleton_share": 0.255,
+      "tone_spread": 1624.7
+     },
+     "rms_32": {
+      "clusters": 4,
+      "max_cluster": 153,
+      "max_cluster_share": 0.6,
+      "median_cluster": 46,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1656.2
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 216,
+      "max_cluster": 39,
+      "max_cluster_share": 0.153,
+      "median_cluster": 1,
+      "cover80_clusters": 165,
+      "singleton_share": 0.839,
+      "tone_spread": 1561.9
+     },
+     "rms_8": {
+      "clusters": 154,
+      "max_cluster": 47,
+      "max_cluster_share": 0.184,
+      "median_cluster": 1,
+      "cover80_clusters": 103,
+      "singleton_share": 0.573,
+      "tone_spread": 1455.6
+     },
+     "rms_16": {
+      "clusters": 74,
+      "max_cluster": 57,
+      "max_cluster_share": 0.224,
+      "median_cluster": 1,
+      "cover80_clusters": 23,
+      "singleton_share": 0.208,
+      "tone_spread": 1596.5
+     },
+     "rms_32": {
+      "clusters": 4,
+      "max_cluster": 105,
+      "max_cluster_share": 0.412,
+      "median_cluster": 64,
+      "cover80_clusters": 3,
+      "singleton_share": 0.0,
+      "tone_spread": 1590.2
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 217,
+      "max_cluster": 38,
+      "max_cluster_share": 0.149,
+      "median_cluster": 1,
+      "cover80_clusters": 166,
+      "singleton_share": 0.843,
+      "tone_spread": 69.3
+     },
+     "corr_75": {
+      "clusters": 204,
+      "max_cluster": 39,
+      "max_cluster_share": 0.153,
+      "median_cluster": 1,
+      "cover80_clusters": 153,
+      "singleton_share": 0.765,
+      "tone_spread": 69.4
+     },
+     "corr_50": {
+      "clusters": 150,
+      "max_cluster": 37,
+      "max_cluster_share": 0.145,
+      "median_cluster": 1,
+      "cover80_clusters": 99,
+      "singleton_share": 0.49,
+      "tone_spread": 70.2
+     },
+     "corr_25": {
+      "clusters": 58,
+      "max_cluster": 40,
+      "max_cluster_share": 0.157,
+      "median_cluster": 2,
+      "cover80_clusters": 23,
+      "singleton_share": 0.09,
+      "tone_spread": 70.4
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 154,
+     "cells": 255,
+     "verdict": "255 клеток → 154 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 38.3,
+     "p10_db": 34.8,
+     "cells": 255,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#769b2e",
+       "share": 0.252,
+       "de": 27.5,
+       "band": "#92a26a",
+       "in_band": false
+      },
+      {
+       "tone": "#010102",
+       "share": 0.245,
+       "de": 15.7,
+       "band": "#1d2829",
+       "in_band": false
+      },
+      {
+       "tone": "#696166",
+       "share": 0.139,
+       "de": 17.4,
+       "band": "#486f77",
+       "in_band": false
+      },
+      {
+       "tone": "#8b392c",
+       "share": 0.126,
+       "de": 41.9,
+       "band": "#6d6d47",
+       "in_band": false
+      },
+      {
+       "tone": "#3f4a35",
+       "share": 0.123,
+       "de": 11.8,
+       "band": "#354845",
+       "in_band": true
+      }
+     ],
+     "in_band_share": 0.123,
+     "in_band_share_recolored": 0.718
+    },
+    "sha256": "1cc3c912fca1032346a4900c041aee95bccd66c4b603424b0ad8a70bd042599f"
    }
   },
   "1793634749339-7f3bfdb0-f178-4410-8e23-db86c6567497-01a19cf5-c493-7c25-8ceb-b108f827af70.png": {
@@ -9377,6 +11037,192 @@
      1536,
      1024
     ]
+   },
+   "cell_profile": {
+    "cells": 156,
+    "cell_px": [
+     115.0,
+     96.0
+    ],
+    "downscale": [
+     0.713,
+     0.8542
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.124,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 145,
+      "max_cluster": 12,
+      "max_cluster_share": 0.077,
+      "median_cluster": 1,
+      "cover80_clusters": 114,
+      "singleton_share": 0.923,
+      "tone_spread": 1399.2
+     },
+     "rms_8": {
+      "clusters": 85,
+      "max_cluster": 19,
+      "max_cluster_share": 0.122,
+      "median_cluster": 1,
+      "cover80_clusters": 54,
+      "singleton_share": 0.417,
+      "tone_spread": 1498.4
+     },
+     "rms_16": {
+      "clusters": 34,
+      "max_cluster": 47,
+      "max_cluster_share": 0.301,
+      "median_cluster": 1,
+      "cover80_clusters": 9,
+      "singleton_share": 0.135,
+      "tone_spread": 1451.8
+     },
+     "rms_32": {
+      "clusters": 4,
+      "max_cluster": 65,
+      "max_cluster_share": 0.417,
+      "median_cluster": 44,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1397.6
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 145,
+      "max_cluster": 12,
+      "max_cluster_share": 0.077,
+      "median_cluster": 1,
+      "cover80_clusters": 114,
+      "singleton_share": 0.923,
+      "tone_spread": 1351.7
+     },
+     "rms_8": {
+      "clusters": 71,
+      "max_cluster": 32,
+      "max_cluster_share": 0.205,
+      "median_cluster": 1,
+      "cover80_clusters": 40,
+      "singleton_share": 0.391,
+      "tone_spread": 1461.3
+     },
+     "rms_16": {
+      "clusters": 29,
+      "max_cluster": 48,
+      "max_cluster_share": 0.308,
+      "median_cluster": 1,
+      "cover80_clusters": 8,
+      "singleton_share": 0.103,
+      "tone_spread": 1411.0
+     },
+     "rms_32": {
+      "clusters": 5,
+      "max_cluster": 67,
+      "max_cluster_share": 0.429,
+      "median_cluster": 15,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 1592.2
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 145,
+      "max_cluster": 12,
+      "max_cluster_share": 0.077,
+      "median_cluster": 1,
+      "cover80_clusters": 114,
+      "singleton_share": 0.923,
+      "tone_spread": 68.4
+     },
+     "corr_75": {
+      "clusters": 142,
+      "max_cluster": 12,
+      "max_cluster_share": 0.077,
+      "median_cluster": 1,
+      "cover80_clusters": 111,
+      "singleton_share": 0.885,
+      "tone_spread": 68.3
+     },
+     "corr_50": {
+      "clusters": 97,
+      "max_cluster": 13,
+      "max_cluster_share": 0.083,
+      "median_cluster": 1,
+      "cover80_clusters": 66,
+      "singleton_share": 0.449,
+      "tone_spread": 69.3
+     },
+     "corr_25": {
+      "clusters": 39,
+      "max_cluster": 22,
+      "max_cluster_share": 0.141,
+      "median_cluster": 2,
+      "cover80_clusters": 16,
+      "singleton_share": 0.109,
+      "tone_spread": 69.8
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 71,
+     "cells": 156,
+     "verdict": "156 клеток → 71 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 33.8,
+     "p10_db": 31.7,
+     "cells": 156,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#91af2f",
+       "share": 0.3,
+       "de": 33.7,
+       "band": "#92a26a",
+       "in_band": false
+      },
+      {
+       "tone": "#2ea6b2",
+       "share": 0.29,
+       "de": 23.2,
+       "band": "#95cde5",
+       "in_band": false
+      },
+      {
+       "tone": "#000100",
+       "share": 0.106,
+       "de": 15.7,
+       "band": "#1d2829",
+       "in_band": false
+      },
+      {
+       "tone": "#e9c685",
+       "share": 0.084,
+       "de": 18.4,
+       "band": "#cdbe9b",
+       "in_band": false
+      },
+      {
+       "tone": "#bfd9d6",
+       "share": 0.081,
+       "de": 17.3,
+       "band": "#95cde5",
+       "in_band": false
+      }
+     ],
+     "in_band_share": 0.0,
+     "in_band_share_recolored": 0.878
+    },
+    "sha256": "e90565156b61d0d69ada403442113ae90a915774dff75767c756871876e21feb"
    }
   },
   "1793636438706-03b53cf3-ea9d-4e1c-8a7f-7cdc53e1f887-01a19d0f-7d1c-7a55-b9fa-8f2056fa3b05.png": {
@@ -9650,6 +11496,185 @@
      1391,
      1131
     ]
+   },
+   "cell_profile": {
+    "cells": 169,
+    "cell_px": [
+     101.0,
+     104.0
+    ],
+    "downscale": [
+     0.8119,
+     0.7885
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.096,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 166,
+      "max_cluster": 3,
+      "max_cluster_share": 0.018,
+      "median_cluster": 1,
+      "cover80_clusters": 133,
+      "singleton_share": 0.97,
+      "tone_spread": 1349.8
+     },
+     "rms_8": {
+      "clusters": 96,
+      "max_cluster": 41,
+      "max_cluster_share": 0.243,
+      "median_cluster": 1,
+      "cover80_clusters": 63,
+      "singleton_share": 0.491,
+      "tone_spread": 1376.4
+     },
+     "rms_16": {
+      "clusters": 46,
+      "max_cluster": 56,
+      "max_cluster_share": 0.331,
+      "median_cluster": 1,
+      "cover80_clusters": 13,
+      "singleton_share": 0.207,
+      "tone_spread": 1406.1
+     },
+     "rms_32": {
+      "clusters": 2,
+      "max_cluster": 85,
+      "max_cluster_share": 0.503,
+      "median_cluster": 84,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 986.4
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 166,
+      "max_cluster": 3,
+      "max_cluster_share": 0.018,
+      "median_cluster": 1,
+      "cover80_clusters": 133,
+      "singleton_share": 0.97,
+      "tone_spread": 1309.2
+     },
+     "rms_8": {
+      "clusters": 88,
+      "max_cluster": 39,
+      "max_cluster_share": 0.231,
+      "median_cluster": 1,
+      "cover80_clusters": 55,
+      "singleton_share": 0.45,
+      "tone_spread": 1336.4
+     },
+     "rms_16": {
+      "clusters": 36,
+      "max_cluster": 66,
+      "max_cluster_share": 0.391,
+      "median_cluster": 1,
+      "cover80_clusters": 7,
+      "singleton_share": 0.154,
+      "tone_spread": 1311.5
+     },
+     "rms_32": {
+      "clusters": 2,
+      "max_cluster": 168,
+      "max_cluster_share": 0.994,
+      "median_cluster": 84,
+      "cover80_clusters": 1,
+      "singleton_share": 0.006,
+      "tone_spread": 1041.4
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 169,
+      "max_cluster": 1,
+      "max_cluster_share": 0.006,
+      "median_cluster": 1,
+      "cover80_clusters": 136,
+      "singleton_share": 1.0,
+      "tone_spread": 69.7
+     },
+     "corr_75": {
+      "clusters": 157,
+      "max_cluster": 3,
+      "max_cluster_share": 0.018,
+      "median_cluster": 1,
+      "cover80_clusters": 124,
+      "singleton_share": 0.876,
+      "tone_spread": 69.9
+     },
+     "corr_50": {
+      "clusters": 117,
+      "max_cluster": 9,
+      "max_cluster_share": 0.053,
+      "median_cluster": 1,
+      "cover80_clusters": 84,
+      "singleton_share": 0.568,
+      "tone_spread": 70.5
+     },
+     "corr_25": {
+      "clusters": 42,
+      "max_cluster": 25,
+      "max_cluster_share": 0.148,
+      "median_cluster": 2,
+      "cover80_clusters": 18,
+      "singleton_share": 0.107,
+      "tone_spread": 70.3
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 88,
+     "cells": 169,
+     "verdict": "169 клеток → 88 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 34.0,
+     "p10_db": 31.3,
+     "cells": 169,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#e9c081",
+       "share": 0.366,
+       "de": 19.0,
+       "band": "#cdbe9b",
+       "in_band": false
+      },
+      {
+       "tone": "#2589a1",
+       "share": 0.262,
+       "de": 16.8,
+       "band": "#486f77",
+       "in_band": false
+      },
+      {
+       "tone": "#65b1b7",
+       "share": 0.121,
+       "de": 16.8,
+       "band": "#95cde5",
+       "in_band": false
+      },
+      {
+       "tone": "#91664b",
+       "share": 0.1,
+       "de": 20.5,
+       "band": "#6d6d47",
+       "in_band": false
+      }
+     ],
+     "in_band_share": 0.0,
+     "in_band_share_recolored": 0.874
+    },
+    "sha256": "cbebe11d3ae3c81be6f5beeacf001ee69ad083f50af94d4ce04c10f11c0e4995"
    }
   },
   "1793636510893-16a87429-857c-4338-b1fe-a3d47db26aab-01a19d10-9e44-742e-87f0-039deaf048af.png": {
@@ -13967,6 +15992,185 @@
      1470,
      1070
     ]
+   },
+   "cell_profile": {
+    "cells": 195,
+    "cell_px": [
+     107.0,
+     90.7
+    ],
+    "downscale": [
+     0.7664,
+     0.9045
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.136,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 168,
+      "max_cluster": 7,
+      "max_cluster_share": 0.036,
+      "median_cluster": 1,
+      "cover80_clusters": 129,
+      "singleton_share": 0.8,
+      "tone_spread": 752.8
+     },
+     "rms_8": {
+      "clusters": 90,
+      "max_cluster": 76,
+      "max_cluster_share": 0.39,
+      "median_cluster": 1,
+      "cover80_clusters": 51,
+      "singleton_share": 0.441,
+      "tone_spread": 962.1
+     },
+     "rms_16": {
+      "clusters": 18,
+      "max_cluster": 134,
+      "max_cluster_share": 0.687,
+      "median_cluster": 2,
+      "cover80_clusters": 4,
+      "singleton_share": 0.041,
+      "tone_spread": 1066.2
+     },
+     "rms_32": {
+      "clusters": 1,
+      "max_cluster": 195,
+      "max_cluster_share": 1.0,
+      "median_cluster": 195,
+      "cover80_clusters": 1,
+      "singleton_share": 0.0,
+      "tone_spread": 0.0
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 174,
+      "max_cluster": 4,
+      "max_cluster_share": 0.021,
+      "median_cluster": 1,
+      "cover80_clusters": 135,
+      "singleton_share": 0.821,
+      "tone_spread": 650.2
+     },
+     "rms_8": {
+      "clusters": 78,
+      "max_cluster": 64,
+      "max_cluster_share": 0.328,
+      "median_cluster": 1,
+      "cover80_clusters": 39,
+      "singleton_share": 0.354,
+      "tone_spread": 818.6
+     },
+     "rms_16": {
+      "clusters": 8,
+      "max_cluster": 136,
+      "max_cluster_share": 0.697,
+      "median_cluster": 7,
+      "cover80_clusters": 2,
+      "singleton_share": 0.015,
+      "tone_spread": 1167.3
+     },
+     "rms_32": {
+      "clusters": 2,
+      "max_cluster": 194,
+      "max_cluster_share": 0.995,
+      "median_cluster": 97,
+      "cover80_clusters": 1,
+      "singleton_share": 0.005,
+      "tone_spread": 1134.5
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 188,
+      "max_cluster": 8,
+      "max_cluster_share": 0.041,
+      "median_cluster": 1,
+      "cover80_clusters": 149,
+      "singleton_share": 0.959,
+      "tone_spread": 63.5
+     },
+     "corr_75": {
+      "clusters": 162,
+      "max_cluster": 12,
+      "max_cluster_share": 0.062,
+      "median_cluster": 1,
+      "cover80_clusters": 123,
+      "singleton_share": 0.769,
+      "tone_spread": 65.4
+     },
+     "corr_50": {
+      "clusters": 103,
+      "max_cluster": 66,
+      "max_cluster_share": 0.338,
+      "median_cluster": 1,
+      "cover80_clusters": 64,
+      "singleton_share": 0.467,
+      "tone_spread": 70.1
+     },
+     "corr_25": {
+      "clusters": 48,
+      "max_cluster": 94,
+      "max_cluster_share": 0.482,
+      "median_cluster": 1,
+      "cover80_clusters": 17,
+      "singleton_share": 0.123,
+      "tone_spread": 70.2
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 78,
+     "cells": 195,
+     "verdict": "195 клеток → 78 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 36.9,
+     "p10_db": 32.9,
+     "cells": 195,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#c7925a",
+       "share": 0.435,
+       "de": 25.9,
+       "band": "#cdbe9b",
+       "in_band": false
+      },
+      {
+       "tone": "#bc834e",
+       "share": 0.201,
+       "de": 30.0,
+       "band": "#cdbe9b",
+       "in_band": false
+      },
+      {
+       "tone": "#a66841",
+       "share": 0.109,
+       "de": 29.9,
+       "band": "#6d6d47",
+       "in_band": false
+      },
+      {
+       "tone": "#855032",
+       "share": 0.096,
+       "de": 26.9,
+       "band": "#6d6d47",
+       "in_band": false
+      }
+     ],
+     "in_band_share": 0.0,
+     "in_band_share_recolored": 0.887
+    },
+    "sha256": "b50f87e87312a8f251ef73535d9a838f8848317bd46691fe4e7279be41c942f6"
    }
   },
   "1793645500580-21f527c8-257b-43cc-91f4-168f61897841-01a19d99-e172-7f05-a6a3-3581557eb028.png": {
@@ -14219,6 +16423,192 @@
      1536,
      1024
     ]
+   },
+   "cell_profile": {
+    "cells": 290,
+    "cell_px": [
+     101.0,
+     66.7
+    ],
+    "downscale": [
+     0.8119,
+     1.2301
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.249,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 224,
+      "max_cluster": 49,
+      "max_cluster_share": 0.169,
+      "median_cluster": 1,
+      "cover80_clusters": 166,
+      "singleton_share": 0.738,
+      "tone_spread": 548.5
+     },
+     "rms_8": {
+      "clusters": 101,
+      "max_cluster": 106,
+      "max_cluster_share": 0.366,
+      "median_cluster": 1,
+      "cover80_clusters": 43,
+      "singleton_share": 0.307,
+      "tone_spread": 614.3
+     },
+     "rms_16": {
+      "clusters": 5,
+      "max_cluster": 166,
+      "max_cluster_share": 0.572,
+      "median_cluster": 39,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 712.9
+     },
+     "rms_32": {
+      "clusters": 1,
+      "max_cluster": 290,
+      "max_cluster_share": 1.0,
+      "median_cluster": 290,
+      "cover80_clusters": 1,
+      "singleton_share": 0.0,
+      "tone_spread": 0.0
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 179,
+      "max_cluster": 49,
+      "max_cluster_share": 0.169,
+      "median_cluster": 1,
+      "cover80_clusters": 121,
+      "singleton_share": 0.572,
+      "tone_spread": 505.1
+     },
+     "rms_8": {
+      "clusters": 43,
+      "max_cluster": 113,
+      "max_cluster_share": 0.39,
+      "median_cluster": 1,
+      "cover80_clusters": 9,
+      "singleton_share": 0.09,
+      "tone_spread": 653.6
+     },
+     "rms_16": {
+      "clusters": 5,
+      "max_cluster": 211,
+      "max_cluster_share": 0.728,
+      "median_cluster": 8,
+      "cover80_clusters": 2,
+      "singleton_share": 0.0,
+      "tone_spread": 714.5
+     },
+     "rms_32": {
+      "clusters": 1,
+      "max_cluster": 290,
+      "max_cluster_share": 1.0,
+      "median_cluster": 290,
+      "cover80_clusters": 1,
+      "singleton_share": 0.0,
+      "tone_spread": 0.0
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 242,
+      "max_cluster": 49,
+      "max_cluster_share": 0.169,
+      "median_cluster": 1,
+      "cover80_clusters": 184,
+      "singleton_share": 0.831,
+      "tone_spread": 62.4
+     },
+     "corr_75": {
+      "clusters": 232,
+      "max_cluster": 49,
+      "max_cluster_share": 0.169,
+      "median_cluster": 1,
+      "cover80_clusters": 174,
+      "singleton_share": 0.783,
+      "tone_spread": 62.8
+     },
+     "corr_50": {
+      "clusters": 138,
+      "max_cluster": 64,
+      "max_cluster_share": 0.221,
+      "median_cluster": 1,
+      "cover80_clusters": 80,
+      "singleton_share": 0.393,
+      "tone_spread": 67.5
+     },
+     "corr_25": {
+      "clusters": 54,
+      "max_cluster": 91,
+      "max_cluster_share": 0.314,
+      "median_cluster": 1,
+      "cover80_clusters": 12,
+      "singleton_share": 0.114,
+      "tone_spread": 69.6
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 43,
+     "cells": 290,
+     "verdict": "290 клеток → 43 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 43.3,
+     "p10_db": 38.8,
+     "cells": 290,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#878077",
+       "share": 0.298,
+       "de": 19.3,
+       "band": "#6d6d47",
+       "in_band": false
+      },
+      {
+       "tone": "#000000",
+       "share": 0.227,
+       "de": 16.0,
+       "band": "#1d2829",
+       "in_band": false
+      },
+      {
+       "tone": "#78746f",
+       "share": 0.194,
+       "de": 17.7,
+       "band": "#486f77",
+       "in_band": false
+      },
+      {
+       "tone": "#5f6264",
+       "share": 0.138,
+       "de": 13.3,
+       "band": "#486f77",
+       "in_band": false
+      },
+      {
+       "tone": "#7a6c52",
+       "share": 0.083,
+       "de": 9.1,
+       "band": "#6d6d47",
+       "in_band": true
+      }
+     ],
+     "in_band_share": 0.083,
+     "in_band_share_recolored": 0.894
+    },
+    "sha256": "40acba7d221447b3ee27f74becf1fb049e694966cadb9b2fc9fcf4b922ec34ad"
    }
   },
   "1793645668466-a4f216e0-41c2-4417-a6f8-cdc4e652a16d-01a19d9c-77a2-7baa-8f1d-650380e809b7.png": {
@@ -15592,7 +17982,226 @@
      1387,
      1134
     ]
+   },
+   "cell_profile": {
+    "cells": 180,
+    "cell_px": [
+     105.0,
+     93.3
+    ],
+    "downscale": [
+     0.781,
+     0.8785
+    ],
+    "rms_units": "RMS по Lab без пересчёта (L 0…100, a/b ±128)",
+    "lines_removed": true,
+    "line_share": 0.215,
+    "with_lines": {
+     "rms_2": {
+      "clusters": 167,
+      "max_cluster": 14,
+      "max_cluster_share": 0.078,
+      "median_cluster": 1,
+      "cover80_clusters": 131,
+      "singleton_share": 0.922,
+      "tone_spread": 666.2
+     },
+     "rms_8": {
+      "clusters": 71,
+      "max_cluster": 72,
+      "max_cluster_share": 0.4,
+      "median_cluster": 1,
+      "cover80_clusters": 35,
+      "singleton_share": 0.361,
+      "tone_spread": 951.3
+     },
+     "rms_16": {
+      "clusters": 25,
+      "max_cluster": 98,
+      "max_cluster_share": 0.544,
+      "median_cluster": 1,
+      "cover80_clusters": 5,
+      "singleton_share": 0.089,
+      "tone_spread": 968.4
+     },
+     "rms_32": {
+      "clusters": 1,
+      "max_cluster": 180,
+      "max_cluster_share": 1.0,
+      "median_cluster": 180,
+      "cover80_clusters": 1,
+      "singleton_share": 0.0,
+      "tone_spread": 0.0
+     }
+    },
+    "no_lines": {
+     "rms_2": {
+      "clusters": 167,
+      "max_cluster": 13,
+      "max_cluster_share": 0.072,
+      "median_cluster": 1,
+      "cover80_clusters": 131,
+      "singleton_share": 0.917,
+      "tone_spread": 625.6
+     },
+     "rms_8": {
+      "clusters": 68,
+      "max_cluster": 61,
+      "max_cluster_share": 0.339,
+      "median_cluster": 1,
+      "cover80_clusters": 32,
+      "singleton_share": 0.344,
+      "tone_spread": 929.8
+     },
+     "rms_16": {
+      "clusters": 23,
+      "max_cluster": 109,
+      "max_cluster_share": 0.606,
+      "median_cluster": 1,
+      "cover80_clusters": 4,
+      "singleton_share": 0.078,
+      "tone_spread": 993.0
+     },
+     "rms_32": {
+      "clusters": 1,
+      "max_cluster": 180,
+      "max_cluster_share": 1.0,
+      "median_cluster": 180,
+      "cover80_clusters": 1,
+      "singleton_share": 0.0,
+      "tone_spread": 0.0
+     }
+    },
+    "normalized": {
+     "corr_90": {
+      "clusters": 165,
+      "max_cluster": 13,
+      "max_cluster_share": 0.072,
+      "median_cluster": 1,
+      "cover80_clusters": 129,
+      "singleton_share": 0.906,
+      "tone_spread": 65.5
+     },
+     "corr_75": {
+      "clusters": 158,
+      "max_cluster": 14,
+      "max_cluster_share": 0.078,
+      "median_cluster": 1,
+      "cover80_clusters": 122,
+      "singleton_share": 0.844,
+      "tone_spread": 65.9
+     },
+     "corr_50": {
+      "clusters": 105,
+      "max_cluster": 13,
+      "max_cluster_share": 0.072,
+      "median_cluster": 1,
+      "cover80_clusters": 69,
+      "singleton_share": 0.483,
+      "tone_spread": 68.9
+     },
+     "corr_25": {
+      "clusters": 43,
+      "max_cluster": 30,
+      "max_cluster_share": 0.167,
+      "median_cluster": 2,
+      "cover80_clusters": 17,
+      "singleton_share": 0.1,
+      "tone_spread": 70.0
+     }
+    },
+    "normalized_note": "RMS² = 2(1−r) по нормированным полям Lab; corr_75 = r ≥ 0.75",
+    "reuse": {
+     "rms": 8.0,
+     "tiles": 68,
+     "cells": 180,
+     "verdict": "180 клеток → 68 тканей"
+    },
+    "psnr_path_a": {
+     "median_db": 36.7,
+     "p10_db": 32.1,
+     "cells": 180,
+     "note": "путь A: по тайлу 82 на клетку, возврат на нативный размер"
+    },
+    "palette_band": {
+     "k": 7,
+     "dom_share_min": 0.08,
+     "max_delta_e": 12.0,
+     "dominant": [
+      {
+       "tone": "#54839a",
+       "share": 0.328,
+       "de": 11.8,
+       "band": "#486f77",
+       "in_band": true
+      },
+      {
+       "tone": "#6590a5",
+       "share": 0.247,
+       "de": 15.0,
+       "band": "#486f77",
+       "in_band": false
+      },
+      {
+       "tone": "#010101",
+       "share": 0.119,
+       "de": 15.7,
+       "band": "#1d2829",
+       "in_band": false
+      },
+      {
+       "tone": "#4c707e",
+       "share": 0.115,
+       "de": 4.0,
+       "band": "#486f77",
+       "in_band": true
+      }
+     ],
+     "in_band_share": 0.443,
+     "in_band_share_recolored": 0.908
+    },
+    "sha256": "f8ff8283d48a7fae04b30837c5a37cc0886284a6af085a14287c541d5674064e"
    }
   }
+ },
+ "policy": {
+  "line_removal": {
+   "mask": "серое < T и насыщение < 60, T = Otsu кадра × 0.8, ограничен [90, 200]",
+   "repair": "значение ближайшего сохранившегося пикселя, итерация по соседям",
+   "repair_reason": "cv2.inpaint затягивает клетку краской соседней клетки",
+   "source_mutated": false
+  },
+  "resample": {
+   "passes": 1,
+   "interpolation": "INTER_AREA",
+   "tile_px": 82,
+   "note": "второй проход запрещён (D3); коэффициент — на сцену, в cell_profile.downscale"
+  },
+  "similarity": {
+   "unit": "RMS по Lab без пересчёта (L 0…100, a/b ±128), только под маской гекса",
+   "cluster": "жадная склейка по первому представителю, порядок обхода детерминирован",
+   "thresholds_rms": [
+    2.0,
+    8.0,
+    16.0,
+    32.0
+   ],
+   "reuse_rms": 8.0,
+   "normalized_scale": "RMS² = 2(1−r) по нормированным полям Lab (краска снята)"
+  },
+  "palette": {
+   "band": [
+    "#1d2829",
+    "#354845",
+    "#486f77",
+    "#6d6d47",
+    "#92a26a",
+    "#cdbe9b",
+    "#95cde5"
+   ],
+   "max_delta_e": 12,
+   "dominant": "k = 7 (тон-кластеры, как в генераторе), доминантой считается тон с долей ≥ 0.08"
+  },
+  "cell_geometry": "точечные гексы; W = col_step_px, R = radius_px; сторона = 2R, шаг по X = W"
  }
 }
