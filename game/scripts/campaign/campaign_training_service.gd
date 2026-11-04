@@ -88,9 +88,54 @@ static func training_queue(city: City) -> Array[Dictionary]:
 	return city.campaign_training
 
 
+## Кандидат-новобранец для заявки из панели поселения (T-308, D-302 (а)): тот,
+## кого постится запись очереди. Характеристики — порог гейта класса из каталога
+## (остальные — база), поэтому заявка проходит `_check_class_gate` по построению
+## и ни одно число не выдумано. Раса — люди: дефолт игрового среза
+## (campaign_composition: стартовая партия «Расы — humans (дефолт…)»), выбора
+## расы новобранца в MVP нет.
+const RECRUIT_RACE := "humans"
+const RECRUIT_BASE_ABILITY := 10
+const RECRUIT_ABILITIES := ["str", "dex", "con", "int", "wis", "cha"]
+
+
+static func recruit_candidate(class_id: String, trainee_id: String) -> Dictionary:
+	var stats := {}
+	for ability in RECRUIT_ABILITIES:
+		stats[ability] = RECRUIT_BASE_ABILITY
+	var gate: Dictionary = _approved_class(_load_catalog(), class_id).get("gate", {})
+	for requirement in gate.get("reqs", []):
+		if requirement is Array and requirement.size() == 2:
+			var key := String(requirement[0]).to_lower()
+			stats[key] = maxi(int(stats.get(key, 0)), int(requirement[1]))
+	return {"id": trainee_id, "race": RECRUIT_RACE, "stats": stats}
+
+
+## Имя класса для кнопки/подсказки (каталог — единственный источник, Т-308).
+static func class_display_name(class_id: String) -> String:
+	var approved: Dictionary = _approved_class(_load_catalog(), class_id)
+	return String(approved.get("name", class_id))
+
+
+## Свободный id новобранца: `trainee.id` становится id бойца партии, поэтому он
+## не должен совпасть ни с живым составом, ни с очередью.
+static func next_recruit_id(city: City, party: Array) -> String:
+	var taken := {}
+	for raw in party:
+		if raw is Dictionary:
+			taken[String((raw as Dictionary).get("id", ""))] = true
+	for record in training_queue(city):
+		var trainee: Dictionary = (record as Dictionary).get("trainee", {})
+		taken[String(trainee.get("id", ""))] = true
+	var index := 1
+	while taken.has("recruit_%d" % index):
+		index += 1
+	return "recruit_%d" % index
+
+
 ## Постройка «жива» = активна и достроена (та же мера, что в
 ## available_training_actions(): недострой и руины сеть не держат).
-static func _building_is_live(instance: Dictionary) -> bool:
+static func building_is_live(instance: Dictionary) -> bool:
 	return String(instance.get("state", "active")) == "active" \
 			and int(instance.get("construction_turns_remaining", 0)) <= 0
 
@@ -147,7 +192,7 @@ static func available_training_actions_city(city: City, building_catalog: Dictio
 		built_ids.append(String(standing.get("id", "")))
 	for raw in instances:
 		var instance: Dictionary = raw
-		if not _building_is_live(instance):
+		if not building_is_live(instance):
 			continue
 		var definition := _find_building(building_catalog, String(instance.get("id", "")))
 		if definition.is_empty():
@@ -201,7 +246,7 @@ static func request_training(city: City, building_catalog: Dictionary, building_
 	if trainee_id.is_empty():
 		return _failure("trainee_id_required")
 	var instance := _instance_by_uid(city, building_uid)
-	if instance.is_empty() or not _building_is_live(instance):
+	if instance.is_empty() or not building_is_live(instance):
 		return _failure("training_building_unavailable")
 	var definition := _find_building(building_catalog, String(instance.get("id", "")))
 	if definition.is_empty():
@@ -294,7 +339,7 @@ static func advance_training_turn(city: City, party_free_slots: int = PARTY_CAPA
 		var state := String(record.get("state", STATE_REQUESTED))
 		if state != STATE_READY:
 			var instance := _instance_by_uid(city, int(record.get("training_building_uid", -1)))
-			if instance.is_empty() or not _building_is_live(instance):
+			if instance.is_empty() or not building_is_live(instance):
 				if state != STATE_PAUSED:
 					record["state"] = STATE_PAUSED
 					report["paused"] = int(report["paused"]) + 1

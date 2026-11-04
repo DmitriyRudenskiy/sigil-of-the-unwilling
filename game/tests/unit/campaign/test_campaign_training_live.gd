@@ -527,3 +527,45 @@ func test_dead_members_do_not_consume_a_training_slot() -> void:
 		full, CampaignTrainingService.PARTY_CAPACITY - 5)
 	assert_that((blocked.members as Array).size()).is_equal(0)
 	assert_that(int(blocked.waiting_slot)).is_equal(1)
+
+
+## T-308 (D-302 (а)): кандидат из панели поселения проходит гейт класса по
+## построению — характеристики берутся из порога каталога, а не из головы.
+## Проверка идёт через request_training: публичного читателя гейта нет.
+func test_recruit_candidate_passes_the_gate_of_every_trainable_class() -> void:
+	var city := _city(200)
+	var uid := _barracks(city)
+	var catalog := CampaignBuildingCatalog.load_catalog()
+	var checked := 0
+	var seen := {}
+	for building in catalog.get("buildings", []):
+		if not (building is Dictionary):
+			continue
+		for action in (building as Dictionary).get("training", []):
+			if not (action is Dictionary):
+				continue
+			var class_id := String((action as Dictionary).get("class_id", ""))
+			# Волшебник без числа дней (T-041) не тренируется и не предлагается.
+			if CampaignTrainingService.training_days(class_id) <= 0.0 or seen.has(class_id):
+				continue
+			seen[class_id] = true
+			var result: Dictionary = CampaignTrainingService.request_training(
+				city, catalog, uid, class_id,
+				CampaignTrainingService.recruit_candidate(class_id, "novice_%d" % checked), 0)
+			assert_bool(bool(result.get("ok", false))).is_true()
+			assert_that(String((result.get("recruit", {}) as Dictionary).get("race_id", ""))) \
+				.is_equal(CampaignTrainingService.RECRUIT_RACE)
+			checked += 1
+	assert_that(checked).is_greater(0)
+
+
+## T-308: id новобранца становится id бойца партии, поэтому он не повторяет ни
+## живого состава, ни тех, кто уже в очереди.
+func test_next_recruit_id_avoids_the_party_and_the_queue() -> void:
+	var city := _city()
+	var uid := _barracks(city)
+	var party := [{"id": "recruit_1"}, {"id": "start_fighter"}]
+	assert_that(CampaignTrainingService.next_recruit_id(city, party)).is_equal("recruit_2")
+	CampaignTrainingService.request_training(city, CampaignBuildingCatalog.load_catalog(),
+			uid, "fighter", CampaignTrainingService.recruit_candidate("fighter", "recruit_2"), 0)
+	assert_that(CampaignTrainingService.next_recruit_id(city, party)).is_equal("recruit_3")

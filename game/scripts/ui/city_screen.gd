@@ -60,6 +60,9 @@ var _selected_category_index := 0
 var _catalog_scroll: ScrollContainer
 var _catalog_placeholder: Label
 var _confirm_build_button: Button
+var _training_box: VBoxContainer
+var _training_note: Label
+var _party: Array = []
 var _cancel_build_button: Button
 var _board_placeholder: Label
 var _board: CampaignCityBoard
@@ -336,6 +339,21 @@ func _build_shell() -> void:
 	_confirm_build_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_confirm_build_button.pressed.connect(_confirm_campaign_building)
 	placement_actions.add_child(_confirm_build_button)
+
+	# Тренировка партии (T-308, D-302 (а)): заявка покупается в панели поселения,
+	# а не в экране партии — отряд стоит в лагере, симметрия с кузницей. Кнопка на
+	# каждый доступный класс; когда недоступен ни один — одна заглушка, а её
+	# подсказка объясняет причину (party-training 7–11, 20, 61).
+	_training_box = VBoxContainer.new()
+	_training_box.name = "TrainingOptions"
+	_training_box.add_theme_constant_override("separation", 4)
+	sidebar_box.add_child(_training_box)
+	_training_note = Label.new()
+	_training_note.name = "TrainingNote"
+	_training_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_training_note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_training_note.add_theme_color_override("font_color", ThemeConfig.C_CITY_PLACEHOLDER)
+	sidebar_box.add_child(_training_note)
 
 	var board_panel := PanelContainer.new()
 	board_panel.name = "CityBoardPanel"
@@ -1304,6 +1322,130 @@ func refresh() -> void:
 	if _selected_cell.x < 0:
 		_selected_cell = city.center
 	_show_cell_inspector(_selected_cell)
+	_refresh_training_options()
+
+
+## Партия для тренировки (T-308): порог населения считается по живым в партии,
+## а id новобранца не должен повторить уже служащего. Хост (кампанийный HUD)
+## передаёт тот же массив, что и экрану партии.
+func bind_party(party: Array) -> void:
+	_party = party
+	if _opened:
+		_refresh_training_options()
+
+
+## Список кнопок заявки. Пересобирается на каждый `refresh()`: очередь сама
+## поднимает порог населения, поэтому «что можно купить» — не постоянное знание.
+func _refresh_training_options() -> void:
+	if _training_box == null:
+		return
+	for child in _training_box.get_children():
+		_training_box.remove_child(child)
+		child.queue_free()
+	if city == null:
+		return
+	var party_alive := PartySystem.alive_members(_party).size()
+	var options := CampaignTrainingService.available_training_actions_city(
+			city, _campaign_catalog, [], 0, party_alive)
+	if options.is_empty():
+		var blocked := Button.new()
+		blocked.name = "TrainingUnavailable"
+		blocked.text = "Тренировка недоступна"
+		blocked.disabled = true
+		blocked.focus_mode = Control.FOCUS_ALL
+		blocked.tooltip_text = _training_unavailable_reason(party_alive)
+		_apply_keyboard_focus(blocked)
+		_training_box.add_child(blocked)
+		return
+	for option in options:
+		_training_box.add_child(_make_training_button(option))
+
+
+## Кнопка заявки: тип бойца в тексте, стоимость и срок — в подсказке (спека
+## требует показать и то, и другое; держать всё в тексте — плодить переносы).
+func _make_training_button(option: Dictionary) -> Button:
+	var class_id := String(option.get("class_id", ""))
+	var costs: Dictionary = option.get("costs", {})
+	var button := Button.new()
+	button.name = "Train%s" % class_id.capitalize().replace(" ", "")
+	button.text = "Тренировать: %s" % CampaignTrainingService.class_display_name(class_id)
+	button.tooltip_text = "%s · %s · %.1f дн." % [
+		CampaignTrainingService.class_display_name(class_id),
+		_resource_map_text(costs),
+		float(option.get("days", 0.0)),
+	]
+	button.focus_mode = Control.FOCUS_ALL
+	_apply_keyboard_focus(button)
+	button.pressed.connect(func() -> void: _request_training(option))
+	return button
+
+
+## Заявка: стоимость списывает сервис, кандидат приносит id по имени класса
+## (novice id становится id бойца партии — он проверяется на уникальность).
+func _request_training(option: Dictionary) -> void:
+	var class_id := String(option.get("class_id", ""))
+	var candidate := CampaignTrainingService.recruit_candidate(
+			class_id, CampaignTrainingService.next_recruit_id(city, _party))
+	var result := CampaignTrainingService.request_training(
+			city, _campaign_catalog, int(option.get("building_uid", -1)),
+			class_id, candidate, PartySystem.alive_members(_party).size())
+	var note := "Тренировка заявлена: %s" % CampaignTrainingService.class_display_name(class_id) \
+			if bool(result.get("ok", false)) \
+			else "Тренировка не удалась: %s" % String(result.get("reason", ""))
+	refresh()
+	if _training_note != null and is_instance_valid(_training_note):
+		_training_note.text = note
+
+
+## Подсказка недоступной тренировки: порог населения и отсутствующая постройка
+## разом (party-training 20, 61 — «UI показывает» и то, и другое). Раньше
+## возвращалась только первая причина: игрок, поднявший население, получал
+## «нужна постройка» без предупреждения.
+func _training_unavailable_reason(party_alive: int) -> String:
+	var parts: Array[String] = []
+	var people: Dictionary = CampaignTrainingService.population_gate_city(city, party_alive)
+	if not bool(people.get("ok", false)):
+		parts.append("Нужно %d жителей (по %d на бойца), а сейчас %d" % [
+			int(people.get("required", 0)),
+			CampaignTrainingService.population_per_unit(),
+			int(people.get("population", 0)),
+		])
+	var missing := _missing_trainable_building_names()
+	if not missing.is_empty():
+		parts.append("Нужна постройка: %s" % ", ".join(missing))
+	if parts.is_empty():
+		return "Классам нужно число дней — в каталоге его нет ни у одного класса"
+	return " · ".join(parts)
+
+
+## Обучающие отряду постройки, которых в городе нет среди живых (2.3: недострой
+## сеть не держит). Обучать могут и импортированные справочники AoE IV, а игрок
+## строит только собственные постройки — они помечены source_refs.game.
+func _missing_trainable_building_names() -> Array[String]:
+	var live := {}
+	for instance_value in city.campaign_buildings:
+		var instance := instance_value as Dictionary
+		if CampaignTrainingService.building_is_live(instance):
+			live[String(instance.get("id", ""))] = true
+	var missing: Array[String] = []
+	for building in _campaign_catalog.get("buildings", []):
+		if not (building is Dictionary) \
+				or (building as Dictionary).get("training", []).is_empty():
+			continue
+		var own := false
+		for reference in (building as Dictionary).get("source_refs", []):
+			if reference is Dictionary \
+					and String((reference as Dictionary).get("game", "")) \
+						== "sigil_of_the_unwilling":
+				own = true
+		if not own or live.has(String((building as Dictionary).get("id", ""))):
+			continue
+		var title := String((building as Dictionary).get("name", ""))
+		if title.is_empty():
+			title = "обучающая постройка"
+		if not missing.has(title):
+			missing.append(title)
+	return missing
 
 func _on_build_farm_pressed() -> void:
 	build_pressed(&"farm")

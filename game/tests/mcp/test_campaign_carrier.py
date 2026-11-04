@@ -38,8 +38,15 @@ def _state(mcp) -> dict:
         f'var hud = s.get_node_or_null("{HUD}")\n'
         f'var mgr = s.get_node_or_null("{MANAGER}")\n'
         'var comp = s.get("composition") if s != null else null\n'
+        'var tbox = hud.city_screen.find_child("TrainingOptions", true, false) if hud != null and hud.city_screen != null else null\n'
+        'var opts = []\n'
+        'if tbox != null:\n'
+        '    for c in tbox.get_children():\n'
+        '        opts.append({"name": String(c.name), "text": c.text,\n'
+        '            "disabled": c.disabled, "tip": c.tooltip_text})\n'
         "return {"
         '"hud": hud != null, '
+        '"training_options": opts, '
         '"layer": hud.get_parent().layer if hud != null else -1, '
         '"button": hud != null and hud.get_node_or_null("TopButtons/CityButton") != null, '
         '"disabled": hud.get_node("TopButtons/CityButton").disabled if hud != null else null, '
@@ -125,6 +132,28 @@ def test_second_press_closes_city_screen(full_cycle):
     st = _state(full_cycle)
     assert not st["open"], f"второе нажатие не закрыло экран: {st}"
     assert st["visible"] is False, f"экран остался видимым после закрытия: {st}"
+
+
+def test_city_screen_carries_the_training_entry(full_cycle):
+    """T-308 (D-302 (а)): тренировка покупается в панели поселения.
+
+    Четвёртый уровень нужен потому, что в юнит-тестах экран города существует
+    сам по себе, а здесь его открыл носитель из живого кампейна: блок заявки
+    обязан быть построен и объяснять своё состояние (party-training 7–11:
+    недоступная заявка не исчезает, а называется причиной).
+    """
+    _press(full_cycle, BUTTON)
+    opts = _state(full_cycle)["training_options"]
+    assert opts, f"в панели поселения нет блока тренировки: {opts}"
+    for option in opts:
+        assert option["text"], f"кнопка заявки без подписи: {option}"
+    blocked = [option for option in opts if option["disabled"]]
+    if blocked:
+        assert len(blocked) == len(opts), f"смесь живых и мёртвых заявок: {opts}"
+        assert blocked[0]["tip"], f"недоступная заявка без объяснения: {blocked}"
+    else:
+        for option in opts:
+            assert "·" in option["tip"], f"заявка без стоимости и срока: {option}"
 
 
 def test_close_requested_signal_closes_carrier(full_cycle):

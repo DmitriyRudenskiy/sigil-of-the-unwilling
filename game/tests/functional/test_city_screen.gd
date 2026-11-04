@@ -1,5 +1,7 @@
 extends BaseTest
 
+const SCREEN_SCENE := preload("res://scenes/ui/city_screen.tscn")
+
 
 
 var screen: CityScreen = null
@@ -20,7 +22,7 @@ func before_test() -> void:
 	window_size = window.size
 	window_size_saved = true
 	window.size = Vector2i(1920, 1080)
-	screen = load("res://scenes/ui/city_screen.tscn").instantiate() as CityScreen
+	screen = SCREEN_SCENE.instantiate() as CityScreen
 	_main_root().add_child(screen)
 	city = City.new()
 	city.display_name = "Тестгород"
@@ -481,3 +483,132 @@ func test_level_up_max_level_fails() -> void:
 	var r: CityCheck = screen.level_up_pressed()
 	assert_bool(bool(r.ok)).is_false()
 	assert_bool(str(r.reason).contains("максимальном")).is_true()
+
+## --- Заявка тренировки в панели поселения (T-308, D-302 (а)) -----------------
+## Фикстура файла поднимает legacy-город, а тренировки живут на кампейн-носителе
+## (`campaign_buildings`, `campaign_training`, `pop`), поэтому экран поднимается
+## заново на кампейн-городе. Открыт он именно кнопкой носителя в MCP-тесте
+## (`test_city_screen_carries_the_training_entry`), здесь — тот же экран в изоляции.
+
+func _campaign_city(residents: int, with_barracks: bool) -> City:
+	var town := TestFactories.make_city()
+	town.core_cells = HexUtils.core_cells(town.center)
+	town.resource_ctx = ResourceContext.new()
+	town.resource_ctx.setup(Resources.get_campaign_resource_defs(true), true)
+	town.resource_ctx.add(&"food", 100.0)
+	town.resource_ctx.add(&"wood", 100.0)
+	town.resource_ctx.add(&"iron", 20.0)
+	for index in range(residents):
+		var resident := PopUnit.new()
+		resident.uid = 1000 + index
+		town.pop.append(resident)
+	if with_barracks:
+		town.campaign_buildings.append({
+			"uid": 7, "id": "campaign_barracks", "state": "active",
+			"construction_turns_remaining": 0, "cell": town.center,
+		})
+	return town
+
+
+## Кампейн-город вместо legacy-фикстуры: экран пересоздаётся, старый снимается.
+func _open_campaign(town: City, party: Array) -> void:
+	if screen != null and is_instance_valid(screen):
+		screen.queue_free()
+	city = town
+	screen = SCREEN_SCENE.instantiate() as CityScreen
+	_main_root().add_child(screen)
+	screen.setup(town, null, town.center, TestFactories.seeded(7), Vector2i(48, 48),
+		func(_cell: Vector2i) -> int: return int(HexUtils.Terrain.GRASS))
+	screen.bind_party(party)
+	screen.open()
+
+
+func _training_box() -> VBoxContainer:
+	return screen.find_child("TrainingOptions", true, false) as VBoxContainer
+
+
+## Постройки нет — кнопка одна, выключена, подсказка называет постройку и порог
+## населения разом (party-training 20, 61: «UI показывает» и то, и другое).
+func test_missing_training_building_is_named_by_the_disabled_button() -> void:
+	_open_campaign(_campaign_city(40, false), [])
+	await get_tree().process_frame
+	var box := _training_box()
+	assert_that(box).is_not_null()
+	assert_that(box.get_child_count()).is_equal(1)
+	var button := box.get_child(0) as Button
+	assert_that(button.name).is_equal("TrainingUnavailable")
+	assert_bool(button.disabled).is_true()
+	assert_bool("Казармы" in button.tooltip_text).is_true()
+
+
+## Постройка есть, людей мало — та же подсказка говорит порог (спека 61).
+func test_population_threshold_is_the_training_reason_when_barracks_exists() -> void:
+	_open_campaign(_campaign_city(5, true), [])
+	await get_tree().process_frame
+	var button := _training_box().get_child(0) as Button
+	assert_bool(button.disabled).is_true()
+	assert_that(button.name).is_equal("TrainingUnavailable")
+	assert_bool(button.tooltip_text.begins_with("Нужно 10 жителей")).is_true()
+	assert_bool("а сейчас 5" in button.tooltip_text).is_true()
+
+
+## Казармы есть, населения хватает: по кнопке на класс, тип бойца в тексте,
+## стоимость и срок в подсказке (спека 7–11 требует показать и то, и другое).
+func test_built_barracks_offers_trainable_classes() -> void:
+	_open_campaign(_campaign_city(40, true), [])
+	await get_tree().process_frame
+	var texts := ""
+	var hints := ""
+	var live := 0
+	for child in _training_box().get_children():
+		var button := child as Button
+		assert_bool(button.disabled).is_false()
+		texts += button.text + "\n"
+		hints += button.tooltip_text + "\n"
+		live += 1
+	assert_that(live).is_equal(2)
+	assert_bool("Воин" in texts).is_true()
+	assert_bool("Следопыт" in texts).is_true()
+	assert_bool("Еда 20" in hints and "Железо 2" in hints).is_true()
+	assert_bool("0.6 дн." in hints and "0.5 дн." in hints).is_true()
+
+
+## Нажатие = запись очереди города со списанной стоимостью, а не боец в партии.
+func test_pressing_training_button_queues_the_recruit_and_pays() -> void:
+	var town := _campaign_city(40, true)
+	_open_campaign(town, [])
+	await get_tree().process_frame
+	var food_before: float = town.resource_ctx.amount(&"food")
+	(_training_box().get_child(0) as Button).emit_signal("pressed")
+	await get_tree().process_frame
+	assert_that(town.campaign_training.size()).is_equal(1)
+	assert_bool(town.resource_ctx.amount(&"food") < food_before).is_true()
+	assert_that(String((town.campaign_training[0] as Dictionary).get("state", ""))) \
+		.is_equal(CampaignTrainingService.STATE_REQUESTED)
+
+
+## AC3: цель дня 2 закрывается живым нажатием, а не вызовом
+## `note_training_completed` из теста: нажатие → очередь города → тик композиции
+## → выпуск в партию → трекер целей. Стартовые числа альфы тренировки не дают
+## (порог 30 жителей, Q-M132), поэтому население и казарма поднимаются руками.
+func test_live_training_press_closes_the_day_two_goal() -> void:
+	var comp: CampaignComposition = CampaignComposition.from_campaign_config(12345)
+	var town: City = comp.city
+	while town.pop.size() < 40:
+		town.add_migrant(PopUnit.State.WORKER, 0)
+	town.resource_ctx.add(&"food", 100.0)
+	town.resource_ctx.add(&"iron", 20.0)
+	town.campaign_buildings.append({
+		"uid": 7, "id": "campaign_barracks", "state": "active",
+		"construction_turns_remaining": 0, "cell": town.center,
+	})
+	assert_bool(comp.goals.is_complete("train_warrior")).is_false()
+	_open_campaign(town, comp.party)
+	await get_tree().process_frame
+	(_training_box().get_child(0) as Button).emit_signal("pressed")
+	await get_tree().process_frame
+	for turn in range(4):
+		if comp.goals.is_complete("train_warrior"):
+			break
+		comp.advance_turn()
+	assert_bool(comp.goals.is_complete("train_warrior")).is_true()

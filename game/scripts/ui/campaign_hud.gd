@@ -1062,8 +1062,8 @@ func bind_city(value: City, rng: RandomNumberGenerator = null) -> void:
 ## (там же, откуда её берёт ростер), хост может передать свою.
 ## Граница: опций в этом экране нет, но уже не из-за сервиса — живая форма
 ## `CampaignTrainingService.available_training_actions_city` читает `City` (T-170,
-## вариант (а)); кнопки заявки в HUD слоя кампании нет, она относится к UI-слою города
-## (`mvp-ui-flow`), и за ней ux-review. Носитель кнопки заявки — предмет T-308.
+## вариант (а)); кнопки заявки в HUD слоя кампании нет и не будет: носителем
+## заявки выбрана панель поселения (T-308, D-302 (а)) — см. `CityScreen`.
 func bind_party(party: Array, capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY) -> void:
 	_party = party
 	if capacity != _party_capacity:
@@ -1170,6 +1170,9 @@ func open_city_screen() -> void:
 	# хроники) оставляет кампанию в её экране, а не кладёт город поверх.
 	if not _show_campaign_screen(CITY_SCREEN_ID):
 		return
+	# Тренировка покупается здесь (T-308, D-302 (а)), поэтому городу нужен тот же
+	# массив партии, что и экрану: порог населения и unique id новобранца.
+	city_screen.bind_party(_party)
 	_open_city_screen()
 
 

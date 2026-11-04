@@ -37,8 +37,27 @@ if screen == null:
 # бы ноль и выглядел как «нарушений нет». Числа снимает гард
 # `tests/functional/ui/test_live_font_hygiene.gd` (он ждёт кадры), см. таблицу
 # замера в билете T-189.
+# Кадр пикселями не доказывает, что заявка тренировки (T-308, D-302 (а)) в живом
+# кампейне вообще что-то показывает: числа блока снимаются здесь и печатаются
+# съёмщиком, поэтому вердикт ссылается на протокол, а не на пиксели.
+var training: Dictionary = {"found": false}
+var tbox: Node = screen.find_child("TrainingOptions", true, false) as Node
+if tbox != null:
+	var options := []
+	for child in tbox.get_children():
+		options.append({
+			"name": String(child.name), "text": child.text,
+			"disabled": child.disabled, "tip": child.tooltip_text,
+		})
+	training = {
+		"found": true,
+		"rect": (tbox as Control).get_global_rect(),
+		"note": screen.find_child("TrainingNote", true, false).text,
+		"options": options,
+	}
 return {
 	"ok": true,
 	"open": bool(hud.is_city_screen_open()),
 	"tutorial_open": bool(hud.is_tutorial_open()),
+	"training": training,
 }
