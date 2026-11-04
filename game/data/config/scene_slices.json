@@ -15,39 +15,17 @@
   "max_coverage_spread": 0.35,
   "max_chamfer_p95_px": 4.0,
   "min_line_coverage": 0.5,
-  "max_drift_px": 1.5,
-  "cl_k_min": 2,
-  "cl_k_max": 8,
-  "cl_samples": 60000,
-  "cl_energy_quantile": 60.0,
-  "cl_energy_blur_frac": 0.06,
-  "cl_roi_min_area": 0.15,
-  "cl_seed": 7,
-  "cl_line_ridge_px": 21,
-  "cl_line_threshold": 60.0,
-  "cl_roi_on_quantile": 99.9,
-  "cl_width_min": 50,
-  "cl_width_max": 200,
-  "cl_coarse_scale": 2,
-  "cl_coarse_step_px": 2.0,
-  "cl_fine_span_px": 2.5,
-  "cl_fine_step_px": 0.25,
-  "cl_ultra_step_px": 0.05,
-  "cl_min_peak": 0.2,
-  "cl_max_coverage_spread": 0.35,
-  "cl_max_chamfer_p95_px": 4.0,
-  "cl_min_line_coverage": 0.5,
-  "cl_max_drift_px": 1.5
+  "max_drift_px": 1.5
  },
  "scenes": {
   "1793607079538-48a6a39d-17a5-4d3d-a515-0739d52b6ac1-01a19b4f-8438-7464-b10d-f41f6cfd8f0d.png": {
    "roi": [
-    0,
-    0,
-    1470,
-    1068
+    60,
+    70,
+    1250,
+    870
    ],
-   "roi_source": "field",
+   "roi_source": "manual",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -74,15 +52,15 @@
    "hex_w_px": 102.5,
    "hex_h_px": 118.36,
    "hw_ratio": 1.1547,
-   "col_step_px": 102.5,
-   "row_step_px": 88.77,
+   "col_step_px": 107.0,
+   "row_step_px": 78.0,
    "period_px": [
     102,
     178
    ],
    "origin": [
-    25,
-    105
+    -16.3,
+    12.7
    ],
    "row_offset": "odd-r",
    "peak": 0.4799,
@@ -155,12 +133,9 @@
    "width_spread_px": 54.0,
    "line_coverage": 0.098,
    "line_density": 0.0331,
-   "cells": {
-    "cols": 14,
-    "rows": 12
-   },
-   "accepted": false,
-   "reason": "остаток p95 91.05 px (88.8% периода) > 4.0 px; решётка объясняет 10% нарисованных линий < 50%",
+   "cells": 83,
+   "accepted": true,
+   "reason": "",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "f16f99e55c77503f1c1c4d7f5c73d5cf4ded15f48422f2a1ae2b29e3d24d0af0",
    "size": [
@@ -243,16 +218,95 @@
      ]
     ],
     "spread_px": 135.4
+   },
+   "manual": {
+    "roi": [
+     60,
+     70,
+     1250,
+     870
+    ]
+   },
+   "cells_found": 84,
+   "radius_px": 52.0,
+   "stretch": 1.188,
+   "homography": [
+    [
+     0.954144,
+     -0.088239,
+     33.374159
+    ],
+    [
+     0.001646,
+     0.904239,
+     14.329989
+    ],
+    [
+     2e-06,
+     -0.000124,
+     1.0
+    ]
+   ],
+   "residual_px": 1.11,
+   "residual_p95_px": 2.61,
+   "residual_raw_px": 5.75,
+   "inliers": 79,
+   "cell_fit": {
+    "cells": 84,
+    "cells_found": 84,
+    "col_step_px": 109.0,
+    "row_step_px": 76.0,
+    "radius_px": 50.67,
+    "stretch": 1.242,
+    "origin": [
+     29.7,
+     -20.3
+    ],
+    "homography": [
+     [
+      0.939861,
+      -0.090111,
+      16.296544
+     ],
+     [
+      0.001612,
+      0.932823,
+      25.36063
+     ],
+     [
+      1e-06,
+      -0.000123,
+      1.0
+     ]
+    ],
+    "residual_px": 1.01,
+    "residual_p95_px": 2.02,
+    "inliers": 84,
+    "coverage": 1.0,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     60,
+     70,
+     1250,
+     870
+    ],
+    "roi_source": "manual",
+    "sha256": "f16f99e55c77503f1c1c4d7f5c73d5cf4ded15f48422f2a1ae2b29e3d24d0af0",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793630023618-025bda8a-33e7-4635-9ba1-08073f87492a-01a19cad-ad81-7f35-abf0-ddc6b064f7a4.png": {
    "roi": [
     0,
     0,
-    1482,
-    1059
+    1484,
+    1060
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -279,15 +333,15 @@
    "hex_w_px": 94.0,
    "hex_h_px": 108.54,
    "hw_ratio": 1.1547,
-   "col_step_px": 94.0,
-   "row_step_px": 81.41,
+   "col_step_px": 107.0,
+   "row_step_px": 72.0,
    "period_px": [
     94,
     163
    ],
    "origin": [
-    23,
-    76
+    39.8,
+    -7.3
    ],
    "row_offset": "odd-r",
    "peak": 0.4022,
@@ -360,12 +414,9 @@
    "width_spread_px": 48.0,
    "line_coverage": 0.094,
    "line_density": 0.0924,
-   "cells": {
-    "cols": 15,
-    "rows": 13
-   },
+   "cells": 96,
    "accepted": false,
-   "reason": "остаток p95 37.93 px (40.4% периода) > 4.0 px; решётка объясняет 9% нарисованных линий < 50%",
+   "reason": "остаток p95 4.28 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "126aa8180175d035e2c875ec14e09e64d129f306284313101d211d1baccaccd4",
    "size": [
@@ -448,6 +499,77 @@
      ]
     ],
     "spread_px": 206.1
+   },
+   "cells_found": 102,
+   "radius_px": 48.0,
+   "stretch": 1.287,
+   "homography": [
+    [
+     0.92239,
+     -0.095652,
+     60.928134
+    ],
+    [
+     -8.1e-05,
+     0.891949,
+     19.035127
+    ],
+    [
+     -1e-06,
+     -0.000131,
+     1.0
+    ]
+   ],
+   "residual_px": 0.68,
+   "residual_p95_px": 4.28,
+   "residual_raw_px": 10.15,
+   "inliers": 89,
+   "cell_fit": {
+    "cells": 94,
+    "cells_found": 103,
+    "col_step_px": 103.0,
+    "row_step_px": 72.0,
+    "radius_px": 48.0,
+    "stretch": 1.239,
+    "origin": [
+     31.4,
+     6.6
+    ],
+    "homography": [
+     [
+      0.956998,
+      -0.096457,
+      0.130287
+     ],
+     [
+      -8e-05,
+      0.890873,
+      12.550835
+     ],
+     [
+      -1e-06,
+      -0.000132,
+      1.0
+     ]
+    ],
+    "residual_px": 0.67,
+    "residual_p95_px": 2.16,
+    "inliers": 94,
+    "coverage": 0.91,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1484,
+     1060
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "126aa8180175d035e2c875ec14e09e64d129f306284313101d211d1baccaccd4",
+    "size": [
+     1484,
+     1060
+    ]
    }
   },
   "1793630103023-4c022438-746d-48d8-8d47-f140386a0d81-01a19cae-de17-7aeb-9945-8af33e4ef3eb.png": {
@@ -455,9 +577,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 116.43,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -484,15 +606,15 @@
    "hex_w_px": 54.0,
    "hex_h_px": 62.35,
    "hw_ratio": 1.1547,
-   "col_step_px": 54.0,
-   "row_step_px": 46.77,
+   "col_step_px": 113.0,
+   "row_step_px": 88.0,
    "period_px": [
     54,
     94
    ],
    "origin": [
-    46,
-    35
+    -21.1,
+    8.8
    ],
    "row_offset": "odd-r",
    "peak": 0.3345,
@@ -565,12 +687,9 @@
    "width_spread_px": 14.0,
    "line_coverage": 0.161,
    "line_density": 0.1254,
-   "cells": {
-    "cols": 27,
-    "rows": 22
-   },
+   "cells": 27,
    "accepted": false,
-   "reason": "остаток p95 37.95 px (70.3% периода) > 4.0 px; решётка объясняет 16% нарисованных линий < 50%; дрейф периода по краям 5.75 px > 1.5 px",
+   "reason": "остаток p95 78.77 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "9e7031d6626c06c7550f0ef6ec0883464426f0cb44158adc7bfefdf1a9b2ed1e",
    "size": [
@@ -653,6 +772,77 @@
      ]
     ],
     "spread_px": 111.4
+   },
+   "cells_found": 45,
+   "radius_px": 58.67,
+   "stretch": 1.112,
+   "homography": [
+    [
+     0.961806,
+     -0.169561,
+     54.684588
+    ],
+    [
+     0.011717,
+     0.672863,
+     116.217686
+    ],
+    [
+     2e-05,
+     -0.000227,
+     1.0
+    ]
+   ],
+   "residual_px": 0.64,
+   "residual_p95_px": 78.77,
+   "residual_raw_px": 18.13,
+   "inliers": 21,
+   "cell_fit": {
+    "cells": 41,
+    "cells_found": 44,
+    "col_step_px": 109.0,
+    "row_step_px": 64.0,
+    "radius_px": 42.67,
+    "stretch": 1.475,
+    "origin": [
+     -12.2,
+     -2.3
+    ],
+    "homography": [
+     [
+      0.940767,
+      -0.230666,
+      66.272217
+     ],
+     [
+      0.003511,
+      0.866043,
+      12.049726
+     ],
+     [
+      7e-06,
+      -0.000317,
+      1.0
+     ]
+    ],
+    "residual_px": 0.64,
+    "residual_p95_px": 2.0,
+    "inliers": 41,
+    "coverage": 0.93,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "9e7031d6626c06c7550f0ef6ec0883464426f0cb44158adc7bfefdf1a9b2ed1e",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793630189379-90ea3ba9-f438-4cb2-9f59-213b969688b7-01a19cb0-305f-7e3b-b3f5-b188014aa81b.png": {
@@ -660,9 +850,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -689,15 +879,15 @@
    "hex_w_px": 94.4,
    "hex_h_px": 81.75,
    "hw_ratio": 0.866,
-   "col_step_px": 70.8,
-   "row_step_px": 81.75,
+   "col_step_px": 159.0,
+   "row_step_px": 42.0,
    "period_px": [
     142,
     82
    ],
    "origin": [
-    106,
-    15
+    46.9,
+    4.6
    ],
    "row_offset": "odd-q",
    "peak": 0.4317,
@@ -770,12 +960,9 @@
    "width_spread_px": 48.0,
    "line_coverage": 0.115,
    "line_density": 0.0941,
-   "cells": {
-    "cols": 21,
-    "rows": 12
-   },
+   "cells": 58,
    "accepted": false,
-   "reason": "остаток p95 63.32 px (67.1% периода) > 4.0 px; решётка объясняет 12% нарисованных линий < 50%; дрейф периода по краям 2.50 px > 1.5 px",
+   "reason": "остаток p95 11.21 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "f8f993d116ae0512d824706bb922d2d5169c1bfbb2dc478c5599dece2853a5c5",
    "size": [
@@ -858,6 +1045,46 @@
      ]
     ],
     "spread_px": 102.7
+   },
+   "cells_found": 58,
+   "radius_px": 28.0,
+   "stretch": 3.279,
+   "homography": [
+    [
+     0.981468,
+     -0.037829,
+     15.489641
+    ],
+    [
+     0.000373,
+     0.940768,
+     14.520504
+    ],
+    [
+     3e-06,
+     -5.6e-05,
+     1.0
+    ]
+   ],
+   "residual_px": 0.69,
+   "residual_p95_px": 11.21,
+   "residual_raw_px": 2.86,
+   "inliers": 49,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "f8f993d116ae0512d824706bb922d2d5169c1bfbb2dc478c5599dece2853a5c5",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793630302255-26e3d4ee-06d1-4f85-bda0-2ba0e524819f-01a19cb1-ed4f-7afc-903c-1398f95ca5ee.png": {
@@ -865,9 +1092,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 109.96,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -894,15 +1121,15 @@
    "hex_w_px": 51.1,
    "hex_h_px": 59.01,
    "hw_ratio": 1.1547,
-   "col_step_px": 51.1,
-   "row_step_px": 44.25,
+   "col_step_px": 99.0,
+   "row_step_px": 68.0,
    "period_px": [
     51,
     89
    ],
    "origin": [
-    14,
-    85
+    0.0,
+    21.1
    ],
    "row_offset": "odd-r",
    "peak": 0.3288,
@@ -975,12 +1202,9 @@
    "width_spread_px": 20.0,
    "line_coverage": 0.167,
    "line_density": 0.0201,
-   "cells": {
-    "cols": 30,
-    "rows": 23
-   },
+   "cells": 33,
    "accepted": false,
-   "reason": "остаток p95 86.53 px (169.3% периода) > 4.0 px; решётка объясняет 17% нарисованных линий < 50%; дрейф периода по краям 3.00 px > 1.5 px",
+   "reason": "остаток p95 24.12 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "2e91c7232df6172e1446bf8b2eb874e9b06c768bb0eae206091e33fc3d56b60f",
    "size": [
@@ -1063,6 +1287,77 @@
      ]
     ],
     "spread_px": 147.8
+   },
+   "cells_found": 56,
+   "radius_px": 45.33,
+   "stretch": 1.261,
+   "homography": [
+    [
+     0.938824,
+     -0.276462,
+     79.464132
+    ],
+    [
+     0.007112,
+     0.681535,
+     71.010843
+    ],
+    [
+     2e-05,
+     -0.000358,
+     1.0
+    ]
+   ],
+   "residual_px": 0.86,
+   "residual_p95_px": 24.12,
+   "residual_raw_px": 14.38,
+   "inliers": 27,
+   "cell_fit": {
+    "cells": 46,
+    "cells_found": 58,
+    "col_step_px": 99.0,
+    "row_step_px": 68.0,
+    "radius_px": 45.33,
+    "stretch": 1.261,
+    "origin": [
+     9.4,
+     -20.0
+    ],
+    "homography": [
+     [
+      0.939121,
+      -0.269284,
+      73.552539
+     ],
+     [
+      -0.00023,
+      0.694592,
+      86.217449
+     ],
+     [
+      -0.0,
+      -0.000337,
+      1.0
+     ]
+    ],
+    "residual_px": 0.74,
+    "residual_p95_px": 1.98,
+    "inliers": 46,
+    "coverage": 0.79,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "2e91c7232df6172e1446bf8b2eb874e9b06c768bb0eae206091e33fc3d56b60f",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793630374414-ca9dd1ee-f541-4157-a842-588f3175ef3b-01a19cb3-0db1-73b0-8d78-f250d6226242.png": {
@@ -1070,9 +1365,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -1099,15 +1394,15 @@
    "hex_w_px": 112.0,
    "hex_h_px": 129.33,
    "hw_ratio": 1.1547,
-   "col_step_px": 112.0,
-   "row_step_px": 96.99,
+   "col_step_px": 109.0,
+   "row_step_px": 76.0,
    "period_px": [
     112,
     194
    ],
    "origin": [
-    108,
-    25
+    3.0,
+    -16.5
    ],
    "row_offset": "odd-r",
    "peak": 0.3726,
@@ -1180,12 +1475,9 @@
    "width_spread_px": 16.0,
    "line_coverage": 0.086,
    "line_density": 0.0291,
-   "cells": {
-    "cols": 13,
-    "rows": 10
-   },
+   "cells": 82,
    "accepted": false,
-   "reason": "остаток p95 150.51 px (134.4% периода) > 4.0 px; решётка объясняет 9% нарисованных линий < 50%",
+   "reason": "остаток p95 128.07 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "f4cfdd5561e5dbb9c21dbea11fd03fa8c002cb1ee0bb6a4ae574cb8f1a675022",
    "size": [
@@ -1268,6 +1560,77 @@
      ]
     ],
     "spread_px": 189.6
+   },
+   "cells_found": 103,
+   "radius_px": 50.67,
+   "stretch": 1.242,
+   "homography": [
+    [
+     0.917326,
+     -0.184461,
+     61.354002
+    ],
+    [
+     -0.0017,
+     0.872737,
+     10.314761
+    ],
+    [
+     -6e-06,
+     -0.000231,
+     1.0
+    ]
+   ],
+   "residual_px": 1.2,
+   "residual_p95_px": 128.07,
+   "residual_raw_px": 10.98,
+   "inliers": 72,
+   "cell_fit": {
+    "cells": 104,
+    "cells_found": 105,
+    "col_step_px": 115.0,
+    "row_step_px": 76.0,
+    "radius_px": 50.67,
+    "stretch": 1.31,
+    "origin": [
+     35.9,
+     15.2
+    ],
+    "homography": [
+     [
+      0.880364,
+      -0.16725,
+      56.423073
+     ],
+     [
+      -0.001519,
+      0.882269,
+      -5.338665
+     ],
+     [
+      -4e-06,
+      -0.000211,
+      1.0
+     ]
+    ],
+    "residual_px": 1.2,
+    "residual_p95_px": 5.2,
+    "inliers": 104,
+    "coverage": 0.99,
+    "accepted": false,
+    "reason": "остаток p95 5.20 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "f4cfdd5561e5dbb9c21dbea11fd03fa8c002cb1ee0bb6a4ae574cb8f1a675022",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793630461934-b711a080-3418-4043-9cab-d5f843ccc808-01a19cb4-63ed-7bc2-b2bb-7fbd9a90e51b.png": {
@@ -1275,9 +1638,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 56.23,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -1390,7 +1753,7 @@
     "rows": 12
    },
    "accepted": false,
-   "reason": "остаток p95 143.95 px (153.1% периода) > 4.0 px; решётка объясняет 9% нарисованных линий < 50%; дрейф периода по краям 2.50 px > 1.5 px",
+   "reason": "в решётку попали 4 сот",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "5a14482b852d1d185d2a9f8124a0ecbe8904b326032b0cd207a2cfc9723c514f",
    "size": [
@@ -1473,6 +1836,53 @@
      ]
     ],
     "spread_px": 145.2
+   },
+   "cell_fit": {
+    "cells": 36,
+    "cells_found": 41,
+    "col_step_px": 107.0,
+    "row_step_px": 70.0,
+    "radius_px": 46.67,
+    "stretch": 1.324,
+    "origin": [
+     33.8,
+     6.4
+    ],
+    "homography": [
+     [
+      0.878635,
+      -0.217641,
+      46.116394
+     ],
+     [
+      -8.6e-05,
+      0.802678,
+      15.359847
+     ],
+     [
+      -0.0,
+      -0.000284,
+      1.0
+     ]
+    ],
+    "residual_px": 0.52,
+    "residual_p95_px": 2.3,
+    "inliers": 36,
+    "coverage": 0.88,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "5a14482b852d1d185d2a9f8124a0ecbe8904b326032b0cd207a2cfc9723c514f",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793630714620-904115ac-f371-4f4d-9cdb-4c542aa01f9e-01a19cb8-3639-7e14-8fee-5cef01c85e25.png": {
@@ -1480,9 +1890,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 71.24,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -1509,15 +1919,15 @@
    "hex_w_px": 54.0,
    "hex_h_px": 62.35,
    "hw_ratio": 1.1547,
-   "col_step_px": 54.0,
-   "row_step_px": 46.77,
+   "col_step_px": 101.0,
+   "row_step_px": 68.0,
    "period_px": [
     54,
     94
    ],
    "origin": [
-    0,
-    32
+    -19.9,
+    5.3
    ],
    "row_offset": "odd-r",
    "peak": 0.3609,
@@ -1590,12 +2000,9 @@
    "width_spread_px": 6.0,
    "line_coverage": 0.16,
    "line_density": 0.1152,
-   "cells": {
-    "cols": 27,
-    "rows": 22
-   },
+   "cells": 84,
    "accepted": false,
-   "reason": "остаток p95 56.10 px (103.9% периода) > 4.0 px; решётка объясняет 16% нарисованных линий < 50%; дрейф периода по краям 2.75 px > 1.5 px",
+   "reason": "остаток p95 24.16 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "9c2d30eb63d71c5675221bfa0abf003bf151eee2bc4b31ee5fabb4e542e92885",
    "size": [
@@ -1678,6 +2085,77 @@
      ]
     ],
     "spread_px": 158.5
+   },
+   "cells_found": 104,
+   "radius_px": 45.33,
+   "stretch": 1.286,
+   "homography": [
+    [
+     0.915996,
+     -0.151106,
+     60.306412
+    ],
+    [
+     0.001225,
+     0.840626,
+     28.249987
+    ],
+    [
+     1e-06,
+     -0.000205,
+     1.0
+    ]
+   ],
+   "residual_px": 1.31,
+   "residual_p95_px": 24.16,
+   "residual_raw_px": 10.19,
+   "inliers": 66,
+   "cell_fit": {
+    "cells": 97,
+    "cells_found": 105,
+    "col_step_px": 105.0,
+    "row_step_px": 74.0,
+    "radius_px": 49.33,
+    "stretch": 1.229,
+    "origin": [
+     0.5,
+     20.6
+    ],
+    "homography": [
+     [
+      0.878972,
+      -0.139888,
+      134.106895
+     ],
+     [
+      -0.001391,
+      0.771178,
+      34.661283
+     ],
+     [
+      -3e-06,
+      -0.000187,
+      1.0
+     ]
+    ],
+    "residual_px": 0.97,
+    "residual_p95_px": 5.36,
+    "inliers": 97,
+    "coverage": 0.92,
+    "accepted": false,
+    "reason": "остаток p95 5.36 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "9c2d30eb63d71c5675221bfa0abf003bf151eee2bc4b31ee5fabb4e542e92885",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793631045387-0ec92f95-de87-445f-8072-79947960b346-01a19cbd-4176-72b6-8be3-53c8e637e024.png": {
@@ -1685,9 +2163,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -1800,7 +2278,7 @@
     "rows": 21
    },
    "accepted": false,
-   "reason": "остаток p95 86.92 px (161.0% периода) > 4.0 px; решётка объясняет 16% нарисованных линий < 50%; дрейф периода по краям 3.00 px > 1.5 px",
+   "reason": "гомография не построилась",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "0ef42b223fd5d574066c5ec3b257d9a1ba229b0d78993dc29651ae465c010900",
    "size": [
@@ -1883,6 +2361,22 @@
      ]
     ],
     "spread_px": 194.4
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "0ef42b223fd5d574066c5ec3b257d9a1ba229b0d78993dc29651ae465c010900",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793631118865-6339c891-ca60-454e-b874-7a2e463bbcf8-01a19cbe-67ea-7a69-9c6d-d5d33ff33ae3.png": {
@@ -1890,9 +2384,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -1919,15 +2413,15 @@
    "hex_w_px": 78.0,
    "hex_h_px": 67.55,
    "hw_ratio": 0.866,
-   "col_step_px": 58.5,
-   "row_step_px": 67.55,
+   "col_step_px": 181.0,
+   "row_step_px": 36.7,
    "period_px": [
     117,
     68
    ],
    "origin": [
-    112,
-    1
+    -71.9,
+    2.9
    ],
    "row_offset": "odd-q",
    "peak": 0.3775,
@@ -2000,12 +2494,9 @@
    "width_spread_px": 42.0,
    "line_coverage": 0.134,
    "line_density": 0.0801,
-   "cells": {
-    "cols": 26,
-    "rows": 15
-   },
+   "cells": 10,
    "accepted": false,
-   "reason": "остаток p95 93.00 px (119.2% периода) > 4.0 px; решётка объясняет 13% нарисованных линий < 50%; дрейф периода по краям 2.25 px > 1.5 px",
+   "reason": "остаток p95 62.25 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "b6abc19828436850b48f75a2ef623d165dc391919517f5eef922274bb5039864",
    "size": [
@@ -2088,6 +2579,46 @@
      ]
     ],
     "spread_px": 161.6
+   },
+   "cells_found": 12,
+   "radius_px": 24.47,
+   "stretch": 4.271,
+   "homography": [
+    [
+     0.87304,
+     -0.207437,
+     106.428281
+    ],
+    [
+     0.018013,
+     0.753196,
+     54.527875
+    ],
+    [
+     3.2e-05,
+     -0.000269,
+     1.0
+    ]
+   ],
+   "residual_px": 0.72,
+   "residual_p95_px": 62.25,
+   "residual_raw_px": 11.41,
+   "inliers": 8,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "b6abc19828436850b48f75a2ef623d165dc391919517f5eef922274bb5039864",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793631191502-ec0efc2e-f07f-4d4a-b567-2f52ba7be4cf-01a19cbf-86e0-7355-93dc-e5ce5ccd275a.png": {
@@ -2095,9 +2626,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -2124,15 +2655,15 @@
    "hex_w_px": 51.1,
    "hex_h_px": 59.01,
    "hw_ratio": 1.1547,
-   "col_step_px": 51.1,
-   "row_step_px": 44.25,
+   "col_step_px": 99.0,
+   "row_step_px": 58.0,
    "period_px": [
     51,
     89
    ],
    "origin": [
-    4,
-    83
+    -21.4,
+    0.5
    ],
    "row_offset": "odd-r",
    "peak": 0.3363,
@@ -2205,12 +2736,9 @@
    "width_spread_px": 16.0,
    "line_coverage": 0.18,
    "line_density": 0.042,
-   "cells": {
-    "cols": 30,
-    "rows": 23
-   },
+   "cells": 38,
    "accepted": false,
-   "reason": "остаток p95 69.75 px (136.5% периода) > 4.0 px; решётка объясняет 18% нарисованных линий < 50%",
+   "reason": "остаток p95 129.23 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "779681c0ef7d4790809a2cb3cf645e7b4f7e69988675adfcbab95c4a413b8099",
    "size": [
@@ -2293,6 +2821,77 @@
      ]
     ],
     "spread_px": 209.4
+   },
+   "cells_found": 48,
+   "radius_px": 38.67,
+   "stretch": 1.478,
+   "homography": [
+    [
+     0.803465,
+     -0.355598,
+     132.106624
+    ],
+    [
+     -0.003253,
+     0.74296,
+     35.349831
+    ],
+    [
+     -5e-06,
+     -0.00047,
+     1.0
+    ]
+   ],
+   "residual_px": 0.71,
+   "residual_p95_px": 129.23,
+   "residual_raw_px": 19.89,
+   "inliers": 20,
+   "cell_fit": {
+    "cells": 45,
+    "cells_found": 48,
+    "col_step_px": 99.0,
+    "row_step_px": 58.0,
+    "radius_px": 38.67,
+    "stretch": 1.478,
+    "origin": [
+     23.8,
+     -3.6
+    ],
+    "homography": [
+     [
+      0.840432,
+      -0.329476,
+      99.240094
+     ],
+     [
+      0.001231,
+      0.78707,
+      27.672396
+     ],
+     [
+      3e-06,
+      -0.000411,
+      1.0
+     ]
+    ],
+    "residual_px": 1.06,
+    "residual_p95_px": 6.0,
+    "inliers": 45,
+    "coverage": 0.94,
+    "accepted": false,
+    "reason": "остаток p95 6.00 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "779681c0ef7d4790809a2cb3cf645e7b4f7e69988675adfcbab95c4a413b8099",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793631295245-18fc8297-7308-4cb8-b4c1-f5807abbb0b3-01a19cc1-0f06-7e07-9d84-fc7e6efae221.png": {
@@ -2300,9 +2899,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -2329,15 +2928,15 @@
    "hex_w_px": 100.75,
    "hex_h_px": 116.34,
    "hw_ratio": 1.1547,
-   "col_step_px": 100.75,
-   "row_step_px": 87.25,
+   "col_step_px": 105.0,
+   "row_step_px": 82.0,
    "period_px": [
     101,
     175
    ],
    "origin": [
-    61,
-    48
+    -13.7,
+    0.8
    ],
    "row_offset": "odd-r",
    "peak": 0.5872,
@@ -2410,12 +3009,9 @@
    "width_spread_px": 8.0,
    "line_coverage": 0.101,
    "line_density": 0.0657,
-   "cells": {
-    "cols": 14,
-    "rows": 12
-   },
-   "accepted": false,
-   "reason": "остаток p95 38.19 px (37.9% периода) > 4.0 px; решётка объясняет 10% нарисованных линий < 50%",
+   "cells": 103,
+   "accepted": true,
+   "reason": "",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "c513b958679ef327d0c5f32df0b7f1d83c0818d5c80afd4aacfa9e2b9d6a9d13",
    "size": [
@@ -2498,6 +3094,77 @@
      ]
     ],
     "spread_px": 201.4
+   },
+   "cells_found": 104,
+   "radius_px": 54.67,
+   "stretch": 1.109,
+   "homography": [
+    [
+     0.940278,
+     -0.060818,
+     41.221666
+    ],
+    [
+     -0.002863,
+     0.930347,
+     12.61965
+    ],
+    [
+     -7e-06,
+     -8e-05,
+     1.0
+    ]
+   ],
+   "residual_px": 0.96,
+   "residual_p95_px": 2.45,
+   "residual_raw_px": 6.02,
+   "inliers": 102,
+   "cell_fit": {
+    "cells": 103,
+    "cells_found": 104,
+    "col_step_px": 103.0,
+    "row_step_px": 82.0,
+    "radius_px": 54.67,
+    "stretch": 1.088,
+    "origin": [
+     -0.9,
+     -0.8
+    ],
+    "homography": [
+     [
+      0.957964,
+      -0.060843,
+      28.485123
+     ],
+     [
+      -0.003078,
+      0.929935,
+      13.575669
+     ],
+     [
+      -7e-06,
+      -8e-05,
+      1.0
+     ]
+    ],
+    "residual_px": 0.95,
+    "residual_p95_px": 2.47,
+    "inliers": 103,
+    "coverage": 0.99,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "c513b958679ef327d0c5f32df0b7f1d83c0818d5c80afd4aacfa9e2b9d6a9d13",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793631425594-81708aca-7041-47fd-b57e-bf67e423ffd5-01a19cc3-0d07-70c4-bf54-401f6d252e00.png": {
@@ -2505,9 +3172,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -2534,15 +3201,15 @@
    "hex_w_px": 94.4,
    "hex_h_px": 109.0,
    "hw_ratio": 1.1547,
-   "col_step_px": 94.4,
-   "row_step_px": 81.75,
+   "col_step_px": 107.0,
+   "row_step_px": 74.0,
    "period_px": [
     94,
     164
    ],
    "origin": [
-    78,
-    136
+    14.6,
+    -27.5
    ],
    "row_offset": "odd-r",
    "peak": 0.3609,
@@ -2615,12 +3282,9 @@
    "width_spread_px": 40.0,
    "line_coverage": 0.087,
    "line_density": 0.0887,
-   "cells": {
-    "cols": 15,
-    "rows": 13
-   },
+   "cells": 62,
    "accepted": false,
-   "reason": "остаток p95 47.62 px (50.4% периода) > 4.0 px; решётка объясняет 9% нарисованных линий < 50%; дрейф периода по краям 2.75 px > 1.5 px",
+   "reason": "остаток p95 33.68 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "e5e5480681bcdda575d9972f123fbba82fc970dfabe84464dcc9554be3ed5fa9",
    "size": [
@@ -2703,6 +3367,77 @@
      ]
     ],
     "spread_px": 219.3
+   },
+   "cells_found": 78,
+   "radius_px": 49.33,
+   "stretch": 1.252,
+   "homography": [
+    [
+     0.948716,
+     -0.147104,
+     40.542957
+    ],
+    [
+     0.00143,
+     0.764841,
+     69.744767
+    ],
+    [
+     3e-06,
+     -0.000185,
+     1.0
+    ]
+   ],
+   "residual_px": 0.87,
+   "residual_p95_px": 33.68,
+   "residual_raw_px": 15.44,
+   "inliers": 49,
+   "cell_fit": {
+    "cells": 64,
+    "cells_found": 68,
+    "col_step_px": 107.0,
+    "row_step_px": 68.0,
+    "radius_px": 45.33,
+    "stretch": 1.363,
+    "origin": [
+     -13.6,
+     -16.4
+    ],
+    "homography": [
+     [
+      0.944923,
+      -0.165119,
+      60.188327
+     ],
+     [
+      0.003395,
+      0.828954,
+      45.93721
+     ],
+     [
+      6e-06,
+      -0.000206,
+      1.0
+     ]
+    ],
+    "residual_px": 0.98,
+    "residual_p95_px": 7.84,
+    "inliers": 64,
+    "coverage": 0.94,
+    "accepted": false,
+    "reason": "остаток p95 7.84 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "e5e5480681bcdda575d9972f123fbba82fc970dfabe84464dcc9554be3ed5fa9",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793631502204-e38b4039-8f51-4aec-a126-6e20a82b1fff-01a19cc4-3418-7931-8de2-e8c4bead0793.png": {
@@ -2710,9 +3445,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -2825,7 +3560,7 @@
     "rows": 23
    },
    "accepted": false,
-   "reason": "остаток p95 112.97 px (221.1% периода) > 4.0 px; решётка объясняет 18% нарисованных линий < 50%",
+   "reason": "гомография не построилась",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "42688530e880e4b1351337dba5e4da23ee31e02b084587a7bc0a9d3ff2136b06",
    "size": [
@@ -2908,6 +3643,53 @@
      ]
     ],
     "spread_px": 178.9
+   },
+   "cell_fit": {
+    "cells": 24,
+    "cells_found": 25,
+    "col_step_px": 103.0,
+    "row_step_px": 72.0,
+    "radius_px": 48.0,
+    "stretch": 1.239,
+    "origin": [
+     6.4,
+     -4.1
+    ],
+    "homography": [
+     [
+      0.901893,
+      -0.205025,
+      73.360674
+     ],
+     [
+      0.000161,
+      0.803179,
+      39.134047
+     ],
+     [
+      3e-06,
+      -0.000258,
+      1.0
+     ]
+    ],
+    "residual_px": 0.64,
+    "residual_p95_px": 1.23,
+    "inliers": 24,
+    "coverage": 0.96,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "42688530e880e4b1351337dba5e4da23ee31e02b084587a7bc0a9d3ff2136b06",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793632186230-39ef79a1-45de-4eef-b7bf-1992a99d2995-01a19cce-a3ec-763c-a004-a6aaf296d8ba.png": {
@@ -2915,9 +3697,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -2944,15 +3726,15 @@
    "hex_w_px": 82.3,
    "hex_h_px": 95.03,
    "hw_ratio": 1.1547,
-   "col_step_px": 82.3,
-   "row_step_px": 71.27,
+   "col_step_px": 95.0,
+   "row_step_px": 60.0,
    "period_px": [
     82,
     143
    ],
    "origin": [
-    49,
-    41
+    28.1,
+    -6.8
    ],
    "row_offset": "odd-r",
    "peak": 0.3607,
@@ -3025,12 +3807,9 @@
    "width_spread_px": 40.0,
    "line_coverage": 0.111,
    "line_density": 0.1863,
-   "cells": {
-    "cols": 18,
-    "rows": 14
-   },
+   "cells": 37,
    "accepted": false,
-   "reason": "остаток p95 28.88 px (35.1% периода) > 4.0 px; решётка объясняет 11% нарисованных линий < 50%; дрейф периода по краям 3.00 px > 1.5 px",
+   "reason": "остаток p95 118.39 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "a07f14b3bbfad31b6311383493e2bba96ba0cf9a33be8e25d78fc0d39df56420",
    "size": [
@@ -3113,6 +3892,77 @@
      ]
     ],
     "spread_px": 242.6
+   },
+   "cells_found": 55,
+   "radius_px": 40.0,
+   "stretch": 1.371,
+   "homography": [
+    [
+     0.931576,
+     -0.211269,
+     82.761482
+    ],
+    [
+     0.006484,
+     0.890817,
+     -14.021091
+    ],
+    [
+     1.4e-05,
+     -0.000259,
+     1.0
+    ]
+   ],
+   "residual_px": 0.8,
+   "residual_p95_px": 118.39,
+   "residual_raw_px": 17.18,
+   "inliers": 29,
+   "cell_fit": {
+    "cells": 52,
+    "cells_found": 55,
+    "col_step_px": 95.0,
+    "row_step_px": 60.0,
+    "radius_px": 40.0,
+    "stretch": 1.371,
+    "origin": [
+     -23.6,
+     13.9
+    ],
+    "homography": [
+     [
+      0.91135,
+      -0.216932,
+      114.511196
+     ],
+     [
+      0.001609,
+      0.861893,
+      -11.31051
+     ],
+     [
+      4e-06,
+      -0.000277,
+      1.0
+     ]
+    ],
+    "residual_px": 0.76,
+    "residual_p95_px": 5.21,
+    "inliers": 52,
+    "coverage": 0.95,
+    "accepted": false,
+    "reason": "остаток p95 5.21 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "a07f14b3bbfad31b6311383493e2bba96ba0cf9a33be8e25d78fc0d39df56420",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793632238502-823e3954-e66d-4467-9f31-38fb93ff1552-01a19ccf-7c2d-7753-993d-be7828153009.png": {
@@ -3120,9 +3970,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -3149,15 +3999,15 @@
    "hex_w_px": 51.1,
    "hex_h_px": 59.01,
    "hw_ratio": 1.1547,
-   "col_step_px": 51.1,
-   "row_step_px": 44.25,
+   "col_step_px": 105.0,
+   "row_step_px": 74.0,
    "period_px": [
     51,
     89
    ],
    "origin": [
-    48,
-    59
+    8.4,
+    -10.5
    ],
    "row_offset": "odd-r",
    "peak": 0.3415,
@@ -3230,12 +4080,9 @@
    "width_spread_px": 8.0,
    "line_coverage": 0.17,
    "line_density": 0.178,
-   "cells": {
-    "cols": 30,
-    "rows": 23
-   },
+   "cells": 33,
    "accepted": false,
-   "reason": "остаток p95 33.53 px (65.6% периода) > 4.0 px; решётка объясняет 17% нарисованных линий < 50%",
+   "reason": "остаток p95 13.61 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "1d9458b1d483a9eb8441b719954c9635f1c932d60b7e69b3af25d820d5b416ce",
    "size": [
@@ -3318,6 +4165,46 @@
      ]
     ],
     "spread_px": 183.1
+   },
+   "cells_found": 47,
+   "radius_px": 49.33,
+   "stretch": 1.229,
+   "homography": [
+    [
+     0.95426,
+     -0.161246,
+     51.900324
+    ],
+    [
+     -0.000909,
+     0.711613,
+     94.922314
+    ],
+    [
+     -2e-06,
+     -0.0002,
+     1.0
+    ]
+   ],
+   "residual_px": 0.53,
+   "residual_p95_px": 13.61,
+   "residual_raw_px": 12.13,
+   "inliers": 29,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "1d9458b1d483a9eb8441b719954c9635f1c932d60b7e69b3af25d820d5b416ce",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793632311861-45fe4cc5-ef8a-4915-bad7-668572a19917-01a19cd0-9e5d-7cf5-87a4-4e1a638eaa0a.png": {
@@ -3325,9 +4212,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -3440,7 +4327,7 @@
     "rows": 15
    },
    "accepted": false,
-   "reason": "остаток p95 116.11 px (148.1% периода) > 4.0 px; решётка объясняет 13% нарисованных линий < 50%; дрейф периода по краям 2.00 px > 1.5 px",
+   "reason": "гомография не построилась",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "b412767141b1f11ae8c8ffb466108e2b68d0da40eb2c21d2aa20db6f69dfead7",
    "size": [
@@ -3523,6 +4410,22 @@
      ]
     ],
     "spread_px": 269.3
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "b412767141b1f11ae8c8ffb466108e2b68d0da40eb2c21d2aa20db6f69dfead7",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793632395568-fe077599-af4f-4aa3-989e-cbd7c40856ae-01a19cd1-e640-7ec1-b1cd-d7a7712700c3.png": {
@@ -3530,9 +4433,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -3559,15 +4462,15 @@
    "hex_w_px": 91.0,
    "hex_h_px": 105.08,
    "hw_ratio": 1.1547,
-   "col_step_px": 91.0,
-   "row_step_px": 78.81,
+   "col_step_px": 103.0,
+   "row_step_px": 74.0,
    "period_px": [
     91,
     158
    ],
    "origin": [
-    73,
-    62
+    42.8,
+    20.9
    ],
    "row_offset": "odd-r",
    "peak": 0.4353,
@@ -3640,12 +4543,9 @@
    "width_spread_px": 46.0,
    "line_coverage": 0.099,
    "line_density": 0.1105,
-   "cells": {
-    "cols": 16,
-    "rows": 12
-   },
+   "cells": 103,
    "accepted": false,
-   "reason": "остаток p95 39.30 px (43.2% периода) > 4.0 px; решётка объясняет 10% нарисованных линий < 50%; дрейф периода по краям 1.75 px > 1.5 px",
+   "reason": "остаток p95 10.65 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "5b5162152828a9cecae8689a3df2ad368d0c1a4c3e8cafc5820094b25b67352e",
    "size": [
@@ -3728,6 +4628,77 @@
      ]
     ],
     "spread_px": 164.0
+   },
+   "cells_found": 103,
+   "radius_px": 49.33,
+   "stretch": 1.205,
+   "homography": [
+    [
+     0.962949,
+     -0.052879,
+     32.290712
+    ],
+    [
+     0.000795,
+     0.947216,
+     8.099396
+    ],
+    [
+     0.0,
+     -6.7e-05,
+     1.0
+    ]
+   ],
+   "residual_px": 0.95,
+   "residual_p95_px": 10.65,
+   "residual_raw_px": 5.31,
+   "inliers": 88,
+   "cell_fit": {
+    "cells": 101,
+    "cells_found": 103,
+    "col_step_px": 101.0,
+    "row_step_px": 74.0,
+    "radius_px": 49.33,
+    "stretch": 1.182,
+    "origin": [
+     40.7,
+     -20.7
+    ],
+    "homography": [
+     [
+      0.981103,
+      -0.050895,
+      -26.362591
+     ],
+     [
+      -0.000849,
+      0.951591,
+      28.04818
+     ],
+     [
+      -2e-06,
+      -6.2e-05,
+      1.0
+     ]
+    ],
+    "residual_px": 0.88,
+    "residual_p95_px": 4.18,
+    "inliers": 101,
+    "coverage": 0.98,
+    "accepted": false,
+    "reason": "остаток p95 4.18 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "5b5162152828a9cecae8689a3df2ad368d0c1a4c3e8cafc5820094b25b67352e",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793632515118-2f86e2d7-af2f-48a9-9ef4-b7edf7b9e435-01a19cd3-b5dd-7782-9be2-6d0439ddc3eb.png": {
@@ -3735,9 +4706,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -3764,15 +4735,15 @@
    "hex_w_px": 54.0,
    "hex_h_px": 62.35,
    "hw_ratio": 1.1547,
-   "col_step_px": 54.0,
-   "row_step_px": 46.77,
+   "col_step_px": 113.0,
+   "row_step_px": 58.0,
    "period_px": [
     54,
     94
    ],
    "origin": [
-    53,
-    78
+    -5.1,
+    11.1
    ],
    "row_offset": "odd-r",
    "peak": 0.3256,
@@ -3845,12 +4816,9 @@
    "width_spread_px": 42.0,
    "line_coverage": 0.165,
    "line_density": 0.0917,
-   "cells": {
-    "cols": 28,
-    "rows": 21
-   },
+   "cells": 35,
    "accepted": false,
-   "reason": "остаток p95 36.56 px (67.7% периода) > 4.0 px; решётка объясняет 16% нарисованных линий < 50%; дрейф периода по краям 2.75 px > 1.5 px",
+   "reason": "остаток p95 170.11 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "f55dfb0ff70f26e0d8a34655434dd95533189d9128d97ab3334e01cf73edbf96",
    "size": [
@@ -3933,6 +4901,46 @@
      ]
     ],
     "spread_px": 96.3
+   },
+   "cells_found": 49,
+   "radius_px": 38.67,
+   "stretch": 1.687,
+   "homography": [
+    [
+     0.914801,
+     -0.276847,
+     66.271223
+    ],
+    [
+     -0.004386,
+     0.886178,
+     15.864192
+    ],
+    [
+     -8e-06,
+     -0.000316,
+     1.0
+    ]
+   ],
+   "residual_px": 1.07,
+   "residual_p95_px": 170.11,
+   "residual_raw_px": 16.03,
+   "inliers": 22,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "f55dfb0ff70f26e0d8a34655434dd95533189d9128d97ab3334e01cf73edbf96",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793632657315-42be3bbe-badd-4b0d-a478-84ebc654b490-01a19cd5-d9cf-7a8c-8877-a48d319495d6.png": {
@@ -3940,9 +4948,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -3969,15 +4977,15 @@
    "hex_w_px": 117.7,
    "hex_h_px": 101.93,
    "hw_ratio": 0.866,
-   "col_step_px": 88.27,
-   "row_step_px": 101.93,
+   "col_step_px": 183.0,
+   "row_step_px": 46.0,
    "period_px": [
     177,
     102
    ],
    "origin": [
-    72,
-    25
+    38.5,
+    -0.3
    ],
    "row_offset": "odd-q",
    "peak": 0.4661,
@@ -4050,12 +5058,9 @@
    "width_spread_px": 68.0,
    "line_coverage": 0.102,
    "line_density": 0.1268,
-   "cells": {
-    "cols": 16,
-    "rows": 10
-   },
+   "cells": 47,
    "accepted": false,
-   "reason": "остаток p95 34.02 px (28.9% периода) > 4.0 px; решётка объясняет 10% нарисованных линий < 50%",
+   "reason": "остаток p95 19.53 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "1c3ba3fae74db45b307e533abfc74fe369a3273ecf2c8e3e77de46b02b343652",
    "size": [
@@ -4138,6 +5143,46 @@
      ]
     ],
     "spread_px": 170.0
+   },
+   "cells_found": 47,
+   "radius_px": 30.67,
+   "stretch": 3.445,
+   "homography": [
+    [
+     0.851567,
+     -0.119655,
+     109.100103
+    ],
+    [
+     -0.011623,
+     0.819503,
+     52.086951
+    ],
+    [
+     -2.4e-05,
+     -0.000144,
+     1.0
+    ]
+   ],
+   "residual_px": 1.16,
+   "residual_p95_px": 19.53,
+   "residual_raw_px": 8.28,
+   "inliers": 39,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "1c3ba3fae74db45b307e533abfc74fe369a3273ecf2c8e3e77de46b02b343652",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793632757572-13fcd2ff-e675-4b96-bbc4-04b90d6083ce-01a19cd7-58f7-7989-8baa-ebec506d53a9.png": {
@@ -4145,9 +5190,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 57.6,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -4174,15 +5219,15 @@
    "hex_w_px": 110.0,
    "hex_h_px": 127.02,
    "hw_ratio": 1.1547,
-   "col_step_px": 110.0,
-   "row_step_px": 95.26,
+   "col_step_px": 113.0,
+   "row_step_px": 74.0,
    "period_px": [
     110,
     191
    ],
    "origin": [
-    29,
-    90
+    34.5,
+    -6.0
    ],
    "row_offset": "odd-r",
    "peak": 0.341,
@@ -4255,12 +5300,9 @@
    "width_spread_px": 26.0,
    "line_coverage": 0.079,
    "line_density": 0.1572,
-   "cells": {
-    "cols": 13,
-    "rows": 10
-   },
+   "cells": 34,
    "accepted": false,
-   "reason": "остаток p95 31.49 px (28.6% периода) > 4.0 px; решётка объясняет 8% нарисованных линий < 50%",
+   "reason": "остаток p95 5.61 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "02c5572bbb02655766fbb63f2a1cdc9554ccef8218159195ef73ac9f75c5a6e9",
    "size": [
@@ -4343,6 +5385,77 @@
      ]
     ],
     "spread_px": 247.2
+   },
+   "cells_found": 40,
+   "radius_px": 49.33,
+   "stretch": 1.322,
+   "homography": [
+    [
+     0.821191,
+     -0.209197,
+     142.620308
+    ],
+    [
+     -0.006653,
+     0.732149,
+     60.590546
+    ],
+    [
+     -1.5e-05,
+     -0.000274,
+     1.0
+    ]
+   ],
+   "residual_px": 0.74,
+   "residual_p95_px": 5.61,
+   "residual_raw_px": 16.08,
+   "inliers": 29,
+   "cell_fit": {
+    "cells": 36,
+    "cells_found": 41,
+    "col_step_px": 109.0,
+    "row_step_px": 74.0,
+    "radius_px": 49.33,
+    "stretch": 1.276,
+    "origin": [
+     25.6,
+     5.4
+    ],
+    "homography": [
+     [
+      0.871241,
+      -0.213,
+      67.057422
+     ],
+     [
+      -0.004525,
+      0.736616,
+      55.201318
+     ],
+     [
+      -6e-06,
+      -0.000277,
+      1.0
+     ]
+    ],
+    "residual_px": 0.74,
+    "residual_p95_px": 3.04,
+    "inliers": 36,
+    "coverage": 0.88,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "02c5572bbb02655766fbb63f2a1cdc9554ccef8218159195ef73ac9f75c5a6e9",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793632909351-d45d6187-7828-441b-9789-25d9561c3af8-01a19cd9-b358-7795-8adf-d3e54d10190c.png": {
@@ -4350,9 +5463,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -4379,15 +5492,15 @@
    "hex_w_px": 49.4,
    "hex_h_px": 57.04,
    "hw_ratio": 1.1547,
-   "col_step_px": 49.4,
-   "row_step_px": 42.78,
+   "col_step_px": 105.0,
+   "row_step_px": 70.0,
    "period_px": [
     49,
     86
    ],
    "origin": [
-    23,
-    11
+    -9.8,
+    -12.9
    ],
    "row_offset": "odd-r",
    "peak": 0.3508,
@@ -4460,12 +5573,9 @@
    "width_spread_px": 16.0,
    "line_coverage": 0.177,
    "line_density": 0.0851,
-   "cells": {
-    "cols": 31,
-    "rows": 23
-   },
+   "cells": 31,
    "accepted": false,
-   "reason": "остаток p95 44.25 px (89.6% периода) > 4.0 px; решётка объясняет 18% нарисованных линий < 50%",
+   "reason": "остаток p95 109.26 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "bc57e3773be7a259c332431627e276d025961cdb78e2963c2c5ddb8ab092aaec",
    "size": [
@@ -4548,6 +5658,77 @@
      ]
     ],
     "spread_px": 111.8
+   },
+   "cells_found": 41,
+   "radius_px": 46.67,
+   "stretch": 1.299,
+   "homography": [
+    [
+     0.907371,
+     -0.258243,
+     58.917165
+    ],
+    [
+     0.003665,
+     0.772857,
+     28.783825
+    ],
+    [
+     -2e-06,
+     -0.000327,
+     1.0
+    ]
+   ],
+   "residual_px": 2.26,
+   "residual_p95_px": 109.26,
+   "residual_raw_px": 12.04,
+   "inliers": 16,
+   "cell_fit": {
+    "cells": 36,
+    "cells_found": 42,
+    "col_step_px": 105.0,
+    "row_step_px": 78.0,
+    "radius_px": 52.0,
+    "stretch": 1.166,
+    "origin": [
+     -28.4,
+     -12.8
+    ],
+    "homography": [
+     [
+      0.962687,
+      -0.224216,
+      62.003293
+     ],
+     [
+      0.004979,
+      0.726744,
+      72.827117
+     ],
+     [
+      9e-06,
+      -0.000282,
+      1.0
+     ]
+    ],
+    "residual_px": 0.85,
+    "residual_p95_px": 7.23,
+    "inliers": 36,
+    "coverage": 0.86,
+    "accepted": false,
+    "reason": "остаток p95 7.23 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "bc57e3773be7a259c332431627e276d025961cdb78e2963c2c5ddb8ab092aaec",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793633055056-be18b9de-58ec-4d58-937e-c819433d7c8b-01a19cdb-e51c-7496-afa3-5cdcfc6224c6.png": {
@@ -4555,9 +5736,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 105.29,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -4670,7 +5851,7 @@
     "rows": 13
    },
    "accepted": false,
-   "reason": "остаток p95 56.38 px (62.0% периода) > 4.0 px; решётка объясняет 12% нарисованных линий < 50%",
+   "reason": "шаг сот не измерился",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "f8a12c83e9f283e1f9c037831f80be6adf7b083c8564dbfe123a336e9d14679c",
    "size": [
@@ -4753,6 +5934,22 @@
      ]
     ],
     "spread_px": 58.5
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "f8a12c83e9f283e1f9c037831f80be6adf7b083c8564dbfe123a336e9d14679c",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793633224027-bb37cf42-88a0-45d7-91bd-981bd069995c-01a19cde-7e55-7483-a740-be0b2e6e434f.png": {
@@ -4760,9 +5957,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -4789,15 +5986,15 @@
    "hex_w_px": 122.0,
    "hex_h_px": 105.66,
    "hw_ratio": 0.866,
-   "col_step_px": 91.5,
-   "row_step_px": 105.66,
+   "col_step_px": 177.0,
+   "row_step_px": 36.0,
    "period_px": [
     183,
     106
    ],
    "origin": [
-    88,
-    92
+    -51.8,
+    -6.2
    ],
    "row_offset": "odd-q",
    "peak": 0.3679,
@@ -4870,12 +6067,9 @@
    "width_spread_px": 78.0,
    "line_coverage": 0.096,
    "line_density": 0.1179,
-   "cells": {
-    "cols": 16,
-    "rows": 10
-   },
+   "cells": 32,
    "accepted": false,
-   "reason": "остаток p95 34.38 px (28.2% периода) > 4.0 px; решётка объясняет 10% нарисованных линий < 50%; дрейф периода по краям 1.75 px > 1.5 px",
+   "reason": "остаток p95 232.40 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "13a69ec577732468af43a367f37953feb1da8b4585163c790c1d06404ed95750",
    "size": [
@@ -4958,6 +6152,46 @@
      ]
     ],
     "spread_px": 127.9
+   },
+   "cells_found": 49,
+   "radius_px": 24.0,
+   "stretch": 4.258,
+   "homography": [
+    [
+     0.847949,
+     -0.255616,
+     82.316993
+    ],
+    [
+     -0.006609,
+     0.863742,
+     8.258172
+    ],
+    [
+     -2.8e-05,
+     -0.00032,
+     1.0
+    ]
+   ],
+   "residual_px": 1.57,
+   "residual_p95_px": 232.4,
+   "residual_raw_px": 22.99,
+   "inliers": 18,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "13a69ec577732468af43a367f37953feb1da8b4585163c790c1d06404ed95750",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793633300020-8048f2d6-e826-4086-88bb-8191428fb298-01a19cdf-af91-739c-a52f-fa72f6888d36.png": {
@@ -4965,9 +6199,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 136.0,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -4994,15 +6228,15 @@
    "hex_w_px": 54.0,
    "hex_h_px": 62.35,
    "hw_ratio": 1.1547,
-   "col_step_px": 54.0,
-   "row_step_px": 46.77,
+   "col_step_px": 109.0,
+   "row_step_px": 76.0,
    "period_px": [
     54,
     94
    ],
    "origin": [
-    9,
-    2
+    -15.9,
+    -21.3
    ],
    "row_offset": "odd-r",
    "peak": 0.3738,
@@ -5075,12 +6309,9 @@
    "width_spread_px": 6.0,
    "line_coverage": 0.157,
    "line_density": 0.0671,
-   "cells": {
-    "cols": 28,
-    "rows": 21
-   },
+   "cells": 50,
    "accepted": false,
-   "reason": "остаток p95 53.11 px (98.4% периода) > 4.0 px; решётка объясняет 16% нарисованных линий < 50%; дрейф периода по краям 2.75 px > 1.5 px",
+   "reason": "остаток p95 112.46 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "bafcddc284f76f502bd5f60778beb2033670a1c564bd3cab344c541641aa0269",
    "size": [
@@ -5163,6 +6394,77 @@
      ]
     ],
     "spread_px": 93.2
+   },
+   "cells_found": 100,
+   "radius_px": 50.67,
+   "stretch": 1.242,
+   "homography": [
+    [
+     0.949185,
+     -0.151023,
+     6.887575
+    ],
+    [
+     -0.00059,
+     0.857398,
+     21.259127
+    ],
+    [
+     -1e-06,
+     -0.000194,
+     1.0
+    ]
+   ],
+   "residual_px": 0.47,
+   "residual_p95_px": 112.46,
+   "residual_raw_px": 26.11,
+   "inliers": 37,
+   "cell_fit": {
+    "cells": 90,
+    "cells_found": 104,
+    "col_step_px": 113.0,
+    "row_step_px": 86.0,
+    "radius_px": 57.33,
+    "stretch": 1.138,
+    "origin": [
+     22.4,
+     4.2
+    ],
+    "homography": [
+     [
+      0.925567,
+      -0.134904,
+      35.315436
+     ],
+     [
+      -0.000235,
+      0.76605,
+      68.397089
+     ],
+     [
+      -1e-06,
+      -0.000174,
+      1.0
+     ]
+    ],
+    "residual_px": 0.64,
+    "residual_p95_px": 8.95,
+    "inliers": 90,
+    "coverage": 0.87,
+    "accepted": false,
+    "reason": "остаток p95 8.95 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "bafcddc284f76f502bd5f60778beb2033670a1c564bd3cab344c541641aa0269",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793633428416-492a73a6-c369-428e-9d6d-af7129fce35b-01a19ce1-a2c5-77c8-be49-500b914eb1d1.png": {
@@ -5170,9 +6472,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -5285,7 +6587,7 @@
     "rows": 21
    },
    "accepted": false,
-   "reason": "остаток p95 115.98 px (214.8% периода) > 4.0 px; решётка объясняет 16% нарисованных линий < 50%",
+   "reason": "шаг сот не измерился",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "363c597df7281332c538dbe5eac1714aa034f63c0574df9cdafa9b5d9b9258f0",
    "size": [
@@ -5368,6 +6670,22 @@
      ]
     ],
     "spread_px": 160.6
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "363c597df7281332c538dbe5eac1714aa034f63c0574df9cdafa9b5d9b9258f0",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793634073322-5363d764-fb25-4440-ac11-80f2308b4b54-01a19ceb-7f29-78e6-9d52-67b637cafbcc.png": {
@@ -5375,9 +6693,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -5404,15 +6722,15 @@
    "hex_w_px": 91.0,
    "hex_h_px": 105.08,
    "hw_ratio": 1.1547,
-   "col_step_px": 91.0,
-   "row_step_px": 78.81,
+   "col_step_px": 103.0,
+   "row_step_px": 72.0,
    "period_px": [
     91,
     158
    ],
    "origin": [
-    25,
-    82
+    14.7,
+    -16.9
    ],
    "row_offset": "odd-r",
    "peak": 0.3878,
@@ -5485,12 +6803,9 @@
    "width_spread_px": 36.0,
    "line_coverage": 0.102,
    "line_density": 0.1392,
-   "cells": {
-    "cols": 16,
-    "rows": 12
-   },
+   "cells": 51,
    "accepted": false,
-   "reason": "остаток p95 35.37 px (38.9% периода) > 4.0 px; решётка объясняет 10% нарисованных линий < 50%",
+   "reason": "остаток p95 11.01 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "2fec7d125e9da66b9381462b658df11d75c35f2a87b2d4fe179ec646dd709eec",
    "size": [
@@ -5573,6 +6888,46 @@
      ]
     ],
     "spread_px": 196.3
+   },
+   "cells_found": 51,
+   "radius_px": 48.0,
+   "stretch": 1.239,
+   "homography": [
+    [
+     0.973974,
+     -0.113114,
+     34.533207
+    ],
+    [
+     0.003122,
+     0.913649,
+     14.0088
+    ],
+    [
+     1e-05,
+     -0.000116,
+     1.0
+    ]
+   ],
+   "residual_px": 0.92,
+   "residual_p95_px": 11.01,
+   "residual_raw_px": 4.62,
+   "inliers": 44,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "2fec7d125e9da66b9381462b658df11d75c35f2a87b2d4fe179ec646dd709eec",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793634465480-96a85ad4-f785-4571-851e-1c656e10c8e7-01a19cf1-6733-762d-a9f1-45179a61c34e.png": {
@@ -5580,9 +6935,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 57.74,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -5695,7 +7050,7 @@
     "rows": 23
    },
    "accepted": false,
-   "reason": "остаток p95 29.48 px (57.7% периода) > 4.0 px; решётка объясняет 17% нарисованных линий < 50%; дрейф периода по краям 1.75 px > 1.5 px",
+   "reason": "гомография не построилась",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "7631c484349639d07f4e93caaa63ea230a42dba7c6dccbb31018b2233949477a",
    "size": [
@@ -5778,6 +7133,22 @@
      ]
     ],
     "spread_px": 108.8
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "7631c484349639d07f4e93caaa63ea230a42dba7c6dccbb31018b2233949477a",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793634553001-c84d1fa3-7320-49cd-9994-cf0e81d3d668-01a19cf2-c611-7aad-8ce7-e9d54cafb7b4.png": {
@@ -5785,9 +7156,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 136.0,
    "stroke_orientation": "flat",
    "stroke_counts": [
@@ -5900,7 +7271,7 @@
     "rows": 22
    },
    "accepted": false,
-   "reason": "остаток p95 139.04 px (260.6% периода) > 4.0 px; решётка объясняет 17% нарисованных линий < 50%",
+   "reason": "шаг сот не измерился",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "44a2ec4ecb1ffaa184d2be87f590fcff95a48c97cc8bdf921248358c13f0af8a",
    "size": [
@@ -5983,6 +7354,53 @@
      ]
     ],
     "spread_px": 126.2
+   },
+   "cell_fit": {
+    "cells": 48,
+    "cells_found": 59,
+    "col_step_px": 99.0,
+    "row_step_px": 52.0,
+    "radius_px": 34.67,
+    "stretch": 1.649,
+    "origin": [
+     -24.9,
+     2.7
+    ],
+    "homography": [
+     [
+      0.854423,
+      -0.325983,
+      158.479983
+     ],
+     [
+      0.00903,
+      0.756174,
+      32.065507
+     ],
+     [
+      2.5e-05,
+      -0.000407,
+      1.0
+     ]
+    ],
+    "residual_px": 1.46,
+    "residual_p95_px": 9.84,
+    "inliers": 48,
+    "coverage": 0.81,
+    "accepted": false,
+    "reason": "остаток p95 9.84 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "44a2ec4ecb1ffaa184d2be87f590fcff95a48c97cc8bdf921248358c13f0af8a",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793634570635-2c489cb2-b59c-4a52-ae74-5076600f1efa-01a19cf3-1020-750f-8195-61232dd90087.png": {
@@ -5990,9 +7408,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -6019,15 +7437,15 @@
    "hex_w_px": 55.15,
    "hex_h_px": 63.68,
    "hw_ratio": 1.1547,
-   "col_step_px": 55.15,
-   "row_step_px": 47.76,
+   "col_step_px": 109.0,
+   "row_step_px": 68.0,
    "period_px": [
     55,
     96
    ],
    "origin": [
-    0,
-    85
+    23.5,
+    -19.9
    ],
    "row_offset": "odd-r",
    "peak": 0.3398,
@@ -6100,12 +7518,9 @@
    "width_spread_px": 4.0,
    "line_coverage": 0.164,
    "line_density": 0.218,
-   "cells": {
-    "cols": 27,
-    "rows": 21
-   },
+   "cells": 36,
    "accepted": false,
-   "reason": "остаток p95 32.45 px (58.8% периода) > 4.0 px; решётка объясняет 16% нарисованных линий < 50%; дрейф периода по краям 3.00 px > 1.5 px",
+   "reason": "остаток p95 96.94 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "15433510ff83a572ac030c555825ae28e95694f0107939f553a73b0c3fb36b1b",
    "size": [
@@ -6188,6 +7603,77 @@
      ]
     ],
     "spread_px": 85.9
+   },
+   "cells_found": 45,
+   "radius_px": 45.33,
+   "stretch": 1.388,
+   "homography": [
+    [
+     0.901297,
+     -0.237707,
+     87.643674
+    ],
+    [
+     0.000175,
+     0.847322,
+     11.077266
+    ],
+    [
+     8e-06,
+     -0.000281,
+     1.0
+    ]
+   ],
+   "residual_px": 2.78,
+   "residual_p95_px": 96.94,
+   "residual_raw_px": 15.86,
+   "inliers": 19,
+   "cell_fit": {
+    "cells": 88,
+    "cells_found": 98,
+    "col_step_px": 111.0,
+    "row_step_px": 72.0,
+    "radius_px": 48.0,
+    "stretch": 1.335,
+    "origin": [
+     27.6,
+     -22.1
+    ],
+    "homography": [
+     [
+      0.898117,
+      -0.181888,
+      40.664051
+     ],
+     [
+      0.002771,
+      0.834073,
+      46.259839
+     ],
+     [
+      2e-06,
+      -0.000226,
+      1.0
+     ]
+    ],
+    "residual_px": 2.78,
+    "residual_p95_px": 9.84,
+    "inliers": 88,
+    "coverage": 0.9,
+    "accepted": false,
+    "reason": "остаток p95 9.84 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "15433510ff83a572ac030c555825ae28e95694f0107939f553a73b0c3fb36b1b",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793634643112-3ec4528f-5cb6-42ee-97bb-8df50fb618a2-01a19cf4-293b-7bde-b9aa-f2db41e9b511.png": {
@@ -6195,9 +7681,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 136.0,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -6224,15 +7710,15 @@
    "hex_w_px": 102.0,
    "hex_h_px": 117.78,
    "hw_ratio": 1.1547,
-   "col_step_px": 102.0,
-   "row_step_px": 88.33,
+   "col_step_px": 97.0,
+   "row_step_px": 58.0,
    "period_px": [
     102,
     177
    ],
    "origin": [
-    5,
-    173
+    -4.8,
+    0.3
    ],
    "row_offset": "odd-r",
    "peak": 0.3858,
@@ -6305,12 +7791,9 @@
    "width_spread_px": 54.0,
    "line_coverage": 0.078,
    "line_density": 0.0306,
-   "cells": {
-    "cols": 15,
-    "rows": 11
-   },
+   "cells": 34,
    "accepted": false,
-   "reason": "остаток p95 84.53 px (82.9% периода) > 4.0 px; решётка объясняет 8% нарисованных линий < 50%; дрейф периода по краям 3.00 px > 1.5 px",
+   "reason": "остаток p95 133.77 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "1cc3c912fca1032346a4900c041aee95bccd66c4b603424b0ad8a70bd042599f",
    "size": [
@@ -6393,6 +7876,77 @@
      ]
     ],
     "spread_px": 122.3
+   },
+   "cells_found": 50,
+   "radius_px": 38.67,
+   "stretch": 1.448,
+   "homography": [
+    [
+     0.905307,
+     -0.303078,
+     65.801485
+    ],
+    [
+     -0.002345,
+     0.804874,
+     25.012157
+    ],
+    [
+     -7e-06,
+     -0.00037,
+     1.0
+    ]
+   ],
+   "residual_px": 0.28,
+   "residual_p95_px": 133.77,
+   "residual_raw_px": 11.42,
+   "inliers": 21,
+   "cell_fit": {
+    "cells": 41,
+    "cells_found": 48,
+    "col_step_px": 97.0,
+    "row_step_px": 58.0,
+    "radius_px": 38.67,
+    "stretch": 1.448,
+    "origin": [
+     5.0,
+     -2.6
+    ],
+    "homography": [
+     [
+      0.917023,
+      -0.289856,
+      53.838625
+     ],
+     [
+      -0.001311,
+      0.821919,
+      21.564743
+     ],
+     [
+      -3e-06,
+      -0.000356,
+      1.0
+     ]
+    ],
+    "residual_px": 0.4,
+    "residual_p95_px": 0.77,
+    "inliers": 41,
+    "coverage": 0.85,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "1cc3c912fca1032346a4900c041aee95bccd66c4b603424b0ad8a70bd042599f",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793634749339-7f3bfdb0-f178-4410-8e23-db86c6567497-01a19cf5-c493-7c25-8ceb-b108f827af70.png": {
@@ -6400,9 +7954,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -6429,15 +7983,15 @@
    "hex_w_px": 94.4,
    "hex_h_px": 81.75,
    "hw_ratio": 0.866,
-   "col_step_px": 70.8,
-   "row_step_px": 81.75,
+   "col_step_px": 169.0,
+   "row_step_px": 38.0,
    "period_px": [
     142,
     82
    ],
    "origin": [
-    15,
-    62
+    -1.5,
+    0.3
    ],
    "row_offset": "odd-q",
    "peak": 0.3375,
@@ -6510,12 +8064,9 @@
    "width_spread_px": 40.0,
    "line_coverage": 0.113,
    "line_density": 0.0376,
-   "cells": {
-    "cols": 21,
-    "rows": 12
-   },
+   "cells": 32,
    "accepted": false,
-   "reason": "остаток p95 73.06 px (77.4% периода) > 4.0 px; решётка объясняет 11% нарисованных линий < 50%; дрейф периода по краям 2.50 px > 1.5 px",
+   "reason": "остаток p95 125.96 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "8ff3f2860f127de3e196d579f8773730add662f42d95985b27bd71d8ab5118f8",
    "size": [
@@ -6598,6 +8149,46 @@
      ]
     ],
     "spread_px": 201.0
+   },
+   "cells_found": 47,
+   "radius_px": 25.33,
+   "stretch": 3.852,
+   "homography": [
+    [
+     0.827331,
+     -0.303463,
+     132.273688
+    ],
+    [
+     -0.005979,
+     0.65444,
+     86.287054
+    ],
+    [
+     -1.6e-05,
+     -0.000392,
+     1.0
+    ]
+   ],
+   "residual_px": 10.53,
+   "residual_p95_px": 125.96,
+   "residual_raw_px": 24.29,
+   "inliers": 14,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "8ff3f2860f127de3e196d579f8773730add662f42d95985b27bd71d8ab5118f8",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793635581269-d6fb713b-c311-483c-b1ad-4202fcf5df12-01a19d02-787a-7f99-b75d-bd969a8ec2bf.png": {
@@ -6605,9 +8196,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -6720,7 +8311,7 @@
     "rows": 24
    },
    "accepted": false,
-   "reason": "остаток p95 132.63 px (273.2% периода) > 4.0 px; решётка объясняет 18% нарисованных линий < 50%; дрейф периода по краям 1.75 px > 1.5 px",
+   "reason": "сот найдено 7 (<8)",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "bbd0feee1a341cc98d75f0063a36a218f4119ea5ebb74a44bc583f9691d50492",
    "size": [
@@ -6803,6 +8394,22 @@
      ]
     ],
     "spread_px": 263.1
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "шаг сот не измерился",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "bbd0feee1a341cc98d75f0063a36a218f4119ea5ebb74a44bc583f9691d50492",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793635773263-89aa4c26-c886-4a46-978a-982cb89e2464-01a19d05-6a16-7241-87db-4f1f7d0d3946.png": {
@@ -6810,9 +8417,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -6925,7 +8532,7 @@
     "rows": 21
    },
    "accepted": false,
-   "reason": "остаток p95 72.02 px (128.3% периода) > 4.0 px; решётка объясняет 15% нарисованных линий < 50%; дрейф периода по краям 2.75 px > 1.5 px",
+   "reason": "гомография не построилась",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "3c73ff1f2cba21c6462e93a07dfb424fa1f14a7141b1ba4f444247cf57f4fa21",
    "size": [
@@ -7008,6 +8615,22 @@
      ]
     ],
     "spread_px": 66.7
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "3c73ff1f2cba21c6462e93a07dfb424fa1f14a7141b1ba4f444247cf57f4fa21",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793635849085-8cd4485f-5455-4702-a6b7-7581b4b43752-01a19d06-7d81-70d6-a72a-c82e4479d299.png": {
@@ -7015,9 +8638,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -7130,7 +8753,7 @@
     "rows": 21
    },
    "accepted": false,
-   "reason": "остаток p95 87.68 px (162.4% периода) > 4.0 px; решётка объясняет 16% нарисованных линий < 50%",
+   "reason": "шаг сот не измерился",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "0a72a1cbf25eacfc8ce91535360f0bb61bda785f999af8a1d0948a2503f0a586",
    "size": [
@@ -7213,6 +8836,53 @@
      ]
     ],
     "spread_px": 115.8
+   },
+   "cell_fit": {
+    "cells": 41,
+    "cells_found": 51,
+    "col_step_px": 115.0,
+    "row_step_px": 60.0,
+    "radius_px": 40.0,
+    "stretch": 1.66,
+    "origin": [
+     20.2,
+     9.7
+    ],
+    "homography": [
+     [
+      0.859239,
+      -0.339592,
+      85.330091
+     ],
+     [
+      0.001954,
+      0.660068,
+      53.078868
+     ],
+     [
+      2e-06,
+      -0.000415,
+      1.0
+     ]
+    ],
+    "residual_px": 2.19,
+    "residual_p95_px": 10.03,
+    "inliers": 41,
+    "coverage": 0.8,
+    "accepted": false,
+    "reason": "остаток p95 10.03 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "0a72a1cbf25eacfc8ce91535360f0bb61bda785f999af8a1d0948a2503f0a586",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793635970132-60a3d003-5476-4afc-95d4-e60d79fdd7f2-01a19d08-6e4b-7056-98c3-d817061fbab9.png": {
@@ -7220,9 +8890,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 104.73,
    "stroke_orientation": "flat",
    "stroke_counts": [
@@ -7335,7 +9005,7 @@
     "rows": 12
    },
    "accepted": false,
-   "reason": "остаток p95 124.94 px (135.7% периода) > 4.0 px; решётка объясняет 10% нарисованных линий < 50%",
+   "reason": "гомография не построилась",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "8f5006c1ead1d47ae42d0c2e72a038e781dface572f6eafde7113021c6caefd7",
    "size": [
@@ -7418,6 +9088,22 @@
      ]
     ],
     "spread_px": 89.3
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "8f5006c1ead1d47ae42d0c2e72a038e781dface572f6eafde7113021c6caefd7",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793636372472-5be6fda6-a434-417f-ab86-e90a96754cc1-01a19d0e-8ebf-7a1f-89a8-14bc8eac3229.png": {
@@ -7425,9 +9111,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -7454,15 +9140,15 @@
    "hex_w_px": 108.0,
    "hex_h_px": 124.71,
    "hw_ratio": 1.1547,
-   "col_step_px": 108.0,
-   "row_step_px": 93.53,
+   "col_step_px": 117.0,
+   "row_step_px": 72.0,
    "period_px": [
     108,
     187
    ],
    "origin": [
-    56,
-    162
+    -10.0,
+    8.9
    ],
    "row_offset": "odd-r",
    "peak": 0.4547,
@@ -7535,12 +9221,9 @@
    "width_spread_px": 62.0,
    "line_coverage": 0.088,
    "line_density": 0.0679,
-   "cells": {
-    "cols": 14,
-    "rows": 10
-   },
+   "cells": 51,
    "accepted": false,
-   "reason": "остаток p95 46.42 px (43.0% периода) > 4.0 px; решётка объясняет 9% нарисованных линий < 50%",
+   "reason": "остаток p95 102.53 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "e90565156b61d0d69ada403442113ae90a915774dff75767c756871876e21feb",
    "size": [
@@ -7623,16 +9306,87 @@
      ]
     ],
     "spread_px": 187.9
+   },
+   "cells_found": 89,
+   "radius_px": 48.0,
+   "stretch": 1.407,
+   "homography": [
+    [
+     0.859082,
+     -0.18418,
+     121.689587
+    ],
+    [
+     0.001476,
+     0.935423,
+     -75.026897
+    ],
+    [
+     2e-06,
+     -0.000214,
+     1.0
+    ]
+   ],
+   "residual_px": 1.86,
+   "residual_p95_px": 102.53,
+   "residual_raw_px": 19.82,
+   "inliers": 27,
+   "cell_fit": {
+    "cells": 90,
+    "cells_found": 91,
+    "col_step_px": 115.0,
+    "row_step_px": 72.0,
+    "radius_px": 48.0,
+    "stretch": 1.383,
+    "origin": [
+     -3.3,
+     -5.8
+    ],
+    "homography": [
+     [
+      0.878755,
+      -0.193037,
+      53.210011
+     ],
+     [
+      -0.000606,
+      0.92754,
+      10.806386
+     ],
+     [
+      -2e-06,
+      -0.000226,
+      1.0
+     ]
+    ],
+    "residual_px": 1.03,
+    "residual_p95_px": 3.76,
+    "inliers": 90,
+    "coverage": 0.99,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "e90565156b61d0d69ada403442113ae90a915774dff75767c756871876e21feb",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793636438706-03b53cf3-ea9d-4e1c-8a7f-7cdc53e1f887-01a19d0f-7d1c-7a55-b9fa-8f2056fa3b05.png": {
    "roi": [
     0,
     0,
-    1389,
+    1391,
     1131
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 123.25,
    "stroke_orientation": "flat",
    "stroke_counts": [
@@ -7659,15 +9413,15 @@
    "hex_w_px": 94.0,
    "hex_h_px": 108.54,
    "hw_ratio": 1.1547,
-   "col_step_px": 94.0,
-   "row_step_px": 81.41,
+   "col_step_px": 103.0,
+   "row_step_px": 82.0,
    "period_px": [
     94,
     163
    ],
    "origin": [
-    82,
-    37
+    14.3,
+    30.7
    ],
    "row_offset": "odd-r",
    "peak": 0.5385,
@@ -7740,12 +9494,9 @@
    "width_spread_px": 46.0,
    "line_coverage": 0.107,
    "line_density": 0.0627,
-   "cells": {
-    "cols": 14,
-    "rows": 13
-   },
-   "accepted": false,
-   "reason": "остаток p95 74.81 px (79.6% периода) > 4.0 px; решётка объясняет 11% нарисованных линий < 50%; дрейф периода по краям 2.25 px > 1.5 px",
+   "cells": 38,
+   "accepted": true,
+   "reason": "",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "cbebe11d3ae3c81be6f5beeacf001ee69ad083f50af94d4ce04c10f11c0e4995",
    "size": [
@@ -7828,16 +9579,87 @@
      ]
     ],
     "spread_px": 184.9
+   },
+   "cells_found": 41,
+   "radius_px": 54.67,
+   "stretch": 1.088,
+   "homography": [
+    [
+     0.936755,
+     -0.112844,
+     62.131789
+    ],
+    [
+     0.008541,
+     0.833913,
+     46.257468
+    ],
+    [
+     1.5e-05,
+     -0.000147,
+     1.0
+    ]
+   ],
+   "residual_px": 0.78,
+   "residual_p95_px": 2.84,
+   "residual_raw_px": 10.74,
+   "inliers": 36,
+   "cell_fit": {
+    "cells": 39,
+    "cells_found": 39,
+    "col_step_px": 101.0,
+    "row_step_px": 78.0,
+    "radius_px": 52.0,
+    "stretch": 1.121,
+    "origin": [
+     21.4,
+     19.2
+    ],
+    "homography": [
+     [
+      0.9455,
+      -0.119231,
+      34.415355
+     ],
+     [
+      0.007799,
+      0.869327,
+      3.610496
+     ],
+     [
+      1.4e-05,
+      -0.000155,
+      1.0
+     ]
+    ],
+    "residual_px": 0.74,
+    "residual_p95_px": 2.27,
+    "inliers": 39,
+    "coverage": 1.0,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1391,
+     1131
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "cbebe11d3ae3c81be6f5beeacf001ee69ad083f50af94d4ce04c10f11c0e4995",
+    "size": [
+     1391,
+     1131
+    ]
    }
   },
   "1793636510893-16a87429-857c-4338-b1fe-a3d47db26aab-01a19d10-9e44-742e-87f0-039deaf048af.png": {
    "roi": [
     0,
     0,
-    1386,
+    1387,
     1134
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -7864,15 +9686,15 @@
    "hex_w_px": 104.25,
    "hex_h_px": 120.38,
    "hw_ratio": 1.1547,
-   "col_step_px": 104.25,
-   "row_step_px": 90.28,
+   "col_step_px": 113.0,
+   "row_step_px": 70.0,
    "period_px": [
     104,
     181
    ],
    "origin": [
-    41,
-    167
+    1.3,
+    6.0
    ],
    "row_offset": "odd-r",
    "peak": 0.4018,
@@ -7945,12 +9767,9 @@
    "width_spread_px": 50.0,
    "line_coverage": 0.088,
    "line_density": 0.107,
-   "cells": {
-    "cols": 13,
-    "rows": 12
-   },
+   "cells": 37,
    "accepted": false,
-   "reason": "остаток p95 39.30 px (37.7% периода) > 4.0 px; решётка объясняет 9% нарисованных линий < 50%",
+   "reason": "остаток p95 195.13 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "afb3ba0b46535d8eea2a7c4f309ec4eebd47041161df2a372237f14be91747dd",
    "size": [
@@ -8033,6 +9852,77 @@
      ]
     ],
     "spread_px": 188.0
+   },
+   "cells_found": 86,
+   "radius_px": 46.67,
+   "stretch": 1.398,
+   "homography": [
+    [
+     0.913759,
+     -0.194074,
+     90.658515
+    ],
+    [
+     0.003115,
+     0.879521,
+     32.340484
+    ],
+    [
+     7e-06,
+     -0.000251,
+     1.0
+    ]
+   ],
+   "residual_px": 4.52,
+   "residual_p95_px": 195.13,
+   "residual_raw_px": 27.89,
+   "inliers": 17,
+   "cell_fit": {
+    "cells": 84,
+    "cells_found": 84,
+    "col_step_px": 111.0,
+    "row_step_px": 70.0,
+    "radius_px": 46.67,
+    "stretch": 1.373,
+    "origin": [
+     -10.3,
+     -4.2
+    ],
+    "homography": [
+     [
+      0.90325,
+      -0.1906,
+      53.736529
+     ],
+     [
+      0.001857,
+      0.845898,
+      -19.07278
+     ],
+     [
+      3e-06,
+      -0.000268,
+      1.0
+     ]
+    ],
+    "residual_px": 1.66,
+    "residual_p95_px": 11.12,
+    "inliers": 84,
+    "coverage": 1.0,
+    "accepted": false,
+    "reason": "остаток p95 11.12 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1387,
+     1134
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "afb3ba0b46535d8eea2a7c4f309ec4eebd47041161df2a372237f14be91747dd",
+    "size": [
+     1387,
+     1134
+    ]
    }
   },
   "1793636581004-f753b445-6edf-4531-86aa-fea6c7da2367-01a19d11-bf41-7ea3-91d4-381e3a9b198b.png": {
@@ -8040,9 +9930,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 136.0,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -8069,15 +9959,15 @@
    "hex_w_px": 110.0,
    "hex_h_px": 127.02,
    "hw_ratio": 1.1547,
-   "col_step_px": 110.0,
-   "row_step_px": 95.26,
+   "col_step_px": 109.0,
+   "row_step_px": 96.0,
    "period_px": [
     110,
     191
    ],
    "origin": [
-    94,
-    182
+    -19.5,
+    -5.7
    ],
    "row_offset": "odd-r",
    "peak": 0.4005,
@@ -8150,12 +10040,9 @@
    "width_spread_px": 56.0,
    "line_coverage": 0.09,
    "line_density": 0.109,
-   "cells": {
-    "cols": 13,
-    "rows": 10
-   },
+   "cells": 27,
    "accepted": false,
-   "reason": "остаток p95 34.83 px (31.7% периода) > 4.0 px; решётка объясняет 9% нарисованных линий < 50%; дрейф периода по краям 2.00 px > 1.5 px",
+   "reason": "остаток p95 21.90 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "30ec80cb430942288bfc4dfd1e99c577cfbfa6af75056b4ec9c7d32ccf59d28b",
    "size": [
@@ -8238,6 +10125,46 @@
      ]
     ],
     "spread_px": 160.4
+   },
+   "cells_found": 42,
+   "radius_px": 64.0,
+   "stretch": 0.983,
+   "homography": [
+    [
+     0.973679,
+     -0.147794,
+     35.857291
+    ],
+    [
+     0.00256,
+     0.717677,
+     92.880198
+    ],
+    [
+     1e-06,
+     -0.000194,
+     1.0
+    ]
+   ],
+   "residual_px": 0.38,
+   "residual_p95_px": 21.9,
+   "residual_raw_px": 16.43,
+   "inliers": 21,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "30ec80cb430942288bfc4dfd1e99c577cfbfa6af75056b4ec9c7d32ccf59d28b",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793636643781-11607e29-4ec5-4642-b83a-ced0cdfd1957-01a19d12-bcda-7ca0-9ef4-56a0f063419e.png": {
@@ -8245,9 +10172,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -8274,15 +10201,15 @@
    "hex_w_px": 49.2,
    "hex_h_px": 56.81,
    "hw_ratio": 1.1547,
-   "col_step_px": 49.2,
-   "row_step_px": 42.61,
+   "col_step_px": 119.0,
+   "row_step_px": 76.0,
    "period_px": [
     49,
     85
    ],
    "origin": [
-    38,
-    28
+    28.8,
+    -17.9
    ],
    "row_offset": "odd-r",
    "peak": 0.3157,
@@ -8355,12 +10282,9 @@
    "width_spread_px": 42.0,
    "line_coverage": 0.171,
    "line_density": 0.1762,
-   "cells": {
-    "cols": 31,
-    "rows": 24
-   },
+   "cells": 33,
    "accepted": false,
-   "reason": "остаток p95 32.51 px (66.1% периода) > 4.0 px; решётка объясняет 17% нарисованных линий < 50%",
+   "reason": "остаток p95 8.30 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "32cd0759a228567d74043d00e6c59bb2378ecd2689242735058a6271123e7618",
    "size": [
@@ -8443,6 +10367,77 @@
      ]
     ],
     "spread_px": 90.5
+   },
+   "cells_found": 40,
+   "radius_px": 50.67,
+   "stretch": 1.356,
+   "homography": [
+    [
+     0.977787,
+     -0.132455,
+     31.728929
+    ],
+    [
+     0.002583,
+     0.939056,
+     -5.616388
+    ],
+    [
+     5e-06,
+     -0.000168,
+     1.0
+    ]
+   ],
+   "residual_px": 0.48,
+   "residual_p95_px": 8.3,
+   "residual_raw_px": 13.7,
+   "inliers": 30,
+   "cell_fit": {
+    "cells": 60,
+    "cells_found": 75,
+    "col_step_px": 123.0,
+    "row_step_px": 78.0,
+    "radius_px": 52.0,
+    "stretch": 1.366,
+    "origin": [
+     -16.6,
+     28.0
+    ],
+    "homography": [
+     [
+      0.934443,
+      -0.129353,
+      64.185418
+     ],
+     [
+      -0.003731,
+      0.909999,
+      -20.095878
+     ],
+     [
+      -7e-06,
+      -0.000159,
+      1.0
+     ]
+    ],
+    "residual_px": 1.61,
+    "residual_p95_px": 14.74,
+    "inliers": 60,
+    "coverage": 0.8,
+    "accepted": false,
+    "reason": "остаток p95 14.74 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "32cd0759a228567d74043d00e6c59bb2378ecd2689242735058a6271123e7618",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793637476055-48378a27-00dc-4a2a-bdf6-8c614c631f16-01a19d1f-67ed-7f73-a85f-aecea5758c5f.png": {
@@ -8450,9 +10445,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -8565,7 +10560,7 @@
     "rows": 21
    },
    "accepted": false,
-   "reason": "остаток p95 80.91 px (149.8% периода) > 4.0 px; решётка объясняет 15% нарисованных линий < 50%",
+   "reason": "гомография не построилась",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "1b95a535dc8e17079fc76bbf3b5aeb6c9390653c7e93a7a89f7c52964b298f03",
    "size": [
@@ -8648,16 +10643,32 @@
      ]
     ],
     "spread_px": 116.6
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "1b95a535dc8e17079fc76bbf3b5aeb6c9390653c7e93a7a89f7c52964b298f03",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793640704042-241b98a1-39d3-4b36-a09e-54a3218d12cf-01a19d50-ac06-74e4-8aae-2969ef8643b2.png": {
    "roi": [
-    96,
-    344,
-    1097,
-    447
+    0,
+    0,
+    1470,
+    1070
    ],
-   "roi_source": "auto",
+   "roi_source": "whole-frame",
    "stroke_period_px": 91.92,
    "stroke_orientation": "flat",
    "stroke_counts": [
@@ -8770,7 +10781,7 @@
     "rows": 5
    },
    "accepted": false,
-   "reason": "остаток p95 65534.63 px (67946.7% периода) > 4.0 px; решётка объясняет 0% нарисованных линий < 50%",
+   "reason": "гомография не построилась",
    "note": null,
    "sha256": "f08a2504cb539e13034bc5d48c2a716c8d0f3b5b339807c81e96201a1552f176",
    "size": [
@@ -8853,6 +10864,22 @@
      ]
     ],
     "spread_px": 93.7
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "f08a2504cb539e13034bc5d48c2a716c8d0f3b5b339807c81e96201a1552f176",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793642609059-1f6b8368-79b5-42f4-a6c8-05d37a57fc59-01a19d6d-c1e6-7eba-9303-ff72ff7b5c5f.png": {
@@ -8860,9 +10887,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 92.31,
    "stroke_orientation": "flat",
    "stroke_counts": [
@@ -8889,15 +10916,15 @@
    "hex_w_px": 103.7,
    "hex_h_px": 89.81,
    "hw_ratio": 0.866,
-   "col_step_px": 77.77,
-   "row_step_px": 89.81,
+   "col_step_px": 179.0,
+   "row_step_px": 40.0,
    "period_px": [
     156,
     90
    ],
    "origin": [
-    81,
-    24
+    49.2,
+    -10.7
    ],
    "row_offset": "odd-q",
    "peak": 0.3481,
@@ -8970,12 +10997,9 @@
    "width_spread_px": 56.0,
    "line_coverage": 0.1,
    "line_density": 0.0306,
-   "cells": {
-    "cols": 19,
-    "rows": 11
-   },
+   "cells": 77,
    "accepted": false,
-   "reason": "остаток p95 133.07 px (128.3% периода) > 4.0 px; решётка объясняет 10% нарисованных линий < 50%",
+   "reason": "остаток p95 83.77 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "9aee09613455318a665b86751ce4a4cfd0180b399aed5b8db7ebcaaa1d29535f",
    "size": [
@@ -9058,6 +11082,46 @@
      ]
     ],
     "spread_px": 127.5
+   },
+   "cells_found": 93,
+   "radius_px": 26.67,
+   "stretch": 3.875,
+   "homography": [
+    [
+     0.833214,
+     -0.219074,
+     163.974655
+    ],
+    [
+     0.002708,
+     0.665866,
+     98.148434
+    ],
+    [
+     4e-06,
+     -0.000262,
+     1.0
+    ]
+   ],
+   "residual_px": 1.5,
+   "residual_p95_px": 83.77,
+   "residual_raw_px": 27.35,
+   "inliers": 59,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "9aee09613455318a665b86751ce4a4cfd0180b399aed5b8db7ebcaaa1d29535f",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793642671565-ca6c502e-62d4-42d6-8e18-31d91e8871de-01a19d6e-babe-73c6-8866-6cd61ea41175.png": {
@@ -9065,9 +11129,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -9094,15 +11158,15 @@
    "hex_w_px": 64.8,
    "hex_h_px": 56.12,
    "hw_ratio": 0.866,
-   "col_step_px": 48.6,
-   "row_step_px": 56.12,
+   "col_step_px": 195.0,
+   "row_step_px": 44.0,
    "period_px": [
     97,
     56
    ],
    "origin": [
-    79,
-    19
+    57.0,
+    -10.3
    ],
    "row_offset": "odd-q",
    "peak": 0.3434,
@@ -9175,12 +11239,9 @@
    "width_spread_px": 42.0,
    "line_coverage": 0.155,
    "line_density": 0.0415,
-   "cells": {
-    "cols": 31,
-    "rows": 18
-   },
+   "cells": 37,
    "accepted": false,
-   "reason": "остаток p95 226.16 px (349.0% периода) > 4.0 px; решётка объясняет 15% нарисованных линий < 50%",
+   "reason": "остаток p95 90.86 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "277a5d663dffd629631073c69e978b60a8973db221e71f99b861a23a8b4ab46f",
    "size": [
@@ -9263,6 +11324,46 @@
      ]
     ],
     "spread_px": 108.8
+   },
+   "cells_found": 46,
+   "radius_px": 29.33,
+   "stretch": 3.838,
+   "homography": [
+    [
+     0.852864,
+     -0.165079,
+     113.009012
+    ],
+    [
+     0.002165,
+     0.679427,
+     113.675506
+    ],
+    [
+     4e-06,
+     -0.000223,
+     1.0
+    ]
+   ],
+   "residual_px": 0.57,
+   "residual_p95_px": 90.86,
+   "residual_raw_px": 8.15,
+   "inliers": 34,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "277a5d663dffd629631073c69e978b60a8973db221e71f99b861a23a8b4ab46f",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793642779343-aa751f80-a8d5-40d1-a2d6-7b5ac89e9780-01a19d70-5939-7762-a1da-845fde866250.png": {
@@ -9270,9 +11371,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -9385,7 +11486,7 @@
     "rows": 13
    },
    "accepted": false,
-   "reason": "остаток p95 318.13 px (358.3% периода) > 4.0 px; решётка объясняет 12% нарисованных линий < 50%; дрейф периода по краям 2.00 px > 1.5 px",
+   "reason": "сот найдено 0 (<8)",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "b189c86911b75a1318708fc7cfe2740473fc5e3eb0f814f7ccb9f17559a00f79",
    "size": [
@@ -9468,6 +11569,22 @@
      ]
     ],
     "spread_px": 93.1
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "сот найдено 1 (<8)",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "b189c86911b75a1318708fc7cfe2740473fc5e3eb0f814f7ccb9f17559a00f79",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793642904185-19e0aad7-d7ec-4db5-b0ef-22cc24391002-01a19d72-33d5-72de-8409-7d6da89c9994.png": {
@@ -9475,9 +11592,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -9590,7 +11707,7 @@
     "rows": 11
    },
    "accepted": false,
-   "reason": "остаток p95 127.72 px (128.9% периода) > 4.0 px; решётка объясняет 9% нарисованных линий < 50%; дрейф периода по краям 2.75 px > 1.5 px",
+   "reason": "в решётку попали 6 сот",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "906d6357729734160d10adc2c90acb8a4fec16c4383eae877a0a06a70e1e794b",
    "size": [
@@ -9673,6 +11790,22 @@
      ]
     ],
     "spread_px": 95.4
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "906d6357729734160d10adc2c90acb8a4fec16c4383eae877a0a06a70e1e794b",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793643214984-fe4e39e9-0b28-4eb1-8938-0862415cea73-01a19d77-081d-7f5f-a916-9755798046d7.png": {
@@ -9680,9 +11813,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -9795,7 +11928,7 @@
     "rows": 15
    },
    "accepted": false,
-   "reason": "остаток p95 339.84 px (451.9% периода) > 4.0 px; решётка объясняет 5% нарисованных линий < 50%; дрейф периода по краям 3.00 px > 1.5 px",
+   "reason": "сот найдено 0 (<8)",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "2621016aa07c3c62ef8442ce3bf51ffcbe69624d5542b1c2abe3bbe8be28b8c7",
    "size": [
@@ -9878,6 +12011,22 @@
      ]
     ],
     "spread_px": 111.1
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "сот найдено 0 (<8)",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "2621016aa07c3c62ef8442ce3bf51ffcbe69624d5542b1c2abe3bbe8be28b8c7",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793643309941-40af05d4-4675-4125-b226-ddb8cd50cbf5-01a19d78-7354-7759-a8d3-b0bd519281fc.png": {
@@ -9885,9 +12034,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -9914,15 +12063,15 @@
    "hex_w_px": 87.0,
    "hex_h_px": 100.46,
    "hw_ratio": 1.1547,
-   "col_step_px": 87.0,
-   "row_step_px": 75.34,
+   "col_step_px": 99.0,
+   "row_step_px": 56.0,
    "period_px": [
     87,
     151
    ],
    "origin": [
-    9,
-    114
+    5.3,
+    -9.2
    ],
    "row_offset": "odd-r",
    "peak": 0.3935,
@@ -9995,12 +12144,9 @@
    "width_spread_px": 34.0,
    "line_coverage": 0.1,
    "line_density": 0.0881,
-   "cells": {
-    "cols": 16,
-    "rows": 14
-   },
-   "accepted": false,
-   "reason": "остаток p95 298.20 px (342.8% периода) > 4.0 px; решётка объясняет 10% нарисованных линий < 50%",
+   "cells": 27,
+   "accepted": true,
+   "reason": "",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "fbde126445cc4676dcebe08785e3dbe8ed9d1a3e123c3b3e550a49b67b664e2d",
    "size": [
@@ -10083,6 +12229,46 @@
      ]
     ],
     "spread_px": 75.1
+   },
+   "cells_found": 29,
+   "radius_px": 37.33,
+   "stretch": 1.531,
+   "homography": [
+    [
+     0.884851,
+     -0.237702,
+     89.479929
+    ],
+    [
+     0.001169,
+     0.805802,
+     29.253757
+    ],
+    [
+     4e-06,
+     -0.000316,
+     1.0
+    ]
+   ],
+   "residual_px": 0.23,
+   "residual_p95_px": 0.4,
+   "residual_raw_px": 4.77,
+   "inliers": 26,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "шаг сот не измерился",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "fbde126445cc4676dcebe08785e3dbe8ed9d1a3e123c3b3e550a49b67b664e2d",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793643407822-e7da2f3c-7747-4e85-883d-92fa744b210b-01a19d79-ed41-7d9d-8cd1-f8a9a6e99a8a.png": {
@@ -10090,9 +12276,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 60.63,
    "stroke_orientation": "flat",
    "stroke_counts": [
@@ -10205,7 +12391,7 @@
     "rows": 15
    },
    "accepted": false,
-   "reason": "остаток p95 83.67 px (113.1% периода) > 4.0 px; решётка объясняет 12% нарисованных линий < 50%; дрейф периода по краям 4.25 px > 1.5 px",
+   "reason": "сот найдено 7 (<8)",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "b5b41aaf186867c8ef779859821101c82af54bf6c54709ffb02f1580b39cb12c",
    "size": [
@@ -10288,6 +12474,22 @@
      ]
     ],
     "spread_px": 86.7
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "шаг сот не измерился",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "b5b41aaf186867c8ef779859821101c82af54bf6c54709ffb02f1580b39cb12c",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793643507822-d47e011e-8fcc-4f9a-82f4-c6ba82186522-01a19d7b-723e-7244-80b7-27cf04ecb973.png": {
@@ -10295,9 +12497,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 100.27,
    "stroke_orientation": "flat",
    "stroke_counts": [
@@ -10324,15 +12526,15 @@
    "hex_w_px": 75.0,
    "hex_h_px": 64.95,
    "hw_ratio": 0.866,
-   "col_step_px": 56.25,
-   "row_step_px": 64.95,
+   "col_step_px": 211.0,
+   "row_step_px": 48.0,
    "period_px": [
     112,
     65
    ],
    "origin": [
-    4,
-    25
+    29.8,
+    11.4
    ],
    "row_offset": "odd-q",
    "peak": 0.292,
@@ -10405,12 +12607,9 @@
    "width_spread_px": 44.0,
    "line_coverage": 0.141,
    "line_density": 0.1672,
-   "cells": {
-    "cols": 26,
-    "rows": 16
-   },
+   "cells": 57,
    "accepted": false,
-   "reason": "остаток p95 45.60 px (60.8% периода) > 4.0 px; решётка объясняет 14% нарисованных линий < 50%; дрейф периода по краям 3.00 px > 1.5 px",
+   "reason": "остаток p95 94.79 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "3dae7779e1a2a352e37eac89ee31fa11ee8b9f7a5e3dbee81f85d69457d24cf7",
    "size": [
@@ -10493,16 +12692,56 @@
      ]
     ],
     "spread_px": 54.3
+   },
+   "cells_found": 76,
+   "radius_px": 32.0,
+   "stretch": 3.807,
+   "homography": [
+    [
+     0.812477,
+     -0.200304,
+     160.677241
+    ],
+    [
+     0.007565,
+     0.602574,
+     156.466553
+    ],
+    [
+     1.1e-05,
+     -0.000263,
+     1.0
+    ]
+   ],
+   "residual_px": 3.77,
+   "residual_p95_px": 94.79,
+   "residual_raw_px": 24.78,
+   "inliers": 27,
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "3dae7779e1a2a352e37eac89ee31fa11ee8b9f7a5e3dbee81f85d69457d24cf7",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793643603468-0a78354f-6cb3-498e-91f4-0abc1363787a-01a19d7c-dab2-7ace-a4fe-5c1d1372fb2d.png": {
    "roi": [
     0,
     0,
-    1386,
+    1387,
     1134
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -10615,7 +12854,7 @@
     "rows": 13
    },
    "accepted": false,
-   "reason": "остаток p95 38.20 px (39.5% периода) > 4.0 px; решётка объясняет 10% нарисованных линий < 50%; дрейф периода по краям 2.50 px > 1.5 px",
+   "reason": "шаг сот не измерился",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "b53f76ee236c82edd6d8c26d34371744e1bf7317c0509e1c4d1df8d665f8efda",
    "size": [
@@ -10698,6 +12937,22 @@
      ]
     ],
     "spread_px": 83.8
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1387,
+     1134
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "b53f76ee236c82edd6d8c26d34371744e1bf7317c0509e1c4d1df8d665f8efda",
+    "size": [
+     1387,
+     1134
+    ]
    }
   },
   "1793643897792-b3ccfe7f-1efd-4d8d-81b9-2b62d898cb03-01a19d81-62fa-791d-913a-a4b64cce351d.png": {
@@ -10705,9 +12960,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -10820,7 +13075,7 @@
     "rows": 21
    },
    "accepted": false,
-   "reason": "остаток p95 48.16 px (89.2% периода) > 4.0 px; решётка объясняет 17% нарисованных линий < 50%",
+   "reason": "шаг сот не измерился",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "aa84212912fa4334891cd62a0b3746bc3b82a12c23b5917e415123d1b92609a4",
    "size": [
@@ -10903,16 +13158,63 @@
      ]
     ],
     "spread_px": 49.2
+   },
+   "cell_fit": {
+    "cells": 80,
+    "cells_found": 90,
+    "col_step_px": 101.0,
+    "row_step_px": 64.0,
+    "radius_px": 42.67,
+    "stretch": 1.367,
+    "origin": [
+     -22.6,
+     -16.3
+    ],
+    "homography": [
+     [
+      0.902579,
+      -0.252482,
+      98.668864
+     ],
+     [
+      -0.003555,
+      0.80073,
+      46.912721
+     ],
+     [
+      -7e-06,
+      -0.000309,
+      1.0
+     ]
+    ],
+    "residual_px": 2.14,
+    "residual_p95_px": 6.57,
+    "inliers": 80,
+    "coverage": 0.89,
+    "accepted": false,
+    "reason": "остаток p95 6.57 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "aa84212912fa4334891cd62a0b3746bc3b82a12c23b5917e415123d1b92609a4",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793644379549-e2b0c670-4ae7-4472-9e19-edd692622602-01a19d88-aa71-7a8b-bc5e-73eef17a92e3.png": {
    "roi": [
     0,
     0,
-    1386,
+    1387,
     1134
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 57.78,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -11020,7 +13322,7 @@
     "rows": 27
    },
    "accepted": false,
-   "reason": "остаток p95 34.74 px (72.4% периода) > 4.0 px; решётка объясняет 18% нарисованных линий < 50%; дрейф периода по краям 2.25 px > 1.5 px",
+   "reason": "в решётку попали 3 сот",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "2c7cae52fcb56326cd0c04c30856895f6e37d820ed4bb6bf73b49944c9c3a273",
    "size": [
@@ -11103,6 +13405,22 @@
      ]
     ],
     "spread_px": 65.2
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1387,
+     1134
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "2c7cae52fcb56326cd0c04c30856895f6e37d820ed4bb6bf73b49944c9c3a273",
+    "size": [
+     1387,
+     1134
+    ]
    }
   },
   "1793644625477-c78e7d29-87fc-466e-a404-705d522d36af-01a19d8c-812e-7261-a825-ffcf04dbb371.png": {
@@ -11110,9 +13428,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -11139,15 +13457,15 @@
    "hex_w_px": 51.1,
    "hex_h_px": 59.01,
    "hw_ratio": 1.1547,
-   "col_step_px": 51.1,
-   "row_step_px": 44.25,
+   "col_step_px": 99.0,
+   "row_step_px": 60.0,
    "period_px": [
     51,
     89
    ],
    "origin": [
-    29,
-    69
+    -20.1,
+    9.8
    ],
    "row_offset": "odd-r",
    "peak": 0.3491,
@@ -11220,12 +13538,9 @@
    "width_spread_px": 14.0,
    "line_coverage": 0.179,
    "line_density": 0.0332,
-   "cells": {
-    "cols": 30,
-    "rows": 23
-   },
+   "cells": 72,
    "accepted": false,
-   "reason": "остаток p95 148.07 px (289.8% периода) > 4.0 px; решётка объясняет 18% нарисованных линий < 50%",
+   "reason": "остаток p95 112.79 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "383a4c097327140248861efe30c640cfea3f377044579a1ca521a783aa86be90",
    "size": [
@@ -11308,6 +13623,77 @@
      ]
     ],
     "spread_px": 86.9
+   },
+   "cells_found": 108,
+   "radius_px": 40.0,
+   "stretch": 1.429,
+   "homography": [
+    [
+     0.868531,
+     -0.279829,
+     97.552814
+    ],
+    [
+     0.000289,
+     0.69743,
+     61.340849
+    ],
+    [
+     -0.0,
+     -0.000363,
+     1.0
+    ]
+   ],
+   "residual_px": 0.96,
+   "residual_p95_px": 112.79,
+   "residual_raw_px": 10.4,
+   "inliers": 52,
+   "cell_fit": {
+    "cells": 100,
+    "cells_found": 106,
+    "col_step_px": 99.0,
+    "row_step_px": 60.0,
+    "radius_px": 40.0,
+    "stretch": 1.429,
+    "origin": [
+     22.3,
+     -10.3
+    ],
+    "homography": [
+     [
+      0.881661,
+      -0.264883,
+      70.856824
+     ],
+     [
+      0.00055,
+      0.720603,
+      64.430474
+     ],
+     [
+      1e-06,
+      -0.000342,
+      1.0
+     ]
+    ],
+    "residual_px": 1.07,
+    "residual_p95_px": 7.51,
+    "inliers": 100,
+    "coverage": 0.94,
+    "accepted": false,
+    "reason": "остаток p95 7.51 px > 4.0 px",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "383a4c097327140248861efe30c640cfea3f377044579a1ca521a783aa86be90",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793644922377-8d9970a0-61a4-483e-8c55-fd4df03d57b8-01a19d91-049b-79ec-9152-b528b11d8e5f.png": {
@@ -11315,9 +13701,9 @@
     0,
     0,
     1470,
-    1068
+    1070
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -11344,15 +13730,15 @@
    "hex_w_px": 74.0,
    "hex_h_px": 85.45,
    "hw_ratio": 1.1547,
-   "col_step_px": 74.0,
-   "row_step_px": 64.09,
+   "col_step_px": 107.0,
+   "row_step_px": 68.0,
    "period_px": [
     74,
     128
    ],
    "origin": [
-    23,
-    50
+    26.7,
+    7.4
    ],
    "row_offset": "odd-r",
    "peak": 0.3746,
@@ -11425,12 +13811,9 @@
    "width_spread_px": 22.0,
    "line_coverage": 0.139,
    "line_density": 0.0134,
-   "cells": {
-    "cols": 19,
-    "rows": 16
-   },
+   "cells": 40,
    "accepted": false,
-   "reason": "остаток p95 181.21 px (244.9% периода) > 4.0 px; решётка объясняет 14% нарисованных линий < 50%",
+   "reason": "остаток p95 35.19 px > 4.0 px",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "b50f87e87312a8f251ef73535d9a838f8848317bd46691fe4e7279be41c942f6",
    "size": [
@@ -11513,16 +13896,87 @@
      ]
     ],
     "spread_px": 100.5
+   },
+   "cells_found": 47,
+   "radius_px": 45.33,
+   "stretch": 1.363,
+   "homography": [
+    [
+     0.78014,
+     -0.230821,
+     164.032735
+    ],
+    [
+     -0.001644,
+     0.57648,
+     144.155098
+    ],
+    [
+     -3e-06,
+     -0.000308,
+     1.0
+    ]
+   ],
+   "residual_px": 0.39,
+   "residual_p95_px": 35.19,
+   "residual_raw_px": 7.94,
+   "inliers": 32,
+   "cell_fit": {
+    "cells": 39,
+    "cells_found": 45,
+    "col_step_px": 107.0,
+    "row_step_px": 68.0,
+    "radius_px": 45.33,
+    "stretch": 1.363,
+    "origin": [
+     -27.7,
+     -7.2
+    ],
+    "homography": [
+     [
+      0.783004,
+      -0.231137,
+      183.265444
+     ],
+     [
+      -0.001679,
+      0.578389,
+      148.724383
+     ],
+     [
+      -2e-06,
+      -0.000308,
+      1.0
+     ]
+    ],
+    "residual_px": 0.38,
+    "residual_p95_px": 2.8,
+    "inliers": 39,
+    "coverage": 0.87,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1470,
+     1070
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "b50f87e87312a8f251ef73535d9a838f8848317bd46691fe4e7279be41c942f6",
+    "size": [
+     1470,
+     1070
+    ]
    }
   },
   "1793645500580-21f527c8-257b-43cc-91f4-168f61897841-01a19d99-e172-7f05-a6a3-3581557eb028.png": {
    "roi": [
     0,
-    341,
+    0,
     1536,
-    682
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -11635,7 +14089,7 @@
     "rows": 10
    },
    "accepted": false,
-   "reason": "остаток p95 31.84 px (40.7% периода) > 4.0 px; решётка объясняет 12% нарисованных линий < 50%",
+   "reason": "сот найдено 5 (<8)",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "40acba7d221447b3ee27f74becf1fb049e694966cadb9b2fc9fcf4b922ec34ad",
    "size": [
@@ -11718,16 +14172,63 @@
      ]
     ],
     "spread_px": 69.9
+   },
+   "cell_fit": {
+    "cells": 98,
+    "cells_found": 108,
+    "col_step_px": 101.0,
+    "row_step_px": 50.0,
+    "radius_px": 33.33,
+    "stretch": 1.749,
+    "origin": [
+     9.9,
+     -12.8
+    ],
+    "homography": [
+     [
+      0.799879,
+      -0.36575,
+      122.155863
+     ],
+     [
+      0.000466,
+      0.687274,
+      62.005273
+     ],
+     [
+      1e-06,
+      -0.000475,
+      1.0
+     ]
+    ],
+    "residual_px": 1.06,
+    "residual_p95_px": 3.98,
+    "inliers": 98,
+    "coverage": 0.91,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "40acba7d221447b3ee27f74becf1fb049e694966cadb9b2fc9fcf4b922ec34ad",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793645668466-a4f216e0-41c2-4417-a6f8-cdc4e652a16d-01a19d9c-77a2-7baa-8f1d-650380e809b7.png": {
    "roi": [
-    512,
     0,
-    1024,
-    1023
+    0,
+    1536,
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 74.62,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -11835,7 +14336,7 @@
     "rows": 25
    },
    "accepted": false,
-   "reason": "остаток p95 95.20 px (201.7% периода) > 4.0 px; решётка объясняет 22% нарисованных линий < 50%",
+   "reason": "сот найдено 3 (<8)",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "5ddcafe03d44f3f925255e8165494dfab89dfe76d7cf2b2558db8d976ea929f7",
    "size": [
@@ -11918,6 +14419,22 @@
      ]
     ],
     "spread_px": 61.1
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "сот найдено 3 (<8)",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "5ddcafe03d44f3f925255e8165494dfab89dfe76d7cf2b2558db8d976ea929f7",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793645807625-0facee09-fbc6-401d-975a-1288a8b00646-01a19d9e-94fa-75be-a06a-d069a8ac8cfd.png": {
@@ -11925,9 +14442,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -12040,7 +14557,7 @@
     "rows": 13
    },
    "accepted": false,
-   "reason": "остаток p95 197.13 px (220.9% периода) > 4.0 px; решётка объясняет 12% нарисованных линий < 50%; дрейф периода по краям 4.00 px > 1.5 px",
+   "reason": "сот найдено 5 (<8)",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "32093547ffc70ba004511c056f9644f6c76780b7011f08e7688837bd38c5e329",
    "size": [
@@ -12123,6 +14640,22 @@
      ]
     ],
     "spread_px": 47.0
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "сот найдено 5 (<8)",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "32093547ffc70ba004511c056f9644f6c76780b7011f08e7688837bd38c5e329",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793646049281-ae3b2e05-2f27-4ee5-ac81-27263dfa9d83-01a19da2-3c18-7abd-a25f-bbcc718726aa.png": {
@@ -12130,9 +14663,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 52.36,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -12245,7 +14778,7 @@
     "rows": 16
    },
    "accepted": false,
-   "reason": "остаток p95 69.69 px (95.5% периода) > 4.0 px; решётка объясняет 16% нарисованных линий < 50%; дрейф периода по краям 2.75 px > 1.5 px",
+   "reason": "шаг сот не измерился",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "2fb185a29455574e814bd6d532c5f8790712feffab1c89cd592cdebed08e1a73",
    "size": [
@@ -12328,16 +14861,32 @@
      ]
     ],
     "spread_px": 56.8
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "шаг сот не измерился",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "2fb185a29455574e814bd6d532c5f8790712feffab1c89cd592cdebed08e1a73",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793646245386-cd60b319-9b82-46b1-b8d3-50ae07d9cd21-01a19da5-2fbc-7a2f-bb7f-2d322a5663ba.png": {
    "roi": [
     0,
     0,
-    1389,
-    1131
+    1390,
+    1132
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 59.65,
    "stroke_orientation": "pointy",
    "stroke_counts": [
@@ -12450,7 +14999,7 @@
     "rows": 11
    },
    "accepted": false,
-   "reason": "остаток p95 45.91 px (39.2% периода) > 4.0 px; решётка объясняет 9% нарисованных линий < 50%",
+   "reason": "гомография не построилась",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "615869bdc3e533e0bdf216303e4721d16eff376e07b1485f1d6d90e2f689870f",
    "size": [
@@ -12533,6 +15082,22 @@
      ]
     ],
     "spread_px": 75.9
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1390,
+     1132
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "615869bdc3e533e0bdf216303e4721d16eff376e07b1485f1d6d90e2f689870f",
+    "size": [
+     1390,
+     1132
+    ]
    }
   },
   "1793647099636-20603745-dd8d-4724-a6bb-926a8f39679b-01a19db2-45f6-7a4e-9468-ecb46e45f782.png": {
@@ -12540,9 +15105,9 @@
     0,
     0,
     1536,
-    1023
+    1024
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": null,
    "stroke_orientation": null,
    "stroke_counts": [
@@ -12655,7 +15220,7 @@
     "rows": 23
    },
    "accepted": false,
-   "reason": "остаток p95 333.65 px (662.0% периода) > 4.0 px; решётка объясняет 20% нарисованных линий < 50%",
+   "reason": "в решётку попали 5 сот",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "d16251781b1ab05d771a304a371062e6b62103204fce93149a0d03735abc9da5",
    "size": [
@@ -12738,16 +15303,32 @@
      ]
     ],
     "spread_px": 130.9
+   },
+   "cell_fit": {
+    "accepted": false,
+    "reason": "соты не привязались к решётке",
+    "roi": [
+     0,
+     0,
+     1536,
+     1024
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "d16251781b1ab05d771a304a371062e6b62103204fce93149a0d03735abc9da5",
+    "size": [
+     1536,
+     1024
+    ]
    }
   },
   "1793690558129-cd5644a8-5973-46be-9f57-617d422ff25b-01a1a049-3cd3-73d0-8220-c65ba4636876.png": {
    "roi": [
     0,
     0,
-    1386,
+    1387,
     1134
    ],
-   "roi_source": "field",
+   "roi_source": "whole-frame",
    "stroke_period_px": 56.26,
    "stroke_orientation": "flat",
    "stroke_counts": [
@@ -12774,15 +15355,15 @@
    "hex_w_px": 101.35,
    "hex_h_px": 117.03,
    "hw_ratio": 1.1547,
-   "col_step_px": 101.35,
-   "row_step_px": 87.77,
+   "col_step_px": 107.0,
+   "row_step_px": 80.0,
    "period_px": [
     101,
     176
    ],
    "origin": [
-    34,
-    101
+    -4.2,
+    -2.3
    ],
    "row_offset": "odd-r",
    "peak": 0.3995,
@@ -12855,12 +15436,9 @@
    "width_spread_px": 42.0,
    "line_coverage": 0.082,
    "line_density": 0.1091,
-   "cells": {
-    "cols": 13,
-    "rows": 12
-   },
-   "accepted": false,
-   "reason": "остаток p95 53.49 px (52.8% периода) > 4.0 px; решётка объясняет 8% нарисованных линий < 50%",
+   "cells": 68,
+   "accepted": true,
+   "reason": "",
    "note": "зона взята окнами, где решётка отозвалась (треть кадра), граница крупная",
    "sha256": "f8ff8283d48a7fae04b30837c5a37cc0886284a6af085a14287c541d5674064e",
    "size": [
@@ -12943,6 +15521,77 @@
      ]
     ],
     "spread_px": 126.2
+   },
+   "cells_found": 87,
+   "radius_px": 53.33,
+   "stretch": 1.158,
+   "homography": [
+    [
+     0.912915,
+     -0.170072,
+     63.629166
+    ],
+    [
+     0.001343,
+     0.710254,
+     83.421122
+    ],
+    [
+     3e-06,
+     -0.000238,
+     1.0
+    ]
+   ],
+   "residual_px": 0.79,
+   "residual_p95_px": 1.86,
+   "residual_raw_px": 12.6,
+   "inliers": 66,
+   "cell_fit": {
+    "cells": 84,
+    "cells_found": 84,
+    "col_step_px": 105.0,
+    "row_step_px": 70.0,
+    "radius_px": 46.67,
+    "stretch": 1.299,
+    "origin": [
+     31.0,
+     9.2
+    ],
+    "homography": [
+     [
+      0.906459,
+      -0.19476,
+      27.979047
+     ],
+     [
+      0.000431,
+      0.788762,
+      26.861513
+     ],
+     [
+      0.0,
+      -0.000272,
+      1.0
+     ]
+    ],
+    "residual_px": 0.64,
+    "residual_p95_px": 1.55,
+    "inliers": 84,
+    "coverage": 1.0,
+    "accepted": true,
+    "reason": "",
+    "roi": [
+     0,
+     0,
+     1387,
+     1134
+    ],
+    "roi_source": "whole-frame",
+    "sha256": "f8ff8283d48a7fae04b30837c5a37cc0886284a6af085a14287c541d5674064e",
+    "size": [
+     1387,
+     1134
+    ]
    }
   }
  }

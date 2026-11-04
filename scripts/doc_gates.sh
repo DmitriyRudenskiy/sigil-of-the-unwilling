@@ -109,7 +109,8 @@ fi
 # numpy/cv2 — не зависимость гейта: без них жёлтый с причиной (D-265), красный — только
 # когда зависимости есть и проверка упала.
 echo "=== измерители сцен: синтетическая самопроверка (шаг 0 нарезки) ==="
-for s in scripts/measure_scene_lattice.py scripts/measure_scene_clusters.py; do
+for s in scripts/measure_scene_lattice.py scripts/measure_scene_clusters.py \
+	scripts/annotate_scenes.py scripts/fit_scene_cells.py; do
 	if ! "$PY" -c "import numpy, cv2" >/dev/null 2>&1; then
 		echo "YELLOW: numpy/cv2 нет — $s не исполнен"; YELLOW=$((YELLOW + 1)); continue
 	fi

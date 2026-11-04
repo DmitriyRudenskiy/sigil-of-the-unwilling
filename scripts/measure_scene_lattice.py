@@ -76,6 +76,8 @@ DEFAULTS = {
     "coarse_step_px": 2.0,
     "fine_span_px": 2.5,
     "fine_step_px": 0.25,
+    "pin_span_px": 6.0,            # полоса вокруг ручной W: глазами лучше пикселя не ждут
+    "pin_step_px": 0.25,
     "stroke_quantile": 85.0,       # порог «здесь линия» для поиска штрихов
     "stroke_len_px": 15,           # длина штриха: меньше — рваные линии, больше — ничего
     "ultra_step_px": 0.05,
@@ -339,30 +341,50 @@ def region_from_density(on: np.ndarray, W: float,
     return int(x), int(y), int(bw), int(bh), True, u8[y:y + bh, x:x + bw].astype(bool)
 
 
-def measure(rgb: np.ndarray, cfg: dict, roi: tuple[int, int, int, int] | None = None) -> dict:
-    """Полный фитт: ориентация, период, начало, вершина корреляции, остаток, дрейф."""
+def measure(rgb: np.ndarray, cfg: dict, roi: tuple[int, int, int, int] | None = None,
+            manual: dict | None = None) -> dict:
+    """Полный фитт: ориентация, период, начало, вершина корреляции, остаток, дрейф.
+
+    `manual` — разметка человека (ветвь (а) Q-M136): игровая зона, период и ориентация.
+    Она не отменяет фитт, а ограничивает его: W ищется в узкой полосе вокруг ручной цифры,
+    чужая ориентация не сканируется, зона не ищется вовсе. Так проверка «объясняет ли
+    решётка линии» остаётся автоматической, а неопределимость по текстуре уходит.
+    """
     resp = line_response(rgb, cfg)
     scale = float(cfg["coarse_scale"])
+    manual = manual or {}
+    if roi is None and manual.get("roi"):
+        roi = tuple(int(v) for v in manual["roi"])
+    m_w = manual.get("W")
+    m_or = manual.get("orientation")
     lo, hi = float(cfg["width_min"]), float(cfg["width_max"])
+    if m_w:
+        span = float(cfg["pin_span_px"])
+        lo, hi = float(m_w) - span, float(m_w) + span
     fits = {}
     for orientation in ("pointy", "flat"):
-        W, peak = scan_width(resp, orientation, lo, hi, float(cfg["coarse_step_px"]), scale)
+        if m_or and orientation != m_or:
+            continue
+        step = float(cfg["pin_step_px"]) if m_w else float(cfg["coarse_step_px"])
+        W, peak = scan_width(resp, orientation, lo, hi, step, scale)
         fits[orientation] = (W, peak)
     orientation = max(fits, key=lambda k: fits[k][1])
     other = "flat" if orientation == "flat" else "pointy"
-    ratio = fits[orientation][1] / max(fits[other][1], 1e-6)
+    ratio = fits[orientation][1] / max(fits.get(other, (0, 1e-6))[1], 1e-6)
 
     auto = roi is None
     on = density_map(resp, orientation, fits[orientation][0], cfg)
     if auto:
         x0, y0, rw, rh, found, region = region_from_density(on, fits[orientation][0], cfg)
     else:
-        x0, y0, rw, rh, found = roi, True
+        x0, y0, rw, rh, found = (*roi, True)   # tuple + флаг: `= roi, True` распадалось бы из 2 в 5
         region = np.ones((rh, rw), bool)
-    if (x0, y0, rw, rh) != (0, 0, resp.shape[1], resp.shape[0]):
+    if not auto:
+        roi_source = "manual"
+    elif (x0, y0, rw, rh) != (0, 0, resp.shape[1], resp.shape[0]):
         roi_source = "auto" if found else "field"
     else:
-        roi_source = "manual" if not auto else "not-found"
+        roi_source = "not-found"
     crop = resp[y0:y0 + rh, x0:x0 + rw]
     if crop.size < 4096 or not region.any():
         return {"roi": [x0, y0, rw, rh], "accepted": False, "reason": "игровая зона пуста"}
@@ -703,6 +725,8 @@ def main() -> int:
                     help="дописать замеры в game/data/config/scene_slices.json")
     ap.add_argument("--debug", default="", help="префикс куда положить кадр-доказательства")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--manual", action="store_true",
+                    help="взять зону/период/ориентацию из `manual` записи реестра")
     ap.add_argument("--geometry", action="store_true",
                     help="только независимая геометрия по штрихам (быстро, без подгонки)")
     a = ap.parse_args()
@@ -737,7 +761,11 @@ def main() -> int:
             out[name] = rec
             print(json.dumps({name: rec}, ensure_ascii=False))
             continue
-        rec = measure(rgb, cfg, roi)
+        manual = reg.get("scenes", {}).get(name, {}).get("manual", {}) if a.manual else None
+        if a.manual and not manual:
+            sys.exit(f"в реестре нет manual-разметки сцены {name} — "
+                     f"нанеси её: scripts/annotate_scenes.py --mark=x,y,w,h --scene=...")
+        rec = measure(rgb, cfg, roi, manual=manual)
         rec["sha256"] = sha256(path)[:16]
         rec["size"] = [rgb.shape[1], rgb.shape[0]]
         out[path.name] = rec
