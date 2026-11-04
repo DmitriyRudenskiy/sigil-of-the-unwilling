@@ -373,6 +373,7 @@ if [ -n "${MCP_SSH_HOST:-}" ] && [ -z "${SOTU_ON_X_HOST:-}" ]; then
 	SOTU_TAR=()
 	[ "$(uname -s)" = "Darwin" ] && SOTU_TAR=(--no-mac-metadata --no-xattrs)
 	if ! ( cd .. && { git ls-files -z game scripts; \
+			git ls-files -z -- image-clone/etalons/manifest.json; \
 			find game/addons/godot-mcp/build game/addons/godot-mcp/node_modules -type f -print0 2>/dev/null; } | \
 		tar "${SOTU_TAR[@]+"${SOTU_TAR[@]}"}" --null -T - -cf - | gzip -1 ) | \
 		ssh -q "$MCP_SSH_HOST" "rm -rf '$SOTU_REMOTE' && mkdir -p '$SOTU_REMOTE' && tar -xzf - -C '$SOTU_REMOTE' --warning=no-unknown-keyword"; then
@@ -612,7 +613,7 @@ fi
 # секцию выше (MCP-секция знает только tests/mcp/), а без него затемнённый побратим листа
 # и кратность MAP_FOG_DIM проверялись бы только руками. Секция не молчит: нет pytest/PIL —
 # явная строка SKIPPED (конвенция MCP-секции).
-echo "=== python: генератор арта карты (scripts/test_gen_map_art.py) ==="
+echo "=== python: генератор арта карты (scripts/test_gen_map_art.py) + концепт-арта (scripts/concept_art/test_generate.py) ==="
 # T-289 (D-166-семья): уровень желтел, хотя интерпретатор с pytest+PIL был установлен
 # (замер 2026-10-29: pytest 9.1.1, PIL 13.0.0, 11 тестов уровня за 2.3 с) — проверка
 # `import pytest, PIL` отвечала честно про не тот интерпретатор, дефолт был `python3`.
@@ -630,7 +631,12 @@ for gen_cand in "${GEN_CANDIDATES[@]}"; do
 done
 if [ -n "$GEN_PY" ]; then
 	echo "GENART: интерпретатор $GEN_PY"
-	"$GEN_PY" -m pytest ../scripts/test_gen_map_art.py -q --tb=short 2>&1 | tail -5
+	# T-291 (D-307): самопроверка генератора концепт-арта исполнима без пикселей эталонов
+	# (`load_spec(check_files=False)` сверяет манифест), поэтому ей есть что проверять и на
+	# чистой машине — до 2026-11-08 она только скипалась и в гейт не попадала вовсе.
+	# -p no:warnings: Pillow-предупреждения вытесняли строку со счётчиком из `tail -5`,
+	# и секция показывала warnings вместо вердикта (замер прогона 2026-11-08).
+	"$GEN_PY" -m pytest ../scripts/test_gen_map_art.py ../scripts/concept_art/test_generate.py -q --tb=short -p no:warnings 2>&1 | tail -3
 	[ "${PIPESTATUS[0]}" -ne 0 ] && MCP_RC=1
 else
 	echo "GENART: SKIPPED (ни один кандидат не импортирует pytest+PIL: ${GEN_CANDIDATES[*]} — GEN_PY в настройку машины $SOTU_MACHINE_ENV)"

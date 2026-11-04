@@ -48,21 +48,41 @@ TERMINAL_BAD = ("error", "not_found", "canceled")
 
 # ---------------------------------------------------------------- каталог
 
-def load_spec(path: Path = SPEC_PATH) -> dict:
+def load_spec(path: Path = SPEC_PATH, check_files: bool = True) -> dict:
+    """Спека прогона. `check_files=False` — режим самопроверки на машине без пикселей
+    (D-307): `/image-clone/etalons/*` в git намеренно нет (D-185), поэтому наличие
+    кадров не проверяется, а сверяется то, что версионируется, — `manifest.json`
+    эталонов (`file`/`category`/`sha256`) против перечня категорий спеки. Прогон
+    генератора по-прежнему идёт с `check_files=True`: без пикселей рисовать не с чем."""
     spec = json.loads(Path(path).read_text())
     raw = str(spec.get("references_dir", ""))
     # Путь эталонного сета относительный — от корня репозитория, а не от рабочей папки:
     # калибровка не должна зависеть от того, откуда запущен прогон.
     refs = Path(raw) if Path(raw).is_absolute() else ROOT / raw
-    if not refs.is_dir():
+    if check_files and not refs.is_dir():
         raise SystemExit(f"spec: нет каталога эталонов references_dir={spec.get('references_dir')!r}")
+    manifest: dict[str, dict] = {}
+    if not check_files:
+        mp = refs / "manifest.json"
+        if not mp.is_file():
+            raise SystemExit(f"spec: манифест эталонов не найден ({mp}) — без пикселей сверять нечем")
+        manifest = {e["file"]: e for e in json.loads(mp.read_text())["files"]}
     spec["_references"] = refs
     for cat, c in spec["categories"].items():
         for key in ("style", "reference"):
             if not c.get(key):
                 raise SystemExit(f"spec: категория {cat}: нет поля {key} (кадр обязан повторять эталон)")
-        if not (refs / c["reference"]).is_file():
-            raise SystemExit(f"spec: категория {cat}: эталон {c['reference']} не найден в {refs}")
+        if check_files:
+            if not (refs / c["reference"]).is_file():
+                raise SystemExit(f"spec: категория {cat}: эталон {c['reference']} не найден в {refs}")
+        else:
+            e = manifest.get(c["reference"])
+            if e is None:
+                raise SystemExit(f"spec: категория {cat}: эталона {c['reference']} нет в манифесте "
+                                 f"эталонов — спека ссылается на кадр, которого никто не собирал")
+            if len(str(e.get("sha256", ""))) != 64:
+                raise SystemExit(f"spec: категория {cat}: у эталона {c['reference']} нет sha256 "
+                                 f"в манифесте — сверять будет нечего")
         n = len(c["items"])
         if n != c["count"]:
             raise SystemExit(f"spec: категория {cat}: count={c['count']} != items={n}")

@@ -5,6 +5,7 @@
 воротчики размера/белизны/яркости, воспроизводимость затравки, полноту перечисления,
 сборку запроса. Обращения к серверу нет.
 """
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -14,25 +15,38 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import generate as g                                            # noqa: E402
 
+# D-307 (T-291, вариант (в)): уровень исполним и на машине без пикселей. Пиксели
+# эталонов в git намеренно нет (D-185), поэтому спека проверяется без них, а сверяется
+# то, что версионируется — manifest.json эталонов. Раньше `load_spec()` на уровне модуля
+# бросал SystemExit, файл называется `test_*.py` → pytest собирал INTERNALERROR и ронял
+# ВЕСЬ прогон `pytest scripts/` со словами «no tests ran» (замер 2026-10-29).
 try:
-    SPEC = g.load_spec()
+    SPEC = g.load_spec(check_files=False)
 except SystemExit as exc:
-    # T-291: пиксели эталонов намеренно не в git (`.gitignore` → `/image-clone/etalons/*`,
-    # в репо только manifest.json), поэтому `load_spec()` на чистой машине обязан
-    # не найти первый же эталон. Отсюда шёл SystemExit **на уровне импорта модуля**,
-    # а файл называется `test_*.py` → pytest собирал его в INTERNALERROR и ронял
-    # ВЕСЬ прогон `pytest scripts/`, не показав ни одного другого набора (замер
-    # 2026-10-29: 9 файлов, 111 тест проходят поодиночке, вместе — «no tests ran»).
-    # Отсутствие машинного ассета — это skip с причиной, а не падение и не «прошёл».
-    _why = f"эталонный набор недоступен: {exc}"
+    # Ни манифеста эталонов (файл в git; отсутствует, например, в частичном зеркале
+    # рабочего дерева, на которое game/run_tests.sh выкладывает только game/ и scripts/).
+    # Это skip с причиной, а не INTERNALERROR: падение на импорте `test_*.py` уносило весь
+    # прогон `pytest scripts/` (T-291). Пиксели здесь не нужны — их и нет нигде, кроме
+    # машины с приватным клоном (D-185).
+    _why = f"манифест эталонов недоступен: {exc}"
     try:
         import pytest
     except ImportError:
         print(f"SKIP: {_why}")
         raise SystemExit(0)
     pytest.skip(_why, allow_module_level=True)
+# Что из проверок требует настоящих кадров. Отличить «скипнуто» от «проверено» обязан
+# читатель строки OK: счётчик ниже печатает и то, и другое.
+PIXELS = all((SPEC["_references"] / c["reference"]).is_file() for c in SPEC["categories"].values())
+
 N = 64
 checks = 0
+
+
+def test_selfcheck():
+    """Одним тестом pytest заставляет собрать файл: без него pytest считает модуль
+    пустым (exit 5 «no tests collected») и гейт краснеет, хотя assert-ы отработали."""
+    assert checks > 0, "ни одной проверки не выполнено"
 
 
 def ok(cond, what):
@@ -58,10 +72,37 @@ with tempfile.TemporaryDirectory() as tmp:
     bad = Path(tmp) / "bad.json"
     bad.write_text(Path(g.SPEC_PATH).read_text().replace('"count": 12', '"count": 11', 1))
     try:
-        g.load_spec(bad)
+        g.load_spec(bad, check_files=False)
         ok(False, "count != len(items) не уронил загрузку")
     except SystemExit as exc:
         ok("units" in str(exc) and "11" in str(exc) and "12" in str(exc), f"сообщение о count: {exc}")
+
+    # --- чистая машина (D-307): каталог с одним manifest.json — уровень работает,
+    # а строгий режим (прогон генератора) обязан сказать «эталон не найден», а не делать вид.
+    clean = Path(tmp) / "clean"
+    clean.mkdir()
+    (clean / "manifest.json").write_text((SPEC["_references"] / "manifest.json").read_text())
+    spec_clean = clean / "spec.json"
+    spec_clean.write_text(Path(g.SPEC_PATH).read_text().replace(
+        '"references_dir": "image-clone/etalons"', f'"references_dir": "{clean}"', 1))
+    g.load_spec(spec_clean, check_files=False)
+    ok(True, "спека без пикселей не загрузилась по манифесту")
+    try:
+        g.load_spec(spec_clean)
+        ok(False, "строгий режим принял каталог без пикселей")
+    except SystemExit as exc:
+        ok("не найден" in str(exc), f"строгий режим молчит: {exc}")
+    man = json.loads((clean / "manifest.json").read_text())
+    named = {c["reference"] for c in SPEC["categories"].values()}
+    for e in man["files"]:
+        if e["file"] in named:
+            e["sha256"] = e["sha256"][:8]
+    (clean / "manifest.json").write_text(json.dumps(man))
+    try:
+        g.load_spec(spec_clean, check_files=False)
+        ok(False, "эталон без sha256 принят")
+    except SystemExit as exc:
+        ok("sha256" in str(exc), f"битый манифест промолчал: {exc}")
 
     subjects = [it["id"] for c in SPEC["categories"].values() for it in c["items"]]
     ok(len(subjects) == 79, f"сюжетов {len(subjects)} != 79")
@@ -88,7 +129,7 @@ with tempfile.TemporaryDirectory() as tmp:
         bad = Path(tmp) / f"dead_{dead}.json"
         bad.write_text(Path(g.SPEC_PATH).read_text().replace('\n "model":', f'\n "{dead}": "x",\n "model":', 1))
         try:
-            g.load_spec(bad)
+            g.load_spec(bad, check_files=False)
             ok(False, f"глобальное поле {dead} промолчало")
         except SystemExit as exc:
             ok(dead in str(exc), f"сообщение про {dead}: {exc}")
@@ -117,12 +158,14 @@ with tempfile.TemporaryDirectory() as tmp:
            f"вариант {vv['id']} лезет в пропорции/палитру/материалы эталона")
     for cname, c in SPEC["categories"].items():
         ok(c.get("style") and c.get("reference"), f"у категории {cname} нет эталона или его описания")
-        ok((SPEC["_references"] / c["reference"]).is_file(), f"эталон {cname} не найден на диске")
+        if PIXELS:
+            ok((SPEC["_references"] / c["reference"]).is_file(), f"эталон {cname} не найден на диске")
 
     # --- воротчик белизны калибруется по эталону: сам эталон обязан его проходить
-    ref = Image.open(SPEC["_references"] / SPEC["categories"]["units"]["reference"]).convert("RGB")
-    ok(g.white_ratio(ref) >= g.WHITE_MIN, "эталон не проходит собственный воротчик белизны")
-    ok(25 <= g.mean_luma(ref) <= 235, "эталон не проходит воротчик яркости")
+    if PIXELS:
+        ref = Image.open(SPEC["_references"] / SPEC["categories"]["units"]["reference"]).convert("RGB")
+        ok(g.white_ratio(ref) >= g.WHITE_MIN, "эталон не проходит собственный воротчик белизны")
+        ok(25 <= g.mean_luma(ref) <= 235, "эталон не проходит воротчик яркости")
 
     # --- воротчик размера
     p = write("right.webp", (255, 255, 255))
@@ -234,4 +277,5 @@ with tempfile.TemporaryDirectory() as tmp:
     ok(board.exists() and Image.open(board).size[0] > 1000, "борд стиля не собран")
     ok(board.name == "board_style_krea2.webp", f"борд не привязан к модели: {board.name}")
 
-print(f"OK: проверок {checks}")
+print(f"OK: проверок {checks} (кадров эталонов на диске: {"есть" if PIXELS else "нет — "
+      "проверки пикселей эталонов пропущены, D-307"})")
