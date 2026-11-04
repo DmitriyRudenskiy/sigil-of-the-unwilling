@@ -171,6 +171,82 @@ func test_field_is_shifted_up_toward_the_band() -> void:
 		.override_failure_message("сдвиг %.1f != (bottom - top) / 2z" % shift)
 
 
+## T-324 (D-304): карточка противника обязана быть видимой, но не за счёт поля.
+## Мера — пересечение прямоугольников, а не координаты карточки: правка обязана
+## пережить другое разрешение и любой будущий перенос пластины. Поле берётся из
+## публичных `field_center()`/`field_size()` минус 30 px запас, заложенный в
+## `field_size()` (тот же источник, что и вписка камеры), и пересчитывается в
+## пиксели окна тем же canvas-трансформом, что и кадр.
+func test_target_card_never_covers_the_hex_field() -> void:
+	for res in [Vector2i(1920, 1080), Vector2i(1280, 720)]:
+		var battle: Node = await _battle_at(res)
+		var card := battle.get_node("BattleUI/target_card") as Control
+		_ui_of(battle).show_target_card(_profiled_enemy(), "Противник")
+		await get_tree().process_frame
+		var got := _win_rect(card.get_global_rect(), _scale_of(battle))
+		assert_bool(got.size.x > 0.0 and got.size.y > 0.0).is_true().override_failure_message(
+			"%dx%d: карточка не разложена (%s) — проверка была бы зелёной без носителя"
+			% [res.x, res.y, got]
+		)
+		var hexes := _hex_field_rect(battle)
+		assert_bool(not hexes.intersects(got.grow(-1.0))).is_true().override_failure_message(
+			"%dx%d: карточка %s лежит на поле сот %s — перекрыто %.0f px² (T-324)"
+			% [res.x, res.y, got, hexes, hexes.intersection(got).get_area()]
+		)
+
+
+## Карточка целиком обязана оставаться в кадре: «сдвинь за край» — тоже способ
+## не перекрывать соты, и он не принимается.
+func test_target_card_stays_inside_the_frame() -> void:
+	var battle: Node = await _battle_at(Vector2i(1920, 1080))
+	var card := battle.get_node("BattleUI/target_card") as Control
+	_ui_of(battle).show_target_card(_profiled_enemy(), "Противник")
+	await get_tree().process_frame
+	var got := _win_rect(card.get_global_rect(), _scale_of(battle))
+	var win: Vector2i = battle.get_node("BattleView").get_viewport().get_window().size
+	assert_bool(got.position.x >= 0.0 and got.position.y >= 0.0).is_true().override_failure_message(
+		"карточка выехала за левый/верхний край кадра: %s при %s" % [got, win]
+	)
+	assert_bool(got.end.x <= float(win.x) + 1.0 and got.end.y <= float(win.y) + 1.0).is_true() \
+		.override_failure_message(
+			"карточка %s не влезает в кадр %s — правый/нижний край за экраном" % [got, win]
+		)
+
+
+## Масштаб окна к координатам viewports (stretch canvas_items): то же число,
+## которым пользуется T-220, чтобы пиксели карточки и сот сравнивать в одной системе.
+func _scale_of(battle: Node) -> float:
+	var vp: Viewport = battle.get_node("BattleView").get_viewport()
+	return float(vp.get_window().size.x) / vp.get_visible_rect().size.x
+
+
+func _win_rect(r: Rect2, k: float) -> Rect2:
+	return Rect2(r.position * k, r.size * k)
+
+
+## Покрывающий прямоугольник сот в пикселях окна: мир → экран через canvas-трансформ.
+func _hex_field_rect(battle: Node) -> Rect2:
+	var view := _view_of(battle)
+	var world := Rect2(
+		view.field_center() - view.field_size() / 2.0 + Vector2(30.0, 30.0),
+		view.field_size() - Vector2(60.0, 60.0))
+	var vt: Transform2D = view.get_viewport().get_canvas_transform()
+	var k := _scale_of(battle)
+	var a: Vector2 = (vt * world.position) * k
+	var b: Vector2 = (vt * world.end) * k
+	return Rect2(a, b - a)
+
+
+## Юнит с dnd-профилем: строка способностей — самая широкая в пластине, а тест
+## обязан держать то состояние карточки, в котором она шире всего.
+func _profiled_enemy() -> BattleState.BattleUnit:
+	var u := _unit_at("knights", Vector2i(0, 0))
+	var profile := DnDCombatantProfile.new("knights", "Knight")
+	profile.level = 1
+	u.dnd_profile = profile
+	return u
+
+
 ## Нулевой запас = прежняя плотная вписка (ловит M1' «запас не применён» и M2'
 ## «прочитан, но не вошёл в формулу»: при нуле обе формулы обязаны совпасть).
 func test_zero_reserve_restores_tight_fit() -> void:

@@ -615,22 +615,24 @@ stretch_mode = 6
 
 [node name="target_card" type="PanelContainer" parent="." unique_id=732893140]
 visible = false
-anchors_preset = 9
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -374.0
-offset_top = -170.0
-offset_right = -14.0
-offset_bottom = 170.0
-grow_horizontal = 0
-grow_vertical = 2
+anchors_preset = 5
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 12.0
+offset_right = 0.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 1
 theme_type_variation = &"PanelCard"
 
-[node name="tc_box" type="VBoxContainer" parent="target_card" unique_id=732893141]
+[node name="tc_box" type="GridContainer" parent="target_card" unique_id=732893141]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 4
+columns = 5
 
 [node name="tc_caption" type="Label" parent="target_card/tc_box"]
 layout_mode = 2
@@ -640,7 +642,6 @@ text = "Цель"
 [node name="tc_name" type="Label" parent="target_card/tc_box" unique_id=732893142]
 layout_mode = 2
 theme_type_variation = &"LabelHeading"
-autowrap_mode = 3
 
 [node name="tc_count_row" type="HBoxContainer" parent="target_card/tc_box" unique_id=732893143]
 layout_mode = 2
