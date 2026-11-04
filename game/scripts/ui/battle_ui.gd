@@ -205,7 +205,7 @@ func theme_root_theme(t: Theme) -> void:
 func _connect_skeleton() -> void:
 	_action_buttons = [
 		_retreat_btn, _auto_btn, _wait_btn, _attack_button,
-		_defend_btn, _skip_btn, _cancel_btn,
+		_defend_btn, _skip_btn, _cancel_btn, _spellbook_btn,
 	]
 	_retreat_btn.pressed.connect(_on_retreat)
 	# Раскладка ряда применяется отложенно: в `_ready` узел ещё настраивает
@@ -377,6 +377,13 @@ func set_controls_enabled(enabled: bool) -> void:
 
 	if _attack_button != null and not enabled:
 		_set_medallion_enabled(_attack_button, false)
+	# T-319 / D-300 (а): книга — команда ряда, она гасится вместе с ним. Открытая
+	# панель закрывается тем же вызовом: иначе вне окна ввода остаётся висящее
+	# окно, выбор из которого игрок сделать не может (прецедент T-247/D-252 —
+	# «непонятно, почему не нажимается»). Горячая клавиша защищена `disabled`
+	# в `_press`, отдельной правки не требует.
+	if not enabled:
+		close_spellbook()
 
 func set_attack_enabled(enabled: bool) -> void:
 	_set_medallion_enabled(_attack_button, enabled)

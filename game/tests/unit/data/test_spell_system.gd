@@ -1,17 +1,19 @@
 extends BaseTest
 
 ## Тесты каталога «книги заклинаний» (`SpellbookRegistry`, `SpellbookDef`,
-## `SpellEnums`) и шаблонного фасада `SpellResolver`.
+## `SpellEnums`).
 ##
-## Разделение обязано быть видным (T-283). Продакшн-путь боя — `SpellCaster.cast`
+## Продакшн-путь боя — `SpellCaster.cast`
 ## (`scripts/systems/battle_action_resolver.gd:102`); он здесь не тестируется, у
 ## него свои файлы (`tests/unit/systems/test_magic_resistance.gd`,
-## `tests/unit/systems/test_battle_spell_targeting.gd`). Восемь проверок с
-## префиксом `test_facade_resolve_*` измеряют фасад, у которого нет ни одного
-## вызывающего в игре, и называются соответственно: раньше они звались
-## `test_resolve_*`, и зелёный прогон читался как «боевая магия работает». Живой
-## инвариант их мёртвости — `tests/unit/data/test_spell_resolver_deadness.gd`;
-## носитель решения по подсистеме целиком — T-267.
+## `tests/unit/systems/test_battle_spell_targeting.gd`).
+##
+## Раньше ниже лежали восемь проверок `test_facade_resolve_*` фасада
+## `SpellResolver` — они звались `test_resolve_*`, и зелёный прогон читался как
+## «боевая магия работает». Фасад снят вместе с ними (T-283, Q-M128 → (б),
+## D-306): ни одного вызывающего в игре у него не было, а две семантики
+## разрешения заклинаний — гарантированное расхождение правил. Носитель решения
+## по подсистеме целиком — T-267.
 
 var registry: Variant = null
 
@@ -352,71 +354,3 @@ func test_market_niche_basic() -> void:
 		&"MARKET_NICHE", {"action": "draw_from_market", "market_cost": 1}, {}, [], null, null, null
 	)
 	assert_that(result["result"]).is_equal("success")
-
-## Ниже — фасад, а не бой: `SpellResolver.resolve` в игре не вызывается ни откуда
-## (T-283, инвариант в `test_spell_resolver_deadness.gd`). Эти восемь проверок
-## держат шаблонный движок на случай варианта (а) из T-267 и ничего не говорят о
-## том, как заклинание считает урон в бою.
-
-func test_facade_resolve_null_spell() -> void:
-	var result: Dictionary = SpellResolver.resolve(null, null, null)
-	assert_that(result["result"]).is_equal("invalid_spell")
-
-func test_facade_resolve_no_template() -> void:
-	var spell: Variant = SpellbookDef.from_dict({"id": "no_template", "cost": 0})
-	var result: Dictionary = SpellResolver.resolve(spell, null, null)
-	assert_that(result["result"]).is_equal("no_template")
-
-func test_facade_resolve_insufficient_power() -> void:
-	var spell = registry.get_spell(&"annihilate")
-	var player: Dictionary = {"current_power": 2}
-	var result: Dictionary = SpellResolver.resolve(spell, null, player)
-	assert_that(result["result"]).is_equal("insufficient_power")
-
-func test_facade_resolve_success_no_target() -> void:
-	var spell = registry.get_spell(&"bottled_insight")
-	var player: Dictionary = {"current_power": 10, "hand": []}
-	var result: Dictionary = SpellResolver.resolve(spell, null, player)
-	assert_that(result["result"]).is_equal("success")
-	assert_bool(result.has("effects")).is_true()
-
-func test_facade_resolve_deducts_cost() -> void:
-	var spell = registry.get_spell(&"ice_bolt")
-	var player: Dictionary = {"current_power": 10, "hand": []}
-	var before: int = player.current_power
-	var result: Dictionary = SpellResolver.resolve(spell, null, player)
-	assert_that(result["result"]).is_equal("success")
-	assert_that(player.current_power).is_equal(before - spell.cost)
-
-func test_facade_resolve_insufficient_influence() -> void:
-	var spell: Variant = SpellbookDef.from_dict({
-		"id": "big", "template": "DIRECT_DAMAGE", "cost": 1,
-		"influence_req": {"fire": 5},
-		"params": {"amount": 1, "target": "ENEMY_NEXUS"},
-	})
-	var player: Dictionary = {"current_power": 10, "influence": {"fire": 1}}
-	var result: Dictionary = SpellResolver.resolve(spell, null, player)
-	assert_that(result["result"]).is_equal("insufficient_influence")
-
-func test_facade_resolve_condition_not_met() -> void:
-	var spell = registry.get_spell(&"deathstrike")
-	var player: Dictionary = {"current_power": 10}
-	var result: Dictionary = SpellResolver.resolve(spell, null, player, null)
-	assert_bool(result["result"] in ["success", "condition_not_met", "no_target"]).is_true()
-
-func test_facade_resolve_all_16_templates() -> void:
-	var templates := [
-		&"DIRECT_DAMAGE", &"HARD_REMOVAL", &"BOUNCE", &"COUNTERMAGIC",
-		&"COMBAT_TRICK", &"DEBUFF_CONTROL", &"SPELL_DRAW", &"MANA_RAMP",
-		&"TOKEN_GENERATION", &"RELIC_INTERACTION", &"KEYWORD_BUFF",
-		&"CHOICE_CYCLE", &"TOUCH_CYCLE", &"DISPLAY_CYCLE",
-		&"DISPEL_DRAW", &"MARKET_NICHE",
-	]
-	for t in templates:
-		var spell: Variant = SpellbookDef.from_dict({
-			"id": str(t), "template": str(t), "cost": 0,
-			"params": {"amount": 1, "target": "ENEMY_UNIT", "count": 1, "atk": 1, "hp": 1, "keyword": "ARMORED"},
-		})
-		var player: Dictionary = {"current_power": 10, "hand": [1]}
-		var result: Dictionary = SpellResolver.resolve(spell, null, player)
-		assert_bool(result["result"] != "unknown_template").is_true()

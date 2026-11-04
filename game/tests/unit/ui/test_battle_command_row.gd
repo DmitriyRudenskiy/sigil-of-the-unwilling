@@ -122,3 +122,55 @@ func test_exit_hotkey_and_corner_options() -> void:
 func _hotkeys_of(ui: BattleUI) -> Dictionary:
 	return ui._hotkeys
 
+
+
+# T-319 / D-300 (а): книга заклинаний — команда ряда, гасится вместе с ним.
+# До правки `_spellbook_btn` не входила в `_action_buttons`: между фазами боя
+# (ход противника, анимация, конец боя) игрок открывал книгу и получал
+# молчаливый отказ — единственный исход, который он не объясняет себе сам.
+func test_spellbook_goes_dark_with_the_row() -> void:
+	var ui: BattleUI = await _ready_ui()
+	assert_bool(ui._action_buttons.has(ui._spellbook_btn)).override_failure_message(
+		"книга не входит в `_action_buttons` — гашение ряда её не касается").is_true()
+	assert_bool(ui._spellbook_btn.disabled).is_false()
+	ui.set_controls_enabled(false)
+	assert_bool(ui._spellbook_btn.disabled).override_failure_message(
+		"T-319: книга доступна вне окна ввода команды").is_true()
+	# инвариант ряда не сломан: «Пропуск» остаётся доступным всегда
+	assert_bool(ui._skip_btn.disabled).is_false()
+	ui.set_controls_enabled(true)
+	assert_bool(ui._spellbook_btn.disabled).is_false()
+
+
+# AC3: открытая до гашения панель закрывается тем же вызовом — висящее окно,
+# из которого нельзя выбрать, и есть «непонятно, почему не нажимается».
+func test_open_spellbook_closes_when_row_goes_dark() -> void:
+	var ui: BattleUI = await _ready_ui()
+	ui.open_spellbook(null)
+	assert_bool(_panel(ui).visible).is_true()
+	ui.set_controls_enabled(false)
+	assert_bool(_panel(ui).visible).override_failure_message(
+		"T-319: панель книги осталась открытой при гашении ряда").is_false()
+
+
+# AC2: погашенная книга не открывается ни кнопкой, ни горячей клавишей.
+func test_dark_spellbook_ignores_press_and_hotkey() -> void:
+	var ui: BattleUI = await _ready_ui()
+	var fired := [0]
+	ui.spellbook_requested.connect(func() -> void: fired[0] += 1)
+	ui.set_controls_enabled(false)
+	# Реальный «клик» по погашенной кнопке движок не доставляет — он гасится
+	# самим `disabled` (проверен выше), поэтому здесь проверяется второй вход:
+	# горячая клавиша ряда идёт через `_press`, и он обязан остановиться на том
+	# же флаге. Прямой `emit_signal("pressed")` тут был бы ложью: он обходит
+	# `disabled` и ничего про ввод не утверждает.
+	assert_bool(ui._spellbook_btn.disabled).is_true()
+	ui._press(ui._hotkeys[KEY_B])              # горячая клавиша ряда
+	await get_tree().process_frame
+	assert_int(fired[0]).override_failure_message(
+		"T-319: тёмная книга вызвала запрос (клавиша или клик)").is_equal(0)
+	assert_bool(_panel(ui).visible).is_false()
+
+
+func _panel(ui: BattleUI) -> Control:
+	return ui.get_node("BattleSpellbookPanel") as Control
