@@ -79,6 +79,13 @@ theme_override_colors/font_color = Color(0.99, 0.96, 0.84, 1)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 
+[node name="LoadButton" type="Button" parent="RightColumn"]
+theme_type_variation = &"MenuPlate"
+custom_minimum_size = Vector2(305, 75)
+theme_override_colors/font_color = Color(0.99, 0.96, 0.84, 1)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+
 [node name="SettingsButton" type="Button" parent="RightColumn"]
 theme_type_variation = &"MenuPlate"
 custom_minimum_size = Vector2(305, 75)

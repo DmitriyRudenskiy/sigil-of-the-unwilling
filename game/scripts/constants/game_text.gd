@@ -473,7 +473,6 @@ static func load_ok() -> String: return TranslationServer.translate("load.ok")
 static func load_failed() -> String: return TranslationServer.translate("load.failed")
 static func no_save_found() -> String: return TranslationServer.translate("load.no_save")
 static func save_slot_empty_unavailable() -> String: return TranslationServer.translate("save.slot_empty_unavailable")
-static func save_load_mode_unavailable() -> String: return TranslationServer.translate("save.load_mode_unavailable")
 
 static func campaign_city() -> String: return TranslationServer.translate("campaign.city")
 static func campaign_party() -> String: return TranslationServer.translate("campaign.party")

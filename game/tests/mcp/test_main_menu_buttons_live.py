@@ -15,7 +15,8 @@ import pytest
 from conftest import boot_menu
 
 COLUMN = [
-    "NewGameButton", "ContinueButton", "SettingsButton", "CreditsButton", "ExitButton",
+    "NewGameButton", "ContinueButton", "LoadButton", "SettingsButton",
+    "CreditsButton", "ExitButton",
 ]
 
 
@@ -35,7 +36,7 @@ def _buttons(mcp) -> list:
 # остальной свит не о чем. В слой smoke попадает только по MCP_SMOKE=1.
 @pytest.mark.smoke
 def test_live_menu_column_matches_contract(mcp):
-    """Пять пунктов в порядке макета, все видимы, тексты не пусты."""
+    """Шесть пунктов в порядке макета 09 (с амендментом D-301), все видимы."""
     boot_menu(mcp)
     rows = _buttons(mcp)
     assert [r["name"] for r in rows] == COLUMN, f"состав колонки разошёлся с макетом: {rows}"
@@ -52,6 +53,34 @@ def test_live_disabled_states(mcp):
     assert states["ExitButton"] is True, f"«Выход» обязана быть отключена (AC6): {states}"
     assert states["NewGameButton"] is False, f"«Новая игра» должна быть доступна: {states}"
     assert states["SettingsButton"] is False, f"«Настройки» должны быть доступны: {states}"
+    # «Загрузить» (D-301 (в)) — живой пункт, а не заглушка: он доступен и при
+    # пустых слотах, потому что пустоту объясняет сам список слотов.
+    assert states["LoadButton"] is False, f"«Загрузить» обязан быть доступен: {states}"
+
+
+def test_live_load_entry_opens_the_campaign_slots(mcp):
+    """T-307: у экрана слотов есть живой вход, и говорит он про кампанийный сейв.
+
+    До правки экран не открывался ниоткуда, а его строки читались из легаси
+    `SaveManager` — магазина, который кампания не пишет: игрок видел бы
+    «сохранений нет» вечно.
+    """
+    boot_menu(mcp)
+    state = mcp.execute_code(
+        'var screen = get_tree().current_scene.get_node("SaveLoadScreen")\n'
+        'assert(not screen.visible)\n'
+        'var btn = get_tree().current_scene.get_node("RightColumn/LoadButton")\n'
+        'assert(not btn.disabled)\n'
+        'btn.emit_signal("pressed")\n'
+        'var list = screen.get_node("Panel/Box/SlotList")\n'
+        'return {"visible": screen.visible, "rows": list.get_child_count(),'
+        ' "slots": screen.SLOT_COUNT}'
+    )
+    assert state["visible"] is True, f"«Загрузить» не открыл экран слотов: {state}"
+    assert state["rows"] == state["slots"], (
+        f"рядов {state['rows']}, а слотов у экрана {state['slots']} — состав ряда "
+        "должен принадлежать носителю сейва (T-307)"
+    )
 
 
 def test_disabled_credits_press_keeps_menu(mcp):

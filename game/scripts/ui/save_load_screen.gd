@@ -5,9 +5,16 @@ signal load_requested(slot: int)
 signal delete_requested(slot: int)
 signal closed
 
-const SLOT_COUNT := 5
+## Число слотов берётся у носителя сейва. Экран держал свои пять кнопок при
+## трёх слотах системы (T-307, D-301): два ряда физически не могли заполниться,
+## и игрок читал «нет сохранений» там, где слота не существует.
+const SLOT_COUNT := MvpSaveManager.SLOT_COUNT
 
-var _mode: String = "load"
+## Загрузка меняет сцену на кампанийный носитель — тот же путь, что у «Продолжить»
+## (`main_menu.SCENE_CONTINUE`); константа своя, чтобы не зациклить preload
+## (`MainMenu` → экран → `MainMenu`).
+const SCENE_CAMPAIGN := "res://scenes/main/main.tscn"
+
 var _wired := false
 
 @onready var _title: Label = $Panel/Box/Title
@@ -23,7 +30,7 @@ func _ready() -> void:
 
 
 ## Столп 1 (mvp-ui-flow 3.3): слоты выключены самим `.tscn` — до первого `open()`
-## экран показывал десять серых кнопок без объяснения. Причина ставится сразу при
+## экран показывал ряды серых кнопок без объяснения. Причина ставится сразу при
 ## монтировании, а `_refresh_slots` дальше ведёт её по состоянию данных.
 func _explain_scene_defaults() -> void:
 	for i in SLOT_COUNT:
@@ -54,10 +61,13 @@ func _get_slot_node(i: int, rel_path: String) -> Control:
 	return slot_root.get_node_or_null(rel_path)
 
 
-func open(mode: String = "load") -> void:
+## Режим `save` снят (T-307, D-301): в сцене нет кнопки записи, и «режим
+## сохранения» показывал список, в котором нельзя было сделать ничего — ни
+## записать, ни загрузить. Запись кампанийного слота делает носитель кампания
+## (`main.save_campaign_slot()`), а не этот список.
+func open() -> void:
 	_wire()
-	_mode = mode
-	_title.text = GameText.load_ok() if mode == "load" else GameText.save_ok()
+	_title.text = GameText.menu_load_game()
 	_error_label.text = ""
 	_refresh_slots()
 	visible = true
@@ -76,8 +86,8 @@ func _refresh_slots() -> void:
 		var info_label: Label = _get_slot_node(i, "HBox/Info")
 		var load_btn: Button = _get_slot_node(i, "HBox/Buttons/LoadButton")
 		var delete_btn: Button = _get_slot_node(i, "HBox/Buttons/DeleteButton")
-		var data: SaveData = _read_slot(slot)
-		if data == null:
+		var state := _read_state(slot)
+		if state.is_empty():
 			if info_label != null:
 				info_label.text = GameText.no_save_found()
 			# Столп 1 (mvp-ui-flow 3.3): в пустом слоте обе кнопки выключены — игрок
@@ -86,14 +96,9 @@ func _refresh_slots() -> void:
 			_set_unavailable(delete_btn, GameText.save_slot_empty_unavailable())
 		else:
 			if info_label != null:
-				info_label.text = _format_slot_info(data)
+				info_label.text = _format_slot_info(state)
+			_set_available(load_btn)
 			_set_available(delete_btn)
-			if _mode == "load":
-				_set_available(load_btn)
-			else:
-				# Заполненный слот в режиме записи: «Загрузить» неактивна — это не
-				# сломанный слот, а режим экрана.
-				_set_unavailable(load_btn, GameText.save_load_mode_unavailable())
 
 
 ## Пара «состояние + причина» ставится одним вызовом: выключить контрол и не
@@ -112,33 +117,31 @@ static func _set_available(button: Button) -> void:
 	button.tooltip_text = ""
 
 
-func _read_slot(slot: int) -> SaveData:
-	var result: Dictionary = SaveManager.load_slot(slot)
-	if int(result.get("error", -1)) != SaveManager.SaveError.OK:
-		return null
-	return result.get("data") as SaveData
+## Только что записанный слот, не проходящий схему, — норма, а не авария: экран
+## обязан показать «пусто», а не упасть. Отличие отсутствующего файла от битого
+## сейва видно в журнале (`MvpSaveManager.load_slot` возвращает код ошибки).
+func _read_state(slot: int) -> Dictionary:
+	var result: Dictionary = MvpSaveManager.load_slot(slot)
+	if not bool(result.get("ok", false)):
+		return {}
+	return result.get("state", {}) as Dictionary
 
 
-func _format_slot_info(data: SaveData) -> String:
-	var parts: Array[String] = []
-	var hero_name: String = str(data.hero.get("hero_name", ""))
+## Мера строки — то, что лежит в сейве: ход кампании и имя героя. Дату, отряд и
+## города показывала легаси-верстка (`SaveData.hero/.cities`) по сейвам, которые
+## игра больше не пишет.
+func _format_slot_info(state: Dictionary) -> String:
+	var campaign := state.get("campaign", {}) as Dictionary
+	var parts: Array[String] = [GameText.campaign_goal_day(int(campaign.get("turn", 1)))]
+	var hero_name := str(campaign.get("hero_name", ""))
 	if not hero_name.is_empty():
-		parts.append("🧙 %s" % hero_name)
-	var d: Dictionary = data.date
-	parts.append(GameText.endgame_date(
-		int(d.get("month", 1)), int(d.get("week", 1)), int(d.get("day", 1))))
-	if data.run_seed > 0:
-		parts.append("🎲 %d" % data.run_seed)
-	if data.cities.size() > 0:
-		parts.append("🏰 %d" % data.cities.size())
-	if parts.is_empty():
-		return GameText.no_save_found()
+		parts.append(hero_name)
 	return "  ·  ".join(parts)
 
 
 func _on_load_pressed(slot_index: int) -> void:
 	var slot := slot_index + 1
-	if not SaveManager.has_save_in_slot(slot):
+	if not MvpSaveManager.has_save_in_slot(slot):
 		_error_label.text = GameText.no_save_found()
 		return
 	load_requested.emit(slot)
@@ -155,25 +158,22 @@ func _on_back_pressed() -> void:
 
 
 func perform_load(slot: int) -> void:
-	var result: Dictionary = SaveManager.load_slot(slot)
-	var err: int = int(result.get("error", -1))
-	if err != SaveManager.SaveError.OK:
+	var result: Dictionary = MvpSaveManager.load_slot(slot)
+	if not bool(result.get("ok", false)):
 		_error_label.text = GameText.load_failed()
-		GameLogger.warn("SaveLoadScreen: load error %d" % err, "SaveLoad")
-		return
-	var data: SaveData = result.get("data")
-	if data == null:
-		_error_label.text = GameText.load_failed()
+		GameLogger.warn(
+			"SaveLoadScreen: slot %d не загружен: %s" % [slot, str(result.get("message", ""))],
+			"SaveLoad")
 		return
 	var persistence: WorldPersistence = Services.resolve(&"persistence")
 	if persistence != null:
-		persistence.pending_save = data
-	# Cutover D-157: навигация — на K-канон-линию; продолжить-MVP (чтение
-	# mvp_save_manager секций) — слой UI-проводки T-110, вне репойнта.
-	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
+		# Тот же вход, что у «Продолжить»: слот читает уже кампанийный носитель
+		# (`main.gd` → `composition.load_save_state`).
+		persistence.pending_campaign_slot = slot
+	get_tree().change_scene_to_file(SCENE_CAMPAIGN)
 
 
 func perform_delete(slot: int) -> void:
-	if SaveManager.delete_slot(slot):
+	if MvpSaveManager.delete_slot(slot):
 		GameLogger.info("SaveLoadScreen: deleted slot %d" % slot, "SaveLoad")
 	_refresh_slots()

@@ -1128,9 +1128,6 @@ msgstr "Save not found"
 msgid "save.slot_empty_unavailable"
 msgstr "Slot is empty: no save written yet."
 
-msgid "save.load_mode_unavailable"
-msgstr "This screen is in save mode."
-
 
 msgid "campaign.city"
 msgstr "City"

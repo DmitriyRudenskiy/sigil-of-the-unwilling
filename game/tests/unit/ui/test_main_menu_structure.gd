@@ -2,8 +2,12 @@ extends BaseTest
 const _Scene := preload("res://scenes/main_menu.tscn")
 
 ## Порядок колонки по макету 09 (ui-mockup-parity, шаг 3) — сверяется построчно.
+## Амендмент макета 09 (D-301 (в), Q-M123→(в)): между «Продолжить» и «Настройки»
+## встал «Загрузить» — вход к трём кампанийным слотам. «Сохранить» в меню нет:
+## сериализовать в меню нечего (запись делает кампанийный слой).
 const MOCKUP_ORDER := [
-	"NewGameButton", "ContinueButton", "SettingsButton", "CreditsButton", "ExitButton",
+	"NewGameButton", "ContinueButton", "LoadButton", "SettingsButton",
+	"CreditsButton", "ExitButton",
 ]
 
 var _menu: Node = null
@@ -20,7 +24,7 @@ func _spawn() -> MainMenu:
 	await get_tree().process_frame
 	return m
 
-func test_main_menu_column_has_five_buttons() -> void:
+func test_main_menu_column_has_six_buttons() -> void:
 	var ui := await _spawn()
 	var col: Node = ui.get_node_or_null("RightColumn")
 	assert_object(col).is_not_null()
@@ -29,7 +33,7 @@ func test_main_menu_column_has_five_buttons() -> void:
 		names.append(child.name)
 	assert_array(names).is_equal(MOCKUP_ORDER).override_failure_message(
 		"колонка меню обязана совпадать с макетом 09 по составу и порядку: %s" % [names])
-	assert_int(col.get_child_count()).is_equal(5).override_failure_message("ровно 5 кнопок, без Spacer")
+	assert_int(col.get_child_count()).is_equal(6).override_failure_message("ровно 6 кнопок, без Spacer")
 
 func test_main_menu_removed_buttons_absent() -> void:
 	var ui := await _spawn()
@@ -101,6 +105,9 @@ func test_main_menu_button_disabled_states() -> void:
 		"«Выход» обязана быть отключена (AC6): выход из игры — не кликом по меню")
 	assert_bool(ui._new_game_btn.disabled).is_false()
 	assert_bool(ui._settings_btn.disabled).is_false()
+	# «Загрузить» не гаснет при пустых слотах: список слотов объясняет пустоту на
+	# месте, рядом с каждым слотом (в отличие от «Продолжить», где объяснять нечего).
+	assert_bool(ui._load_btn.disabled).is_false()
 
 
 ## UI-3 шаг 3: нажатие доступного пункта доходит до обработчика — экран настроек
@@ -113,6 +120,18 @@ func test_main_menu_settings_press_shows_screen() -> void:
 	await get_tree().process_frame
 	assert_bool(layer.visible).is_true().override_failure_message(
 		"нажатие «Настройки» не открыло экран настроек")
+
+
+## T-307 (D-301 (в)): тот же инвариант для «Загрузить» — у живого экрана слотов
+## есть точка входа, и она не молчит: нажатие показывает оверлей.
+func test_main_menu_load_press_shows_slot_screen() -> void:
+	var ui := await _spawn()
+	var screen: CanvasItem = ui.get_node("SaveLoadScreen")
+	screen.visible = false
+	ui._load_btn.emit_signal("pressed")
+	await get_tree().process_frame
+	assert_bool(screen.visible).is_true().override_failure_message(
+		"нажатие «Загрузить» не открыло экран слотов")
 
 
 ## UI-3 шаг 3 (макет 09): титульный леттеринг — три строки по центру кадра, верхний
@@ -158,9 +177,8 @@ const _MENU_SOURCE := "res://scripts/ui/main_menu.gd"
 ## Единственные разрешённые молчуны — с тикетом-владельцем. Список красен и в другую
 ## сторону: если проводка появится, устаревшая строка красна так же, как мёртвый
 ## обработчик (иначе allowlist превращается в кладбище).
-const _SILENCE_ALLOWED := {
-	"_on_load_game": "T-307 (экран 3 слотов без точки входа)",
-}
+## Пусто с T-307: `_on_load_game` получил проводку (пункт «ЗаLOAD»)…
+const _SILENCE_ALLOWED := {}
 
 
 func _source_lines() -> PackedStringArray:

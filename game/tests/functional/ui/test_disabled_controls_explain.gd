@@ -39,6 +39,7 @@ const CREDITS_PATH := "RightColumn/CreditsButton"
 const EXIT_PATH := "RightColumn/ExitButton"
 const AVAILABLE_PATHS := [
 	"RightColumn/NewGameButton", "RightColumn/SettingsButton",
+	"RightColumn/LoadButton",
 ]
 const SUBRACE_PATH := "Overlay/Scroll/Root/SubraceRow/SubraceOption"
 const RACE_PATH := "Overlay/Scroll/Root/RaceRow/RaceOption"
@@ -123,7 +124,7 @@ func _expected_menu_disabled(has_save: bool) -> Array[String]:
 	# зрения: он печатается в отчёте теста как «отключённый, но скрытый».
 	if not has_save:
 		out.append(CONTINUE_PATH)
-	for i in 5:
+	for i in MvpSaveManager.SLOT_COUNT:
 		for button_name in ["LoadButton", "DeleteButton"]:
 			out.append("SaveLoadScreen/Panel/Box/SlotList/Slot%d/HBox/Buttons/%s"
 				% [i, button_name])
@@ -175,40 +176,37 @@ func test_menu_available_items_carry_no_reason() -> void:
 
 ## Панель сохранений — единственный экран, где причина уже была (строка «Сохранение
 ## не найдено» в той же строке слота). Проверяется, что к ней добавился и тултип,
-## и что инвентарь выключенных кнопок совпадает состоянию данных в обоих режимах:
-## пустой слот — обе кнопки; заполненный в режиме записи — только «Загрузить».
+## и что инвентарь выключенных кнопок совпадает состоянию данных: пустой слот —
+## обе кнопки, заполненный — ни одной (режима записи у экрана больше нет, T-307:
+## кнопки «Сохранить» в сцене не было никогда, и «режим сохранения» предлагал
+## список, в котором нельзя было сделать ничего).
 func test_save_load_rows_explain_their_disabled_buttons() -> void:
 	var screen: Node = await _spawn(SAVE_LOAD_SCENE_PATH)
 	var filled: Array[bool] = []
-	for i in 5:
+	for i in MvpSaveManager.SLOT_COUNT:
 		filled.append(_slot_filled(i + 1))
-	for mode in ["load", "save"]:
-		(screen as SaveLoadScreen).open(mode)
-		await get_tree().process_frame
-		var expected: Array[String] = []
-		for i in 5:
-			var row: String = "Panel/Box/SlotList/Slot%d/HBox/Buttons/" % i
-			if not filled[i]:
-				expected.append(row + "LoadButton")
-				expected.append(row + "DeleteButton")
-			elif mode == "save":
-				# Заполненный слот в режиме записи: загружать нечего, удалять — можно.
-				expected.append(row + "LoadButton")
-		expected.sort()
-		var disabled := _disabled_paths(screen)
-		assert_bool(disabled == expected).override_failure_message(
-			"режим «%s»: инвентарь выключенных кнопок разошёлся: ждалось %s, получено %s"
-			% [mode, expected, disabled]).is_true()
-		for path in disabled:
-			assert_str(_tooltip(screen, path)).override_failure_message(
-				"режим «%s»: выключенная кнопка %s без причины" % [mode, path]).is_not_empty()
+	(screen as SaveLoadScreen).open()
+	await get_tree().process_frame
+	var expected: Array[String] = []
+	for i in MvpSaveManager.SLOT_COUNT:
+		var row: String = "Panel/Box/SlotList/Slot%d/HBox/Buttons/" % i
+		if not filled[i]:
+			expected.append(row + "LoadButton")
+			expected.append(row + "DeleteButton")
+	expected.sort()
+	var disabled := _disabled_paths(screen)
+	assert_bool(disabled == expected).override_failure_message(
+		"инвентарь выключенных кнопок разошёлся: ждалось %s, получено %s"
+		% [expected, disabled]).is_true()
+	for path in disabled:
+		assert_str(_tooltip(screen, path)).override_failure_message(
+			"выключенная кнопка %s без причины" % path).is_not_empty()
 
 
 func _slot_filled(slot: int) -> bool:
-	# То же чтение слота, что и у экрана (SaveManager.load_slot + код ошибки):
-	# инвентарь сверяется с данными, а не с догадкой о них.
-	var result: Dictionary = SaveManager.load_slot(slot)
-	return int(result.get("error", -1)) == SaveManager.SaveError.OK
+	# То же чтение слота, что и у экрана (`MvpSaveManager.load_slot`): инвентарь
+	# сверяется с данными, а не с догадкой о них.
+	return bool(MvpSaveManager.load_slot(slot).get("ok", false))
 
 
 func test_creation_subrace_explains_itself() -> void:

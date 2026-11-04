@@ -1129,9 +1129,6 @@ msgstr "Сохранение не найдено"
 msgid "save.slot_empty_unavailable"
 msgstr "Слот пуст: сохранение ещё не записано."
 
-msgid "save.load_mode_unavailable"
-msgstr "Экран открыт в режиме сохранения."
-
 msgid "campaign.city"
 msgstr "Город"
 

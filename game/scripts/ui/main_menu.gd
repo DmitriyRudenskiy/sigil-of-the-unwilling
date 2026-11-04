@@ -11,6 +11,9 @@ const SCENE_CONTINUE := "res://scenes/main/main.tscn"
 
 @onready var _background: TextureRect = $Background
 @onready var _continue_btn: Button = $RightColumn/ContinueButton
+## «Загрузить» (D-301 (в), Q-M123): выбор кампанийного слота. Пункт стоит сразу
+## за «Продолжить» — это та же операция, только с выбором слота.
+@onready var _load_btn: Button = $RightColumn/LoadButton
 @onready var _new_game_btn: Button = $RightColumn/NewGameButton
 @onready var _credits_btn: Button = $RightColumn/CreditsButton
 @onready var _settings_btn: Button = $RightColumn/SettingsButton
@@ -83,7 +86,7 @@ func _placeholder() -> ImageTexture:
 
 func _style_buttons() -> void:
     var buttons: Array[Button] = [
-        _continue_btn, _new_game_btn, _credits_btn,
+        _continue_btn, _load_btn, _new_game_btn, _credits_btn,
         _settings_btn, _exit_btn
     ]
     # Носитель кнопок — тема (вариант MenuPlate: плита макета 09, 9-slice). Здесь
@@ -103,6 +106,7 @@ func _style_buttons() -> void:
 
 func _localize() -> void:
     _continue_btn.text = GameText.menu_continue()
+    _load_btn.text = GameText.menu_load_game()
     _new_game_btn.text = GameText.menu_new_game()
     _credits_btn.text = GameText.menu_credits()
     _settings_btn.text = GameText.menu_settings()
@@ -130,6 +134,7 @@ func _set_title(title: String) -> void:
 
 func _connect_buttons() -> void:
     _continue_btn.pressed.connect(_on_continue)
+    _load_btn.pressed.connect(_on_load_game)
     _new_game_btn.pressed.connect(_on_new_game)
     _settings_btn.pressed.connect(_on_settings)
     _exit_btn.pressed.connect(_on_exit)
@@ -176,15 +181,14 @@ func _clear_session_caches() -> void:
 
     Services.clear_session()
 
-## ВРЕМЕННО НЕДОСТИЖИМО (Т-133, Q-M90 → D-205 (а)): макет 09 не содержит пункта
-## «Загрузить», кнопка убрана из колонки; экран выбора сохранения и его проводка
-## оставлены на месте. Вердикт D-205 закрыл состав меню, но не судьбу экрана —
-## она у T-307. Не удалять молча и не соединять «временно» куда-нибудь: инвариант
-## «у каждого обработчика меню есть проводка» держится списком в
-## tests/unit/ui/test_main_menu_structure.gd, и этот обработчик — его единственная
-## строка.
+## Точка входа экрана слотов (T-307, D-301 (в)): пункт «Загрузить» в колонке
+## макета 09. D-205 (а) вычеркнул его из состава меню, когда экрана ещё не
+## существовало; амендмент D-301 вернул пункт, и инвариант «у каждого
+## обработчика есть проводка» больше не держит для него строку-исключение.
+## «Сохранить» в меню нет: сериализовать нечего — состояние кампании живёт в
+## носителя `main.gd`, а в меню его уже нет (запись делает кампанийный слой).
 func _on_load_game() -> void:
-    _save_load_screen.open("load")
+    _save_load_screen.open()
 
 func _create_save_load_screen() -> void:
     _save_load_screen.load_requested.connect(_on_slot_load_requested)
