@@ -284,3 +284,31 @@ python3 scripts/measure_scene_clusters.py --self-test    # 22 проверки, 
 уже есть носитель в генераторе (6.1 — `cut_road`, `ROAD_AXES`, `build_road_sheet` →
 `world_map_roads.{webp,json}`), переходы биомов тоже отданы генератору, а строения донорских
 кадров лежат за игровым полем, в рамке комплекта.
+
+## Резервный лист из принятого кадра (задача 4.4, кадр 6.1 — 2026-11-09)
+
+`scripts/slice_kit_atlas.py` режет принятый кадр в **раскладке существующего
+атласа**: сетка, id и роли клеток берутся из `world_map_atlas.json`, заполнение —
+клетки кадра, попавшие в тон биома. Рантайм не изменён ни на строку — подменена
+только поверхность тайлов (`tools/map_shot.gd --atlas=`), поэтому старый атлас
+остаётся на месте, а новый рядом (формулировка 4.4).
+
+```
+python3 scripts/slice_kit_atlas.py --self-test
+python3 scripts/slice_kit_atlas.py --sha 126aa81801 --max-tiles 0 \
+    --layout=game/assets/tiles/world_map_atlas.json \
+    --out-prefix game/assets/tiles/world_map_kit
+"${GODOT_BIN}" --path game -s tools/map_shot.gd -- --seed=4242 --size=40 \
+    --atlas=res://assets/tiles/world_map_kit.webp \
+    --out="$PWD/docs/reference/map-baseline/kit-sheet-t341.png"  # --out обязан быть абсолютным
+```
+
+Числа донора `126aa81801…` (фит T-339: 94 клетки, остаток 0.67 px, покрытие 0.91):
+182 клетки в игре, тонов — трава 87, снег 52, вода 19, скала 20, глина 3, болото 1;
+80 клеток атласа размещено, биомов без своего тона — **sand, road**. Контур сот
+снят до резки (`strip_lines`, политика «удалить» из Q-M135 → (б), D-310): без него
+тайл приносил в игру контур чужой решётки.
+
+Что показал живой кадр (глазом, `docs/reference/map-baseline/kit-sheet-t341.png`): земля комплекта читается,
+геометрия сот совпала (щелей нет), но переходы прямоугольные и деревья сидят
+внутри травяных плиток. Открыто в **T-341**.
