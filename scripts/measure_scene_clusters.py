@@ -453,7 +453,7 @@ def props_of(clean: np.ndarray, fit: dict, cfg: dict) -> dict:
     n, lab_im, stats, cent = cv2.connectedComponentsWithStats(on, 8)
     hex_area = 1.299 * C * R
     items, kinds = [], {"object": 0, "road": 0, "patch": 0, "tiny": 0}
-    sizes, cells_hit = [], {}
+    sizes, cells_hit, crops = [], {}, []
     for i in range(1, n):
         x, y, w, hgt, area = (int(v) for v in stats[i])
         share = area / hex_area
@@ -461,8 +461,8 @@ def props_of(clean: np.ndarray, fit: dict, cfg: dict) -> dict:
             kinds["tiny"] += 1
             continue
         pts = cv2.findNonZero((lab_im[y:y + hgt, x:x + w] == i).astype(np.uint8))
-        (rx, ry), (rw, rh), ang = cv2.minAreaRect(pts)
-        long_, short_ = max(rw, rh), max(min(rw, rh), 1.0)
+        (mcx, mcy), (mrw, mrh), ang = cv2.minAreaRect(pts)
+        long_, short_ = max(mrw, mrh), max(min(mrw, mrh), 1.0)
         elong = long_ / short_
         kind = ("road" if elong >= cfg["prop_elong"] and long_ >= cfg["prop_road_share"] * C
                 else "patch" if share > cfg["prop_patch_share"] else "object")
@@ -471,6 +471,8 @@ def props_of(clean: np.ndarray, fit: dict, cfg: dict) -> dict:
         key = cell_of(cx, cy, C, R, ox, oy)
         cells_hit[key] = cells_hit.get(key, 0) + 1
         sizes.append(share)
+        if kind == "object":
+            crops.append(prop_crop(src, (x, y, w, hgt)))
         if len(items) < 60:
             items.append({"kind": kind, "cell": list(key), "bbox": [x + x0, y + y0, w, hgt],
                           "cell_share": round(share, 3), "elong": round(elong, 2),
@@ -481,7 +483,52 @@ def props_of(clean: np.ndarray, fit: dict, cfg: dict) -> dict:
             "patches": kinds["patch"], "dropped_tiny": kinds["tiny"],
             "props_per_cell_p95": occ[-1] if occ else 0,
             "area_share_p50": round(sizes[len(sizes) // 2], 3) if sizes else 0.0,
-            "items": items}
+            "items": items,
+            # кропы нужны мере «схлопываются ли пропсы в набор» (dedupe_props); в реестр
+            # они не пишутся — run_props снимает этот ключ перед сериализацией
+            "crops": crops}
+
+
+def prop_crop(src: np.ndarray, box: tuple, size: int = 32) -> np.ndarray:
+    """Компонента → кроп `size`×`size` в Lab. Рамка плотная (это bbox компоненты),
+    поэтому пропсы разного масштаба сравниваются как одинаковые формы."""
+    x, y, w, hgt = box
+    return lab(cv2.resize(src[y:y + hgt, x:x + w].astype(np.float32), (size, size),
+                          interpolation=cv2.INTER_AREA))
+
+
+def disc_mask(size: int) -> np.ndarray:
+    """Маска-диск вместо прямоугольника: углы плотного bbox irregular пропса — это пол
+    под ним, а не краска пропса (тот же урок, что D-312 про padding: фон в расстояниях)."""
+    g = np.arange(size, dtype=np.float32) - (size - 1) / 2
+    xx, yy = np.meshgrid(g, g)
+    return (xx ** 2 + yy ** 2) <= (size / 2 - 1) ** 2
+
+
+def dedupe_props(crops: list) -> dict:
+    """Пропсы всех доноров вместе → сколько из них наборов.
+
+    Вопрос тот же, что D-312 задал террейну, только к пропсам: лист имеет смысл как
+    набор. 266 находок набором могут быть (художник повторяет валун) и не могут
+    (трещины пола неповторимы, как ткань). Пороги — CELL_RMS/NORM_CORR те же, что у
+    кластеров ткани, чтобы «ткань» и «пропс» мерились одной линейкой, а не двумя.
+    """
+    out = {"props": len(crops)}
+    if len(crops) < 2:
+        return out
+    out["note"] = ("набор пропсов меряется порогами ткани (CELL_RMS, NORM_CORR — те же, что у "
+                   "D-312): сырой RMS = «тот же мазок и краска», нормированное поле r ≥ 0.9 = "
+                   "«тот же силуэт». Ближайший к носителю порог — rms_8 (гейт листа).")
+    tiles = np.stack(crops)
+    m = disc_mask(tiles.shape[1])
+    out["raw"] = {f"rms_{thr:g}": len(greedy_clusters(tiles, m, float(thr)))
+                  for thr in CELL_RMS}
+    lin = normalize_cells(tiles, m)
+    out["normalized"] = {f"corr_{r:g}": len(greedy_clusters(lin, m, math.sqrt(2 * (1 - r))))
+                         for r, _ in NORM_CORR}
+    out["note"] = ("набор пропсов меряется порогами ткани (D-312); нормированные поля — «тот же "
+                   "силуэт» (r ≥ 0.9), сырые RMS — «та же краска», ΔE-гейт приёмки не трогает")
+    return out
 
 
 def biome_pair(rgb: np.ndarray, fit: dict, cfg: dict) -> dict:
@@ -563,6 +610,16 @@ def props_self_test() -> list[tuple[str, bool, str]]:
     checks.append(("кадр из двух биомов описывается двумя красками",
                    pair["shares"] == [0.5, 0.5] and pair["delta_e"] > 40,
                    f'{pair["shares"]} при ΔE {pair["delta_e"]}'))
+    # «схлопываются ли пропсы в набор»: два одинаковых кропа — один кластер, другой
+    # пропс — второй. Без этой проверки число кластеров в реестре было бы числом веры.
+    plate = np.full((48, 48, 3), 120.0)
+    red = np.dstack([plate[..., 0] + 60, plate[..., 1] - 40, plate[..., 2] - 30]).astype(np.uint8)
+    grn = np.dstack([plate[..., 0] - 20, plate[..., 1] - 50, plate[..., 2] + 50]).astype(np.uint8)
+    dd = dedupe_props([prop_crop(red, (8, 8, 32, 32)), prop_crop(red, (8, 8, 32, 32)),
+                       prop_crop(grn, (8, 8, 32, 32))])
+    checks.append(("одинаковые пропсы схлопываются, разные — нет",
+                   dd["props"] == 3 and dd["raw"]["rms_2"] == 2 == dd["raw"]["rms_32"],
+                   f'{dd["raw"].get("rms_2")} кластеров при rms_2, ждалось 2 из 3'))
     return checks
 
 
@@ -573,7 +630,7 @@ def run_props(a: argparse.Namespace) -> int:
     reg = L.load_registry()
     kit = L.kit_dir(a.kit)
     names = [a.scene] if a.scene else L.kit_files(kit)
-    out, skip = {}, []
+    out, skip, all_crops = {}, [], []
     for name in names:
         key = Path(name).name          # реестр знает имена комплекта, а не путь прогона
         fit = reg.get("scenes", {}).get(key, {}).get("cell_fit") or {}
@@ -590,6 +647,7 @@ def run_props(a: argparse.Namespace) -> int:
         plane = plane_of(rgb, fit)
         clean = remove_lines(plane, F.line_mask(plane, roi))
         rec = props_of(clean, fit, cfg)
+        all_crops += rec.pop("crops")     # numpy-кропы: в реестр они не пишутся
         rec["biome_pair"] = biome_pair(plane, fit, cfg)
         if a.props_debug:
             d = Path(a.props_debug)
@@ -601,6 +659,12 @@ def run_props(a: argparse.Namespace) -> int:
               f"медиана размера {rec['area_share_p50']:.2f} соты; "
               f"две краски кадра {rec['biome_pair']['shares']} при ΔE "
               f"{rec['biome_pair']['delta_e']}")
+    # «лист или шум» — мера, а не opinion: схлопываются ли пропсы в набор теми же
+    # порогами, что D-312 мерил ткань. Считать до записи реестра, иначе число живёт
+    # только в выводе (так и было: первый прогон его напечатал, но не сохранил).
+    dd = dedupe_props(all_crops) if out else {}
+    if dd:
+        reg["props_dedupe"] = dd
     if a.update and out:
         scenes = reg.setdefault("scenes", {})
         for name, rec in out.items():
@@ -619,6 +683,11 @@ def run_props(a: argparse.Namespace) -> int:
         print(f"  кадр как две краски: меньшей доли p50 {statistics.median(smaller):.2f}, "
               f"ΔE между красками p50 {statistics.median(de):.0f} "
               f"(гейт палитры ΔE ≤ {GATES['palette']['max_delta_e']:g})")
+        # «лист или шум» — теми же порогами, что ткань (D-312): без этого числа лист
+        # покупать нельзя.
+        print(f"набор из {dd.get('props', 0)} пропсов: " + ", ".join(
+            f"{k}={v}" for k, v in dd.get("raw", {}).items()) + " | норм.: " + ", ".join(
+            f"{k}={v}" for k, v in dd.get("normalized", {}).items()))
     for name, why in skip[:3]:
         print(f"ПРОПУСК {name[:40]} — {why}")
     return 0
