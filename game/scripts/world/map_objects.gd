@@ -78,8 +78,14 @@ static func build_tileset() -> TileSet:
 		GameLogger.error("MapObjects: не удалось загрузить %s" % SHEET_PATH)
 		return null
 	var ts := TileSet.new()
-	ts.tile_shape = 3 as TileSet.TileShape  # TILE_SHAPE_HEXAGON — как у базы
-	ts.tile_size = Vector2i(TILE, TILE)
+	# Геометрия обязана совпадать с базой (`TileAtlas.build_hex`) до пикселя:
+	# tile_size — bounding box гекса, а не квадрат ART-клетки (иначе клетки слоя
+	# растительности разъедутся с землёй на 0.75·h − TILE на ряд). Сама картинка
+	# остаётся квадратной — её просто рисовали под другой бокс.
+	ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+	ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+	ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
+	ts.tile_size = TileAtlas.HEX_SIZE
 	var src := TileSetAtlasSource.new()
 	src.texture = tex
 	src.texture_region_size = Vector2i(TILE, TILE)

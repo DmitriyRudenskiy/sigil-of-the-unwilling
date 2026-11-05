@@ -280,7 +280,7 @@ func test_hex_tileset_declares_the_fog_twin() -> void:
 	# положить туман в ту же клетку тем же тайлом.
 	assert_that(twin.texture.get_size()).is_equal(base.texture.get_size())
 	assert_that(twin.get_tiles_count()).is_equal(base.get_tiles_count())
-	assert_that(int(twin.texture_region_size.x)).is_equal(int(TileAtlas.TILE))
+	assert_that(twin.texture_region_size).is_equal(TileAtlas.HEX_SIZE)
 
 	# И та же картинка, помноженная на `MAP_FOG_DIM` по RGB при неизменной альфе —
 	# та кратность, о которой говорит тест затемнённых носителей выше.
