@@ -2878,19 +2878,19 @@
   },
   {
    "id": "base_road_0",
-   "tone": "grass"
+   "tone": "mud"
   },
   {
    "id": "base_road_1",
-   "tone": "grass"
+   "tone": "mud"
   },
   {
    "id": "base_road_2",
-   "tone": "grass"
+   "tone": "mud"
   },
   {
    "id": "base_road_3",
-   "tone": "grass"
+   "tone": "mud"
   },
   {
    "id": "edge_grass_e",
@@ -3062,33 +3062,35 @@
   },
   {
    "id": "edge_road_e",
-   "tone": "grass"
+   "tone": "mud"
   },
   {
    "id": "edge_road_ne",
-   "tone": "grass"
+   "tone": "mud"
   },
   {
    "id": "edge_road_nw",
-   "tone": "grass"
+   "tone": "mud"
   },
   {
    "id": "edge_road_w",
-   "tone": "grass"
+   "tone": "mud"
   },
   {
    "id": "edge_road_sw",
-   "tone": "grass"
+   "tone": "mud"
   },
   {
    "id": "edge_road_se",
-   "tone": "grass"
+   "tone": "mud"
   }
  ],
  "gaps": {
   "biomes_without_tone": [
-   "sand",
-   "road"
-  ]
+   "sand"
+  ],
+  "biomes_substituted": {
+   "road": "mud"
+  }
  }
 }

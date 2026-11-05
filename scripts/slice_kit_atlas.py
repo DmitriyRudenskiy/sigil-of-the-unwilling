@@ -3,10 +3,12 @@
 
 Донор — кадр из `game/data/config/scene_slices.json` с принятой геометрией сот
 (`cell_fit.accepted`: T-339). Каждая клетка решётки внутри игровой области
-становится тайлом `tile × tile`, классифицируется по тону и получает адрес в
-манифесте. Дальше лист живёт как обычный атлас: `KitAtlas` строит из него
-гекс-тайлсет, `MapRenderer.paint_kit` кладёт тайлы в клетки карты по совпадению
-тона (из кадра в рантайм уходит только тон клетки: семантики биома в нём нет).
+становится тайлом `tile × tile`, классифицируется по тону и складывается в
+**раскладку существующего атласа** (`--layout=…world_map_atlas.json`): сетку, id и
+роли клеток диктует манифест атласа, из кадра приходит только поверхность. Рантайм
+при этом не меняется ни на строку: тот же `TileAtlas`, а лист поднимает
+`MAP_KIT=1` (`TileAtlas.sheet_path()`, T-341); без `--layout` получается
+собственная упаковка кадра — только для глазного вердикта, в игру она не идёт.
 
 Координаты решётки берутся из **реестра**, а не пересчитываются здесь: один
 источник геометрии с приёмкой T-339, иначе лист разъедется с числом, по которому
@@ -29,6 +31,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -41,6 +44,13 @@ KIT_DEFAULT = Path.home() / "Downloads/battlefield"
 ## Тон тайла — имена биомов атласа (`TileAtlas.BIOME_NAMES`), иначе рантайм
 ## будет искать «green» там, где рендер знает «grass».
 TONES = ("snow", "water", "sand", "rock", "swamp", "mud", "grass")
+
+## Биомы раскладки, у которых в кадре-доноре нет своего тона, но есть близкий.
+## «Дорога» атласа — утоптанное полотно (её же рисует декаль покрытия в
+## `MapRenderer.paint_roads`), а глинистая тропа в доноре есть; без подмены
+## дорожные клетки и декаль легли бы травой. Песок подменить нечем — он остаётся
+## травой и ездит в отчёте как пробел (T-341).
+SUBSTITUTE = {"road": "mud"}
 
 
 def lab(a: np.ndarray) -> np.ndarray:
@@ -227,9 +237,14 @@ def layout_sheet(
     sheet = np.zeros((rows * tile, cols * tile, 3), dtype=np.uint8)
     placed: list[dict] = []
     missing: list[str] = []
+    substituted: dict[str, str] = {}
     for cell in spec["cells"]:
         biome = str(cell["biome"])
         pool = by_tone.get(biome)
+        if not pool and SUBSTITUTE.get(biome) in by_tone:
+            sub = SUBSTITUTE[biome]
+            substituted[biome] = sub
+            pool = by_tone[sub]
         if not pool:
             if biome not in missing:
                 missing.append(biome)
@@ -241,7 +256,7 @@ def layout_sheet(
         sheet[y * tile : (y + 1) * tile, x * tile : (x + 1) * tile] = tiles[src]
         placed.append({"id": cell["id"], "tone": tones[src]})
     _save(sheet, path)
-    return placed, {"biomes_without_tone": missing}
+    return placed, {"biomes_without_tone": missing, "biomes_substituted": substituted}
 
 
 def self_test() -> int:
@@ -283,6 +298,24 @@ def self_test() -> int:
     plate = base.copy()
     plate[11:13, :] = 25  # нарисованный контур клетки
     dev = int(np.abs(strip_lines(plate).astype(np.int16) - base.astype(np.int16)).max())
+    # Подмена тона в раскладке: у дороги своего тона в наборе нет, и она обязана
+    # взять глину, а не траву (иначе дорожное полотно в игре невидимо).
+    with tempfile.TemporaryDirectory() as tmp:
+        t = Path(tmp)
+        (t / "layout.json").write_text(json.dumps({
+            "tile": 24, "grid": [2, 1],
+            "cells": [
+                {"id": "base_road_0", "kind": "base", "biome": "road", "atlas": [0, 0]},
+                {"id": "base_sand_0", "kind": "base", "biome": "sand", "atlas": [1, 0]},
+            ],
+        }))
+        probe_tiles = [
+            np.full((24, 24, 3), (120, 90, 60), np.uint8),  # глина
+            np.full((24, 24, 3), colors["grass"], np.uint8),
+        ]
+        probe, gaps = layout_sheet(
+            t / "layout.json", probe_tiles, ["mud", "grass"], 24, t / "sheet.webp"
+        )
     checks = [
         ("тон воды", tone_of(np.array(colors["water"], np.uint8).reshape(1, 1, 3)), "water"),
         ("тон песка", tone_of(np.array(colors["sand"], np.uint8).reshape(1, 1, 3)), "sand"),
@@ -294,6 +327,10 @@ def self_test() -> int:
         ("адрес row-major", manifest["cells"][4]["atlas"], [1, 1]),
         ("тайл квадратный", tuple(tiles[0].shape), (tile, tile, 3)),
         ("следов от линии (>12)", int(dev > 12), 0),
+        ("дорога берёт глину", probe[0]["tone"], "mud"),
+        ("подмена в отчёте", gaps["biomes_substituted"], {"road": "mud"}),
+        ("песок без тона — трава", probe[1]["tone"], "grass"),
+        ("пробел в отчёте", gaps["biomes_without_tone"], ["sand"]),
     ]
     bad = 0
     for name, got_v, want_v in checks:
@@ -378,8 +415,9 @@ def main() -> int:
     if args.layout:
         print(
             "РАСКЛАДКА "
-            f"{args.layout}: размещено {len(placed)} клеток, биомов без своего тона: "
-            f"{json.dumps(gaps['biomes_without_tone'], ensure_ascii=False)}"
+            f"{args.layout}: размещено {len(placed)} клеток, подменено "
+            f"{json.dumps(gaps['biomes_substituted'], ensure_ascii=False)}, биомов без "
+            f"своего тона: {json.dumps(gaps['biomes_without_tone'], ensure_ascii=False)}"
         )
     print(f"MANIFEST {meta}: донор {digest[:12]}")
     return 0
