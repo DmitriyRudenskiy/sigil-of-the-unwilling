@@ -268,7 +268,12 @@ func _draw() -> void:
 		var a := hex_points(region)
 		var center := _centers[region] as Vector2
 		var biome := _biome_of(String(region))
-		var rect := _atlas_rect(biome, -1)
+		# Вариант базы — по координате раскладки, а не по региону: соседние гексы
+		# обязаны различаться («разной густоты»), а раскладка детерминирована от
+		# карты, поэтому кадр остаётся тем же кадром при перезапуске.
+		var variant := TileAtlas.variant_for(
+				_axial.get(region, Vector2i.ZERO) as Vector2i, 0, TileAtlas.VARIANTS)
+		var rect := _atlas_rect(biome, -1, variant)
 		if not _map.open_regions.has(region):
 			draw_polygon(a, [COLOR_FOG])
 		elif rect == Rect2():
@@ -327,7 +332,7 @@ func _biome_of(region: String) -> int:
 ## Клетка листа: биом + сторона (`side` = −1 — база, иначе индекс `SIDES`). Пустой
 ## `Rect2` — биома нет в листе (или нет листа): гекс рисуется подложкой, а не
 ## чужой текстурой, иначе «неизвестный биом» выглядел бы лугом.
-func _atlas_rect(biome: int, side: int) -> Rect2:
+func _atlas_rect(biome: int, side: int, variant: int = 0) -> Rect2:
 	if _sheet == null or biome < 0:
 		return Rect2()
 	var cell := Vector2i.ZERO
@@ -335,7 +340,7 @@ func _atlas_rect(biome: int, side: int) -> Rect2:
 		var cells: Array = TileAtlas.base_coords(biome)
 		if cells.is_empty():
 			return Rect2()
-		cell = cells[0]
+		cell = cells[clampi(variant, 0, cells.size() - 1)]
 	else:
 		cell = TileAtlas.edge_coords(biome, String(TileAtlas.SIDES[side]))
 		if cell.x < 0:
@@ -364,7 +369,6 @@ func _draw_transitions(region: String, pts: PackedVector2Array, center: Vector2,
 		if rect == Rect2():
 			continue
 		draw_polygon(pts, [Color.WHITE], _uvs(pts, rect, center), _sheet)
-
 
 ## UV гекса: те же вершины полигона, только в координатах клетки листа.
 func _uvs(pts: PackedVector2Array, rect: Rect2, center: Vector2) -> PackedVector2Array:
