@@ -3092,6 +3092,43 @@
   },
   "biomes_from_carrier": [
    "sand"
-  ]
+  ],
+  "selection": {
+   "grass": {
+    "pool": 87,
+    "used": 10,
+    "objectness_max": 0.0
+   },
+   "snow": {
+    "pool": 52,
+    "used": 10,
+    "objectness_max": 0.0
+   },
+   "swamp": {
+    "pool": 1,
+    "used": 10,
+    "objectness_max": 0.031
+   },
+   "water": {
+    "pool": 19,
+    "used": 10,
+    "objectness_max": 0.135
+   },
+   "rock": {
+    "pool": 20,
+    "used": 10,
+    "objectness_max": 0.173
+   },
+   "mud": {
+    "pool": 3,
+    "used": 10,
+    "objectness_max": 0.059
+   },
+   "road": {
+    "pool": 3,
+    "used": 10,
+    "objectness_max": 0.059
+   }
+  }
  }
 }

@@ -110,6 +110,20 @@ def strip_lines(rgb: np.ndarray, radius: int = 4, threshold: float = 18.0) -> np
     return np.where(ink[..., None], med, rgb).astype(np.uint8)
 
 
+def objectness(tile: np.ndarray) -> float:
+    """Доля тёмных пикселов клетки — грубая мера «внутри ткани нарисован объект».
+
+    Крона дерева и валун дают тёмное пятно относительно собственной светлой
+    поверхности клетки; открытая поверхность — нет. Мера не различает объект и
+    тёмный биом (вода и камень тёмные сами по себе), поэтому она только
+    УПОРЯДОЧИВАЕТ кандидатов одного тона — слотов всегда меньше пула, и пусть в
+    лист берут открытые клетки, а не те, что подвернулись в порядке обхода кадра
+    (урёк T-341: «трава приходит с деревом посередине»). Тон она не меняет.
+    """
+    lum = lab(tile)[..., 0].astype(float)
+    return float((lum < np.percentile(lum, 75) - 25).mean())
+
+
 def cells_of(fit: dict) -> list[dict]:
     """Клетки решётки реестра внутри области замера (`roi`), центр — не у кромки.
 
@@ -239,6 +253,8 @@ def layout_sheet(
     by_tone: dict[str, list[int]] = {}
     for i, tone in enumerate(tones):
         by_tone.setdefault(tone, []).append(i)
+    for tone, idx in by_tone.items():
+        by_tone[tone] = sorted(idx, key=lambda i: (objectness(tiles[i]), i))
     if not by_tone.get("grass"):
         raise SystemExit("в доноре нет ни одной клетки тона grass — лист нечем наполнять")
     taken: dict[str, int] = {}
@@ -247,6 +263,8 @@ def layout_sheet(
     missing: list[str] = []
     substituted: dict[str, str] = {}
     from_layout: list[str] = []
+    picked: dict[str, list[int]] = {}
+    pool_len: dict[str, int] = {}
     for cell in spec["cells"]:
         biome = str(cell["biome"])
         pool = by_tone.get(biome)
@@ -268,16 +286,29 @@ def layout_sheet(
             if biome not in missing:
                 missing.append(biome)
             pool = by_tone["grass"]
+        pool_len[biome] = len(pool)
         n = taken.get(biome, 0)
         taken[biome] = n + 1
         src = pool[n % len(pool)]
+        picked.setdefault(biome, []).append(src)
         sheet[y * tile : (y + 1) * tile, x * tile : (x + 1) * tile] = tiles[src]
         placed.append({"id": cell["id"], "tone": tones[src]})
     _save(sheet, path)
+    # Что реально попало в лист: пул, число занятых клеток и «занятость» худшей
+    # из них — числа для вердикта, а не для глазка.
+    selection = {
+        biome: {
+            "pool": pool_len[biome],
+            "used": len(chosen),
+            "objectness_max": round(max(objectness(tiles[i]) for i in chosen), 3),
+        }
+        for biome, chosen in picked.items()
+    }
     return placed, {
         "biomes_without_tone": missing,
         "biomes_substituted": substituted,
         "biomes_from_carrier": from_layout,
+        "selection": selection,
     }
 
 
@@ -348,6 +379,24 @@ def self_test() -> int:
             t / "layout.json", probe_tiles, ["mud", "grass"], 24, t / "sheet2.webp"
         )
         carrier_px = np.asarray(Image.open(t / "sheet2.webp").convert("RGB"), np.uint8)[0, 30]
+        # Порядок кандидатов одного тона: слотов меньше пула, и клетка с объектом
+        # внутри ткани обязана уезжать в хвост — иначе в лист берутся те десять
+        # клеток из ста, что подвернулись в порядке обхода кадра (урёк T-341:
+        # «трава приходит с деревом посередине»). Тона мера не меняет.
+        busy = np.full((24, 24, 3), colors["grass"], np.uint8)
+        busy[6:18, 6:18] = (20, 25, 15)
+        flat_a = np.full((24, 24, 3), colors["grass"], np.uint8)
+        flat_b = np.full((24, 24, 3), (95, 115, 65), np.uint8)
+        (t / "layout2.json").write_text(json.dumps({
+            "tile": 24, "grid": [2, 1],
+            "cells": [
+                {"id": "base_grass_0", "kind": "base", "biome": "grass", "atlas": [0, 0]},
+                {"id": "base_grass_1", "kind": "base", "biome": "grass", "atlas": [1, 0]},
+            ],
+        }))
+        _, gaps_o = layout_sheet(
+            t / "layout2.json", [busy, flat_a, flat_b], ["grass"] * 3, 24, t / "sheet3.webp"
+        )
     checks = [
         ("тон воды", tone_of(np.array(colors["water"], np.uint8).reshape(1, 1, 3)), "water"),
         ("тон песка", tone_of(np.array(colors["sand"], np.uint8).reshape(1, 1, 3)), "sand"),
@@ -368,6 +417,14 @@ def self_test() -> int:
         ("пиксель носителя", int(np.abs(carrier_px.astype(int) - px).max()) <= 8, True),
         ("носитель в отчёте", gaps_c["biomes_from_carrier"], ["sand"]),
         ("пробел пуст у носителя", gaps_c["biomes_without_tone"], []),
+        ("открытая клетка пуста", objectness(flat_a), 0.0),
+        ("клетка с объектом заметна", objectness(busy) > 0.1, True),
+        ("выбираются открытые", gaps_o["selection"]["grass"]["objectness_max"], 0.0),
+        (
+            "отбор в отчёте",
+            gaps_o["selection"]["grass"],
+            {"pool": 3, "used": 2, "objectness_max": 0.0},
+        ),
     ]
     bad = 0
     for name, got_v, want_v in checks:
@@ -457,6 +514,7 @@ def main() -> int:
             f"носителя {json.dumps(gaps['biomes_from_carrier'], ensure_ascii=False)}, "
             f"без покрытия: {json.dumps(gaps['biomes_without_tone'], ensure_ascii=False)}"
         )
+        print(f"ОТБОР {json.dumps(gaps['selection'], ensure_ascii=False)}")
     print(f"MANIFEST {meta}: донор {digest[:12]}")
     return 0
 
