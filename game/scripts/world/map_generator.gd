@@ -176,7 +176,7 @@ func _ensure_layers() -> void:
 		_tile_map.name = "TileMapTerrain"
 		add_child(_tile_map)
 	if tileset == null:
-		push_error("TileAtlas: failed to build hex tileset (missing %s)" % TileAtlas.SHEET_PATH)
+		push_error("TileAtlas: тайлсет не собрался (текстура листа не создана)")
 	else:
 		_tile_map.tile_set = tileset
 
@@ -201,7 +201,7 @@ func _ensure_layers() -> void:
 
 	# Слой 3 «дороги» (6.2) — между стыками и тенями/растительностью: декаль
 	# покрытия лежит поверх базы, но не перекрывает носители объектов. Свой тайлсет:
-	# дороги живут на отдельном листе, геометрия та же (гекс, tile_size 82),
+	# дороги живут на отдельном листе, геометрия та же (гекс, TileAtlas.HEX_SIZE),
 	# поэтому клетки не разъезжаются с базой.
 	road_edge_layers.clear()
 	var roads_root: Node2D = get_node_or_null("TileMapRoads")
@@ -243,7 +243,7 @@ func _ensure_layers() -> void:
 		add_child(_decor_layer)
 	if _decor_layer.tile_set == null:
 		# Свой тайлсет: растительность живёт на листе объектов, а не в атласе
-		# биомов. Геометрия та же (гекс, tile_size 82), поэтому клетки слоя
+		# биомов. Геометрия та же (гекс, TileAtlas.HEX_SIZE), поэтому клетки слоя
 		# не разъезжаются с базой.
 		_decor_layer.tile_set = MapObjects.build_tileset()
 	# Тени — под растительностью и в том же тайлсете (источник `SHADOW_SOURCE_ID`),

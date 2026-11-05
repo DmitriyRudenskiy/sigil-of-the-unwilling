@@ -1,113 +1,136 @@
 class_name TileAtlas
 extends RefCounted
 
-## Лист тайлов карты и его манифест. Оба продукта конвейера
-## `scripts/gen_map_art.py --assemble`: пиксели `world_map_atlas.webp`, раскладка
-## `world_map_atlas.json`.
+## Процедурный лист биомов карты (**T-344**). Файла-носителя нет: клетки рисует
+## этот скрипт, один раз на процесс, дальше текстура живёт в кэше
+## `TileAtlasCache`.
 ##
-## Координаты в листе НЕ дублируются в скрипте: единственный источник — манифест.
-## Прежний `const BASE_COORDS` прожил отдельную жизнь и пережил три пересборки
-## листа молча (тест пути тайлсета ловил только отсутствие файла), а `TRANSITION_ART`
-## с 14 записями и `pick()` не вызывались никем — мёртвый реестр указывал на клетки
-## листа, которого больше нет (снимается по задаче 4.2).
+## Прежний носитель — `world_map_atlas.{webp,json}` конвейера
+## `gen_map_art.py --assemble` — обязывал runtime читать манифест с координатами
+## 80 клеток. Именно там жили два дефекта: квадратная клетка 82×82 при решётке
+## pointy-top (**T-343**, +7.3% на ряд → ступенчатые стыки) и «клетка значится в
+## манифесте, а в листе её нет» (молчаливая подмена чужим материалом). Здесь
+## клетка занимает весь свой bounding box, а манифеста нет — читать нечего,
+## подменять нечем.
+##
+## Геометрия: pointy-top, `h = w · 2/√3` (1.1547), шаг столбца `w`, шаг ряда
+## `0.75·h`, нечётный ряд сдвинут вправо — та же odd-r-схема, что читает
+## `HexUtils`. Соотношение не «красивое», а единственное, при котором шестиугольники
+## соседей стыкуются без щелей и нахлёста: на квадратной клетке щель обязана
+## появиться на каждой второй границе биомов.
 
-const SHEET_PATH := "res://assets/tiles/world_map_atlas.webp"
-const MANIFEST_PATH := "res://assets/tiles/world_map_atlas.json"
 const TILE := GameNumbers.TILE_SIZE
+## Размер клетки = bounding box гекса. НЕ квадрат: высота выведена из ширины.
+const HEX_SIZE := Vector2i(TILE, int(round(TILE * 2.0 / sqrt(3.0))))
+
 const SOURCE_ID := 0
 const FOG_SOURCE_ID := 1
-## world-map-art-variety 4.2 / Q-M98 → (б), D-232: отдельного источника деталей
-## нет — «мелочь на земле» несут вариант базы (4.3) и растительность (7.2),
-## восьмой группы отрисовки в `world-map-layer-stack` не заводилось.
 
 enum Biome { GRASS, SAND, SNOW, SWAMP, WATER, ROCK, MUD, ROAD }
 
-## Имена биомов — они же значения `biome` в манифесте атласа. Порядок обязан
-## совпадать с enum Biome (индекс = значение enum). LAVA и DENSE_FOREST из enum
-## сняты: ни генератор, ни рендер их не рисуют (MapRenderer.TERRAIN_TO_BIOME),
-## а атлас их не содержит — переход для них был бы «мёртвым».
+## Имена биомов: индекс = значение enum Biome. Тот же порядок, что у BIOME_COLORS.
 const BIOME_NAMES := [
 	"grass", "sand", "snow", "swamp", "water",
 	"rock", "mud", "road",
 ]
 
-## Стороны гекса: тот же порядок, что биты `HexUtils.get_neighbor(cell, bit)` и
-## поле `side` в манифесте (восток, северо-восток, северо-запад, запад,...).
+## Тон биома. Палитра — наша, а не донорская: донорский кадр под эту задачу
+## снимался (T-341) и ушёл вместе с резачком. Порядок обязан совпадать с enum.
+const BIOME_COLORS: Array[Color] = [
+	Color(0.52, 0.60, 0.33),   # grass
+	Color(0.83, 0.75, 0.50),   # sand
+	Color(0.90, 0.93, 0.96),   # snow
+	Color(0.40, 0.47, 0.34),   # swamp
+	Color(0.32, 0.52, 0.68),   # water
+	Color(0.53, 0.52, 0.50),   # rock
+	Color(0.47, 0.37, 0.28),   # mud
+	Color(0.65, 0.55, 0.41),   # road
+]
+
+## Стороны гекса: тот же порядок, что биты `HexUtils.get_neighbor(cell, bit)`.
 const SIDES := ["e", "ne", "nw", "w", "sw", "se"]
 
-static var _manifest: Dictionary = {}
-static var _fog_tex: ImageTexture
+## Внешняя нормаль стороны, градусы в экранных координатах (y вниз): восток — 0°,
+## дальше по 60°. Для pointy-top нормали сторон стоят на 0°/60°/…, вершины — на
+## 30°/90°/…; перепутать их — значит повернуть лист на 30° и разъесть все швы.
+const SIDE_ANGLES := {
+	"e": 0.0, "se": 60.0, "sw": 120.0, "w": 180.0, "nw": 240.0, "ne": 300.0,
+}
 
-var _tileset: TileSet
-var _src: TileSetAtlasSource
-var _fog_src: TileSetAtlasSource
+## Раскладка листа: столбец — биом, строка 0 — база, строки 1…6 — декаль
+## «материал биома наедает сторону SIDES[строка−1]».
+const COLS := 8
+const ROWS := 7
+## Ободок базы (доля апотемы) и полоса декали: от `BAND_FROM` прозрачно, к
+## `BAND_TO` — полный тон. Полоса начинается до края, чтобы граница биомов была
+## градиентом, а не линией, и кончалась до центра, чтобы не съесть свою клетку.
+const RIM := 0.90
+const BAND_FROM := 0.42
+const BAND_TO := 0.86
+const BAND_ALPHA := 0.75
 
-
-## Манифест листа: {tile, grid, cells: [{id, kind, biome, variant|side, atlas}]}.
-static func manifest() -> Dictionary:
-	if not _manifest.is_empty():
-		return _manifest
-	if not FileAccess.file_exists(MANIFEST_PATH):
-		GameLogger.error("TileAtlas: манифест не найден: %s" % MANIFEST_PATH)
-		return _manifest
-	var file := FileAccess.open(MANIFEST_PATH, FileAccess.READ)
-	var parsed: Variant = JSON.parse_string(file.get_as_text()) if file != null else null
-	if not (parsed is Dictionary):
-		GameLogger.error("TileAtlas: манифест не читается: %s" % MANIFEST_PATH)
-		return _manifest
-	_manifest = parsed
-	return _manifest
-
-
-## Индекс манифеста: {biome: [координата...]}, {"biome:side": координата}.
-## Строится один раз: `_base()` и `paint_transitions()` зовут эти функции на каждую
-## клетку карты, а скан списка клеток на каждый вызов — это 3600 × 80 операций
-## на один paint (и на каждое обновление тумана).
-static var _index: Dictionary = {}
+static var _sheet: ImageTexture
+static var _fog_sheet: ImageTexture
 
 
-static func _ensure_index() -> void:
-	if not _index.is_empty():
-		return
-	var groups: Dictionary = {}
-	var edges: Dictionary = {}
-	var all: Array = []
-	for cell in manifest().get("cells", []):
-		var atlas: Array = cell.get("atlas", [0, 0])
-		var coords := Vector2i(int(atlas[0]), int(atlas[1]))
-		all.append(coords)
-		var biome := String(cell.get("biome", ""))
-		if String(cell.get("kind", "")) == "base":
-			if not groups.has(biome):
-				groups[biome] = []
-			(groups[biome] as Array).append([int(cell.get("variant", 0)), coords])
-		else:
-			edges["%s:%s" % [biome, cell.get("side", "")]] = coords
-	var base: Dictionary = {}
-	for biome in groups:
-		var rows: Array = groups[biome]
-		rows.sort_custom(func(a, b): return a[0] < b[0])
-		var coords_list: Array = []
-		for pair in rows:
-			coords_list.append(pair[1])
-		base[biome] = coords_list
-	_index = {"base": base, "edge": edges, "all": all}
+## Текстурный лист: 8×7 клеток. Строится один раз и переиспользуется всеми
+## тайлсетами (база карты, бой, поле кампании) и его побратимом тумана.
+static func sheet() -> ImageTexture:
+	if _sheet != null:
+		return _sheet
+	if BIOME_NAMES.size() != COLS or BIOME_COLORS.size() != COLS or ROWS != 1 + SIDES.size():
+		push_error("TileAtlas: раскладка листа %d×%d не совпадает с %d биомами и %d сторонами" % [
+			COLS, ROWS, BIOME_NAMES.size(), SIDES.size()])
+		return null
+	var img := Image.create(COLS * HEX_SIZE.x, ROWS * HEX_SIZE.y, false, Image.FORMAT_RGBA8)
+	var geom := _geometry()
+	for biome in COLS:
+		var color: Color = BIOME_COLORS[biome]
+		_paint_cell(img, biome, 0, color, geom)
+		for side in SIDES.size():
+			_paint_cell(img, biome, 1 + side, color, geom)
+	_sheet = ImageTexture.create_from_image(img)
+	return _sheet
 
 
-## Варианты базы биома — координаты в листе, в порядке возрастания variant.
-## Массив общий на всех вызывающего: не править его на месте.
+## Побратим тумана: тот же лист, RGB затемнён (`GameNumbers.MAP_FOG_DIM`), альфа
+## нетронута. Вторым *источником*, а не `modulate` слоя: туман различает клетки,
+## слой затемнял бы и то, что в поле зрения.
+static func fog_sheet() -> ImageTexture:
+	if _fog_sheet != null:
+		return _fog_sheet
+	var src := sheet()
+	if src == null:
+		return null
+	_fog_sheet = ImageTexture.create_from_image(_dimmed_image(src.get_image()))
+	return _fog_sheet
+
+
+## Клетка базы биома. Массив из одной клетки: вариантов у биома ровно один
+## (`variant_for` остаётся вызывающим кодам на будущее, count ≤ 1 → 0).
 static func base_coords(biome: int) -> Array:
-	_ensure_index()
-	return (_index["base"] as Dictionary).get(BIOME_NAMES[biome], []) as Array
+	if biome < 0 or biome >= COLS:
+		return []
+	return [Vector2i(biome, 0)]
 
 
 ## Клетка декаля «материал биома наедает сторону side» (слой стыков).
-## [-1,-1] — перехода в атласе нет; по spec world-map-tile-atlas это провал
-## приёмки, молчаливого фолбэка на базу нет намеренно.
+## [-1,-1] — такой стороны/биома нет; молчаливого фолбэка на базу нет намеренно
+## (тот же смысл, что был у отсутствия перехода в манифесте).
 static func edge_coords(biome: int, side: String) -> Vector2i:
-	_ensure_index()
-	return (_index["edge"] as Dictionary).get(
-		"%s:%s" % [BIOME_NAMES[biome], side], Vector2i(-1, -1))
+	var s := SIDES.find(side)
+	if biome < 0 or biome >= COLS or s < 0:
+		return Vector2i(-1, -1)
+	return Vector2i(biome, 1 + s)
+
+
+## Все клетки листа (база + переходы) — для псевдо-тайлсетов в тестах.
+static func all_coords() -> Array:
+	var out: Array = []
+	for row in ROWS:
+		for col in COLS:
+			out.append(Vector2i(col, row))
+	return out
 
 
 ## Номер варианта базы для клетки — хэш от клетки и сида карты. Детерминизм
@@ -119,32 +142,60 @@ static func variant_for(cell: Vector2i, seed_value: int, count: int) -> int:
 	return int(hash("%d:%d:%d" % [cell.x, cell.y, seed_value])) % count
 
 
-static func all_coords() -> Array:
-	"""Все клетки листа (база + переходы) — для псевдо-тайлсетов в тестах."""
-	_ensure_index()
-	return _index["all"] as Array
+static func build_hex() -> TileSet:
+	var ts := TileSet.new()
+	## Ориентация — в коде, а не в дефолтах Godot: и `TILE_SHAPE_HEXAGON`, и
+	## `TILE_LAYOUT_STACKED`, и `TILE_OFFSET_AXIS_HORIZONTAL` обязаны быть названы,
+	## иначе смена умолчания движком молча поворачивает сетку на 90°, а
+	## `HexGrid.calibrate` меряет только сдвиг ряда (`shift_right`) — ось он назад
+	## не повернёт. STACKED + HORIZONTAL = pointy-top с нечётными рядами вправо.
+	ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+	ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+	ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
+	ts.tile_size = HEX_SIZE
+	_add_source(ts, SOURCE_ID, sheet())
+	# Побратим тумана объявляется здесь, а не только в старом квадратном билдере
+	# (T-168): `MapRenderer.apply_fog` и `paint_transitions` кладут «исследовано,
+	# но не видно» в `FOG_SOURCE_ID`, а `TileMapLayer` на ссылку в несуществующий
+	# источник не ругается — он рисует пустоту.
+	_add_source(ts, FOG_SOURCE_ID, fog_sheet())
+	return ts
 
 
-func build() -> bool:
-	var tex := load(SHEET_PATH)
-	if not (tex is Texture2D):
-		GameLogger.error("TileAtlas: не удалось загрузить %s" % SHEET_PATH)
-		return false
-	_tileset = TileSet.new()
-	_tileset.tile_size = Vector2i(TILE, TILE)
-	_src = TileSetAtlasSource.new()
-	_src.texture = tex
-	_src.texture_region_size = Vector2i(TILE, TILE)
-	_tileset.add_source(_src, SOURCE_ID)
-	_build_fog_source(tex)
+static func _add_source(ts: TileSet, id: int, tex: Texture2D) -> void:
+	if tex == null:
+		push_error("TileAtlas: источник %d строится без текстуры" % id)
+		return
+	var src := TileSetAtlasSource.new()
+	src.texture = tex
+	src.texture_region_size = HEX_SIZE
+	ts.add_source(src, id)
 	for coords in all_coords():
-		_src.create_tile(coords)
-	return true
+		src.create_tile(coords)
 
 
-## Затемнённый побратим листа (`GameNumbers.MAP_FOG_DIM` по RGB, альфа нетронута).
-## Нужен именно вторым листом, а не `modulate` слоя: туман различает клетки, а слой
-## затемнял бы и то, что в поле зрения.
+static func build_hex_tileset() -> TileSet:
+	var main_loop := Engine.get_main_loop()
+	if main_loop is SceneTree:
+		var tree := main_loop as SceneTree
+		var cache := tree.root.get_node_or_null("/root/TileAtlasCache")
+		if cache != null and cache.has_method("build_hex_tileset"):
+			return cache.call("build_hex_tileset")
+	return TileAtlas.build_hex()
+
+
+static func clear_cache() -> void:
+	_sheet = null
+	_fog_sheet = null
+	var main_loop := Engine.get_main_loop()
+	if main_loop is SceneTree:
+		var tree := main_loop as SceneTree
+		var cache := tree.root.get_node_or_null("/root/TileAtlasCache")
+		if cache != null and cache.has_method("clear_cache"):
+			cache.call("clear_cache")
+
+
+## Затемнённый побратим изображения (общий для листа и любых резервов).
 static func _dimmed_image(src: Image) -> Image:
 	var img: Image = src.duplicate()
 	var dim := float(GameNumbers.MAP_FOG_DIM)
@@ -155,97 +206,68 @@ static func _dimmed_image(src: Image) -> Image:
 	return img
 
 
-## Затемнённый лист для тумана войны: тот же тайлсет, второй источник, те же
-## координаты — иначе `apply_fog` не сможет класть туман в ту же клетку.
-func _build_fog_source(tex: Texture2D) -> void:
-	_fog_tex = ImageTexture.create_from_image(_dimmed_image(tex.get_image()))
-	_fog_src = TileSetAtlasSource.new()
-	_fog_src.texture = _fog_tex
-	_fog_src.texture_region_size = Vector2i(TILE, TILE)
-	_tileset.add_source(_fog_src, FOG_SOURCE_ID)
-	for coords in all_coords():
-		_fog_src.create_tile(coords)
+## Геометрия клетки, посчитанная один раз: для каждого пикселя — максимум
+## нормализованных координат по всем сторонам (`> 1` — вне гекса) и по шесть
+## массивов `t_side` ∈ [−1,1] (1 — середина стороны). Клетки различаются только
+## цветом, поэтому пиксельные циклы над сотней тысяч точек идут один раз.
+static func _geometry() -> Array:
+	var w := HEX_SIZE.x
+	var h := HEX_SIZE.y
+	var a := w * 0.5                      # апотема = половина ширины гекса
+	var center := Vector2(w * 0.5, h * 0.5)
+	var edges := _normals()
+	var tmax := PackedFloat32Array()
+	tmax.resize(w * h)
+	var bands: Array[PackedFloat32Array] = []
+	for side in edges.size():
+		var band := PackedFloat32Array()
+		band.resize(w * h)
+		bands.append(band)
+	for y in h:
+		for x in w:
+			var p := Vector2(x + 0.5, y + 0.5) - center
+			var i := y * w + x
+			var m := 0.0
+			for side in edges.size():
+				var t := p.dot(edges[side]) / a
+				bands[side][i] = t
+				m = maxf(m, absf(t))
+			tmax[i] = m
+	return [tmax, bands]
 
 
-func tileset() -> TileSet:
-	return _tileset
+## Внешние нормали сторон в порядке `SIDES` — вычислены из угла стороны, а не
+## из порядка битов: порядок бит у `HexUtils`, порядок направления у листа.
+static func _normals() -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for side in SIDES:
+		var angle := deg_to_rad(float(SIDE_ANGLES[String(side)]))
+		out.append(Vector2(cos(angle), sin(angle)))
+	return out
 
 
-func build_hex() -> TileSet:
-	var tex := load(SHEET_PATH)
-	if not (tex is Texture2D):
-		# Резервный атлас (4.2, спека «Резервный атлас до зелёного гейта»):
-		# отказ нового атласа — явная ошибка в журнале + работоспособная карта,
-		# а не пустой тайлмап. Старый лист удалён по указанию владельца, поэтому
-		# резерв — процедурная нейтральная клетка (тот же гекс, один вариант).
-		GameLogger.error("TileAtlas: не удалось загрузить %s — карта рисуется резервным атласом" % SHEET_PATH)
-		return _build_fallback_tileset()
-	var ts := TileSet.new()
-	ts.tile_shape = 3 as TileSet.TileShape
-	ts.tile_size = Vector2i(TILE, TILE)
-	var src := TileSetAtlasSource.new()
-	src.texture = tex
-	src.texture_region_size = Vector2i(TILE, TILE)
-	ts.add_source(src, SOURCE_ID)
-	for coords in all_coords():
-		src.create_tile(coords)
-	# Побратим тумана объявляется и здесь, а не только в квадратном `build()`
-	# (T-168): `MapRenderer.apply_fog` и `paint_transitions` кладут «исследовано, но
-	# не видно» в `FOG_SOURCE_ID`, а `TileMapLayer` на ссылку в несуществующий
-	# источник не ругается — он рисует пустоту. Пока источника не было, память
-	# тумана (клетка, которую игрок видел и из которой вышел) становилась
-	# неотличима от никогда не открытой земли.
-	var fog_src := TileSetAtlasSource.new()
-	fog_src.texture = ImageTexture.create_from_image(_dimmed_image(tex.get_image()))
-	fog_src.texture_region_size = Vector2i(TILE, TILE)
-	ts.add_source(fog_src, FOG_SOURCE_ID)
-	for coords in all_coords():
-		fog_src.create_tile(coords)
-	return ts
-
-
-## Резервный тайлсет: одна процедурная нейтральная клетка (тот же гекс), чтобы
-## карта оставалась работоспособной при отсутствии нового атласа. Все биомы
-## рисуются одним тайлом — это явный визуальный сигнал, что атлас сломан.
-func _build_fallback_tileset() -> TileSet:
-	var ts := TileSet.new()
-	ts.tile_shape = 3 as TileSet.TileShape
-	ts.tile_size = Vector2i(TILE, TILE)
-	var img := Image.create(TILE, TILE, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0.4, 0.35, 0.3, 1.0))
-	var tex := ImageTexture.create_from_image(img)
-	var src := TileSetAtlasSource.new()
-	src.texture = tex
-	src.texture_region_size = Vector2i(TILE, TILE)
-	ts.add_source(src, SOURCE_ID)
-	src.create_tile(Vector2i.ZERO)
-	# Побратим тумана нужен и резерву: правило «открыто и не видно — затемнено» не
-	# отменяется из-за того, что основной лист не загрузился (T-168).
-	var fog_src := TileSetAtlasSource.new()
-	fog_src.texture = ImageTexture.create_from_image(_dimmed_image(img))
-	fog_src.texture_region_size = Vector2i(TILE, TILE)
-	ts.add_source(fog_src, FOG_SOURCE_ID)
-	fog_src.create_tile(Vector2i.ZERO)
-	return ts
-
-
-static func build_hex_tileset() -> TileSet:
-	var main_loop := Engine.get_main_loop()
-	if main_loop is SceneTree:
-		var tree := main_loop as SceneTree
-		var cache := tree.root.get_node_or_null("/root/TileAtlasCache")
-		if cache != null and cache.has_method("build_hex_tileset"):
-			return cache.call("build_hex_tileset")
-	return TileAtlas.new().build_hex()
-
-
-static func clear_cache() -> void:
-	_manifest = {}
-	_index = {}
-	_fog_tex = null
-	var main_loop := Engine.get_main_loop()
-	if main_loop is SceneTree:
-		var tree := main_loop as SceneTree
-		var cache := tree.root.get_node_or_null("/root/TileAtlasCache")
-		if cache != null and cache.has_method("clear_cache"):
-			cache.call("clear_cache")
+## Одна клетка листа: база (row 0) — залитый гекс с ободком; декаль (row ≥ 1) —
+## тон биома, наедающий полосу у своей стороны с прозрачным краем.
+static func _paint_cell(img: Image, col: int, row: int, color: Color, geom: Array) -> void:
+	var w := HEX_SIZE.x
+	var h := HEX_SIZE.y
+	var tmax: PackedFloat32Array = geom[0]
+	var bands: Array = geom[1]
+	var side := row - 1
+	for y in h:
+		for x in w:
+			var i := y * w + x
+			if tmax[i] > 1.0:
+				continue
+			var alpha := 1.0
+			var c := color
+			if side < 0:
+				if tmax[i] > RIM:
+					c = c.darkened(0.22)
+			else:
+				alpha = clampf(
+					(bands[side][i] - BAND_FROM) / (BAND_TO - BAND_FROM), 0.0, 1.0)
+				if alpha <= 0.0:
+					continue
+				alpha *= BAND_ALPHA
+			img.set_pixel(col * w + x, row * h + y, Color(c.r, c.g, c.b, alpha))

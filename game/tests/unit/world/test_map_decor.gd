@@ -258,20 +258,6 @@ func test_exhausted_node_carrier_dimmed() -> void:
 	assert_that(node.outline.visible).is_false()
 
 
-## Резервный тайлсет (4.2, спека «Резервный атлас до зелёного гейта»): при
-## отсутствии нового атласа карта остаётся работоспособной — один нейтральный
-## гекс-тайл, а не пустой тайлмап.
-func test_fallback_tileset_is_workable() -> void:
-	var atlas := TileAtlas.new()
-	var ts: TileSet = atlas._build_fallback_tileset()
-	assert_that(ts).is_not_null()
-	assert_that(ts.tile_size).is_equal(Vector2i(TileAtlas.TILE, TileAtlas.TILE))
-	# Тайл на (0,0) существует — все биомы рисуются им (явный сигнал сбоя).
-	var src: TileSetAtlasSource = ts.get_source(0) as TileSetAtlasSource
-	assert_that(src).is_not_null()
-	assert_that(src.has_tile(Vector2i.ZERO)).is_true()
-
-
 func _make_resource_node(id: StringName) -> ResourceNode:
 	var node: ResourceNode = load("res://scenes/entities/resource_node.tscn").instantiate()
 	add_child(node)
