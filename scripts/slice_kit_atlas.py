@@ -217,17 +217,25 @@ def layout_sheet(
 ) -> tuple[list[dict], dict]:
     """Собрать лист в раскладке существующего атласа.
 
-    Раскладка (сетка, id клеток, роли base/edge) берётся из манифеста атласа, а
-    заполнение — из нарезанных клеток кадра: тайл с тоном биома подставляется в
-    каждую его клетку, варианты чередуются. Декалям перехода свой тайл не даётся
-    — в кадре перехода нет, и честное «перехода нет» лучше мнимого. Рантайм при
-    этом не меняется ни на строку: `tools/map_shot.gd --atlas=` подменяет пиксели
-    тем же тайлсетом.
+    Декалям перехода свой тайл не даётся — в кадре перехода нет, и честное
+    «перехода нет» лучше мнимого. Биому, для которой в кадре нет ни тона, ни
+    подмены, клетка берётся **из поверхности того же носителя** (`<layout>.webp`,
+    то есть из текущего атласа): песчаное кольцо города — песочной текстуры, а не
+    зелёной подделки. Если листа-носителя рядом нет, клетка становится травой и
+    уезжает в `biomes_without_tone`. Рантайм не меняется ни на строку:
+    `tools/map_shot.gd --atlas=` подменяет пиксели тем же тайлсетом, а в игре лист
+    поднимает `TileAtlas.sheet_path()`.
     """
     spec = json.loads(layout.read_text())
     cols, rows = (int(v) for v in spec["grid"])
     if int(spec["tile"]) != tile:
         raise SystemExit(f"лист {layout}: тайл {spec['tile']} != {tile}")
+    carrier = layout.with_suffix(".webp")
+    base = (
+        np.asarray(Image.open(carrier).convert("RGB"), dtype=np.uint8)
+        if carrier.exists()
+        else None
+    )
     by_tone: dict[str, list[int]] = {}
     for i, tone in enumerate(tones):
         by_tone.setdefault(tone, []).append(i)
@@ -238,6 +246,7 @@ def layout_sheet(
     placed: list[dict] = []
     missing: list[str] = []
     substituted: dict[str, str] = {}
+    from_layout: list[str] = []
     for cell in spec["cells"]:
         biome = str(cell["biome"])
         pool = by_tone.get(biome)
@@ -245,6 +254,16 @@ def layout_sheet(
             sub = SUBSTITUTE[biome]
             substituted[biome] = sub
             pool = by_tone[sub]
+        x, y = (int(v) for v in cell["atlas"])
+        if not pool and base is not None:
+            # Клетка достаётся носителю: своя текстура лучше чужой подделки.
+            if biome not in from_layout:
+                from_layout.append(biome)
+            sheet[y * tile : (y + 1) * tile, x * tile : (x + 1) * tile] = base[
+                y * tile : (y + 1) * tile, x * tile : (x + 1) * tile
+            ]
+            placed.append({"id": cell["id"], "tone": "carrier"})
+            continue
         if not pool:
             if biome not in missing:
                 missing.append(biome)
@@ -252,11 +271,14 @@ def layout_sheet(
         n = taken.get(biome, 0)
         taken[biome] = n + 1
         src = pool[n % len(pool)]
-        x, y = (int(v) for v in cell["atlas"])
         sheet[y * tile : (y + 1) * tile, x * tile : (x + 1) * tile] = tiles[src]
         placed.append({"id": cell["id"], "tone": tones[src]})
     _save(sheet, path)
-    return placed, {"biomes_without_tone": missing, "biomes_substituted": substituted}
+    return placed, {
+        "biomes_without_tone": missing,
+        "biomes_substituted": substituted,
+        "biomes_from_carrier": from_layout,
+    }
 
 
 def self_test() -> int:
@@ -299,7 +321,9 @@ def self_test() -> int:
     plate[11:13, :] = 25  # нарисованный контур клетки
     dev = int(np.abs(strip_lines(plate).astype(np.int16) - base.astype(np.int16)).max())
     # Подмена тона в раскладке: у дороги своего тона в наборе нет, и она обязана
-    # взять глину, а не траву (иначе дорожное полотно в игре невидимо).
+    # взять глину, а не траву (иначе дорожное полотно в игре невидимо). Песок
+    # подменить нечем: без листа-носителя он травa и уезжает в пробел, а с листом
+    # носителя (`<layout>.webp`) клетка достаётся носителю, а не подделке.
     with tempfile.TemporaryDirectory() as tmp:
         t = Path(tmp)
         (t / "layout.json").write_text(json.dumps({
@@ -316,6 +340,14 @@ def self_test() -> int:
         probe, gaps = layout_sheet(
             t / "layout.json", probe_tiles, ["mud", "grass"], 24, t / "sheet.webp"
         )
+        px = np.array([200, 10, 10], np.uint8)
+        carrier_sheet = np.zeros((24, 48, 3), np.uint8)
+        carrier_sheet[:, 24:] = px
+        Image.fromarray(carrier_sheet).save(t / "layout.webp")
+        probe_c, gaps_c = layout_sheet(
+            t / "layout.json", probe_tiles, ["mud", "grass"], 24, t / "sheet2.webp"
+        )
+        carrier_px = np.asarray(Image.open(t / "sheet2.webp").convert("RGB"), np.uint8)[0, 30]
     checks = [
         ("тон воды", tone_of(np.array(colors["water"], np.uint8).reshape(1, 1, 3)), "water"),
         ("тон песка", tone_of(np.array(colors["sand"], np.uint8).reshape(1, 1, 3)), "sand"),
@@ -331,6 +363,11 @@ def self_test() -> int:
         ("подмена в отчёте", gaps["biomes_substituted"], {"road": "mud"}),
         ("песок без тона — трава", probe[1]["tone"], "grass"),
         ("пробел в отчёте", gaps["biomes_without_tone"], ["sand"]),
+        ("песок у носителя", probe_c[1]["tone"], "carrier"),
+        # webp — с потерями, поэтому пиксель сверяется допуском, а не равенством.
+        ("пиксель носителя", int(np.abs(carrier_px.astype(int) - px).max()) <= 8, True),
+        ("носитель в отчёте", gaps_c["biomes_from_carrier"], ["sand"]),
+        ("пробел пуст у носителя", gaps_c["biomes_without_tone"], []),
     ]
     bad = 0
     for name, got_v, want_v in checks:
@@ -416,8 +453,9 @@ def main() -> int:
         print(
             "РАСКЛАДКА "
             f"{args.layout}: размещено {len(placed)} клеток, подменено "
-            f"{json.dumps(gaps['biomes_substituted'], ensure_ascii=False)}, биомов без "
-            f"своего тона: {json.dumps(gaps['biomes_without_tone'], ensure_ascii=False)}"
+            f"{json.dumps(gaps['biomes_substituted'], ensure_ascii=False)}, взято из "
+            f"носителя {json.dumps(gaps['biomes_from_carrier'], ensure_ascii=False)}, "
+            f"без покрытия: {json.dumps(gaps['biomes_without_tone'], ensure_ascii=False)}"
         )
     print(f"MANIFEST {meta}: донор {digest[:12]}")
     return 0

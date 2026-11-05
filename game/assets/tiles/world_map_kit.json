@@ -2782,19 +2782,19 @@
   },
   {
    "id": "base_sand_0",
-   "tone": "grass"
+   "tone": "carrier"
   },
   {
    "id": "base_sand_1",
-   "tone": "grass"
+   "tone": "carrier"
   },
   {
    "id": "base_sand_2",
-   "tone": "grass"
+   "tone": "carrier"
   },
   {
    "id": "base_sand_3",
-   "tone": "grass"
+   "tone": "carrier"
   },
   {
    "id": "base_snow_0",
@@ -2918,27 +2918,27 @@
   },
   {
    "id": "edge_sand_e",
-   "tone": "grass"
+   "tone": "carrier"
   },
   {
    "id": "edge_sand_ne",
-   "tone": "grass"
+   "tone": "carrier"
   },
   {
    "id": "edge_sand_nw",
-   "tone": "grass"
+   "tone": "carrier"
   },
   {
    "id": "edge_sand_w",
-   "tone": "grass"
+   "tone": "carrier"
   },
   {
    "id": "edge_sand_sw",
-   "tone": "grass"
+   "tone": "carrier"
   },
   {
    "id": "edge_sand_se",
-   "tone": "grass"
+   "tone": "carrier"
   },
   {
    "id": "edge_snow_e",
@@ -3086,11 +3086,12 @@
   }
  ],
  "gaps": {
-  "biomes_without_tone": [
-   "sand"
-  ],
+  "biomes_without_tone": [],
   "biomes_substituted": {
    "road": "mud"
-  }
+  },
+  "biomes_from_carrier": [
+   "sand"
+  ]
  }
 }
