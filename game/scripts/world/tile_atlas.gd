@@ -211,6 +211,14 @@ func build_hex() -> TileSet:
 		return _build_fallback_tileset()
 	var ts := TileSet.new()
 	ts.tile_shape = 3 as TileSet.TileShape
+	## Ориентация — в коде, а не в дефолтах Godot (T-341, разбор hex_map_generator):
+	## и `TILE_LAYOUT_STACKED`, и `TILE_OFFSET_AXIS_HORIZONTAL` сегодня равны 0, поэтому
+	## сетка держалась на умолчании. Смена оси молча поворачивает всю сетку на 90°,
+	## а `HexGrid.calibrate` меряет только сдвиг ряда (shift_right) — ось он назад
+	## не повернёт. STACKED + HORIZONTAL = pointy-top с нечётными рядами вправо —
+	## ровно та схема odd-r, которую читает `HexUtils`.
+	ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+	ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
 	ts.tile_size = Vector2i(TILE, TILE)
 	var src := TileSetAtlasSource.new()
 	src.texture = tex
