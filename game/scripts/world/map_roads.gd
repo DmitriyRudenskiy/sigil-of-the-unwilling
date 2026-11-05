@@ -97,8 +97,12 @@ static func build_tileset() -> TileSet:
 		GameLogger.error("MapRoads: не удалось загрузить %s" % SHEET_PATH)
 		return null
 	var ts := TileSet.new()
-	ts.tile_shape = 3 as TileSet.TileShape  # TILE_SHAPE_HEXAGON — как у базы
-	ts.tile_size = Vector2i(TILE, TILE)
+	# Тот же бокс, что у базы (T-344): декаль ложится в клетку, а не в картинку —
+	# квадратный tile_size сдвинул бы полотно относительно дороги рельефа.
+	ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+	ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+	ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
+	ts.tile_size = TileAtlas.HEX_SIZE
 	_add_source(ts, tex, SOURCE_ID, _coords.values())
 	_add_source(ts, fog_sheet_texture(), FOG_SOURCE_ID, _coords.values())
 	return ts

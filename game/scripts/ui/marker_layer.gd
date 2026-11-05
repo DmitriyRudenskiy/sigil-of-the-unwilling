@@ -35,7 +35,7 @@ func setup(map: MapGenerator) -> void:
 	_map_gen = map
 	z_index = 5
 	if _map_gen and _map_gen.has_valid_tilemap():
-		_hex_size = _map_gen.get_tile_size().x * 0.5
+		_hex_size = _map_gen.get_tile_size().y * 0.5  # для pointy-top радиус = h/2
 
 ## Туман — источник истины «показывать ли маркер» (docs/02g §2.1: неисследованная
 ## клетка пуста, без ресурсов и маркеров). Хост (WorldController) передаёт свой

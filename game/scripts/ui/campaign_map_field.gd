@@ -20,7 +20,6 @@ extends Control
 ## Выбор игрока: карточка региона + причины из модели экрана. Слушатель — HUD.
 signal region_selected(card: Dictionary)
 
-const SHEET := "res://assets/tiles/world_map_atlas.webp"
 const HEX_DIRECTIONS: Array[Vector2i] = [
 	Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1), Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1),
 ]
@@ -49,6 +48,8 @@ var _map: RegionMap = null
 var _selected: String = ""
 var _sheet: Texture2D = null
 var _centers: Dictionary = {}  # region -> Vector2, пиксели внутри `size`
+var _axial: Dictionary = {}    # region -> Vector2i (осевые координаты раскладки)
+var _at_axial: Dictionary = {} # Vector2i -> region (обратная: сосед по стороне)
 var _radius := 0.0
 ## Знак показанной партии (T-280) — кадр атласа носителей. Узел, а не `draw_*`:
 ## гард кадра видит то, что лежит в дереве, и носитель обязан быть в нём.
@@ -217,9 +218,14 @@ func _layout() -> void:
 	if bounds.size == Vector2.ZERO:
 		bounds = Rect2(Vector2.ZERO, Vector2.ONE)
 	# Масштаб так, чтобы гексы с радиусом вписались в кадр целиком (половина
-	# гекса за краем — это не «карта ушла за кадр», а обрезанный кадр); радиус —
-	# половина шага решётки по горизонтали.
-	var k := sqrt(3.0) / 2.0 * 0.92
+	# гекса за краем — это не «карта ушла за кадр», а обрезанный кадр).
+	#
+	# Радиус обязан равняться радиусу решётки (единичный множитель осевой формулы
+	# выше), а не быть его долей: при прежнем `k = √3/2 · 0.92` гексы рисовались в
+	# 0.8 от своей клетки и между всеми соседями оставался зазор ~20% шага — тот же
+	# дефект, что «тайл занимает не свою клетку», только множителем радиуса, а не
+	# формой клетки (**T-344**).
+	var k := 1.0
 	var avail := size * (Vector2.ONE - Vector2(2.0 * MARGIN, 2.0 * MARGIN))
 	var scale_min := minf(
 		avail.x / (bounds.size.x + sqrt(3.0) * k),
@@ -228,6 +234,10 @@ func _layout() -> void:
 	var offset := (size - bounds.size * scale_min) / 2.0 - bounds.position * scale_min
 	for region in pixels:
 		_centers[region] = (pixels[region] as Vector2) * scale_min + offset
+	_axial = axial
+	_at_axial = {}
+	for region in axial:
+		_at_axial[axial[region]] = String(region)
 	_place_hero_marker()
 
 
@@ -253,16 +263,19 @@ func _draw() -> void:
 	if _map == null:
 		return
 	if _sheet == null:
-		_sheet = load(SHEET) as Texture2D
+		_sheet = TileAtlas.sheet()  # процедурный лист биомов (T-344), файла нет
 	for region in _centers:
 		var a := hex_points(region)
-		var rect := _atlas_rect(String(region))
+		var center := _centers[region] as Vector2
+		var biome := _biome_of(String(region))
+		var rect := _atlas_rect(biome, -1)
 		if not _map.open_regions.has(region):
 			draw_polygon(a, [COLOR_FOG])
 		elif rect == Rect2():
 			draw_polygon(a, [COLOR_UNKNOWN])
 		else:
-			draw_polygon(a, [Color.WHITE], _uvs(a, rect, _centers[region] as Vector2), _sheet)
+			draw_polygon(a, [Color.WHITE], _uvs(a, rect, center), _sheet)
+			_draw_transitions(String(region), a, center, biome)
 	for edge in _map.edges:
 		var from := _centers.get(String(edge[0]), Vector2.ZERO) as Vector2
 		var to := _centers.get(String(edge[1]), Vector2.ZERO) as Vector2
@@ -305,26 +318,64 @@ func _draw_caption(region: String, pts: PackedVector2Array) -> void:
 			HorizontalAlignment.HORIZONTAL_ALIGNMENT_LEFT, -1, size_px, COLOR_SELECTED)
 
 
-## Клетка листа для региона: биом → первая клетка базы. Пустой `Rect2` — биома
-## нет в листе (или нет листа): гекс рисуется подложкой, а не чужой текстурой,
-## иначе «неизвестный биом» выглядел бы лугом.
-func _atlas_rect(region: String) -> Rect2:
-	var biome: int = REGION_BIOME_TO_ATLAS.get(String(_map.biomes.get(region, "")), -1)
-	if _sheet == null or biome == -1:
+## Биом региона через таблицу соответствия; −1 — биом не из листа (регион рисуется
+## подложкой, а не подменённым чужим тоном).
+func _biome_of(region: String) -> int:
+	return REGION_BIOME_TO_ATLAS.get(String(_map.biomes.get(region, "")), -1)
+
+
+## Клетка листа: биом + сторона (`side` = −1 — база, иначе индекс `SIDES`). Пустой
+## `Rect2` — биома нет в листе (или нет листа): гекс рисуется подложкой, а не
+## чужой текстурой, иначе «неизвестный биом» выглядел бы лугом.
+func _atlas_rect(biome: int, side: int) -> Rect2:
+	if _sheet == null or biome < 0:
 		return Rect2()
-	var cells: Array = TileAtlas.base_coords(int(biome))
-	if cells.is_empty():
-		return Rect2()
-	var cell: Vector2i = cells[0]
-	var tile := float(GameNumbers.TILE_SIZE)
-	return Rect2(cell.x * tile, cell.y * tile, tile, tile)
+	var cell := Vector2i.ZERO
+	if side < 0:
+		var cells: Array = TileAtlas.base_coords(biome)
+		if cells.is_empty():
+			return Rect2()
+		cell = cells[0]
+	else:
+		cell = TileAtlas.edge_coords(biome, String(TileAtlas.SIDES[side]))
+		if cell.x < 0:
+			return Rect2()
+	# Клетка листа — bounding box гекса, а не квадрат (T-344): square-математика
+	# резала бы гекс по ширине и уползала бы вниз с каждой строкой листа.
+	var hex_ := Vector2(TileAtlas.HEX_SIZE)
+	return Rect2(cell.x * hex_.x, cell.y * hex_.y, hex_.x, hex_.y)
+
+
+## Переходы региона: декаль биомa соседа на моей стороне, обращённой к соседу.
+## Одинаковые биомы перехода не получают — декаль своего тона на своей границе
+## лишь затемнила бы клетку.
+func _draw_transitions(region: String, pts: PackedVector2Array, center: Vector2, biome: int) -> void:
+	if not _axial.has(region):
+		return
+	var here: Vector2i = _axial[region]
+	for side in HEX_DIRECTIONS.size():
+		var other := String(_at_axial.get(here + HEX_DIRECTIONS[side], ""))
+		if other == "" or not _map.open_regions.has(other):
+			continue
+		var other_biome := _biome_of(other)
+		if other_biome < 0 or other_biome == biome:
+			continue
+		var rect := _atlas_rect(other_biome, side)
+		if rect == Rect2():
+			continue
+		draw_polygon(pts, [Color.WHITE], _uvs(pts, rect, center), _sheet)
 
 
 ## UV гекса: те же вершины полигона, только в координатах клетки листа.
 func _uvs(pts: PackedVector2Array, rect: Rect2, center: Vector2) -> PackedVector2Array:
+	# Полигон и клетка — один и тот же bounding box соты (√3·R × 2R), поэтому
+	# масштаб по осям обязан быть разным: прежний `rect.size.x / (2R)` на обе оси
+	# сжимал клетку по вертикали и съезжал к левому верху — те самые «артефакты».
 	var sheet_size := _sheet.get_size()
+	var box := Vector2(sqrt(3.0) * _radius, 2.0 * _radius)
+	var scale_ := rect.size / box
 	var uvs := PackedVector2Array()
 	for p in pts:
-		var local := (p - center + Vector2(_radius, _radius)) * (rect.size.x / (_radius * 2.0))
+		var local := (p - center + box * 0.5) * scale_
 		uvs.append((rect.position + local) / sheet_size)
 	return uvs

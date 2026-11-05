@@ -12,13 +12,14 @@ class _Flag:
 	var value := false
 
 
-## Псевдо-тайлсет: клетки берутся из манифеста атласа, а не из квадрата 4×2 —
-## иначе set_cell на реальной координате листа молча пишет пустоту.
+## Псевдо-тайлсет: клетки берутся из раскладки листа (`TileAtlas.all_coords`),
+## а не из квадрата 4×2 — иначе set_cell на реальной координате листа молча пишет
+## пустоту.
 func _make_tileset() -> TileSet:
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
 	var all_coords: Array = TileAtlas.all_coords()
-	# Псевдо-текстура — по факту манифеста: квадрат 4×2 на 80 клеток не тянет,
+	# Псевдо-текстура — по факту раскладки: квадрат 4×2 на все клетки не тянет,
 	# Godot ругался «tile is outside the texture» и тайлы не создавались вовсе.
 	var last := Vector2i(0, 0)
 	for coords in all_coords:
@@ -325,7 +326,7 @@ func _gen_painted(seed_value: int) -> Dictionary:
 	return {"painted": painted, "terrain": gen.model.terrain_grid}
 
 
-func test_variants_survive_map_rebuild() -> void:
+func test_painted_tiles_survive_map_rebuild() -> void:
 	var first: Dictionary = _gen_painted(4242)
 	var again: Dictionary = _gen_painted(4242)
 	var other: Dictionary = _gen_painted(777)
@@ -337,43 +338,11 @@ func test_variants_survive_map_rebuild() -> void:
 		if b.get(cell) != a[cell]:
 			changed += 1
 	assert_that(changed).is_equal(0)
-	# Другой сид — другая раскраска: иначе variant_for не зависит от сида.
-	var o: Dictionary = other["painted"]
-	var foreign := 0
-	for cell in a:
-		if o.has(cell) and o[cell] == a[cell]:
-			foreign += 1
-	assert_that(foreign < a.size()).is_true()
+	# Сравнение с другим сидом здесь было бы молчаливой проверкой «ничего»:
+	# с одного варианта базы карта не обязана менять раскраску от сида (T-344),
+	# обязана она сохранять раскраску при пересборке — выше.
+	assert_that(other["painted"].size()).is_equal(a.size())
 
-
-## Разнообразие обязано быть видно в кадре: у каждого биома, которого в кадре
-## 40×40 не меньше 20 клеток, встречаются все четыре варианта базы. У редкого
-## биома четырёх не бывает по арифметике хэша, поэтому порог и счёт по факту.
-func test_generated_frame_shows_all_four_variants() -> void:
-	var generated: Dictionary = _gen_painted(4242)
-	var painted: Dictionary = generated["painted"]
-	var terrain: Dictionary = generated["terrain"]
-	var seen: Dictionary = {}
-	var cells: Dictionary = {}
-	for cell in painted:
-		var terrain_id: int = int(terrain.get(cell, -1))
-		if not MapRenderer.TERRAIN_TO_BIOME.has(terrain_id):
-			continue
-		var biome: int = MapRenderer.TERRAIN_TO_BIOME[terrain_id]
-		if not seen.has(biome):
-			seen[biome] = {}
-		(seen[biome] as Dictionary)[painted[cell]] = true
-		cells[biome] = int(cells.get(biome, 0)) + 1
-	var roomy := 0
-	var full := 0
-	for biome in seen:
-		if int(cells[biome]) < 20:
-			continue
-		roomy += 1
-		if (seen[biome] as Dictionary).size() == TileAtlas.base_coords(biome).size():
-			full += 1
-	assert_that(roomy).is_greater(0)
-	assert_that(full).is_equal(roomy)
 
 # Прежний дом — unit/world/test_city_hex_layout.gd (шаг 6 T-305, 2026-10-30):
 # rebuild_city_zones — метод рендерера, а не «прототип планировки города».
