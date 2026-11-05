@@ -59,7 +59,6 @@ TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 	scripts/test_check_hero_layout_map.py
 	scripts/test_check_openspec_specs.py scripts/test_check_node_paths.py
 	scripts/test_check_save_matrix.py scripts/test_check_asset_provenance.py
-	scripts/test_slice_kit_atlas.py
 	scripts/test_check_hero_frames.py
 	scripts/test_audit_hero_frames.py
 	scripts/test_scenario_matrix.py

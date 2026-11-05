@@ -14,17 +14,6 @@ extends RefCounted
 const SHEET_PATH := "res://assets/tiles/world_map_atlas.webp"
 const MANIFEST_PATH := "res://assets/tiles/world_map_atlas.json"
 
-## Резервный лист, собранный из кадра (`scripts/slice_kit_atlas.py`, T-341).
-## Кладётся рядом с атласом: раскладка общая (`MANIFEST_PATH` — те же id и
-## координаты клеток), поэтому манифест не меняется, меняется только поверхность.
-## Носитель не выбран (T-341), поэтому по умолчанию рисуется атлас; лист включается
-## настройкой `world_map/kit/enabled` (в редакторе — Project Settings) или переменной
-## окружения `MAP_KIT=1` (`MAP_KIT=0` — выключить, даже если настройка включена).
-## Отсутствующий лист — рендер атласом + ошибка в журнал, а не пустой тайлмап
-## (world-map-scene-slicing 4.4).
-const KIT_SHEET_PATH := "res://assets/tiles/world_map_kit.webp"
-const KIT_ENV := "MAP_KIT"
-
 const TILE := GameNumbers.TILE_SIZE
 const SOURCE_ID := 0
 const FOG_SOURCE_ID := 1
@@ -53,21 +42,6 @@ static var _fog_tex: ImageTexture
 var _tileset: TileSet
 var _src: TileSetAtlasSource
 var _fog_src: TileSetAtlasSource
-
-
-## Какой лист грузит рантайм: резервный из кадра или атлас (см. `KIT_SHEET_PATH`).
-static func sheet_path() -> String:
-	if OS.get_environment(KIT_ENV) == "0":
-		return SHEET_PATH
-	var wanted := bool(ProjectSettings.get_setting("world_map/kit/enabled", false))
-	if OS.has_environment(KIT_ENV):
-		wanted = OS.get_environment(KIT_ENV) == "1"
-	if not wanted:
-		return SHEET_PATH
-	if not ResourceLoader.exists(KIT_SHEET_PATH):
-		GameLogger.error("TileAtlas: резервного листа %s нет — карта рисуется атласом" % KIT_SHEET_PATH)
-		return SHEET_PATH
-	return KIT_SHEET_PATH
 
 
 ## Манифест листа: {tile, grid, cells: [{id, kind, biome, variant|side, atlas}]}.
@@ -153,7 +127,7 @@ static func all_coords() -> Array:
 
 
 func build() -> bool:
-	var path := sheet_path()
+	var path := SHEET_PATH
 	var tex := load(path)
 	if not (tex is Texture2D):
 		GameLogger.error("TileAtlas: не удалось загрузить %s" % path)
@@ -200,7 +174,7 @@ func tileset() -> TileSet:
 
 
 func build_hex() -> TileSet:
-	var path := sheet_path()
+	var path := SHEET_PATH
 	var tex := load(path)
 	if not (tex is Texture2D):
 		# Резервный атлас (4.2, спека «Резервный атлас до зелёного гейта»):
