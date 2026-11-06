@@ -36,7 +36,7 @@ date: 2026-10-29
 | `Spells` | `scripts/autoload/spell_registry.gd` | реестр заклинаний: `_reg(id, name, school, lvl, mana, target…)`, `get_spell` |
 | `Resources` | `scripts/autoload/resource_registry.gd` | реестр ресурсов: городские (`_add_city` с ёмкостью), иконки (`get_icon`) |
 | `Services` | `scripts/autoload/services.gd` | DI-реестр (см. §2): `resolve(key)`, `register_singleton(key, service)`, `clear_session()` |
-| `TileAtlasCache` | `scripts/autoload/tile_atlas_cache.gd` | кэш `TileSet` гекс-тайлов (`build_hex_tileset`) — сборка атласа один раз за сессию |
+| `HexCellArtCache` | `scripts/autoload/hex_cell_art_cache.gd` | кэш `TileSet` гекс-тайлов (`build_hex_tileset`) — сборка процедурного листа сот один раз за сессию (T-344: носитель `TileAtlas` → `HexCellArt`) |
 | `HexGrid` | `scripts/autoload/hex_grid.gd` | калибровка координатной сетки по `TileMapLayer` (`calibrate(tm)`, 12 строк) |
 
 ## 2. Services — DI-реестр
