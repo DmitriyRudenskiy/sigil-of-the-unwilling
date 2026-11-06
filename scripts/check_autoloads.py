@@ -1,54 +1,92 @@
 #!/usr/bin/env python3
-"""Префлайт автозагрузок (T-344): каждая запись `[autoload]` → существующий файл.
+"""Предпроверка автолоадов project.godot (T-344).
 
-Причина: `static_caches.gd` держит идентификатор автозагрузки как литерал, и
-несуществующий файл превращается не в «тихий скип», а в падение компиляции всего
-проекта (прогон: 1 error + 1 failure, виновник — строка в project.godot). Проверка
-дешёвая и ловит класс до GdUnit: опечатка в пути, переименованный носитель без
-правки секции, пустая строка, оставшаяся после инжекта вендорного MCP-сервера.
+Гейт умел молча портить project.godot: вендорный MCP-сервер инжектит
+autoload-строку, а cleanup делал `git checkout -- project.godot`, сносивший
+заодно и незакоммиченные правки носителя (инцидент 2026-11-06). Снапшот +
+восстановление в trap снимают саму порчу; эта предпроверка ловит ЕЁ РЕЗУЛЬТАТ
+до прогона: секция `[autoload]` — закрытый набор из 15 записей, и GdUnit без
+автолоадов не спорит, а молча краснеет.
 
-Вызов: python3 scripts/check_autoloads.py [--project game/project.godot]
+Расхождение с каноном — красный гейт, а не молчаливая подмена (тот же смысл,
+что «клетки нет в манифесте» у прежнего носителя). Порядок записей — тоже
+факт дерева: перестановка автолоадов меняет порядок инициализации.
+
+Самопроверка: scripts/test_check_autoloads.py (TESTS в scripts/doc_gates.sh).
 """
-
 from __future__ import annotations
 
+import re
 import sys
-from pathlib import Path
+
+# Канон секции [autoload]: 15 записей, порядок = порядок в project.godot.
+EXPECTED = [
+    "McpInteractionServer",
+    "Settings",
+    "SoundManager",
+    "GameEventBus",
+    "Spellbook",
+    "PauseController",
+    "CursorController",
+    "TemplateBootstrap",
+    "Units",
+    "Artifacts",
+    "Spells",
+    "Resources",
+    "Services",
+    "HexCellArtCache",
+    "HexGrid",
+]
 
 
-def autoloads(project: Path) -> list[tuple[str, str]]:
-    """Пары (имя, путь) из секции [autoload] простого ini-вида project.godot."""
-    rows: list[tuple[str, str]] = []
+def parse_autoloads(text: str) -> list:
+    """Имена автолоадов из текста project.godot, в порядке следования."""
+    names: list = []
     in_section = False
-    for line in project.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line.startswith("[") and line.endswith("]"):
-            in_section = line == "[autoload]"
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("["):
+            in_section = stripped == "[autoload]"
             continue
-        if in_section and line and not line.startswith(("#", ";")) and "=" in line:
-            name, value = line.split("=", 1)
-            rows.append((name.strip(), value.strip().strip('"')))
-    return rows
+        if not in_section or not stripped or stripped[:1] in (";", "#"):
+            continue
+        matched = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*"', stripped)
+        if matched:
+            names.append(matched.group(1))
+    return names
 
 
-def main(argv: list[str]) -> int:
-    project = Path(argv[2] if len(argv) > 2 else "game/project.godot")
-    if not project.is_file():
-        print(f"AUTOLOADS: Красный — файл проекта не найден: {project}")
+def check(text: str) -> list:
+    """Список расхождений с каноном; пустой список = секция канонична."""
+    names = parse_autoloads(text)
+    problems: list = []
+    if names == EXPECTED:
+        return problems
+    missing = [n for n in EXPECTED if n not in names]
+    extra = [n for n in names if n not in EXPECTED]
+    if missing:
+        problems.append(f"нет записей: {missing}")
+    if extra:
+        problems.append(f"лишние записи (вендорный инжект?): {extra}")
+    if not missing and not extra:
+        problems.append(f"порядок записей изменился: {names}")
+    return problems
+
+
+def main(argv: list) -> int:
+    path = argv[1] if len(argv) > 1 else "game/project.godot"
+    try:
+        text = open(path, encoding="utf-8").read()
+    except OSError as exc:
+        print(f"AUTOLOAD-PRECHECK: RED — {path} не читается: {exc}")
         return 1
-    bad: list[str] = []
-    for name, value in autoloads(project):
-        target = value[1:] if value.startswith("*") else value
-        if not target.startswith("res://"):
-            bad.append(f"{name} = {value!r} — не res://-скрипт (пустая строка после инжекта?)")
-        elif not (project.parent / target.removeprefix("res://")).is_file():
-            bad.append(f"{name} = {value!r} — файла нет: {target}")
-    if bad:
-        print(f"AUTOLOADS: Красный — битых записей {len(bad)} (из {len(autoloads(project))}):")
-        for row in bad:
-            print(f"  - {row}")
+    problems = check(text)
+    if problems:
+        print(f"AUTOLOAD-PRECHECK: RED — секция [autoload] не канон ({len(EXPECTED)} записей):")
+        for problem in problems:
+            print(f"  - {problem}")
         return 1
-    print(f"AUTOLOADS: OK — записей {len(autoloads(project))}, все указывают на файл")
+    print(f"AUTOLOAD-PRECHECK: OK ({len(EXPECTED)} записей)")
     return 0
 
 
