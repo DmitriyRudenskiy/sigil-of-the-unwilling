@@ -243,6 +243,33 @@ if [ "$ORPHAN_RED" -ne 0 ]; then
 fi
 
 fi
+# Владелец, 2026-11-09: уровень, который не мерился, не имеет права выглядеть
+# зелёным. Замер дня: symlink вместо node_modules → зеркало на X-контур
+# (`find … -type f` по symlink не идёт) уезжало без зависимостей →
+# `PYTEST: SKIPPED` при `exit 0` = «зелёный full без e2e» (GATE_EXIT был 0).
+# Отсюда одна строка вердикта на всех выходах и правило: SKIPPED ⇒ максимум
+# YELLOW, никогда GREEN. Жёлтый exit-кода не краснит — это среда, а не падение
+# (тот же статус, что у readiness D-265).
+MCP_YELLOW=0
+SOTU_SKIPPED=""
+skipped_level() { # skipped_level "<уровень>" "<причина>"
+	SOTU_SKIPPED="${SOTU_SKIPPED:+$SOTU_SKIPPED; }$1: $2"
+}
+gate_verdict() { # gate_verdict <red|ok> "<причина падения>"
+	local line rc=0 why=${2:-}
+	if [ "$1" = "red" ]; then
+		line="RED — $why"; rc=1
+	elif [ -n "$SOTU_SKIPPED" ]; then
+		line="YELLOW — уровень не мерился ($SOTU_SKIPPED); зелёного без e2e не бывает"
+	elif [ "$MCP_YELLOW" -eq 1 ]; then
+		line="YELLOW — регрессий нет, readiness-красный снят по подписи (D-265)"
+	else
+		line="GREEN — измеренные уровни зелёные, пропусков уровней нет"
+	fi
+	echo "GATE VERDICT: $line"
+	return "$rc"
+}
+
 echo ""
 echo "=== lint: gdlint (T-141, report-only) ==="
 # D-210: gdlint ищет .gdlintrc по рабочему каталогу. Скрипт выше делает cd в game/,
@@ -255,6 +282,12 @@ if [ "$TIER" != "full" ]; then
 	# Report-only уровень стоит 16 с (замер 2026-11-02) — в бюджет smoke не влезает,
 	# а сигнала для падения не даёт ни в одном слое.
 	echo "LINT: SKIPPED (report-only, не входит в слой $TIER; полный прогон: game/run_tests.sh)"
+elif [ -n "${SOTU_ON_X_HOST:-}" ]; then
+	# LINT остаётся локальным уровнем (gdtoolkit на X-хост не ставится — решение
+	# владельца 2026-11-09), но называться обязан тем, чем является: не потерянным
+	# уровнем, а уровнем, который здесь не меряется по устройству. Report-only,
+	# в вердикт не входит (он и локально в слой не входит).
+	echo "LINT: НЕ МЕРЯЕТСЯ на X-контуре (report-only; вердикт снимается локально)"
 elif "$LINT_PY" -c 'import gdtoolkit.linter' 2>/dev/null && [ -f .gdlintrc ]; then
 	# Знаменатель печатается раздельно (D-210: мера печатает охват). Корзин — ТРИ, а не две:
 	# внутри tools/ лежит tools/mcp (77 из 78 находок tools/) — закоммиченная и пропатченная
@@ -342,6 +375,7 @@ if [ "$MCP_RUN" != "1" ]; then
 	echo "NOT MEASURED: python-уровни (генератор арта T-150, классификатор D-265) — не входят в слой $TIER"
 	echo "NOT MEASURED: gdlint (report-only) — не входит в слой $TIER"
 	echo "TIER $TIER: зелёный прогон НЕ является основанием для push — публикация требует зелёного full (D-224)."
+	echo "GATE VERDICT: PARTIAL — слой $TIER, MCP и python-уровни не мерились; читать как «не проверялось»"
 	exit 0
 fi
 echo ""
@@ -374,10 +408,16 @@ if [ -n "${MCP_SSH_HOST:-}" ] && [ -z "${SOTU_ON_X_HOST:-}" ]; then
 	[ "$(uname -s)" = "Darwin" ] && SOTU_TAR=(--no-mac-metadata --no-xattrs)
 	if ! ( cd .. && { git ls-files -z game scripts; \
 			git ls-files -z -- image-clone/etalons/manifest.json; \
-			find game/addons/godot-mcp/build game/addons/godot-mcp/node_modules -type f -print0 2>/dev/null; } | \
+			# -L обязателен (владелец, 2026-11-09): без него find НЕ идёт ни в
+			# symlink-каталог, ни по symlink-файлам. Дерево, где node_modules —
+			# ссылка (scratch-дерево, досылка чужой сборки), уезжало на X-контур
+			# без зависимостей, и e2e молча не мерился.
+			find -L game/addons/godot-mcp/build game/addons/godot-mcp/node_modules -type f -print0 2>/dev/null; } | \
 		tar "${SOTU_TAR[@]+"${SOTU_TAR[@]}"}" --null -T - -cf - | gzip -1 ) | \
 		ssh -q "$MCP_SSH_HOST" "rm -rf '$SOTU_REMOTE' && mkdir -p '$SOTU_REMOTE' && tar -xzf - -C '$SOTU_REMOTE' --warning=no-unknown-keyword"; then
 		echo "PYTEST: SKIPPED (дерево не выложено на $MCP_SSH_HOST — MCP-уровень не мерился; сними MCP_SSH_HOST для локального X)"
+		skipped_level "MCP e2e" "дерево не выложено на $MCP_SSH_HOST"
+		gate_verdict ok
 		exit 0
 	fi
 	# Удалённый прогон — тот же скрипт целиком, только без GdUnit (он измерен здесь)
@@ -398,10 +438,19 @@ if [ -n "${MCP_SSH_HOST:-}" ] && [ -z "${SOTU_ON_X_HOST:-}" ]; then
 	MCP_RC=$?
 	echo "MCP: вердикт снят на $MCP_SSH_HOST (rc=$MCP_RC); рабочий каталог прогона удалён"
 	ssh -q "$MCP_SSH_HOST" "rm -rf '$SOTU_REMOTE'" || true
+	# Вердикт печатает удалённый прогон (тот же скрипт, тот же хвост); здесь — только
+	# передача красного в exit-код, без перекрашивания жёлтого в зелёный.
+	if [ "$MCP_RC" -ne 0 ]; then
+		gate_verdict red "X-контур $MCP_SSH_HOST вернул rc=$MCP_RC"
+	else
+		echo "GATE VERDICT: итог — в вердикте удалённого прогона ($MCP_SSH_HOST, rc=$MCP_RC)"
+	fi
 	exit "$MCP_RC"
 fi
 if [ ! -f "$MCP_SERVER" ]; then
 	echo "PYTEST: SKIPPED (no MCP server: $MCP_SERVER; build: cd addons/godot-mcp && npm ci && npm run build)"
+	skipped_level "MCP e2e" "нет MCP-сервера ($MCP_SERVER)"
+	gate_verdict ok
 	exit 0
 fi
 # Зависимости аддона — не «деталь сборки», а условие того, что сервер вообще
@@ -411,6 +460,8 @@ fi
 if [ ! -d "$(dirname "$(dirname "$MCP_SERVER")")/node_modules" ]; then
 	echo "PYTEST: SKIPPED (нет node_modules у $MCP_SERVER — npm ci в game/addons/godot-mcp/; без них сервер не стартует)"
 	echo "MCP VERDICT: SKIPPED (зависимости godot-mcp не установлены — уровень не мерился)"
+	skipped_level "MCP e2e" "нет node_modules у $MCP_SERVER"
+	gate_verdict ok
 	exit 0
 fi
 XVFB_PID=""
@@ -427,6 +478,8 @@ if [ -z "${DISPLAY:-}" ] && command -v Xvfb >/dev/null 2>&1; then
 	done
 	if [ -z "$XVFB_PID" ]; then
 		echo "PYTEST: SKIPPED (X-дисплея нет: DISPLAY не задан, свободного Xvfb :91–:98 не нашли, MCP_SSH_HOST не задан — настройка машины $SOTU_MACHINE_ENV)"
+		skipped_level "MCP e2e" "X-дисплея нет (DISPLAY, Xvfb :91–:98, MCP_SSH_HOST пусты)"
+		gate_verdict ok
 		exit 0
 	fi
 fi
@@ -439,6 +492,8 @@ if [ ! -x "$PYTEST_PY" ]; then
 		PYTEST_PY="$(command -v python3)"
 	else
 		echo "PYTEST: SKIPPED (MCP_PYTEST_PY не задан/не исполняемый: «$PYTEST_PY», и нет python3 с mcp+anyio; настройка машины $SOTU_MACHINE_ENV: python3 -m venv <путь> && <путь>/bin/pip install pytest pytest-timeout mcp anyio)"
+		skipped_level "MCP e2e" "интерпретатора MCP-тестов нет (MCP_PYTEST_PY, python3 с mcp+anyio)"
+		gate_verdict ok
 		[ -n "$XVFB_PID" ] && kill "$XVFB_PID" 2>/dev/null || true
 		exit 0
 	fi
@@ -600,6 +655,7 @@ else
 	case $? in
 		0) : ;;
 		3)
+			MCP_YELLOW=1
 			if [ "$MCP_RC" -ne 0 ]; then
 				echo "MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265)"
 				MCP_RC=0
@@ -640,6 +696,7 @@ if [ -n "$GEN_PY" ]; then
 	[ "${PIPESTATUS[0]}" -ne 0 ] && MCP_RC=1
 else
 	echo "GENART: SKIPPED (ни один кандидат не импортирует pytest+PIL: ${GEN_CANDIDATES[*]} — GEN_PY в настройку машины $SOTU_MACHINE_ENV)"
+	skipped_level "GENART" "нет интерпретатора с pytest+PIL"
 fi
 
 # Сами-тест классификатора (D-265): тот решает, что считать жёлтым, и обязан краснеть сам,
@@ -657,7 +714,10 @@ if "$PYTEST_PY" -c 'import pytest' 2>/dev/null; then
 	fi
 else
 	echo "READINESS-CLASSIFIER: SKIPPED (нет pytest в $PYTEST_PY)"
+	skipped_level "READINESS-CLASSIFIER" "нет pytest в $PYTEST_PY"
 fi
 
 # Очистка (Xvfb, инжект-артефакты, node/godot MCP-процессы) — в trap cleanup_mcp (EXIT).
+echo "MCP VERDICT: exit=$MCP_RC (0 = зелёный или readiness-жёлтый D-265; 100/1/2 — красный)"
+gate_verdict "$([ "$MCP_RC" -eq 0 ] && echo ok || echo red)" "MCP/pytest вернул rc=$MCP_RC"
 exit "$MCP_RC"
