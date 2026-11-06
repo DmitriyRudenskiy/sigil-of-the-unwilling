@@ -217,3 +217,21 @@ func test_variant_choice_is_stable() -> void:
 		assert_that(HexCellArt.variant_for(cell, 7, 1)).is_equal(0)
 		assert_that(first).is_greater_equal(0)
 		assert_that(first).is_less(HexCellArt.VARIANTS)
+
+## Норма C (T-344): аналитическая норма присутствия кольца угрозы. Кольцо рисует
+## маркерный слой (draw_arc в marker_layer._draw), но вместимость его в клетку —
+## геометрия НОСИТЕЛЯ: внешний край на пике пульса (0.30 + 0.08 = 0.38·hex) плюс
+## ореол (+1.5 px, полуширина штриха 1.5) — против апотемы гекса. Норма pin:
+## раздувание пульса или укорочение клетки ловится аналитически, без рендера.
+## Второй якорь — два тона (Блок B): ореол темнее ядра, иначе пара «тёмное
+## широкое + светлое узкое» не читается как кольцо.
+func test_threat_ring_fits_cell_and_has_two_tones() -> void:
+	var hex := float(HexCellArt.HEX_SIZE.y) * 0.5
+	var apothem := float(HexCellArt.HEX_SIZE.x) * 0.5
+	var peak := hex * 0.38
+	var outer := peak + 1.5 + 1.5
+	assert_float(outer).is_less_equal(apothem)
+	assert_float(hex * 0.22 - 1.5).is_greater(0.0)
+	var halo: Color = ThemeConfig.C_MARKER_DANGER_ARC.darkened(0.55)
+	assert_float(halo.get_luminance()).is_less(
+			ThemeConfig.C_MARKER_DANGER_ARC.get_luminance())

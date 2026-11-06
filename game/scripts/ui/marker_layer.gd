@@ -166,8 +166,16 @@ func _draw() -> void:
                 if not marker_visible_at(cell):
                         continue
                 var ring_r: float = _hex_size * (0.30 + 0.08 * sin(pulse_t * 4.0))
+                # Блок B (T-344): два тона — тёмный ореол ПОД ярким ядром. Заявление
+                # «второй цвет draw_arc невозможен» опровергнуто измерением: ореол
+                # (r+1.5 px, ширина 3.0) рисуется первым и лежит под ядром (r, 1.75);
+                # ядро на пульсе читается тонким и гаснет на светлой траве, пара
+                # «тёмное широкое + светлое узкое» видна на любом биоме. Норма присутствия
+                # и вместимости кольца — аналитическая, в tests/unit/world/test_tile_art.gd.
+                draw_arc(_map_gen.map_to_local(cell), ring_r + 1.5, 0.0, TAU, 32,
+                        ThemeConfig.C_MARKER_DANGER_ARC.darkened(0.55), 3.0)
                 draw_arc(_map_gen.map_to_local(cell), ring_r, 0.0, TAU, 32,
-                        ThemeConfig.C_MARKER_DANGER_ARC, 2.5)
+                        ThemeConfig.C_MARKER_DANGER_ARC, 1.75)
 
         for m in _city_marks:
                 if not marker_visible_at(m.cell):
