@@ -19,20 +19,24 @@ SOTU_MACHINE_ENV=${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}
 [ -f "$SOTU_MACHINE_ENV" ] && . "$SOTU_MACHINE_ENV"
 
 run() { # run "<название>" <команда...>
-	local name=$1; shift
-	echo "=== $name ==="
-	if "$@"; then
-		echo "OK: $name"
-	else
-		echo "RED: $name"
-		FAIL=1
-	fi
-	echo ""
+        local name=$1; shift
+        echo "=== $name ==="
+        if "$@"; then
+                echo "OK: $name"
+        else
+                echo "RED: $name"
+                FAIL=1
+        fi
+        echo ""
 }
 
 run "wikilinks, имена файлов, словарь статусов" "$PY" scripts/check_docs_links.py
 run "индекс документации не устарел" "$PY" scripts/gen_docs_index.py --check
 run "доки ↔ код (автолоады, сцены, классы, save-ключи)" "$PY" scripts/audit_docs_vs_code.py
+# Автолоады — закрытый набор 15 записей (T-344): гейт умел молча портить
+# project.godot (вендорный инжект + git checkout в cleanup); снапшот в
+# run_tests.sh снимает порчу, этот уровень ловит её результат на любом дереве.
+run "автолоады project.godot (закрытый набор 15 записей)" "$PY" scripts/check_autoloads.py
 # Карта hero-экрана и таблица геометрии обязаны сверяться машиной, а не только
 # ux-review: GdUnit-тест не годится (res:// не читает docs/), поэтому сверщик
 # здесь (T-277).
@@ -54,53 +58,54 @@ run "кадры героев ↔ манифест сборки integrate.py" "$P
 run "аудит комплекта фигур (альфа, холст, опора, рост)" "$PY" scripts/audit_hero_frames.py
 
 TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
-	scripts/test_classify_mcp_junit.py scripts/test_gdd_gate.py scripts/test_gdd_grounding.py
-	scripts/test_gen_map_art.py scripts/test_testmap.py
-	scripts/test_check_hero_layout_map.py
-	scripts/test_check_openspec_specs.py scripts/test_check_node_paths.py
-	scripts/test_check_save_matrix.py scripts/test_check_asset_provenance.py
-	scripts/test_check_hero_frames.py
-	scripts/test_audit_hero_frames.py
-	scripts/test_scenario_matrix.py
-	scripts/test_check_test_tiers.py)
+        scripts/test_classify_mcp_junit.py scripts/test_gdd_gate.py scripts/test_gdd_grounding.py
+        scripts/test_gen_map_art.py scripts/test_testmap.py
+        scripts/test_check_hero_layout_map.py
+        scripts/test_check_openspec_specs.py scripts/test_check_node_paths.py
+        scripts/test_check_save_matrix.py scripts/test_check_asset_provenance.py
+        scripts/test_check_autoloads.py
+        scripts/test_check_hero_frames.py
+        scripts/test_audit_hero_frames.py
+        scripts/test_scenario_matrix.py
+        scripts/test_check_test_tiers.py)
 # Отсутствующий файл списка — КРАСНЫЙ, а не «молча не досчитались»: ровно так список
 # и жил, пока в нём значился test_check_docs_links.py, которого никогда не было
 # (T-223). Проверщик без теста и проверщик, которого нет, — один и тот же класс.
 MISSING=()
 EXIST=()
 for t in "${TESTS[@]}"; do
-	if [ -f "$t" ]; then EXIST+=("$t"); else MISSING+=("$t"); fi
+        if [ -f "$t" ]; then EXIST+=("$t"); else MISSING+=("$t"); fi
 done
 # Интерпретатор с pytest: явный PYTEST_PY → PYTHON → venv MCP-тестов из настроек
 # машины (MCP_PYTEST_PY, его же читает game/run_tests.sh) → python3. Молчать
 # уровень не имеет права: если pytest нигде не найден — YELLOW с причиной, а не
 # зелёный пропуск (D-265).
 pick_pytest_py() {
-	local c cand=("${PYTEST_PY:-}" "$PY" "${MCP_PYTEST_PY:-}" python3)
-	for c in "${cand[@]}"; do
-		[ -n "$c" ] && "$c" -c "import pytest" >/dev/null 2>&1 && { echo "$c"; return 0; }
-	done
-	return 1
+        local c cand=("${PYTEST_PY:-}" "$PY" "${MCP_PYTEST_PY:-}" python3)
+        for c in "${cand[@]}"; do
+                [ -n "$c" ] && "$c" -c "import pytest" >/dev/null 2>&1 && { echo "$c"; return 0; }
+        done
+        return 1
 }
 
 echo "=== тесты самих проверщиков ==="
 if [ ${#MISSING[@]} -gt 0 ]; then
-	echo "RED: в списке уровней есть несуществующие файлы: ${MISSING[*]}"
-	FAIL=1
+        echo "RED: в списке уровней есть несуществующие файлы: ${MISSING[*]}"
+        FAIL=1
 fi
 if [ ${#EXIST[@]} -eq 0 ]; then
-	echo "YELLOW: тестов проверщиков нет — проверщик без теста уже один раз протих"
-	YELLOW=$((YELLOW + 1))
+        echo "YELLOW: тестов проверщиков нет — проверщик без теста уже один раз протих"
+        YELLOW=$((YELLOW + 1))
 elif PPP=$(pick_pytest_py); then
-	if "$PPP" -m pytest "${EXIST[@]}" -q; then
-		echo "OK: тесты самих проверщиков (${#EXIST[@]} файлов, $($PPP -c 'import pytest;print(pytest.__version__)'))"
-	else
-		echo "RED: тесты самих проверщиков (${#EXIST[@]} файлов)"
-		FAIL=1
-	fi
+        if "$PPP" -m pytest "${EXIST[@]}" -q; then
+                echo "OK: тесты самих проверщиков (${#EXIST[@]} файлов, $($PPP -c 'import pytest;print(pytest.__version__)'))"
+        else
+                echo "RED: тесты самих проверщиков (${#EXIST[@]} файлов)"
+                FAIL=1
+        fi
 else
-	echo "YELLOW: pytest недоступен (ни PYTEST_PY/PYTHON, ни MCP_PYTEST_PY из настроек машины) — ${#EXIST[@]} файлов уровня не исполнены"
-	YELLOW=$((YELLOW + 1))
+        echo "YELLOW: pytest недоступен (ни PYTEST_PY/PYTHON, ни MCP_PYTEST_PY из настроек машины) — ${#EXIST[@]} файлов уровня не исполнены"
+        YELLOW=$((YELLOW + 1))
 fi
 
 # Самопроверка измерителей сцен (шаг 0 нарезки, мир-карта). Скрипты производят
@@ -110,15 +115,15 @@ fi
 # когда зависимости есть и проверка упала.
 echo "=== измерители сцен: синтетическая самопроверка (шаг 0 нарезки) ==="
 for s in scripts/measure_scene_lattice.py scripts/measure_scene_clusters.py \
-	scripts/annotate_scenes.py scripts/fit_scene_cells.py; do
-	if ! "$PY" -c "import numpy, cv2" >/dev/null 2>&1; then
-		echo "YELLOW: numpy/cv2 нет — $s не исполнен"; YELLOW=$((YELLOW + 1)); continue
-	fi
-	if "$PY" "$s" --self-test > /dev/null 2>&1; then
-		echo "OK: $s --self-test"
-	else
-		echo "RED: $s --self-test (подробности: $PY $s --self-test)"; FAIL=1
-	fi
+        scripts/annotate_scenes.py scripts/fit_scene_cells.py; do
+        if ! "$PY" -c "import numpy, cv2" >/dev/null 2>&1; then
+                echo "YELLOW: numpy/cv2 нет — $s не исполнен"; YELLOW=$((YELLOW + 1)); continue
+        fi
+        if "$PY" "$s" --self-test > /dev/null 2>&1; then
+                echo "OK: $s --self-test"
+        else
+                echo "RED: $s --self-test (подробности: $PY $s --self-test)"; FAIL=1
+        fi
 done
 echo ""
 
@@ -135,17 +140,17 @@ echo ""
 # дельта — факт, а не степень (12 таких файлов сведены 2026-10-27, T-274).
 echo "=== сведённые спеки: структура (T-274) ==="
 if python3 scripts/check_openspec_specs.py; then
-	: ; else
-	echo "  план сведения: python3 scripts/check_openspec_specs.py; дельта-заголовки допустимы только в openspec/changes/"
-	FAIL=1
+        : ; else
+        echo "  план сведения: python3 scripts/check_openspec_specs.py; дельта-заголовки допустимы только в openspec/changes/"
+        FAIL=1
 fi
 echo ""
 
 echo "=== карта тестов: рэтчет покрытия и оскопления (T-227) ==="
 if python3 scripts/testmap.py --check; then
-	: ; else
-	echo "  подробности: python3 scripts/testmap.py --top 12; план сведения — docs/mvp/TEST-MAP.md"
-	FAIL=1
+        : ; else
+        echo "  подробности: python3 scripts/testmap.py --top 12; план сведения — docs/mvp/TEST-MAP.md"
+        FAIL=1
 fi
 echo ""
 
@@ -153,20 +158,20 @@ echo ""
 # ручная таблица уже описывала набор, которого больше нет.
 echo "=== таблица слоёв прогона: док ↔ раннер (срез 8.1) ==="
 if python3 scripts/gen_tier_table.py --check; then
-	: ; else
-	echo "  починка: python3 scripts/gen_tier_table.py --write"
-	FAIL=1
+        : ; else
+        echo "  починка: python3 scripts/gen_tier_table.py --write"
+        FAIL=1
 fi
 echo ""
 
 echo "=========================================="
 if [ "$FAIL" -eq 0 ]; then
-	if [ "$YELLOW" -gt 0 ]; then
-		echo "DOC GATES: GREEN (жёлтых уровней: $YELLOW)"
-	else
-		echo "DOC GATES: GREEN"
-	fi
+        if [ "$YELLOW" -gt 0 ]; then
+                echo "DOC GATES: GREEN (жёлтых уровней: $YELLOW)"
+        else
+                echo "DOC GATES: GREEN"
+        fi
 else
-	echo "DOC GATES: RED"
+        echo "DOC GATES: RED"
 fi
 exit "$FAIL"
