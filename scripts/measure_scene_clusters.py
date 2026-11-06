@@ -160,17 +160,6 @@ DEFAULT_CELLS = {"band_m": [h.lower() for h in GATES["palette"]["band_m"]],
 CELL_MAX_PIXELS = 120_000      # пикселей соты на кадр в kmeans палитры
 REUSE_RMS = 8.0                # порог, на котором считается «ткань одна и та же»
 
-# Путь (в), D-313: из сцены режутся только изначально уникальные предметы — дороги,
-# здания, границы, декор. Порог ниже отделяет предмет от террейна, он не гейт
-# переиспользования, поэтому чисел покрытия и уникальности у него нет.
-DEFAULT_PROPS = {"prop_dE": 12.0,           # ΔE от локального среднего террейна (шаг гейта палитры)
-                 "prop_chroma": 8.0,        # из них хотя бы столько — краской, не светом
-                 "prop_min_share": 0.10,    # мельче десятой доли соты — зерно рельефа
-                 "prop_patch_share": 1.6,   # крупнее полутора сот — пятно террейна, не пропс
-                 "prop_elong": 3.0,         # отношение сторон описывающего прямоугольника у полосы
-                 "prop_road_share": 1.5,    # длина полосы от полутора колоночных шагов
-                 "seed": DEFAULTS["seed"]}  # kmeans двух красок детерминирован, как весь скрипт
-
 
 def lab(a: np.ndarray) -> np.ndarray:
     """uint8 RGB → Lab в единицах приёмки (L 0…100, a/b ±128), та же метрика, что в гейтах."""
@@ -398,301 +387,6 @@ def profile(rgb: np.ndarray, fit: dict, cfg: dict) -> dict:
     return res
 
 
-# ------------------------------------------------- пропсы кадра (шаг 3, D-313)
-
-
-def plane_of(rgb: np.ndarray, fit: dict) -> np.ndarray:
-    """Кадр → «плоскость решётки» обратной гомографией принятого фита: там клетки —
-    прямоугольная сетка, и пропсу можно поставить в вину конкретную соту (D-311).
-    Тот же переход, что в `cell_tiles`, поэтому координаты клеток не разъезжаются."""
-    h, w = rgb.shape[:2]
-    back = np.linalg.inv(np.array(fit["homography"], dtype=np.float64))
-    return cv2.warpPerspective(rgb, back, (w, h))
-
-
-def cell_of(cx: float, cy: float, C: float, R: float, ox: float, oy: float) -> tuple[int, int]:
-    """Центр пропса → клетка odd-r-решётки (та же формула, что обход в `cell_tiles`)."""
-    r = round((cy - oy) / (1.5 * R))
-    shift = C / 2 if r % 2 else 0.0
-    return round((cx - shift - ox) / C), int(r)
-
-
-def props_of(clean: np.ndarray, fit: dict, cfg: dict) -> dict:
-    """Кадр в плоскости решётки → уникальные предметы: дорога, здание, декор.
-
-    Модель террейна — локальное среднее по окну в колонный шаг: рельеф и градиенты
-    света в него усредняются, предмет (свои три цвета на чужом фоне) — остаётся.
-    Расстояние берётся в Lab в единицах приёмки, то есть порог — тот же шаг, что
-    гейт «палитра в полосе M», а не новая калибровка.
-
-    Две поправки сняты с кадров глазами: первый прогон ловил породу и чёрный край
-    поворота вместо предметов. Поэтому пропс обязан отличаться от фона именно краской,
-    Δ(a,b), а не только светом (перепад освещённости на камне иначе проходит по ΔE),
-    и обязан лежать внутри полигона поворота — за ним плоскость чёрная, и это самый
-    сильный контраст кадра.
-
-    Класс формы: вытянутое длинное — полоса (дорога/граница), компактное — предмет,
-    больше полутора сот — пятно террейна (не пропс, но считается: по нему видно,
-    что порог поймал рельеф, а не предметы).
-    """
-    C, R = float(fit["col_step_px"]), float(fit["radius_px"])
-    ox, oy = (float(v) for v in fit["origin"])
-    rx, ry, rw, rh = (int(v) for v in fit["roi"])      # roi = [x, y, w, h], как в реестре
-    x0, y0 = max(0, rx), max(0, ry)
-    x1, y1 = min(clean.shape[1], rx + rw), min(clean.shape[0], ry + rh)
-    src = clean[y0:y1, x0:x1]
-    l = lab(src)
-    k = max(3, int(round(C)) | 1)
-    bg = cv2.boxFilter(l, -1, (k, k))
-    d = l - bg
-    on = ((np.sqrt((d ** 2).sum(axis=2)) > cfg["prop_dE"])                  # полный ΔE от фона
-          & (np.sqrt((d[..., 1:] ** 2).sum(axis=2)) > cfg["prop_chroma"])  # и краской
-          & (src.sum(axis=2) > 12)).astype(np.uint8) * 255                  # и не чёрный край
-    on = cv2.morphologyEx(on, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
-    on = cv2.morphologyEx(on, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
-    n, lab_im, stats, cent = cv2.connectedComponentsWithStats(on, 8)
-    hex_area = 1.299 * C * R
-    items, kinds = [], {"object": 0, "road": 0, "patch": 0, "tiny": 0}
-    sizes, cells_hit, crops = [], {}, []
-    for i in range(1, n):
-        x, y, w, hgt, area = (int(v) for v in stats[i])
-        share = area / hex_area
-        if share < cfg["prop_min_share"]:
-            kinds["tiny"] += 1
-            continue
-        pts = cv2.findNonZero((lab_im[y:y + hgt, x:x + w] == i).astype(np.uint8))
-        (mcx, mcy), (mrw, mrh), ang = cv2.minAreaRect(pts)
-        long_, short_ = max(mrw, mrh), max(min(mrw, mrh), 1.0)
-        elong = long_ / short_
-        kind = ("road" if elong >= cfg["prop_elong"] and long_ >= cfg["prop_road_share"] * C
-                else "patch" if share > cfg["prop_patch_share"] else "object")
-        kinds[kind] += 1
-        cx, cy = float(cent[i][0]) + x0, float(cent[i][1]) + y0
-        key = cell_of(cx, cy, C, R, ox, oy)
-        cells_hit[key] = cells_hit.get(key, 0) + 1
-        sizes.append(share)
-        if kind == "object":
-            crops.append(prop_crop(src, (x, y, w, hgt)))
-        if len(items) < 60:
-            items.append({"kind": kind, "cell": list(key), "bbox": [x + x0, y + y0, w, hgt],
-                          "cell_share": round(share, 3), "elong": round(elong, 2),
-                          "angle": round(float(ang), 1)})
-    sizes.sort()
-    occ = sorted(cells_hit.values())
-    return {"cells": len(cells_hit), "objects": kinds["object"], "roads": kinds["road"],
-            "patches": kinds["patch"], "dropped_tiny": kinds["tiny"],
-            "props_per_cell_p95": occ[-1] if occ else 0,
-            "area_share_p50": round(sizes[len(sizes) // 2], 3) if sizes else 0.0,
-            "items": items,
-            # кропы нужны мере «схлопываются ли пропсы в набор» (dedupe_props); в реестр
-            # они не пишутся — run_props снимает этот ключ перед сериализацией
-            "crops": crops}
-
-
-def prop_crop(src: np.ndarray, box: tuple, size: int = 32) -> np.ndarray:
-    """Компонента → кроп `size`×`size` в Lab. Рамка плотная (это bbox компоненты),
-    поэтому пропсы разного масштаба сравниваются как одинаковые формы."""
-    x, y, w, hgt = box
-    return lab(cv2.resize(src[y:y + hgt, x:x + w].astype(np.float32), (size, size),
-                          interpolation=cv2.INTER_AREA))
-
-
-def disc_mask(size: int) -> np.ndarray:
-    """Маска-диск вместо прямоугольника: углы плотного bbox irregular пропса — это пол
-    под ним, а не краска пропса (тот же урок, что D-312 про padding: фон в расстояниях)."""
-    g = np.arange(size, dtype=np.float32) - (size - 1) / 2
-    xx, yy = np.meshgrid(g, g)
-    return (xx ** 2 + yy ** 2) <= (size / 2 - 1) ** 2
-
-
-def dedupe_props(crops: list) -> dict:
-    """Пропсы всех доноров вместе → сколько из них наборов.
-
-    Вопрос тот же, что D-312 задал террейну, только к пропсам: лист имеет смысл как
-    набор. 266 находок набором могут быть (художник повторяет валун) и не могут
-    (трещины пола неповторимы, как ткань). Пороги — CELL_RMS/NORM_CORR те же, что у
-    кластеров ткани, чтобы «ткань» и «пропс» мерились одной линейкой, а не двумя.
-    """
-    out = {"props": len(crops)}
-    if len(crops) < 2:
-        return out
-    out["note"] = ("набор пропсов меряется порогами ткани (CELL_RMS, NORM_CORR — те же, что у "
-                   "D-312): сырой RMS = «тот же мазок и краска», нормированное поле r ≥ 0.9 = "
-                   "«тот же силуэт». Ближайший к носителю порог — rms_8 (гейт листа).")
-    tiles = np.stack(crops)
-    m = disc_mask(tiles.shape[1])
-    out["raw"] = {f"rms_{thr:g}": len(greedy_clusters(tiles, m, float(thr)))
-                  for thr in CELL_RMS}
-    lin = normalize_cells(tiles, m)
-    out["normalized"] = {f"corr_{r:g}": len(greedy_clusters(lin, m, math.sqrt(2 * (1 - r))))
-                         for r, _ in NORM_CORR}
-    out["note"] = ("набор пропсов меряется порогами ткани (D-312); нормированные поля — «тот же "
-                   "силуэт» (r ≥ 0.9), сырые RMS — «та же краска», ΔE-гейт приёмки не трогает")
-    return out
-
-
-def biome_pair(rgb: np.ndarray, fit: dict, cfg: dict) -> dict:
-    """Кадр → две краски: доли кластеров и ΔE между ними.
-
-    Зачем: комплект выглядит как листы «переход биома A в биом B», и это меряется, а не
-    обсуждается глазами. Если кадр двухкрасочный с долями около половины и ΔE через
-    гейт палитры, его уникальное содержимое — переход, а не предметы; а переход при
-    D-313 отдан генератору, то есть резать из такого кадра нечего.
-    """
-    rx, ry, rw, rh = (int(v) for v in fit["roi"])
-    src = rgb[max(0, ry):ry + rh, max(0, rx):rx + rw]
-    s = math.sqrt(60_000 / max(src.shape[0] * src.shape[1], 1))
-    if s < 1.0:
-        src = cv2.resize(src, None, fx=s, fy=s, interpolation=cv2.INTER_AREA)
-    crit = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 1.0)
-    _, labels, center = cv2.kmeans(src.reshape(-1, 1, 3).astype(np.float32), 2, None,
-                                   crit, 3, cv2.KMEANS_PP_CENTERS, cfg["seed"])
-    shares = sorted(round(int(v) / labels.size, 3) for v in np.bincount(labels.flatten()))
-    l2 = lab(center)
-    return {"shares": shares, "delta_e": round(float(np.linalg.norm(l2[0] - l2[1])), 1)}
-
-
-def props_debug(path: Path, plane: np.ndarray, items: list[dict]) -> Path:
-    """Кадр с обведёнными кандидатами — единственная проверка, что порог ловит предметы,
-    а не рельеф: числом это не доказать, глазами — да (D-313: пропсы уникальны, поэтому
-    мерой они не проверяются вовсе)."""
-    view = cv2.cvtColor(plane, cv2.COLOR_RGB2BGR)
-    COL = {"object": (0, 255, 0), "road": (0, 0, 255), "patch": (0, 255, 255)}
-    for it in items:
-        x, y, w, h = it["bbox"]
-        cv2.rectangle(view, (x, y), (x + w, y + h), COL[it["kind"]], 2)
-        cv2.putText(view, f'{it["kind"][0]}{it["cell"]}', (x, max(12, y - 4)),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, COL[it["kind"]], 1, cv2.LINE_AA)
-    out = path.with_name(f'{path.stem}-props.png')
-    cv2.imwrite(str(out), view)
-    return out
-
-
-def props_self_test() -> list[tuple[str, bool, str]]:
-    """Синтетика: террейн с зерном и тремя известными предметами + полосой дороги."""
-    C, R = 100.0, 52.0
-    rng = np.random.default_rng(7)
-    h, w = 900, 1200
-    coarse = cv2.resize(rng.normal(0.0, 1.0, (h // 12, w // 12)), (w, h),
-                        interpolation=cv2.INTER_CUBIC)
-    grain = cv2.GaussianBlur(rng.normal(0.0, 1.0, (h, w)), (3, 3), 0)
-    terrain = (coarse / coarse.std() * 7.0) + (grain / grain.std() * 4.0)
-    rgb = np.clip(120 + np.dstack([terrain] * 3), 0, 255).astype(np.uint8)
-    rgb[:, :40] = 0        # чёрный край поворота плоскости: не должен давать кандидатов
-    for (cx, cy) in ((250, 300), (600, 500), (950, 260)):     # три компактных предмета
-        cv2.circle(rgb, (cx, cy), 26, (40, 170, 60), -1)
-    cv2.rectangle(rgb, (150, 700), (1050, 726), (60, 90, 200), -1)   # дорога
-    fit = {"col_step_px": C, "radius_px": R, "origin": [0.0, 0.0],
-           "homography": np.eye(3).tolist(), "roi": [100, 150, 1100, 800]}
-    cfg = dict(DEFAULT_PROPS)
-    rec = props_of(rgb, fit, cfg)
-    got = {tuple(i["cell"]) for i in rec["items"] if i["kind"] == "object"}
-    exp = {cell_of(cx, cy, C, R, 0.0, 0.0) for cx, cy in ((250, 300), (600, 500), (950, 260))}
-    road = [i for i in rec["items"] if i["kind"] == "road"]
-    checks = [("три предмета найдено", rec["objects"] == 3,
-               f'{rec["objects"]}, пятен {rec["patches"]}, крошек {rec["dropped_tiny"]}'),
-              ("клетки предметов угаданы", got == exp, f'{sorted(got)} vs {sorted(exp)}'),
-              ("полоса опознана дорогой", len(road) >= 1, f'{len(road)} полос')]
-    # чистый террейн не должен давать предметов вовсе — иначе порог ловит рельеф
-    rec2 = props_of(rgb, {**fit, "roi": [40, 760, 1160, 140]}, cfg)
-    checks.append(("голый террейн чист", rec2["objects"] == 0,
-                   f'{rec2["objects"]} предметов на голом террейне'))
-    # тот же кадр со светотенью ±12 светлоты (полпорога), но без краски: порог обязан молчать
-    z = cv2.GaussianBlur(rng.normal(0.0, 1.0, (h, w)), (0, 0), 12)
-    shade = np.clip(rgb + np.dstack([(z / z.std() * 12.0)] * 3), 0, 255).astype(np.uint8)
-    rec3 = props_of(shade, {**fit, "roi": [40, 760, 1160, 140]}, cfg)
-    checks.append(("светотень не считается предметом", rec3["objects"] == 0,
-                   f'{rec3["objects"]} предметов на чистой светотени'))
-    # две краски кадра меряются: левая половина тёмная, правая светлая
-    two = np.full((200, 200, 3), 60, np.uint8)
-    two[:, 100:] = 200
-    pair = biome_pair(two, {"roi": [0, 0, 200, 200]}, cfg)
-    checks.append(("кадр из двух биомов описывается двумя красками",
-                   pair["shares"] == [0.5, 0.5] and pair["delta_e"] > 40,
-                   f'{pair["shares"]} при ΔE {pair["delta_e"]}'))
-    # «схлопываются ли пропсы в набор»: два одинаковых кропа — один кластер, другой
-    # пропс — второй. Без этой проверки число кластеров в реестре было бы числом веры.
-    plate = np.full((48, 48, 3), 120.0)
-    red = np.dstack([plate[..., 0] + 60, plate[..., 1] - 40, plate[..., 2] - 30]).astype(np.uint8)
-    grn = np.dstack([plate[..., 0] - 20, plate[..., 1] - 50, plate[..., 2] + 50]).astype(np.uint8)
-    dd = dedupe_props([prop_crop(red, (8, 8, 32, 32)), prop_crop(red, (8, 8, 32, 32)),
-                       prop_crop(grn, (8, 8, 32, 32))])
-    checks.append(("одинаковые пропсы схлопываются, разные — нет",
-                   dd["props"] == 3 and dd["raw"]["rms_2"] == 2 == dd["raw"]["rms_32"],
-                   f'{dd["raw"].get("rms_2")} кластеров при rms_2, ждалось 2 из 3'))
-    return checks
-
-
-def run_props(a: argparse.Namespace) -> int:
-    """Пачка `--props`: доноры пропсов (с принятый геометрией) → сколько уникальных
-    предметов в кадре и к каким клеткам они привязаны (шаг 3.1, путь (в))."""
-    cfg = dict(DEFAULT_PROPS)
-    reg = L.load_registry()
-    kit = L.kit_dir(a.kit)
-    names = [a.scene] if a.scene else L.kit_files(kit)
-    out, skip, all_crops = {}, [], []
-    for name in names:
-        key = Path(name).name          # реестр знает имена комплекта, а не путь прогона
-        fit = reg.get("scenes", {}).get(key, {}).get("cell_fit") or {}
-        if not fit.get("accepted"):
-            skip.append((name, fit.get("reason") or "геометрия не мерилась"))
-            continue
-        path = Path(name) if Path(name).is_file() else kit / name
-        bgr = cv2.imread(str(path))
-        if bgr is None:
-            print(f"СЦЕНА {name}: НЕЧИТАЕМА", file=sys.stderr)
-            return 2
-        rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
-        roi = tuple(int(v) for v in fit["roi"])
-        plane = plane_of(rgb, fit)
-        clean = remove_lines(plane, F.line_mask(plane, roi))
-        rec = props_of(clean, fit, cfg)
-        all_crops += rec.pop("crops")     # numpy-кропы: в реестр они не пишутся
-        rec["biome_pair"] = biome_pair(plane, fit, cfg)
-        if a.props_debug:
-            d = Path(a.props_debug)
-            d.mkdir(parents=True, exist_ok=True)
-            rec["debug"] = str(props_debug(d / key, plane, rec["items"]))
-        out[name] = rec
-        print(f"ПРОПСЫ {name[:40]} — предметов {rec['objects']}, полос {rec['roads']}, "
-              f"пятен {rec['patches']}, клеток занято {rec['cells']}, "
-              f"медиана размера {rec['area_share_p50']:.2f} соты; "
-              f"две краски кадра {rec['biome_pair']['shares']} при ΔE "
-              f"{rec['biome_pair']['delta_e']}")
-    # «лист или шум» — мера, а не opinion: схлопываются ли пропсы в набор теми же
-    # порогами, что D-312 мерил ткань. Считать до записи реестра, иначе число живёт
-    # только в выводе (так и было: первый прогон его напечатал, но не сохранил).
-    dd = dedupe_props(all_crops) if out else {}
-    if dd:
-        reg["props_dedupe"] = dd
-    if a.update and out:
-        scenes = reg.setdefault("scenes", {})
-        for name, rec in out.items():
-            scenes.setdefault(name, {})["props"] = rec
-        L.REGISTRY.write_text(json.dumps(reg, ensure_ascii=False, indent=1) + "\n")
-        print(f"РЕЕСТР: {L.REGISTRY} — записей пропсов: {len(out)}")
-    if out:
-        o = [r["objects"] for r in out.values()]
-        rd = [r["roads"] for r in out.values()]
-        sh = [r["area_share_p50"] for r in out.values() if r["area_share_p50"]]
-        smaller = [r["biome_pair"]["shares"][0] for r in out.values()]
-        de = [r["biome_pair"]["delta_e"] for r in out.values()]
-        print(f"\nсцен {len(out)} (пропущено {len(skip)}): предметов p50 "
-              f"{statistics.median(o):.0f} (мин {min(o)}, макс {max(o)}); полос p50 "
-              f"{statistics.median(rd):.0f}; размер предмета p50 {statistics.median(sh):.2f} соты")
-        print(f"  кадр как две краски: меньшей доли p50 {statistics.median(smaller):.2f}, "
-              f"ΔE между красками p50 {statistics.median(de):.0f} "
-              f"(гейт палитры ΔE ≤ {GATES['palette']['max_delta_e']:g})")
-        # «лист или шум» — теми же порогами, что ткань (D-312): без этого числа лист
-        # покупать нельзя.
-        print(f"набор из {dd.get('props', 0)} пропсов: " + ", ".join(
-            f"{k}={v}" for k, v in dd.get("raw", {}).items()) + " | норм.: " + ", ".join(
-            f"{k}={v}" for k, v in dd.get("normalized", {}).items()))
-    for name, why in skip[:3]:
-        print(f"ПРОПУСК {name[:40]} — {why}")
-    return 0
-
-
 def synthetic_cells(draw_lines: bool = True) -> tuple[np.ndarray, dict]:
     """Синтетика для `--cells`: 4×4 клетки четырёх известных тканей, нарисованные
     рёбра, лёгкая перспектива и шум. Ответ замера предсказуем: четыре ткани. Второй
@@ -837,9 +531,6 @@ def self_test() -> int:
     for name, ok, detail in cells_self_test():
         bad += 0 if ok else 1
         print(f"  {'ok  ' if ok else 'FAIL'} клетки: {name} — {detail}")
-    for name, ok, detail in props_self_test():
-        bad += 0 if ok else 1
-        print(f"  {'ok  ' if ok else 'FAIL'} пропсы: {name} — {detail}")
     print("SELF-TEST:", "OK" if bad == 0 else f"FAIL ({bad})")
     return 0 if bad == 0 else 1
 
@@ -930,10 +621,6 @@ def main() -> int:
     ap.add_argument("--kit", default="")
     ap.add_argument("--cells", action="store_true",
                     help="профиль переиспользования по маске гекса (1.3–1.5), а не профиль кадра")
-    ap.add_argument("--props", action="store_true",
-                    help="уникальные предметы кадра (шаг 3, путь (в)): дороги, здания, декор")
-    ap.add_argument("--props-debug", default="", metavar="КАТАЛОГ",
-                    help="рядом с кадром наложить рамки кандидатов — глазами проверить порог")
     ap.add_argument("--update", action="store_true")
     ap.add_argument("--self-test", action="store_true")
     a = ap.parse_args()
@@ -941,8 +628,6 @@ def main() -> int:
         return self_test()
     if a.cells:
         return run_cells(a)
-    if a.props:
-        return run_props(a)
 
     cfg = dict(DEFAULTS)
     reg = L.load_registry()
