@@ -32,217 +32,225 @@ var _terrain_pos: Dictionary = {}
 var _fog: RefCounted = null
 
 func setup(map: MapGenerator) -> void:
-	_map_gen = map
-	z_index = 5
-	if _map_gen and _map_gen.has_valid_tilemap():
-		_hex_size = _map_gen.get_tile_size().y * 0.5  # для pointy-top радиус = h/2
+        _map_gen = map
+        z_index = 5
+        if _map_gen and _map_gen.has_valid_tilemap():
+                _hex_size = _map_gen.get_tile_size().y * 0.5  # для pointy-top радиус = h/2
 
 ## Туман — источник истины «показывать ли маркер» (docs/02g §2.1: неисследованная
 ## клетка пуста, без ресурсов и маркеров). Хост (WorldController) передаёт свой
 ## VisibilityMap при каждом `_fog_refreshed`; без него слой рисует всё, как раньше
 ## (юнит-тесты собирают его без карты видимости).
 func set_fog(fog: RefCounted) -> void:
-	_fog = fog
-	queue_redraw()
+        _fog = fog
+        queue_redraw()
 
 ## Показан ли маркер на клетке: канон — только на исследованной.
 func marker_visible_at(cell: Vector2i) -> bool:
-	return _fog == null or _fog.is_explored(cell)
+        return _fog == null or _fog.is_explored(cell)
 
 func show_markers(hero_cell: Vector2i, mp: float, dist_map: Dictionary) -> void:
-	_hero_cell = hero_cell
-	_mp_current = mp
-	_dist = dist_map
-	_reachable.clear()
-	_red_frontier.clear()
-	_visible = true
+        _hero_cell = hero_cell
+        _mp_current = mp
+        _dist = dist_map
+        _reachable.clear()
+        _red_frontier.clear()
+        _visible = true
 
-	for cell in _dist:
-		var cost: float = _dist[cell]
-		if cost <= mp + 0.001:
-			var remaining: float = mp - cost
-			if remaining >= 1.0:
-				_reachable[cell] = MarkType.GREEN
-			else:
-				_reachable[cell] = MarkType.YELLOW
+        for cell in _dist:
+                var cost: float = _dist[cell]
+                if cost <= mp + 0.001:
+                        var remaining: float = mp - cost
+                        if remaining >= 1.0:
+                                _reachable[cell] = MarkType.GREEN
+                        else:
+                                _reachable[cell] = MarkType.YELLOW
 
-	var red_candidates: Dictionary = {}
-	for cell in _reachable:
-		for nb in HexUtils.get_all_neighbors(cell):
-			if not _map_gen.is_in_bounds(nb) or nb in _reachable:
-				continue
-			var can_enter_within_budget: bool = _map_gen.is_walkable(nb) and _dist.get(nb, INF) <= mp + 0.001
-			if not can_enter_within_budget:
-				red_candidates[nb] = true
+        var red_candidates: Dictionary = {}
+        for cell in _reachable:
+                for nb in HexUtils.get_all_neighbors(cell):
+                        if not _map_gen.is_in_bounds(nb) or nb in _reachable:
+                                continue
+                        var can_enter_within_budget: bool = _map_gen.is_walkable(nb) and _dist.get(nb, INF) <= mp + 0.001
+                        if not can_enter_within_budget:
+                                red_candidates[nb] = true
 
-	_red_frontier = red_candidates
+        _red_frontier = red_candidates
 
-	_green_pos.clear()
-	_yellow_pos.clear()
-	_red_pos.clear()
-	if _map_gen and _map_gen.has_valid_tilemap():
-		for cell in _reachable:
-			if _reachable[cell] == MarkType.GREEN:
-				_green_pos.append(_map_gen.map_to_local(cell))
-			else:
-				_yellow_pos.append(_map_gen.map_to_local(cell))
-		for cell in _red_frontier:
-			_red_pos.append(_map_gen.map_to_local(cell))
+        _green_pos.clear()
+        _yellow_pos.clear()
+        _red_pos.clear()
+        if _map_gen and _map_gen.has_valid_tilemap():
+                for cell in _reachable:
+                        if _reachable[cell] == MarkType.GREEN:
+                                _green_pos.append(_map_gen.map_to_local(cell))
+                        else:
+                                _yellow_pos.append(_map_gen.map_to_local(cell))
+                for cell in _red_frontier:
+                        _red_pos.append(_map_gen.map_to_local(cell))
 
-	queue_redraw()
+        queue_redraw()
 
 func hide_markers() -> void:
-	_visible = false
-	_reachable.clear()
-	_red_frontier.clear()
-	_green_pos.clear()
-	_yellow_pos.clear()
-	_red_pos.clear()
-	queue_redraw()
+        _visible = false
+        _reachable.clear()
+        _red_frontier.clear()
+        _green_pos.clear()
+        _yellow_pos.clear()
+        _red_pos.clear()
+        queue_redraw()
 
 func set_city_markers(cities: Array) -> void:
-	_city_marks.clear()
-	if _map_gen == null or not _map_gen.has_valid_tilemap():
-		return
-	for city in cities:
-		if city == null:
-			continue
-		_city_marks.append({"cell": city.center, "pos": _map_gen.map_to_local(city.center), "city": city})
-	queue_redraw()
+        _city_marks.clear()
+        if _map_gen == null or not _map_gen.has_valid_tilemap():
+                return
+        for city in cities:
+                if city == null:
+                        continue
+                _city_marks.append({"cell": city.center, "pos": _map_gen.map_to_local(city.center), "city": city})
+        queue_redraw()
 
 ## Клик по маркеру города: та же граница тумана, что и у отрисовки (02g §2.1) —
 ## город за туманом не виден, значит и клика по нему быть не может.
 func city_at_cell(cell: Vector2i) -> City:
-	if not marker_visible_at(cell):
-		return null
-	for m in _city_marks:
-		if m.cell == cell:
-			return m.city
-	return null
+        if not marker_visible_at(cell):
+                return null
+        for m in _city_marks:
+                if m.cell == cell:
+                        return m.city
+        return null
 
 func set_threat_markers(cells: Array) -> void:
-	_threat_cells.clear()
-	if _map_gen == null or not _map_gen.has_valid_tilemap():
-		queue_redraw()
-		return
-	for cell in cells:
-		if cell is Vector2i:
-			_threat_cells.append(cell)
-	queue_redraw()
+        _threat_cells.clear()
+        if _map_gen == null or not _map_gen.has_valid_tilemap():
+                queue_redraw()
+                return
+        for cell in cells:
+                if cell is Vector2i:
+                        _threat_cells.append(cell)
+        queue_redraw()
 
 func set_terrain_resource_markers(terrain_mgr: Variant) -> void:
-	_terrain_mgr = terrain_mgr
-	_terrain_pos.clear()
-	if _map_gen == null or not _map_gen.has_valid_tilemap() or terrain_mgr == null:
-		queue_redraw()
-		return
-	for cell in terrain_mgr.cells:
-		if cell is Vector2i:
-			_terrain_pos[cell] = {"pos": _map_gen.map_to_local(cell), "exhausted": terrain_mgr.is_exhausted(cell)}
-	queue_redraw()
+        _terrain_mgr = terrain_mgr
+        _terrain_pos.clear()
+        if _map_gen == null or not _map_gen.has_valid_tilemap() or terrain_mgr == null:
+                queue_redraw()
+                return
+        for cell in terrain_mgr.cells:
+                if cell is Vector2i:
+                        _terrain_pos[cell] = {"pos": _map_gen.map_to_local(cell), "exhausted": terrain_mgr.is_exhausted(cell)}
+        queue_redraw()
 
 func refresh_terrain_markers() -> void:
-	if _terrain_mgr == null:
-		return
-	_terrain_pos.clear()
-	if _map_gen == null or not _map_gen.has_valid_tilemap():
-		queue_redraw()
-		return
-	for cell in _terrain_mgr.cells:
-		if cell is Vector2i:
-			_terrain_pos[cell] = {"pos": _map_gen.map_to_local(cell), "exhausted": _terrain_mgr.is_exhausted(cell)}
-	queue_redraw()
+        if _terrain_mgr == null:
+                return
+        _terrain_pos.clear()
+        if _map_gen == null or not _map_gen.has_valid_tilemap():
+                queue_redraw()
+                return
+        for cell in _terrain_mgr.cells:
+                if cell is Vector2i:
+                        _terrain_pos[cell] = {"pos": _map_gen.map_to_local(cell), "exhausted": _terrain_mgr.is_exhausted(cell)}
+        queue_redraw()
 
 func _process(_d: float) -> void:
-	if (_visible and not _green_pos.is_empty()) or not _threat_cells.is_empty():
-		queue_redraw()
+        if (_visible and not _green_pos.is_empty()) or not _threat_cells.is_empty():
+                queue_redraw()
 
 func _draw() -> void:
-	if not _map_gen or not _map_gen.has_valid_tilemap():
-		return
+        if not _map_gen or not _map_gen.has_valid_tilemap():
+                return
 
-	var pulse_t: float = Time.get_ticks_msec() / 1000.0
-	for cell in _threat_cells:
-		if not marker_visible_at(cell):
-			continue
-		var ring_r: float = _hex_size * (0.30 + 0.08 * sin(pulse_t * 4.0))
-		draw_arc(_map_gen.map_to_local(cell), ring_r, 0.0, TAU, 32,
-			ThemeConfig.C_MARKER_DANGER_ARC, 2.5)
+        var pulse_t: float = Time.get_ticks_msec() / 1000.0
+        for cell in _threat_cells:
+                if not marker_visible_at(cell):
+                        continue
+                var ring_r: float = _hex_size * (0.30 + 0.08 * sin(pulse_t * 4.0))
+                draw_arc(_map_gen.map_to_local(cell), ring_r, 0.0, TAU, 32,
+                        ThemeConfig.C_MARKER_DANGER_ARC, 2.5)
 
-	for m in _city_marks:
-		if not marker_visible_at(m.cell):
-			continue
-		var pos: Vector2 = m.pos
-		draw_circle(pos, _hex_size * 0.22, ThemeConfig.C_MARKER_MAGIC_FILL)
-		draw_arc(pos, _hex_size * 0.22, 0.0, TAU, 32, ThemeConfig.C_MARKER_MAGIC_RING, 2.0)
-		draw_string(
-			ThemeDB.fallback_font, pos + Vector2(0.0, -_hex_size * 0.30),
-			m.city.display_name, HORIZONTAL_ALIGNMENT_CENTER,
-			int(_hex_size * 2.0), 14, ThemeConfig.C_MARKER_LABEL)
+        for m in _city_marks:
+                if not marker_visible_at(m.cell):
+                        continue
+                var pos: Vector2 = m.pos
+                draw_circle(pos, _hex_size * 0.22, ThemeConfig.C_MARKER_MAGIC_FILL)
+                draw_arc(pos, _hex_size * 0.22, 0.0, TAU, 32, ThemeConfig.C_MARKER_MAGIC_RING, 2.0)
+                # Бокс центровки обязан стоять НА КЛЕТКЕ: draw_string тянет бокс ширины
+                # width ВПРАВО от pos, и CENTER центрует текст внутри него — бокс от
+                # центра клетки клал подпись восточному соседу (зонд Ф1: Δcenter_cell
+                # +46.5 px, вылет за маску 31.5 px, leaks 41 px в e2e). Сдвиг на −W/2
+                # возвращает подпись в свою клетку (T-344, ступень 1 лестницы).
+                draw_string(
+                        ThemeDB.fallback_font, pos + Vector2(-_hex_size, -_hex_size * 0.30),
+                        m.city.display_name, HORIZONTAL_ALIGNMENT_CENTER,
+                        int(_hex_size * 2.0), 14, ThemeConfig.C_MARKER_LABEL)
 
-	for cell in _terrain_pos:
-		if not marker_visible_at(cell):
-			continue
-		var m: Dictionary = _terrain_pos[cell]
-		var pos: Vector2 = m["pos"]
-		var glyph: String = "✗" if m["exhausted"] else "⛏️"
-		var color: Color = ThemeConfig.C_MARKER_EXHAUSTED if m["exhausted"] else ThemeConfig.C_MARKER_ACTIVE
-		draw_string(ThemeDB.fallback_font, pos, glyph, HORIZONTAL_ALIGNMENT_CENTER,
-			int(_hex_size * 1.6), 14, color)
+        for cell in _terrain_pos:
+                if not marker_visible_at(cell):
+                        continue
+                var m: Dictionary = _terrain_pos[cell]
+                var pos: Vector2 = m["pos"]
+                var glyph: String = "✗" if m["exhausted"] else "⛏️"
+                var color: Color = ThemeConfig.C_MARKER_EXHAUSTED if m["exhausted"] else ThemeConfig.C_MARKER_ACTIVE
+                # Тот же сдвиг бокса −W/2, что у подписи города выше: глиф обязан быть
+                # в СВОЕЙ клетке (зонд Ф1: Δcenter_cell +37.5 px, вылет 2.5 px — второй
+                # call site того же дефекта; правятся оба, T-344 ступень 1).
+                draw_string(ThemeDB.fallback_font, pos + Vector2(-_hex_size * 0.8, 0.0), glyph,
+                        HORIZONTAL_ALIGNMENT_CENTER, int(_hex_size * 1.6), 14, color)
 
-	if not _visible:
-		return
+        if not _visible:
+                return
 
-	var pulse: float = 1.0 + sin(Time.get_ticks_msec() / 1000.0 * 3.0) * 0.15
-	var r_green: float = _hex_size * 0.18 * pulse
-	for pos in _green_pos:
-		draw_circle(pos, r_green, _COLOR_GREEN)
+        var pulse: float = 1.0 + sin(Time.get_ticks_msec() / 1000.0 * 3.0) * 0.15
+        var r_green: float = _hex_size * 0.18 * pulse
+        for pos in _green_pos:
+                draw_circle(pos, r_green, _COLOR_GREEN)
 
-	var r_yellow: float = _hex_size * 0.10
-	for pos in _yellow_pos:
-		draw_circle(pos, r_yellow, _COLOR_YELLOW)
+        var r_yellow: float = _hex_size * 0.10
+        for pos in _yellow_pos:
+                draw_circle(pos, r_yellow, _COLOR_YELLOW)
 
-	var r_red: float = _hex_size * 0.08
-	for pos in _red_pos:
-		draw_circle(pos, r_red, _COLOR_RED)
+        var r_red: float = _hex_size * 0.08
+        for pos in _red_pos:
+                draw_circle(pos, r_red, _COLOR_RED)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed:
-		var cell := _screen_to_cell(get_global_mouse_position())
-		if cell == Vector2i(-1, -1):
-			return
+        if event is InputEventMouseButton and event.pressed:
+                var cell := _screen_to_cell(get_global_mouse_position())
+                if cell == Vector2i(-1, -1):
+                        return
 
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			_handle_left_click(cell)
+                if event.button_index == MOUSE_BUTTON_LEFT:
+                        _handle_left_click(cell)
 
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			pass
+                elif event.button_index == MOUSE_BUTTON_RIGHT:
+                        pass
 
-	elif event is InputEventMouseMotion and _visible:
-		var cell := _screen_to_cell(get_global_mouse_position())
-		if cell != Vector2i(-1, -1):
-			var is_reachable: bool = _reachable.has(cell) and _reachable[cell] != MarkType.RED
-			var cost: float = _dist.get(cell, INF)
-			var remaining: float = _mp_current - cost
-			if not is_reachable and _red_frontier.has(cell):
-				remaining = -remaining
-			marker_hovered.emit(cell, cost, remaining, is_reachable)
+        elif event is InputEventMouseMotion and _visible:
+                var cell := _screen_to_cell(get_global_mouse_position())
+                if cell != Vector2i(-1, -1):
+                        var is_reachable: bool = _reachable.has(cell) and _reachable[cell] != MarkType.RED
+                        var cost: float = _dist.get(cell, INF)
+                        var remaining: float = _mp_current - cost
+                        if not is_reachable and _red_frontier.has(cell):
+                                remaining = -remaining
+                        marker_hovered.emit(cell, cost, remaining, is_reachable)
 
 func _handle_left_click(cell: Vector2i) -> void:
-	var c: City = city_at_cell(cell)
-	if c != null:
-		city_marker_clicked.emit(c)
-		get_viewport().set_input_as_handled()
-		return
-	var is_green_or_yellow: bool = _reachable.has(cell) and _reachable[cell] != MarkType.RED
-	if is_green_or_yellow:
-		marker_clicked.emit(cell, true)
-		get_viewport().set_input_as_handled()
-	elif _red_frontier.has(cell):
-		marker_clicked.emit(cell, false)
-		get_viewport().set_input_as_handled()
+        var c: City = city_at_cell(cell)
+        if c != null:
+                city_marker_clicked.emit(c)
+                get_viewport().set_input_as_handled()
+                return
+        var is_green_or_yellow: bool = _reachable.has(cell) and _reachable[cell] != MarkType.RED
+        if is_green_or_yellow:
+                marker_clicked.emit(cell, true)
+                get_viewport().set_input_as_handled()
+        elif _red_frontier.has(cell):
+                marker_clicked.emit(cell, false)
+                get_viewport().set_input_as_handled()
 
 func _screen_to_cell(world_pos: Vector2) -> Vector2i:
-	if not _map_gen or not _map_gen.has_valid_tilemap():
-		return Vector2i(-1, -1)
-	return _map_gen.world_to_map(world_pos)
+        if not _map_gen or not _map_gen.has_valid_tilemap():
+                return Vector2i(-1, -1)
+        return _map_gen.world_to_map(world_pos)
