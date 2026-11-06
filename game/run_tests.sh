@@ -270,6 +270,8 @@ if command -v python3 >/dev/null 2>&1; then
         [ "$TIER" = "smoke" ] && COV_ARGS+=(--require-nonempty)
         if ! COV="$(cd .. && python3 scripts/check_test_tiers.py "${COV_ARGS[@]}" 2>&1)"; then
                 echo "TIER COVERAGE: RED — $COV"
+                echo "GATE VERDICT: RED — полнота сбора слоя не сошлась"
+                echo "PUSH: BLOCKED — красный гейт (исправить и прогнать full заново)"
                 rm -f "$GDUNIT_LOG"
                 exit 1
         fi
@@ -279,6 +281,8 @@ else
 fi
 rm -f "$GDUNIT_LOG"
 if [ "$ORPHAN_RED" -ne 0 ]; then
+        echo "GATE VERDICT: RED — ORPHAN-GATE"
+        echo "PUSH: BLOCKED — красный гейт (исправить и прогнать full заново)"
         exit 1
 fi
 
@@ -307,7 +311,23 @@ gate_verdict() { # gate_verdict <red|ok> "<причина падения>"
                 line="GREEN — измеренные уровни зелёные, пропусков уровней нет"
         fi
         echo "GATE VERDICT: $line"
+        push_verdict "$1"
         return "$rc"
+}
+# Push-условие как гейт (T-344, D-265): основание публикации печатает сам гейт,
+# а не выводится чтением вердикта глазами. Разрешено ровно одно: полный прогон,
+# failed = 0, все уровни измерены; readiness, классифицированный жёлтым по
+# подписи, красным не является (D-265). Любой непомреный уровень — BLOCKED.
+push_verdict() {
+        if [ "$1" = "red" ]; then
+                echo "PUSH: BLOCKED — красный гейт (исправить и прогнать full заново)"
+        elif [ -n "$SOTU_SKIPPED" ]; then
+                echo "PUSH: BLOCKED — уровень не мерился ($SOTU_SKIPPED); пуш по неполному прогону запрещён (D-224)"
+        elif [ "$MCP_YELLOW" -eq 1 ]; then
+                echo "PUSH: OK — failed = 0, readiness классифицирован жёлтым (D-265)"
+        else
+                echo "PUSH: OK — failed = 0, все уровни измерены"
+        fi
 }
 
 echo ""
@@ -415,6 +435,7 @@ if [ "$MCP_RUN" != "1" ]; then
         echo "NOT MEASURED: python-уровни (генератор арта T-150, классификатор D-265) — не входят в слой $TIER"
         echo "NOT MEASURED: gdlint (report-only) — не входит в слой $TIER"
         echo "TIER $TIER: зелёный прогон НЕ является основанием для push — публикация требует зелёного full (D-224)."
+        echo "PUSH: BLOCKED — слой $TIER не полный гейт (D-224; основание публикации — только full)"
         echo "GATE VERDICT: PARTIAL — слой $TIER, MCP и python-уровни не мерились; читать как «не проверялось»"
         exit 0
 fi
