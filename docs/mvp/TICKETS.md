@@ -5858,21 +5858,28 @@ ARI(k-means, партиция) ≈ 0 и silhouette(k-means) 0.16, то есть 
 партиции по исправленной нарезке меняет сами метки и требует пересъёмки чисел
 `docs/18-lora-style-groups.md`.
 
-### T-347 · ⏳ Фикстура кадра T-344 (AC3) лишается носителя: `scenes/archive/world.tscn` снимается срезом сцен (2026-11-07)
+### T-347 · ⏳ Носитель кадра T-344 (AC3) найден: `scenes/ui/adventure_ui.tscn`; маркер `scripts/main/main` в `conftest` уже лжёт (2026-11-09)
 
-- **Что случилось.** Кадр AC3 требует носитель, где поднят `MapRenderer`; такой
-  носитель один — `scenes/archive/world.tscn`, и на него указывает фикстура
-  `game/tools/capture/world_hero_step.gd` (ввезена мёржем `879df259`). Параллельная
-  сессия `world-map-scene-slicing` снимает этот файл (в её индексе — `D`, в рабочем
-  дереве файла уже нет), нового носителя фикстуре не указав.
-- **Чем это мерится.** В рабочем дереве `ls game/scenes/archive/*.tscn` — «нет такого
-  файла», в `HEAD` он ещё числится; `grep -rn archive/world.tscn game` даёт ссылку
-  фикстуры. AC3-кадр нельзя снять ни локально, ни на X-контуре: туда уезжает это же
-  рабочее дерево.
-- **Что нужно.** Одну строку в тред среза: куда переезжает носитель `MapRenderer`,
-  и правку пути фикстуры тем же коммитом. Пока её нет, AC3 остаётся незакрытым
-  пунктом `tasks.md` (1.7) задачи `world-hex-cell-art` — не из-за отсутствия кода,
-  а из-за отсутствующего носителя съёмки.
+- **Что нашли вместо вопроса «куда переезжает носитель».** Ни спрашивать, ни ждать не
+  нужно: срез сцен уже переписал маршрут входа в игру, и новый носитель виден в его
+  диффе — `sign_choice_ui.gd` (`_CAMPAIGN_SCENE = scenes/main/main.tscn` →
+  `_ADVENTURE_SCENE = scenes/ui/adventure_ui.tscn`), `main_menu.gd` (`SCENE_CONTINUE` —
+  туда же), `world_state_serializer.gd` (`start_game()` грузит `adventure_ui.tscn`
+  вместо `archive/world.tscn`), `tests/mcp/conftest.py` (`WORLD_SCENE` — туда же).
+  Фикстуре AC3 (`tools/capture/world_hero_step.gd`, ей нужен `get_hero`) подходит
+  именно `adventure_ui.tscn`: её корень — `World` со `world_controller.gd`, внутри
+  `WorldUI` → `WorldUIManager` → `MarkerLayer` (`world_ui_manager.gd:17`), то есть
+  тот же носитель черт, что требовала AC3. Архивная сцена была обёрткой над ним.
+- **Что отсюда красное, и это не слияние T-344.** `tests/mcp/conftest.py:300` ждёт
+  `current_scene` со скриптом, в пути которого есть `scripts/main/main`, а игра туда
+  больше не приходит — отсюда 12 одинаковых `MCPError: Сцена scripts/main/main
+  не загрузилась за 60 с` (`test_campaign_carrier` × 12, `test_full_cycle`,
+  `test_continue_loads_campaign_slot`) при зелёном GdUnit и при том, что `main.tscn`
+  поднимается без ошибок. Мёрж T-344 тронул из кода два файла
+  (`marker_layer.gd`, `test_tile_art.gd`) и ни одного из этого маршрута.
+- **Что нужно сделать владельцу среза (один символ × 2).** Перевести маркер
+  `conftest.py:300` (и ожидаемое в `test_full_cycle.py`) на `scripts/world/world_controller`.
+  До этой правки любой полный гейт, снятый в общем дереве, красно-неинформативен.
 
 ### T-301 · ✅ Матрица покрытия сейвов `doc/SAVE_MATRIX.md` — ссылка спеки живёт в пустоту (2026-10-29)
 
