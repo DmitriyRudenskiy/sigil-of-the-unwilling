@@ -2,7 +2,7 @@
 title: Scene slice measurements (kit battlefield)
 tags: [mvp, world-map, measurement, evidence]
 status: reference
-date: 2026-11-09
+date: 2026-11-08
 ---
 
 # Шаг 0 нарезки сцен: что измерено в комплекте
