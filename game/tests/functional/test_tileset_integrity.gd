@@ -15,7 +15,7 @@ const EXPECTED_RATIO := 2.0 / sqrt(3.0)
 
 
 func test_tileset_integrity() -> void:
-	var ts := TileAtlas.build_hex_tileset()
+	var ts := HexCellArt.build_hex_tileset()
 	assert_that(ts).is_not_null()
 	assert_that(ts.get_source_count()).is_greater(0)
 
@@ -38,9 +38,9 @@ func test_tileset_integrity() -> void:
 ## `HexGrid.calibrate` меряет только знак сдвига, а не его величину).
 func test_lattice_step_matches_hex_geometry() -> void:
 	var layer := TileMapLayer.new()
-	layer.tile_set = TileAtlas.build_hex_tileset()
+	layer.tile_set = HexCellArt.build_hex_tileset()
 	add_child(layer)
-	var hex := Vector2(TileAtlas.HEX_SIZE)
+	var hex := Vector2(HexCellArt.HEX_SIZE)
 	var origin := layer.map_to_local(Vector2i(0, 0))
 	var east := layer.map_to_local(Vector2i(1, 0))
 	var south := layer.map_to_local(Vector2i(0, 1))
@@ -57,7 +57,7 @@ func test_lattice_step_matches_hex_geometry() -> void:
 ## листы и свои картинки, но та же клетка. Разъезд — это деревья не над своей
 ## землёй и дороги не над своей дорогой (проверка дешёвая, дефект был бы молча).
 func test_overlay_layers_share_base_lattice() -> void:
-	var base := TileAtlas.build_hex_tileset()
+	var base := HexCellArt.build_hex_tileset()
 	for other in [MapObjects.build_tileset(), MapRoads.build_tileset()]:
 		assert_that(other).is_not_null()
 		assert_int(other.tile_shape).is_equal(base.tile_shape)

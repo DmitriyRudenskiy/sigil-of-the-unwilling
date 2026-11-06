@@ -39,7 +39,7 @@ func _ready() -> void:
 	_model.seed_value = SEED
 	var renderer: RefCounted = load("res://scripts/world/map_renderer.gd").new(_model)
 
-	var tileset := TileAtlas.build_hex_tileset()
+	var tileset := HexCellArt.build_hex_tileset()
 	var base := TileMapLayer.new()
 	base.name = "TileMapTerrain"
 	base.tile_set = tileset
@@ -49,7 +49,7 @@ func _ready() -> void:
 	root.name = "TileMapTransitions"
 	add_child(root)
 	var layers: Array = []
-	for side: String in TileAtlas.SIDES:
+	for side: String in HexCellArt.SIDES:
 		var layer := TileMapLayer.new()
 		layer.name = "TileMapTransition_" + side
 		layer.tile_set = tileset

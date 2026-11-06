@@ -1,9 +1,9 @@
-class_name TileAtlas
+class_name HexCellArt
 extends RefCounted
 
 ## Процедурный лист биомов карты (**T-344**). Файла-носителя нет: клетки рисует
 ## этот скрипт, один раз на процесс, дальше текстура живёт в кэше
-## `TileAtlasCache`.
+## `HexCellArtCache`.
 ##
 ## Прежний носитель — `world_map_atlas.{webp,json}` конвейера
 ## `gen_map_art.py --assemble` — обязывал runtime читать манифест с координатами
@@ -128,7 +128,7 @@ static func sheet() -> ImageTexture:
 		return _sheet
 	if BIOME_NAMES.size() != COLS or BIOME_COLORS.size() != COLS \
 			or BIOME_ACCENTS.size() != COLS or ROWS != VARIANTS + SIDES.size():
-		push_error("TileAtlas: раскладка листа %d×%d не совпадает с %d биомами и %d сторонами" % [
+		push_error("HexCellArt: раскладка листа %d×%d не совпадает с %d биомами и %d сторонами" % [
 			COLS, ROWS, BIOME_NAMES.size(), SIDES.size()])
 		return null
 	var img := Image.create(COLS * HEX_SIZE.x, ROWS * HEX_SIZE.y, false, Image.FORMAT_RGBA8)
@@ -215,7 +215,7 @@ static func build_hex() -> TileSet:
 
 static func _add_source(ts: TileSet, id: int, tex: Texture2D) -> void:
 	if tex == null:
-		push_error("TileAtlas: источник %d строится без текстуры" % id)
+		push_error("HexCellArt: источник %d строится без текстуры" % id)
 		return
 	var src := TileSetAtlasSource.new()
 	src.texture = tex
@@ -229,10 +229,10 @@ static func build_hex_tileset() -> TileSet:
 	var main_loop := Engine.get_main_loop()
 	if main_loop is SceneTree:
 		var tree := main_loop as SceneTree
-		var cache := tree.root.get_node_or_null("/root/TileAtlasCache")
+		var cache := tree.root.get_node_or_null("/root/HexCellArtCache")
 		if cache != null and cache.has_method("build_hex_tileset"):
 			return cache.call("build_hex_tileset")
-	return TileAtlas.build_hex()
+	return HexCellArt.build_hex()
 
 
 static func clear_cache() -> void:
@@ -241,7 +241,7 @@ static func clear_cache() -> void:
 	var main_loop := Engine.get_main_loop()
 	if main_loop is SceneTree:
 		var tree := main_loop as SceneTree
-		var cache := tree.root.get_node_or_null("/root/TileAtlasCache")
+		var cache := tree.root.get_node_or_null("/root/HexCellArtCache")
 		if cache != null and cache.has_method("clear_cache"):
 			cache.call("clear_cache")
 

@@ -36,18 +36,18 @@ func _paintable() -> Array:
 	var ids := {}
 	for biome in MapRenderer.TERRAIN_TO_BIOME.values():
 		ids[int(biome)] = true
-	ids[TileAtlas.Biome.MUD] = true
+	ids[HexCellArt.Biome.MUD] = true
 	return ids.keys()
 
 
 func _image() -> Image:
-	var sheet := TileAtlas.sheet()
+	var sheet := HexCellArt.sheet()
 	assert_that(sheet).is_not_null()
 	return sheet.get_image()
 
 
 func _cell_rect(coords: Vector2i) -> Rect2i:
-	var hex := TileAtlas.HEX_SIZE
+	var hex := HexCellArt.HEX_SIZE
 	return Rect2i(coords.x * hex.x, coords.y * hex.y, hex.x, hex.y)
 
 
@@ -68,7 +68,7 @@ func _luminances(img: Image, coords: Vector2i) -> PackedFloat32Array:
 ## плотностью и набором деталей, иначе поле читается текстурой-кирпичом.
 func test_base_variants_are_not_copies() -> void:
 	var img := _image()
-	var hex := TileAtlas.HEX_SIZE
+	var hex := HexCellArt.HEX_SIZE
 	var same: Array[String] = []
 	for biome in _paintable():
 		var a := _cell_rect(Vector2i(int(biome), 0))
@@ -85,7 +85,7 @@ func test_base_variants_are_not_copies() -> void:
 					differs += 1
 		if total == 0 or float(differs) / float(total) < VARIANT_DIFF_MIN:
 			same.append("%s: %.1f%%" % [
-				TileAtlas.Biome.keys()[int(biome)],
+				HexCellArt.Biome.keys()[int(biome)],
 				100.0 * float(differs) / float(maxi(total, 1))])
 	if not same.is_empty():
 		_fail("варианты базы совпадают (< %d%% различий): %s"
@@ -100,7 +100,7 @@ func test_base_cells_are_not_flat() -> void:
 	for biome in _paintable():
 		var lums := _luminances(img, Vector2i(int(biome), 0))
 		if lums.size() < 100:
-			flat.append("%s: клетка пуста" % TileAtlas.Biome.keys()[int(biome)])
+			flat.append("%s: клетка пуста" % HexCellArt.Biome.keys()[int(biome)])
 			continue
 		var mean := 0.0
 		for l in lums:
@@ -116,7 +116,7 @@ func test_base_cells_are_not_flat() -> void:
 		var sigma := sqrt(variance / float(lums.size()))
 		if sigma < SIGMA_MIN or hi - lo < SPREAD_MIN * mean:
 			flat.append("%s: σ=%.3f, размах=%.3f" % [
-				TileAtlas.Biome.keys()[int(biome)], sigma, hi - lo])
+				HexCellArt.Biome.keys()[int(biome)], sigma, hi - lo])
 	if not flat.is_empty():
 		_fail("плоские биомы (σ<%.2f или размах<%.0f%% средней): %s"
 			% [SIGMA_MIN, SPREAD_MIN * 100.0, ", ".join(flat)])
@@ -126,7 +126,7 @@ func test_base_cells_are_not_flat() -> void:
 ## с каждой клетки) — так соты читаются сотами без отдельной линии сетки.
 func test_cell_edge_is_darker_than_middle() -> void:
 	var img := _image()
-	var hex := TileAtlas.HEX_SIZE
+	var hex := HexCellArt.HEX_SIZE
 	var weak: Array[String] = []
 	for biome in _paintable():
 		var rect := _cell_rect(Vector2i(int(biome), 0))
@@ -146,7 +146,7 @@ func test_cell_edge_is_darker_than_middle() -> void:
 						img, x, rect.position.y + rect.size.y / 2, middle))
 		if edge > middle * (1.0 - EDGE_DARK_MIN):
 			weak.append("%s: кромка %.3f, центр %.3f (%.1f%%)" % [
-				TileAtlas.Biome.keys()[int(biome)], edge, middle,
+				HexCellArt.Biome.keys()[int(biome)], edge, middle,
 				100.0 * (1.0 - edge / middle)])
 	if not weak.is_empty():
 		_fail("кромка не темнее центра (меньше %.0f%%): %s"
@@ -171,10 +171,10 @@ func _mean_luminance(img: Image, rect: Rect2i) -> float:
 ## Иначе трава или трещина лезут в чужую клетку, и «шов» возвращается.
 func test_details_stay_inside_hex() -> void:
 	var img := _image()
-	var hex := TileAtlas.HEX_SIZE
+	var hex := HexCellArt.HEX_SIZE
 	var leak: Array[String] = []
 	for biome in _paintable():
-		for variant in TileAtlas.VARIANTS:
+		for variant in HexCellArt.VARIANTS:
 			var rect := _cell_rect(Vector2i(int(biome), variant))
 			for corner in [
 				Vector2i(0, 0), Vector2i(hex.x - 1, 0),
@@ -182,7 +182,7 @@ func test_details_stay_inside_hex() -> void:
 			]:
 				if img.get_pixel(rect.position.x + corner.x, rect.position.y + corner.y).a > 0.0:
 					leak.append("%s/%d@%s" % [
-						TileAtlas.Biome.keys()[int(biome)], variant, str(corner)])
+						HexCellArt.Biome.keys()[int(biome)], variant, str(corner)])
 	if not leak.is_empty():
 		_fail("краска в углу клетки (%d): %s" % [leak.size(), ", ".join(leak.slice(0, 6))])
 
@@ -191,7 +191,7 @@ func test_details_stay_inside_hex() -> void:
 ## пиксели, иначе варианты cells разъезжаются между кадрами.
 func test_sheet_rebuild_is_identical() -> void:
 	var first := _fingerprint(_image())
-	TileAtlas.clear_cache()
+	HexCellArt.clear_cache()
 	assert_that(_fingerprint(_image())).is_equal(first)
 
 
@@ -211,9 +211,9 @@ func test_variant_choice_is_stable() -> void:
 	var cells: Array[Vector2i] = [
 		Vector2i(0, 0), Vector2i(3, -2), Vector2i(-7, 4), Vector2i(11, 11)]
 	for cell in cells:
-		var first := TileAtlas.variant_for(cell, 7, TileAtlas.VARIANTS)
+		var first := HexCellArt.variant_for(cell, 7, HexCellArt.VARIANTS)
 		for pass_ in 3:
-			assert_that(TileAtlas.variant_for(cell, 7, TileAtlas.VARIANTS)).is_equal(first)
-		assert_that(TileAtlas.variant_for(cell, 7, 1)).is_equal(0)
+			assert_that(HexCellArt.variant_for(cell, 7, HexCellArt.VARIANTS)).is_equal(first)
+		assert_that(HexCellArt.variant_for(cell, 7, 1)).is_equal(0)
 		assert_that(first).is_greater_equal(0)
-		assert_that(first).is_less(TileAtlas.VARIANTS)
+		assert_that(first).is_less(HexCellArt.VARIANTS)

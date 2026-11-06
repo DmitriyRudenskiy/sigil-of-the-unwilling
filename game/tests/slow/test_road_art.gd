@@ -124,14 +124,14 @@ func test_edge_only_on_non_road_side() -> void:
 	var c := Vector2i(6, 6)
 	_set_roads(gen, _straight(c, 0, 3, P))
 	var edges: Array = gen.road_edge_layers
-	assert_that(edges.size()).is_equal(TileAtlas.SIDES.size())
+	assert_that(edges.size()).is_equal(HexCellArt.SIDES.size())
 	for bit in [0, 3]:
 		assert_that((edges[bit] as TileMapLayer).get_cell_source_id(c)).is_equal(-1)
 	for bit in [1, 2, 4, 5]:
 		var layer: TileMapLayer = edges[bit]
 		assert_that(layer.get_cell_source_id(c)).is_equal(MapRoads.SOURCE_ID)
 		assert_that(layer.get_cell_atlas_coords(c)).is_equal(MapRoads.coords_for(
-				MapRoads.edge_id(String(TileAtlas.SIDES[bit]), "primary")))
+				MapRoads.edge_id(String(HexCellArt.SIDES[bit]), "primary")))
 
 
 ## Кромка ставится и на краю карты: «соседа» там нет, дороги тоже нет — значит
@@ -143,7 +143,7 @@ func test_edge_on_map_border() -> void:
 	_set_roads(gen, {c: P, e: P})
 	var edges: Array = gen.road_edge_layers
 	var marked: int = 0
-	for bit in TileAtlas.SIDES.size():
+	for bit in HexCellArt.SIDES.size():
 		if (edges[bit] as TileMapLayer).get_cell_source_id(c) != -1:
 			marked += 1
 	assert_that(marked).is_greater_equal(3)
@@ -195,7 +195,7 @@ func test_manifest_covers_every_choice() -> void:
 				missing.append(MapRoads.strip_id(a, s))
 			if MapRoads.coords_for(MapRoads.bridge_id(a, s)).x < 0:
 				missing.append(MapRoads.bridge_id(a, s))
-		for side in TileAtlas.SIDES:
+		for side in HexCellArt.SIDES:
 			var d: String = String(side)
 			if MapRoads.coords_for(MapRoads.edge_id(d, s)).x < 0:
 				missing.append(MapRoads.edge_id(d, s))
@@ -239,7 +239,7 @@ func test_road_layer_sits_between_transitions_and_vegetation() -> void:
 		"TileMapShadow", "TileMapDecor",
 	])
 	var sides: Array[String] = []
-	for side in TileAtlas.SIDES:
+	for side in HexCellArt.SIDES:
 		sides.append("TileMapRoadEdge_" + String(side))
 	var child_names: Array[String] = []
 	for child in gen.get_node("TileMapRoads").get_children():
@@ -319,7 +319,7 @@ func test_roads_follow_fog() -> void:
 	assert_that(gen.road_layer.get_cell_source_id(visible)).is_equal(MapRoads.SOURCE_ID)
 	assert_that(gen.road_layer.get_cell_source_id(explored)).is_equal(MapRoads.FOG_SOURCE_ID)
 	# Кромки гасятся вместе с полотном, а не остаются яркими.
-	for bit in TileAtlas.SIDES.size():
+	for bit in HexCellArt.SIDES.size():
 		var layer: TileMapLayer = gen.road_edge_layers[bit]
 		assert_that(layer.get_cell_tile_data(hidden)).is_null()
 		if layer.get_cell_source_id(explored) != -1:
