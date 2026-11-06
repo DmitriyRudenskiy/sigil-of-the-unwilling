@@ -45,7 +45,8 @@ from measure_palette_band import (  # noqa: E402  (общая метрика п�
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG = os.path.join(ROOT, "game/data/config/map_art_gates.json")
-ATLAS = os.path.join(ROOT, "game/assets/tiles/world_map_atlas.json")
+# Превью-атлас клетки вне дерева ассетов (T-344): клетку рисует HexCellArt.
+ATLAS = os.path.join(ROOT, "tmp/map_art/world_map_atlas.json")
 OBJECTS = os.path.join(ROOT, "game/assets/objects/world_map_objects.json")
 PROVENANCE = os.path.join(ROOT, "game/assets/PROVENANCE.md")
 PATCH = 8          # во сколько сжимается патч клетки перед сравнением

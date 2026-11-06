@@ -5,7 +5,7 @@ extends RefCounted
 ## Пиксели `world_map_objects.webp` и раскладка `world_map_objects.json` —
 ## продукты `scripts/gen_map_art.py`. Координаты читаются только из манифеста:
 ## отдельный реестр в скрипте уже умирал один раз (`const BASE_COORDS` в
-## `tile_atlas.gd`), поэтому его здесь не заводим вторым экземпляром.
+## `hex_cell_art.gd`), поэтому его здесь не заводим вторым экземпляром.
 
 const SHEET_PATH := "res://assets/objects/world_map_objects.webp"
 const FOG_SHEET_PATH := "res://assets/objects/world_map_objects_fog.webp"
@@ -24,7 +24,7 @@ const SHADOW_ALPHA := 0.5
 const SHADOW_RX := 0.40   # доли тайла
 const SHADOW_RY := 0.18
 ## Затемнённая копия листа для тумана войны (дефект T-150): тот же узор, те же
-## координаты, вторая пара источников — как `TileAtlas.FOG_SOURCE_ID` у базы. Без
+## координаты, вторая пара источников — как `HexCellArt.FOG_SOURCE_ID` у базы. Без
 ## неё объект либо оставался ярким над стёртой базой, либо пропадал и на открытой
 ## клетке, где спека требует затемнённое содержимое того же слоя.
 const FOG_SOURCE_ID := 2
@@ -78,8 +78,14 @@ static func build_tileset() -> TileSet:
 		GameLogger.error("MapObjects: не удалось загрузить %s" % SHEET_PATH)
 		return null
 	var ts := TileSet.new()
-	ts.tile_shape = 3 as TileSet.TileShape  # TILE_SHAPE_HEXAGON — как у базы
-	ts.tile_size = Vector2i(TILE, TILE)
+	# Геометрия обязана совпадать с базой (`HexCellArt.build_hex`) до пикселя:
+	# tile_size — bounding box гекса, а не квадрат ART-клетки (иначе клетки слоя
+	# растительности разъедутся с землёй на 0.75·h − TILE на ряд). Сама картинка
+	# остаётся квадратной — её просто рисовали под другой бокс.
+	ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+	ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+	ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
+	ts.tile_size = HexCellArt.HEX_SIZE
 	var src := TileSetAtlasSource.new()
 	src.texture = tex
 	src.texture_region_size = Vector2i(TILE, TILE)

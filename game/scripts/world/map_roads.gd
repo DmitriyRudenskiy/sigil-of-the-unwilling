@@ -17,14 +17,14 @@ const FOG_SHEET_PATH := "res://assets/objects/world_map_roads_fog.webp"
 const MANIFEST_PATH := "res://assets/objects/world_map_roads.json"
 const TILE := GameNumbers.TILE_SIZE
 const SOURCE_ID := 0
-## Затемнённый побратим листа — тот же приём, что у базы (`TileAtlas.FOG_SOURCE_ID`)
+## Затемнённый побратим листа — тот же приём, что у базы (`HexCellArt.FOG_SOURCE_ID`)
 ## и у объектов: правило «туман войны по всем слоям» требует той же кратности
 ## (`GameNumbers.MAP_FOG_DIM`), а не яркой дороги над стёртой базой (дефект T-150).
 const FOG_SOURCE_ID := 1
 
 ## Три оси гекса. Полоса дороги идёт между двумя соседями, а соседей шесть —
 ## по три пары на каждую ось, поэтому ориентация декали описывается осью,
-## а не направлением: `AXIS_BY_SIDE` переводит сторону (`TileAtlas.SIDES`) в ось.
+## а не направлением: `AXIS_BY_SIDE` переводит сторону (`HexCellArt.SIDES`) в ось.
 const AXES := ["ew", "nesw", "nwse"]
 const AXIS_BY_SIDE := {
 	"e": "ew", "w": "ew",
@@ -97,8 +97,12 @@ static func build_tileset() -> TileSet:
 		GameLogger.error("MapRoads: не удалось загрузить %s" % SHEET_PATH)
 		return null
 	var ts := TileSet.new()
-	ts.tile_shape = 3 as TileSet.TileShape  # TILE_SHAPE_HEXAGON — как у базы
-	ts.tile_size = Vector2i(TILE, TILE)
+	# Тот же бокс, что у базы (T-344): декаль ложится в клетку, а не в картинку —
+	# квадратный tile_size сдвинул бы полотно относительно дороги рельефа.
+	ts.tile_shape = TileSet.TILE_SHAPE_HEXAGON
+	ts.tile_layout = TileSet.TILE_LAYOUT_STACKED
+	ts.tile_offset_axis = TileSet.TILE_OFFSET_AXIS_HORIZONTAL
+	ts.tile_size = HexCellArt.HEX_SIZE
 	_add_source(ts, tex, SOURCE_ID, _coords.values())
 	_add_source(ts, fog_sheet_texture(), FOG_SOURCE_ID, _coords.values())
 	return ts

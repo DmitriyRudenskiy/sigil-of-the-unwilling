@@ -1,17 +1,15 @@
 extends BaseTest
-## Замыкание переходов биомов (world-map-art-variety, задача 2.4).
+## Замыкание переходов биомов (world-map-art-variety 2.4) — в процедурном
+## носителе (**T-344**).
 ##
-## Тест читает манифест атласа, а не реестр в скрипте: переходы — данные, и
-## проверка обязана краснеть до того, как появится код, который их рисует
-## (урок инициативы: сначала гейт, потом пиксель).
+## раньше тест читал манифест атласа, а не реестр в скрипте: переходы были
+## данными, и гейт обязан был краснеть раньше пикселя. Манифеста больше нет —
+## лист строит `HexCellArt`, поэтому проверяется он же: покрытие (биом × сторона),
+## жёсткая семантика отсутствия и **геометия полос** — то, чего манифест проверить
+## не мог в принципе: декаль обязан лежать у своей стороны, а не у случайной.
 ##
 ## Покрываемая пара соседств — любая пара биомов, которые движок может положить
 ## в соседние клетки (MapRenderer.TERRAIN_TO_BIOME + ил города из city-hex-layout).
-## Для такой пары и любого из шести направлений у обеих сторон обязан найтись
-## переход: иначе на границе остаётся голый шов. Направление берётся из
-## HexUtils (bit 0..5 = E, NE, NW, W, SE, SW), «напротив» — его же зеркало.
-
-const MANIFEST := "res://assets/tiles/world_map_atlas.json"
 
 ## Шесть сторон клетки — тот же порядок бит, что HexUtils.get_neighbor.
 const SIDES := ["E", "NE", "NW", "W", "SW", "SE"]
@@ -21,15 +19,20 @@ const OPPOSITE := {"E": "W", "W": "E", "NE": "SW", "SW": "NE", "NW": "SE", "SE":
 ## допускается обе — но только из этого множества (урок: порядок бит HexUtils
 ## [E, NE, NW, W, SW, SE], а не «по алфавиту», и путаница SE/SW молча рисует
 ## переход не на том крае).
-
-
 const SIDE_DELTAS := {
 	"E": [Vector2i(1, 0)], "W": [Vector2i(-1, 0)],
 	"NE": [Vector2i(0, -1), Vector2i(1, -1)], "NW": [Vector2i(-1, -1), Vector2i(0, -1)],
 	"SW": [Vector2i(-1, 1), Vector2i(0, 1)], "SE": [Vector2i(0, 1), Vector2i(1, 1)],
 }
 
-
+## Нормаль стороны в пиксельных координатах (y вниз) — та же таблица, что у
+## `HexCellArt.SIDE_ANGLES`, но независимая: тест сверяет лист с собственным
+## ожиданием, а не со ссылкой на тот же источник.
+const SIDE_VECTORS := {
+	"E": Vector2(1, 0), "W": Vector2(-1, 0),
+	"NE": Vector2(0.5, -0.866), "NW": Vector2(-0.5, -0.866),
+	"SE": Vector2(0.5, 0.866), "SW": Vector2(-0.5, 0.866),
+}
 
 
 ## В этом GdUnit4 нет fail_test(); падение с текстом — неравное сравнение.
@@ -37,99 +40,118 @@ func _fail(message: String) -> void:
 	assert_that(message).is_equal("")
 
 
-func _manifest() -> Dictionary:
-	if not FileAccess.file_exists(MANIFEST):
-		_fail(
-			"манифеста атласа нет: %s — переходы нечем замыкать (задача 4.1)" % MANIFEST)
-		return {}
-	var file := FileAccess.open(MANIFEST, FileAccess.READ)
-	if file == null:
-		_fail("манифест атласа не читается: %s" % MANIFEST)
-		return {}
-	var parsed: Variant = JSON.parse_string(file.get_as_text())
-	if not (parsed is Dictionary):
-		_fail("манифест атласа — не объект JSON: %s" % MANIFEST)
-		return {}
-	return parsed
-
-
-## Клетки манифеста, сгруппированные переходов: {biome: {side: id}}.
-func _edges(manifest: Dictionary) -> Dictionary:
-	var out: Dictionary = {}
-	for cell in manifest.get("cells", []):
-		if String(cell.get("kind", "")) != "edge":
-			continue
-		var biome := String(cell.get("biome", ""))
-		if not out.has(biome):
-			out[biome] = {}
-		# Манифест — данные, и имя стороны в нём строчное (оно входит в id клетки:
-		# edge_grass_e). Контракт направления — верхний регистр SIDES, поэтому
-		# нормализуем здесь, а не в генераторе.
-		out[biome][String(cell.get("side", "")).to_upper()] = String(cell.get("id", ""))
-	return out
-
-
 ## Биомы, которые рендер способен положить на карту (значит, и столкнуть
-## соседями). LAVA/DENSE_FOREST в списке TileAtlas есть, но не рисуются —
+## соседями). LAVA/DENSE_FOREST в списке HexCellArt есть, но не рисуются —
 ## переход для них был бы «мёртвым».
 func _paintable() -> Array:
-	var names := {}
+	var ids := {}
 	for biome in MapRenderer.TERRAIN_TO_BIOME.values():
-		names[TileAtlas.BIOME_NAMES[biome]] = true
-	names[TileAtlas.BIOME_NAMES[TileAtlas.Biome.MUD]] = true  # ядро города
-	return names.keys()
+		ids[int(biome)] = true
+	ids[HexCellArt.Biome.MUD] = true  # ядро города
+	return ids.keys()
 
 
-func test_manifest_present() -> void:
-	var manifest := _manifest()
-	assert_that(manifest.is_empty()).is_false()
-	assert_that(manifest.get("cells", [])).is_not_empty()
+func _tileset() -> TileSet:
+	var ts := HexCellArt.build_hex()
+	assert_that(ts).is_not_null()
+	return ts
 
 
+## Покрытие: у каждого рисуемого биома есть база и декаль каждой из шести
+## сторон, и клетка реально заведена в обоих источниках (основном и туманном) —
+## ровно та инвариантность, из-за которой T-168 когда-то показал пустоту в тумане.
 func test_every_paintable_biome_has_all_sides() -> void:
-	var edges := _edges(_manifest())
+	var ts := _tileset()
 	var missing: Array[String] = []
 	for biome in _paintable():
-		if not edges.has(biome):
-			missing.append("%s: ни одного перехода" % biome)
+		var base: Array = HexCellArt.base_coords(int(biome))
+		if base.is_empty():
+			missing.append("%s: нет базы" % HexCellArt.BIOME_NAMES[int(biome)])
 			continue
 		for side in SIDES:
-			if not (edges[biome] as Dictionary).has(side):
-				missing.append("%s/%s" % [biome, side])
+			var coords: Vector2i = HexCellArt.edge_coords(
+				int(biome), String(side).to_lower())
+			if coords.x < 0:
+				missing.append("%s/%s: нет клетки перехода" % [
+					HexCellArt.BIOME_NAMES[int(biome)], side])
+				continue
+			for source_id in [HexCellArt.SOURCE_ID, HexCellArt.FOG_SOURCE_ID]:
+				var src := ts.get_source(source_id) as TileSetAtlasSource
+				if src == null or not src.has_tile(coords):
+					missing.append("%s/%s: клетки %s нет в источнике %d" % [
+						HexCellArt.BIOME_NAMES[int(biome)], side, str(coords), source_id])
 	if not missing.is_empty():
 		_fail("переходов не хватает (%d): %s" % [missing.size(), ", ".join(missing)])
 
 
-func test_no_dead_transition() -> void:
-	var paintable := _paintable()
-	var dead: Array[String] = []
-	for biome in _edges(_manifest()).keys():
-		if not paintable.has(biome):
-			dead.append(biome)
-	if not dead.is_empty():
-		_fail(
-			"переходы для биомов, которых на карте не бывает: %s "
-			% ", ".join(dead))
+## Жёсткая семантика отсутствия: несуществующая сторона или биом — [-1,-1], а не
+## ближайшая подходящая клетка. Молчаливая подмена и есть тот дефект, из-за
+## которого «дорога стала травой» (T-341).
+func test_unknown_side_or_biome_is_not_silently_substituted() -> void:
+	assert_that(HexCellArt.edge_coords(HexCellArt.Biome.GRASS, "up")) \
+		.is_equal(Vector2i(-1, -1))
+	assert_that(HexCellArt.edge_coords(-1, "e")).is_equal(Vector2i(-1, -1))
+	assert_that(HexCellArt.base_coords(-1)).is_empty()
+	assert_that(HexCellArt.base_coords(HexCellArt.BIOME_NAMES.size())).is_empty()
 
 
-## Замыкание по паре: для любой допустимой пары и любого направления переход
-## есть с обеих сторон, причём смотрят они друг на друга.
+## Переход открыт с обеих сторон: структура (столбец = биом, строка = сторона)
+## даёт его автоматически, так что проверяется обратное — что декали разных
+## сторон не свалились в одну клетку.
 func test_pairs_close_in_both_directions() -> void:
-	var edges := _edges(_manifest())
-	var open_pairs: Array[String] = []
-	for a in _paintable():
-		for b in _paintable():
-			if a == b or not edges.has(a) or not edges.has(b):
-				continue
-			for side in SIDES:
-				var there := (edges[a] as Dictionary).has(side)
-				var back := (edges[b] as Dictionary).has(OPPOSITE[side])
-				if there != back:
-					open_pairs.append("%s:%s ↔ %s:%s" % [a, side, b, OPPOSITE[side]])
-	if not open_pairs.is_empty():
-		_fail("переход открыт с одной стороны (%d): %s"
-			% [open_pairs.size(), ", ".join(open_pairs.slice(0, 6))])
+	var seen := {}
+	var clash: Array[String] = []
+	for biome in _paintable():
+		for side in SIDES:
+			var coords: Vector2i = HexCellArt.edge_coords(
+				int(biome), String(side).to_lower())
+			var key := "%s:%s" % [str(coords), side]
+			if seen.has(str(coords)):
+				clash.append("%s и %s" % [String(seen[str(coords)]), key])
+			seen[str(coords)] = "%s:%s" % [
+				HexCellArt.BIOME_NAMES[int(biome)], side]
+	if not clash.is_empty():
+		_fail("разные переходы лежат в одной клетке (%d): %s"
+			% [clash.size(), ", ".join(clash.slice(0, 6))])
 
+
+## Геометрия полосы: декаль стороны обязан лежать у своей стороны клетки. Ловит
+## то, что не ловила проверка манифеста, — поворот листа на 30° (перепутаны
+## нормали сторон и вершины) или перестановку SIDES относительно бит: координаты
+## остаются валидными, а переходы рисуются не на том крае.
+func test_decal_band_sits_on_its_own_side() -> void:
+	var sheet := HexCellArt.sheet()
+	assert_that(sheet).is_not_null()
+	var img := sheet.get_image()
+	var hex := HexCellArt.HEX_SIZE
+	var wrong: Array[String] = []
+	for biome in [HexCellArt.Biome.GRASS, HexCellArt.Biome.WATER]:
+		for side in SIDES:
+			var coords: Vector2i = HexCellArt.edge_coords(
+				biome, String(side).to_lower())
+			var mean := _mean_opaque(img, coords, hex)
+			var normal: Vector2 = SIDE_VECTORS[side]
+			if mean.length() < 0.05:
+				wrong.append("%s/%s: полоса не найдена" % [
+					HexCellArt.BIOME_NAMES[biome], side])
+				continue
+			if mean.normalized().dot(normal) < 0.6:
+				wrong.append("%s/%s: полоса смотрит на %s" % [
+					HexCellArt.BIOME_NAMES[biome], side, str(mean.normalized())])
+	if not wrong.is_empty():
+		_fail("декаль не у своей стороны (%d): %s" % [wrong.size(), ", ".join(wrong)])
+
+
+## Среднее положение непрозрачных пикселей клетки в координатах −1…1 от центра.
+func _mean_opaque(img: Image, coords: Vector2i, hex: Vector2i) -> Vector2:
+	var sum := Vector2.ZERO
+	var n := 0
+	for y in hex.y:
+		for x in hex.x:
+			if img.get_pixel(coords.x * hex.x + x, coords.y * hex.y + y).a > 0.1:
+				sum += Vector2((x + 0.5) / hex.x * 2.0 - 1.0, (y + 0.5) / hex.y * 2.0 - 1.0)
+				n += 1
+	return sum / n if n > 0 else Vector2.ZERO
 
 
 ## Имя стороны обязано соответствовать биту HexUtils: иначе переход рисуется

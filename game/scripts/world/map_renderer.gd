@@ -7,16 +7,16 @@ const _VisibilityMap = preload("res://scripts/core/visibility_map.gd")
 signal fog_refreshed()
 
 const TERRAIN_TO_BIOME := {
-	HexUtils.Terrain.WATER:    TileAtlas.Biome.WATER,
-	HexUtils.Terrain.SWAMP:    TileAtlas.Biome.SWAMP,
-	HexUtils.Terrain.SAND:     TileAtlas.Biome.SAND,
-	HexUtils.Terrain.GRASS:    TileAtlas.Biome.GRASS,
-	HexUtils.Terrain.FOREST:   TileAtlas.Biome.GRASS,
-	HexUtils.Terrain.DENSE_FOREST: TileAtlas.Biome.GRASS,
-	HexUtils.Terrain.MOUNTAIN: TileAtlas.Biome.ROCK,
-	HexUtils.Terrain.SNOW:     TileAtlas.Biome.SNOW,
-	HexUtils.Terrain.RIVER:    TileAtlas.Biome.WATER,
-	HexUtils.Terrain.ROAD:     TileAtlas.Biome.ROAD,
+	HexUtils.Terrain.WATER:    HexCellArt.Biome.WATER,
+	HexUtils.Terrain.SWAMP:    HexCellArt.Biome.SWAMP,
+	HexUtils.Terrain.SAND:     HexCellArt.Biome.SAND,
+	HexUtils.Terrain.GRASS:    HexCellArt.Biome.GRASS,
+	HexUtils.Terrain.FOREST:   HexCellArt.Biome.GRASS,
+	HexUtils.Terrain.DENSE_FOREST: HexCellArt.Biome.GRASS,
+	HexUtils.Terrain.MOUNTAIN: HexCellArt.Biome.ROCK,
+	HexUtils.Terrain.SNOW:     HexCellArt.Biome.SNOW,
+	HexUtils.Terrain.RIVER:    HexCellArt.Biome.WATER,
+	HexUtils.Terrain.ROAD:     HexCellArt.Biome.ROAD,
 }
 
 var model
@@ -63,22 +63,22 @@ func rebuild_city_zones(cities: Array) -> void:
 				if not city_zones.has(cell):
 					city_zones[cell] = {"city": city, "ring": r}
 
-## city-hex-layout 4.2: окраска ядра и колец 1–3 (палитра TileAtlas, без новых
+## city-hex-layout 4.2: окраска ядра и колец 1–3 (палитра HexCellArt, без новых
 ## текстур); палитра — _zone_biome.
 func paint_city_zones(tile_map: TileMapLayer) -> void:
 	if tile_map == null:
 		return
 	for cell in city_zones:
 		var zone: Dictionary = city_zones[cell]
-		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, _base(cell, _zone_biome(int(zone.ring))))
+		tile_map.set_cell(cell, HexCellArt.SOURCE_ID, _base(cell, _zone_biome(int(zone.ring))))
 	paint_transitions()
 
 
 ## Палитра города (city-hex-layout 4.2): ядро — MUD, кольцо 1 — ROAD, кольца 2–3 — SAND.
 func _zone_biome(r: int) -> int:
 	if r == 0:
-		return TileAtlas.Biome.MUD
-	return TileAtlas.Biome.ROAD if r == 1 else TileAtlas.Biome.SAND
+		return HexCellArt.Biome.MUD
+	return HexCellArt.Biome.ROAD if r == 1 else HexCellArt.Biome.SAND
 
 
 ## Биом клетки так, как он нарисован: ил/дорога города перекрывают рельеф, и
@@ -92,7 +92,7 @@ func _biome_at(cell: Vector2i) -> int:
 
 ## Переходы биомов (задача 4.4): декаль соседа кладётся на клетку со стороны
 ## соседа, поэтому граница не «рубится», а наедает в чужую клетку градиентом.
-## Красит только «старший» биом пары (порядок — enum TileAtlas.Biome): если бы
+## Красит только «старший» биом пары (порядок — enum HexCellArt.Biome): если бы
 ## красили обе клетки границы, цвета просто поменялись бы местами и твёрдый стык
 ## остался бы на месте. Детерминировано по клетке, как и варианты базы.
 func paint_transitions(visibility = null) -> void:
@@ -107,10 +107,10 @@ func paint_transitions(visibility = null) -> void:
 			continue
 		if visibility != null and not visibility.is_explored(cell):
 			continue
-		var source: int = TileAtlas.SOURCE_ID
+		var source: int = HexCellArt.SOURCE_ID
 		if visibility != null and not visibility.is_visible(cell):
-			source = TileAtlas.FOG_SOURCE_ID
-		for bit in TileAtlas.SIDES.size():
+			source = HexCellArt.FOG_SOURCE_ID
+		for bit in HexCellArt.SIDES.size():
 			var neighbor: Vector2i = HexUtils.get_neighbor(cell, bit)
 			# Декаль выдал бы биом за краем тумана: сосед, которого игрок ещё
 			# не видел, не имеет права подкрашивать соседнюю клетку.
@@ -121,11 +121,11 @@ func paint_transitions(visibility = null) -> void:
 			# красить — у него (он видит нас «старшим» и красит в свою клетку).
 			if other <= biome:
 				continue
-			var side: String = TileAtlas.SIDES[bit]
-			var coords: Vector2i = TileAtlas.edge_coords(other, side)
+			var side: String = HexCellArt.SIDES[bit]
+			var coords: Vector2i = HexCellArt.edge_coords(other, side)
 			if coords.x < 0:
-				push_error("TileAtlas: нет перехода %s→%s на стороне %s" % [
-					TileAtlas.BIOME_NAMES[biome], TileAtlas.BIOME_NAMES[other], side])
+				push_error("HexCellArt: нет перехода %s→%s на стороне %s" % [
+					HexCellArt.BIOME_NAMES[biome], HexCellArt.BIOME_NAMES[other], side])
 				continue
 			(transition_layers[bit] as TileMapLayer).set_cell(cell, source, coords)
 
@@ -148,9 +148,9 @@ func paint_roads(visibility = null) -> void:
 	for layer in road_edge_layers:
 		if layer is TileMapLayer:
 			layer.clear()
-	if road_edge_layers.size() != TileAtlas.SIDES.size():
+	if road_edge_layers.size() != HexCellArt.SIDES.size():
 		push_error("MapRenderer: подслоёв кромки %d, сторон гекса %d" % [
-			road_edge_layers.size(), TileAtlas.SIDES.size()])
+			road_edge_layers.size(), HexCellArt.SIDES.size()])
 		return
 	for cell in model.road_grid:
 		if visibility != null and not visibility.is_explored(cell):
@@ -173,10 +173,10 @@ func paint_roads(visibility = null) -> void:
 			push_error("MapRoads: нет декали %s в манифесте листа дорог" % main_id)
 			continue
 		road_layer.set_cell(cell, src, coords)
-		for bit in TileAtlas.SIDES.size():
+		for bit in HexCellArt.SIDES.size():
 			if bits.has(bit):
 				continue  # сосед — дорога: кромки там нет, там полотно
-			var side: String = TileAtlas.SIDES[bit]
+			var side: String = HexCellArt.SIDES[bit]
 			var edge: String = MapRoads.edge_id(side, surface)
 			var ecoords: Vector2i = MapRoads.coords_for(edge)
 			if ecoords.x < 0:
@@ -185,10 +185,10 @@ func paint_roads(visibility = null) -> void:
 			(road_edge_layers[bit] as TileMapLayer).set_cell(cell, src, ecoords)
 
 
-## Соседи-дороги клетки: стороны (`TileAtlas.SIDES`), за которыми тоже дорога.
+## Соседи-дороги клетки: стороны (`HexCellArt.SIDES`), за которыми тоже дорога.
 func _road_neighbor_bits(cell: Vector2i) -> Array:
 	var bits: Array = []
-	for bit in TileAtlas.SIDES.size():
+	for bit in HexCellArt.SIDES.size():
 		if model.road_grid.has(HexUtils.get_neighbor(cell, bit)):
 			bits.append(bit)
 	return bits
@@ -201,7 +201,7 @@ func _road_neighbor_bits(cell: Vector2i) -> Array:
 func _road_axis(bits: Array) -> String:
 	var counts: Dictionary = {}
 	for bit in bits:
-		var side: String = TileAtlas.SIDES[int(bit)]
+		var side: String = HexCellArt.SIDES[int(bit)]
 		var axis: String = String(MapRoads.AXIS_BY_SIDE[side])
 		counts[axis] = int(counts.get(axis, 0)) + 1
 	var best: String = String(MapRoads.AXES[0])
@@ -216,11 +216,11 @@ func _road_axis(bits: Array) -> String:
 ## База биома для клетки: вариант выбирается по клетке и сиду карты (задача 4.3),
 ## поэтому картина не зависит от порядка обхода словаря и переживает save/load.
 func _base(cell: Vector2i, biome: int) -> Vector2i:
-	var variants: Array = TileAtlas.base_coords(biome)
+	var variants: Array = HexCellArt.base_coords(biome)
 	if variants.is_empty():
-		push_error("TileAtlas: у биома %s нет базовых тайлов" % TileAtlas.BIOME_NAMES[biome])
+		push_error("HexCellArt: у биома %s нет базовых тайлов" % HexCellArt.BIOME_NAMES[biome])
 		return Vector2i.ZERO
-	return variants[TileAtlas.variant_for(cell, int(_seed()), variants.size())]
+	return variants[HexCellArt.variant_for(cell, int(_seed()), variants.size())]
 
 
 func _seed() -> int:
@@ -234,7 +234,7 @@ func paint(tile_map: TileMapLayer) -> void:
 		if not TERRAIN_TO_BIOME.has(terrain_id):
 			continue
 		var biome: int = TERRAIN_TO_BIOME[terrain_id]
-		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, _base(cell, biome))
+		tile_map.set_cell(cell, HexCellArt.SOURCE_ID, _base(cell, biome))
 	paint_transitions()
 
 func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
@@ -250,9 +250,9 @@ func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
 		var biome: int = TERRAIN_TO_BIOME[terrain_id]
 		var coords: Vector2i = _base(cell, biome)
 		if not visibility.is_visible(cell):
-			tile_map.set_cell(cell, TileAtlas.FOG_SOURCE_ID, coords)
+			tile_map.set_cell(cell, HexCellArt.FOG_SOURCE_ID, coords)
 		else:
-			tile_map.set_cell(cell, TileAtlas.SOURCE_ID, coords)
+			tile_map.set_cell(cell, HexCellArt.SOURCE_ID, coords)
 	paint_transitions(visibility)
 	fog_refreshed.emit()
 

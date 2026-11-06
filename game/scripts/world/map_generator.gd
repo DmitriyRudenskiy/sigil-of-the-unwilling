@@ -14,7 +14,7 @@ var _decor_layer: TileMapLayer
 var _shadow_layer: TileMapLayer
 
 ## Подслои перехода (слой 2 «стыки и переходы») — по одному на сторону гекса,
-## порядок задаёт TileAtlas.SIDES; MapRenderer.paint_transitions().
+## порядок задаёт HexCellArt.SIDES; MapRenderer.paint_transitions().
 var transition_layers: Array = []
 
 ## Слой 3 «дороги» (world-map-art-variety 6.2): основная декаль (полоса/
@@ -168,7 +168,7 @@ func _compute_reachable_cells() -> Dictionary:
 	)
 
 func _ensure_layers() -> void:
-	var tileset := TileAtlas.build_hex_tileset()
+	var tileset := HexCellArt.build_hex_tileset()
 
 	_tile_map = get_node_or_null("TileMapTerrain")
 	if _tile_map == null:
@@ -176,7 +176,7 @@ func _ensure_layers() -> void:
 		_tile_map.name = "TileMapTerrain"
 		add_child(_tile_map)
 	if tileset == null:
-		push_error("TileAtlas: failed to build hex tileset (missing %s)" % TileAtlas.SHEET_PATH)
+		push_error("HexCellArt: тайлсет не собрался (текстура листа не создана)")
 	else:
 		_tile_map.tile_set = tileset
 
@@ -188,7 +188,7 @@ func _ensure_layers() -> void:
 		root = Node2D.new()
 		root.name = "TileMapTransitions"
 		add_child(root)
-	for side: String in TileAtlas.SIDES:
+	for side: String in HexCellArt.SIDES:
 		var tname := "TileMapTransition_" + side
 		var tlayer: TileMapLayer = root.get_node_or_null(tname)
 		if tlayer == null:
@@ -201,7 +201,7 @@ func _ensure_layers() -> void:
 
 	# Слой 3 «дороги» (6.2) — между стыками и тенями/растительностью: декаль
 	# покрытия лежит поверх базы, но не перекрывает носители объектов. Свой тайлсет:
-	# дороги живут на отдельном листе, геометрия та же (гекс, tile_size 82),
+	# дороги живут на отдельном листе, геометрия та же (гекс, HexCellArt.HEX_SIZE),
 	# поэтому клетки не разъезжаются с базой.
 	road_edge_layers.clear()
 	var roads_root: Node2D = get_node_or_null("TileMapRoads")
@@ -214,7 +214,7 @@ func _ensure_layers() -> void:
 		road_layer = TileMapLayer.new()
 		road_layer.name = "TileMapRoad"
 		roads_root.add_child(road_layer)
-	for side: String in TileAtlas.SIDES:
+	for side: String in HexCellArt.SIDES:
 		var rname := "TileMapRoadEdge_" + side
 		var rlayer: TileMapLayer = roads_root.get_node_or_null(rname)
 		if rlayer == null:
@@ -243,7 +243,7 @@ func _ensure_layers() -> void:
 		add_child(_decor_layer)
 	if _decor_layer.tile_set == null:
 		# Свой тайлсет: растительность живёт на листе объектов, а не в атласе
-		# биомов. Геометрия та же (гекс, tile_size 82), поэтому клетки слоя
+		# биомов. Геометрия та же (гекс, HexCellArt.HEX_SIZE), поэтому клетки слоя
 		# не разъезжаются с базой.
 		_decor_layer.tile_set = MapObjects.build_tileset()
 	# Тени — под растительностью и в том же тайлсете (источник `SHADOW_SOURCE_ID`),

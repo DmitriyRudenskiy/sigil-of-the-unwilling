@@ -1,12 +1,12 @@
 {
  "duplicate_groups": 0,
- "gd_files": 391,
- "gd_tests": 3678,
+ "gd_files": 392,
+ "gd_tests": 3684,
  "holes": 80,
  "local_builder_files": 45,
  "local_builders": 57,
- "merge_files": 144,
- "merge_groups": 28,
+ "merge_files": 146,
+ "merge_groups": 29,
  "name_collisions": 0,
  "py_files": 36,
  "py_tests": 114

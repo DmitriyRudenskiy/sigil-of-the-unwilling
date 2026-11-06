@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Раскладка вариантов базы по клеткам (T-143). `TileAtlas.variant_for` — хеш от
+## Раскладка вариантов базы по клеткам (T-143). `HexCellArt.variant_for` — хеш от
 ## «x:y:seed» по модулю числа вариантов; инструмент отвечает на два вопроса, которые
 ## по пикселям кадра не различимы: с какой частотой раздаётся каждый вариант и как
 ## часто соседние клетки получают РАЗНЫЙ вариант (то есть сколько вообще стыков
@@ -28,7 +28,7 @@ func _init() -> void:
 	var cells := {}
 	for y in range(-n, n + 1):
 		for x in range(-n, n + 1):
-			var v := TileAtlas.variant_for(Vector2i(x, y), seed_value, count)
+			var v := HexCellArt.variant_for(Vector2i(x, y), seed_value, count)
 			hist[v] += 1
 			cells["%d,%d" % [x, y]] = v
 	var total := float(hist.reduce(func(a, b): return a + b))

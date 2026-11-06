@@ -10,7 +10,7 @@ static func reset_all() -> void:
 	UnitSprites.clear_caches()
 	PlaceholderTexture.clear()
 	ResourceAtlas.clear()
-	TileAtlasCache.clear_cache()
+	HexCellArtCache.clear_cache()
 
 	var services: Variant = Services
 	if services != null:

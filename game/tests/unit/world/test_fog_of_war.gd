@@ -215,7 +215,7 @@ func test_delta_fog_persistence() -> void:
 
 ## Инвариант тумана по всем слоям (спека «Туман войны по всем слоям», вердикт
 ## В2 → (в), D-205): открытая, но не видимая клетка затемняет статичные носители
-## той же кратностью, что и база (база затемняется в TileAtlas тем же
+## той же кратностью, что и база (база затемняется в HexCellArt тем же
 ## `GameNumbers.MAP_FOG_DIM`), а вражеский стеки остаётся скрыт — туман не должен
 ## отдавать разведку врагом.
 func test_explored_cell_dims_static_carriers() -> void:
@@ -260,18 +260,18 @@ func test_explored_cell_dims_static_carriers() -> void:
 
 ## Т-168: гексовая сборка тайлсета обязана объявлять побратима тумана.
 ##
-## Почему проверка смотрит на `TileAtlas`, а не на `MapRenderer`: рендер и до правки
-## клал «исследовано, но не видно» в `TileAtlas.FOG_SOURCE_ID`, и `test_apply_fog_
+## Почему проверка смотрит на `HexCellArt`, а не на `MapRenderer`: рендер и до правки
+## клал «исследовано, но не видно» в `HexCellArt.FOG_SOURCE_ID`, и `test_apply_fog_
 ## three_states` это видело — но в фейковом тайлсете самого теста. `TileMapLayer` на
 ## ссылку в несуществующий источник не ругается: он рисует пустоту, поэтому память
 ## тумана (клетка, из которой игрок вышел) выглядела как никогда не открытая земля.
 ## Квадратный `build()` побратима добавлял, гексовый `build_hex()` — нет.
 func test_hex_tileset_declares_the_fog_twin() -> void:
-	var ts := TileAtlas.build_hex_tileset()
-	assert_bool(ts.has_source(TileAtlas.SOURCE_ID)).is_true()
-	assert_bool(ts.has_source(TileAtlas.FOG_SOURCE_ID)).is_true()
-	var base := ts.get_source(TileAtlas.SOURCE_ID) as TileSetAtlasSource
-	var twin := ts.get_source(TileAtlas.FOG_SOURCE_ID) as TileSetAtlasSource
+	var ts := HexCellArt.build_hex_tileset()
+	assert_bool(ts.has_source(HexCellArt.SOURCE_ID)).is_true()
+	assert_bool(ts.has_source(HexCellArt.FOG_SOURCE_ID)).is_true()
+	var base := ts.get_source(HexCellArt.SOURCE_ID) as TileSetAtlasSource
+	var twin := ts.get_source(HexCellArt.FOG_SOURCE_ID) as TileSetAtlasSource
 	if twin == null:
 		# Случай уже уронил тест проверкой `has_source` выше; возврат — только чтобы
 		# не упасть на `twin.texture` и не превратить падение в шум.
@@ -280,7 +280,7 @@ func test_hex_tileset_declares_the_fog_twin() -> void:
 	# положить туман в ту же клетку тем же тайлом.
 	assert_that(twin.texture.get_size()).is_equal(base.texture.get_size())
 	assert_that(twin.get_tiles_count()).is_equal(base.get_tiles_count())
-	assert_that(int(twin.texture_region_size.x)).is_equal(int(TileAtlas.TILE))
+	assert_that(twin.texture_region_size).is_equal(HexCellArt.HEX_SIZE)
 
 	# И та же картинка, помноженная на `MAP_FOG_DIM` по RGB при неизменной альфе —
 	# та кратность, о которой говорит тест затемнённых носителей выше.
@@ -311,8 +311,8 @@ func test_hex_tileset_declares_the_fog_twin() -> void:
 ## `FOG_SOURCE_ID`, тогда как дороги и объекты объявляли своих побратимей.
 func test_every_layer_declares_the_sources_the_renderer_uses() -> void:
 	var cases := {
-		"биом": [TileAtlas.build_hex_tileset(),
-			[TileAtlas.SOURCE_ID, TileAtlas.FOG_SOURCE_ID]],
+		"биом": [HexCellArt.build_hex_tileset(),
+			[HexCellArt.SOURCE_ID, HexCellArt.FOG_SOURCE_ID]],
 		"дороги": [MapRoads.build_tileset(),
 			[MapRoads.SOURCE_ID, MapRoads.FOG_SOURCE_ID]],
 		"объекты": [MapObjects.build_tileset(),
