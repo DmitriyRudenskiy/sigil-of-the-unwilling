@@ -36,7 +36,7 @@ date: 2026-10-29
 | `Spells` | `scripts/autoload/spell_registry.gd` | реестр заклинаний: `_reg(id, name, school, lvl, mana, target…)`, `get_spell` |
 | `Resources` | `scripts/autoload/resource_registry.gd` | реестр ресурсов: городские (`_add_city` с ёмкостью), иконки (`get_icon`) |
 | `Services` | `scripts/autoload/services.gd` | DI-реестр (см. §2): `resolve(key)`, `register_singleton(key, service)`, `clear_session()` |
-| `HexCellArtCache` | `scripts/autoload/hex_cell_art_cache.gd` | кэш `TileSet` гекс-тайлов (`build_hex_tileset`) — сборка процедурного листа сот один раз за сессию (T-344: носитель `TileAtlas` → `HexCellArt`) |
+| `HexCellArtCache` | `scripts/autoload/hex_cell_art_cache.gd` | кэш `TileSet` гекс-тайлов (`build_hex_tileset`) — сборка процедурного листа сот один раз за сессию (T-344: класс-носитель переименован в `HexCellArt`) |
 | `HexGrid` | `scripts/autoload/hex_grid.gd` | калибровка координатной сетки по `TileMapLayer` (`calibrate(tm)`, 12 строк) |
 
 ## 2. Services — DI-реестр
@@ -124,7 +124,7 @@ date: 2026-10-29
 | `WorkerAssignment` | `worker_assignment.gd` | расстановка работников по производственным цепям зданий (`assign_all(city)` читает `chain.required_workers`), приоритеты кампанийных рецептов (`campaign_recipe_priority`, `sort_campaign_recipes`) | `economy/economic_turn_processor.gd`, `city/processors/worker_assignment_processor.gd` |
 | `Season` | `season.gd` | месяц → сезон (`from_month`: 12, 1–2 — зима; невалидный месяц → `push_warning` + весна) и `growth_modifier(season)` | `campaign/campaign_calendar.gd`, `systems/crisis_event_system.gd`, `constants/game_text.gd` |
 | `MapModel` | `map_model.gd` | модель карты: `generate_noise()`, `get_biome_terrain_id(height, temp, moist)` по порогам `WATER_THRESHOLD 0.35` / `SAND_THRESHOLD 0.40`, `is_walkable(cell)` | `world/map_generator.gd`, `world/map_spawner.gd`, `tools/diag_biome_resources.gd` |
-| `MapObjects` | `map_objects.gd` | лист изолированных объектов карты: пиксели `assets/objects/world_map_objects.webp` и раскладка `world_map_objects.json` — продукты `scripts/gen_map_art.py`; координаты читаются **только из манифеста**, отдельного реестра в скрипте нет (такой реестр уже умирал в `tile_atlas.gd`) | `world/map_generator.gd`, `world/map_renderer.gd`, `world/map_roads.gd`, `world/map_spawner.gd`, `entities/resource_node.gd` |
+| `MapObjects` | `map_objects.gd` | лист изолированных объектов карты: пиксели `assets/objects/world_map_objects.webp` и раскладка `world_map_objects.json` — продукты `scripts/gen_map_art.py`; координаты читаются **только из манифеста**, отдельного реестра в скрипте нет (такой реестр уже умирал в прежнем атласном носителе, переименованном в T-344) | `world/map_generator.gd`, `world/map_renderer.gd`, `world/map_roads.gd`, `world/map_spawner.gd`, `entities/resource_node.gd` |
 | `MapSpawner` | `map_spawner.gd` | расстановка по `MapModel` (`place_villages()` и далее), реестр юнитов подставляется извне (`setup_registry`) | `world/map_generator.gd`, `world_bootstrap.gd`, `world_spawner.gd`, `systems/enemy_growth_system.gd`, `probe/balance_probe.gd` |
 | `ResourceNodeManager` | `resource_node_manager.gd` | узлы ресурсов на карте (`Node`): заводит `scenes/entities/resource_node.tscn`, читает `ResourceDef` и скрытые по биому ресурсы, работает через `Resources`-реестр и переданный `map_to_local`-callable | `world_bootstrap.gd`, `world_load_context.gd`, `world/resource_chain_service.gd`, `systems/extract_rules.gd`, `probe/*` |
 
