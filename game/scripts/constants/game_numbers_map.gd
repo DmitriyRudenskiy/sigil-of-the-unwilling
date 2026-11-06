@@ -1,7 +1,7 @@
 class_name GameNumbersMap
 extends RefCounted
 
-const TILE_SIZE                  := 82    # ширина гекса карты, px; высота — TileAtlas.HEX_SIZE (T-344)
+const TILE_SIZE                  := 82    # ширина гекса карты, px; высота — HexCellArt.HEX_SIZE (T-344)
 # Кратность затемнения открытой, но не видимой клетки — одна для базы и для
 # объектов (спека «Туман войны по всем слоям»; вердикт В2 → (в), D-205).
 const MAP_FOG_DIM := 0.45

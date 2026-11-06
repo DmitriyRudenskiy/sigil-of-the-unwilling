@@ -41,8 +41,8 @@ const BACKDROP_ART := {
 	"swamp": "res://assets/ui/backgrounds/battle_swamp.png",
 }
 const BIOMES := {
-	"snow": TileAtlas.Biome.SNOW,
-	"swamp": TileAtlas.Biome.SWAMP,
+	"snow": HexCellArt.Biome.SNOW,
+	"swamp": HexCellArt.Biome.SWAMP,
 }
 
 ## Наклон плоскости поля: 1.0 — соты лежат плашмя (вид до alpha-battle-field),
@@ -73,7 +73,7 @@ func _kill_unit_tweens(uid: int) -> void:
 func setup() -> void:
 	_tile_map = _terrain
 	_tile_map.name = "BattleTerrain"
-	_tile_map.tile_set = TileAtlas.build_hex_tileset()
+	_tile_map.tile_set = HexCellArt.build_hex_tileset()
 	# Узел тайлмапа — единственный носитель наклона для тайлов: соты укорочены по
 	# вертикали, `project()` переносит тот же наклон на подсветки, курсор, обводку,
 	# фигуры и камеру. `HexGrid.calibrate` ниже считает локальную сетку, где
@@ -109,10 +109,10 @@ func paint_field() -> void:
 	# ширину обводки, а старые клетки обводки иначе останутся в `get_used_rect()`
 	# — на них смотрит `field_size()`, то есть в камере останется фантомное поле.
 	_tile_map.clear()
-	var biome: int = BIOMES.get(_background_terrain, TileAtlas.Biome.GRASS)
-	var variants: Array = TileAtlas.base_coords(biome)
+	var biome: int = BIOMES.get(_background_terrain, HexCellArt.Biome.GRASS)
+	var variants: Array = HexCellArt.base_coords(biome)
 	if variants.is_empty():
-		push_error("TileAtlas: у биома %s нет базовых тайлов" % TileAtlas.BIOME_NAMES[biome])
+		push_error("HexCellArt: у биома %s нет базовых тайлов" % HexCellArt.BIOME_NAMES[biome])
 		return
 	# Два вида поля выбирает ключ местности: `FIELD_ART` — кадр становится полем
 	# и тайлы гаснут, `BACKDROP_ART` (или местность без кадра) — полем правит
@@ -127,8 +127,8 @@ func paint_field() -> void:
 	for y in range(-ring, BattleState.BH + ring):
 		for x in range(-ring, BattleState.BW + ring):
 			var cell := Vector2i(x, y)
-			_tile_map.set_cell(cell, TileAtlas.SOURCE_ID,
-				variants[TileAtlas.variant_for(cell, 0, variants.size())])
+			_tile_map.set_cell(cell, HexCellArt.SOURCE_ID,
+				variants[HexCellArt.variant_for(cell, 0, variants.size())])
 	_board_edge.cells.clear()
 	if art_field:
 		for x in BattleState.BW:

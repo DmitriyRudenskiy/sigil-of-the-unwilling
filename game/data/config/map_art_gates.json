@@ -28,7 +28,6 @@
   },
   "provenance": {
     "required_files": [
-      "tiles/world_map_atlas.webp",
       "objects/world_map_objects.webp"
     ]
   },

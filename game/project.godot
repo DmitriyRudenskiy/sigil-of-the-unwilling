@@ -33,7 +33,7 @@ Artifacts="*res://scripts/autoload/artifact_registry.gd"
 Spells="*res://scripts/autoload/spell_registry.gd"
 Resources="*res://scripts/autoload/resource_registry.gd"
 Services="*res://scripts/autoload/services.gd"
-TileAtlasCache="*res://scripts/autoload/tile_atlas_cache.gd"
+HexCellArtCache="*res://scripts/autoload/hex_cell_art_cache.gd"
 HexGrid="*res://scripts/autoload/hex_grid.gd"
 
 [config]

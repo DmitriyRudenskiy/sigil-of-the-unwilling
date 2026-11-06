@@ -92,4 +92,4 @@ def test_mountain_decor_density_stays_under_the_gate() -> None:
 
 
 ## Перекраска принятого листа (--recolor, T-163) снята вместе с самим листом:
-## с T-344 раскраску задаёт TileAtlas в GDScript, постобработки webp больше нет.
+## с T-344 раскраску задаёт HexCellArt в GDScript, постобработки webp больше нет.

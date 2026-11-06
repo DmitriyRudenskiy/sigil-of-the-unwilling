@@ -12,19 +12,19 @@ class _Flag:
 	var value := false
 
 
-## Псевдо-тайлсет: клетки берутся из раскладки листа (`TileAtlas.all_coords`),
+## Псевдо-тайлсет: клетки берутся из раскладки листа (`HexCellArt.all_coords`),
 ## а не из квадрата 4×2 — иначе set_cell на реальной координате листа молча пишет
 ## пустоту.
 func _make_tileset() -> TileSet:
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
-	var all_coords: Array = TileAtlas.all_coords()
+	var all_coords: Array = HexCellArt.all_coords()
 	# Псевдо-текстура — по факту раскладки: квадрат 4×2 на все клетки не тянет,
 	# Godot ругался «tile is outside the texture» и тайлы не создавались вовсе.
 	var last := Vector2i(0, 0)
 	for coords in all_coords:
 		last = Vector2i(max(last.x, coords.x + 1), max(last.y, coords.y + 1))
-	for sid in [TileAtlas.SOURCE_ID, TileAtlas.FOG_SOURCE_ID]:
+	for sid in [HexCellArt.SOURCE_ID, HexCellArt.FOG_SOURCE_ID]:
 		var src := TileSetAtlasSource.new()
 		src.texture = ImageTexture.create_from_image(
 			Image.create_empty(last.x * 16, last.y * 16, false, Image.FORMAT_RGBA8))
@@ -57,19 +57,19 @@ func test_paint_uses_biome_source_per_terrain() -> void:
 	var layer := _make_layer()
 	MapRenderer.new(model).paint(layer)
 
-	assert_that(layer.get_cell_source_id(grass)).is_equal(TileAtlas.SOURCE_ID)
-	assert_that(layer.get_cell_source_id(water)).is_equal(TileAtlas.SOURCE_ID)
-	assert_that(layer.get_cell_source_id(mountain)).is_equal(TileAtlas.SOURCE_ID)
+	assert_that(layer.get_cell_source_id(grass)).is_equal(HexCellArt.SOURCE_ID)
+	assert_that(layer.get_cell_source_id(water)).is_equal(HexCellArt.SOURCE_ID)
+	assert_that(layer.get_cell_source_id(mountain)).is_equal(HexCellArt.SOURCE_ID)
 	# Вариант клетки выбирается по клетке и сиду, поэтому проверяется принадлежность
 	# множеству вариантов биома, а не конкретная клетка листа.
 	var outside: Array[String] = []
-	for pair in [[grass, TileAtlas.Biome.GRASS], [water, TileAtlas.Biome.WATER],
-			[mountain, TileAtlas.Biome.ROCK]]:
+	for pair in [[grass, HexCellArt.Biome.GRASS], [water, HexCellArt.Biome.WATER],
+			[mountain, HexCellArt.Biome.ROCK]]:
 		var cell: Vector2i = pair[0]
 		var coords: Vector2i = layer.get_cell_atlas_coords(cell)
-		if not TileAtlas.base_coords(pair[1]).has(coords):
+		if not HexCellArt.base_coords(pair[1]).has(coords):
 			outside.append("%s=%s не вариант %s" % [
-				str(cell), str(coords), TileAtlas.BIOME_NAMES[pair[1]]])
+				str(cell), str(coords), HexCellArt.BIOME_NAMES[pair[1]]])
 	assert_array(outside).is_empty()
 	layer.queue_free()
 
@@ -133,10 +133,10 @@ func test_apply_fog_three_states() -> void:
 	assert_that(layer.get_cell_tile_data(hidden)).is_null()
 	# Explored-but-not-visible cell shows the fog source.
 	assert_that(layer.get_cell_tile_data(explored)).is_not_null()
-	assert_that(layer.get_cell_source_id(explored)).is_equal(TileAtlas.FOG_SOURCE_ID)
+	assert_that(layer.get_cell_source_id(explored)).is_equal(HexCellArt.FOG_SOURCE_ID)
 	# Visible cell keeps the normal source.
 	assert_that(layer.get_cell_tile_data(visible)).is_not_null()
-	assert_that(layer.get_cell_source_id(visible)).is_equal(TileAtlas.SOURCE_ID)
+	assert_that(layer.get_cell_source_id(visible)).is_equal(HexCellArt.SOURCE_ID)
 	layer.queue_free()
 
 
@@ -162,7 +162,7 @@ func test_apply_fog_sources_exist_in_shipped_tileset() -> void:
 	vis.visible = {Vector2i(0, 0): true}
 	MapRenderer.new(model).apply_fog(layer, vis)
 
-	var shipped := TileAtlas.build_hex_tileset()
+	var shipped := HexCellArt.build_hex_tileset()
 	var missing: Array[String] = []
 	for cell in model.terrain_grid:
 		var sid: int = layer.get_cell_source_id(cell)
@@ -173,7 +173,7 @@ func test_apply_fog_sources_exist_in_shipped_tileset() -> void:
 	assert_array(missing).is_empty()
 	# Фикстура обязана создавать все три состояния тумана, иначе проверка выше
 	# проходила бы на пустом списке.
-	assert_that(layer.get_cell_source_id(Vector2i(1, 0))).is_equal(TileAtlas.FOG_SOURCE_ID)
+	assert_that(layer.get_cell_source_id(Vector2i(1, 0))).is_equal(HexCellArt.FOG_SOURCE_ID)
 	layer.queue_free()
 
 
@@ -189,7 +189,7 @@ func test_apply_fog_null_safety() -> void:
 
 func _make_transition_layers() -> Array:
 	var layers: Array = []
-	for side in TileAtlas.SIDES:
+	for side in HexCellArt.SIDES:
 		layers.append(_make_layer())
 	return layers
 
@@ -209,11 +209,11 @@ func test_transition_paints_on_stronger_biom_neighbor_side() -> void:
 	renderer.transition_layers = layers
 	renderer.paint(layer)
 
-	var east: TileMapLayer = layers[TileAtlas.SIDES.find("e")]
-	var west: TileMapLayer = layers[TileAtlas.SIDES.find("w")]
+	var east: TileMapLayer = layers[HexCellArt.SIDES.find("e")]
+	var west: TileMapLayer = layers[HexCellArt.SIDES.find("w")]
 	assert_that(east.get_cell_atlas_coords(grass)).is_equal(
-		TileAtlas.edge_coords(TileAtlas.Biome.WATER, "e"))
-	assert_that(east.get_cell_source_id(grass)).is_equal(TileAtlas.SOURCE_ID)
+		HexCellArt.edge_coords(HexCellArt.Biome.WATER, "e"))
+	assert_that(east.get_cell_source_id(grass)).is_equal(HexCellArt.SOURCE_ID)
 	# Обратно — пусто: вода свою границу с травой не красит.
 	assert_that(west.get_cell_tile_data(water)).is_null()
 	layer.queue_free()
@@ -257,8 +257,8 @@ func test_transition_follows_fog() -> void:
 	vis.set_map_size(10, 10)
 	vis.explored = {grass: true, water: true}
 	renderer.apply_fog(layer, vis)
-	var east: TileMapLayer = layers[TileAtlas.SIDES.find("e")]
-	assert_that(east.get_cell_source_id(grass)).is_equal(TileAtlas.FOG_SOURCE_ID)
+	var east: TileMapLayer = layers[HexCellArt.SIDES.find("e")]
+	assert_that(east.get_cell_source_id(grass)).is_equal(HexCellArt.FOG_SOURCE_ID)
 
 	# Сосед за краем тумана: трава исследована, вода — нет → декаль молчит.
 	vis.explored = {grass: true}

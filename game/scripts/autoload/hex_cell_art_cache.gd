@@ -15,4 +15,4 @@ func clear_cache() -> void:
 ## Единственная обязанность кэша — не пересобирать процедурный лист на каждый
 ## тайлсет (земля, бой, поле кампании зовут один и тот же тайлсет).
 func _build_tileset() -> TileSet:
-	return TileAtlas.build_hex()
+	return HexCellArt.build_hex()

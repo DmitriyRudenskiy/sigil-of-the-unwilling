@@ -43,7 +43,7 @@ func test_layer_order_is_fixed() -> void:
 			found.append(cname)
 	assert_that(found).is_equal(EXPECTED)
 	var sides: Array[String] = []
-	for side in TileAtlas.SIDES:
+	for side in HexCellArt.SIDES:
 		sides.append("TileMapTransition_" + side)
 	assert_that(_child_names(gen.get_node("TileMapTransitions"))).is_equal(sides)
 

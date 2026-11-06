@@ -51,7 +51,7 @@ func _initialize() -> void:
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	root.add_child(viewport)
 
-	var atlas = load("res://scripts/world/tile_atlas.gd")
+	var atlas = load("res://scripts/world/hex_cell_art.gd")
 	var renderer = load("res://scripts/world/map_renderer.gd")
 	var biome_names: PackedStringArray = atlas.Biome.keys()
 	var to_biome: Dictionary = renderer.TERRAIN_TO_BIOME
@@ -177,7 +177,7 @@ func _dump_geometry(mg, scene: Node2D, shot_path: String, size: Vector2i,
 
 
 ## Подмена пиксельной части атласа биомов (T-163). Затемнённый побратим строится тем же
-## множителем, что `TileAtlas._build_fog_source`, иначе клетки тумана рисовались бы
+## множителем, что `HexCellArt._build_fog_source`, иначе клетки тумана рисовались бы
 ## исходным листом и вердикт снимался бы по кадру, которого в игре нет.
 func _swap_atlas(root: Node, path: String, tile: int, fog_id: int) -> int:
 	var sheet := Image.load_from_file(ProjectSettings.globalize_path(path))

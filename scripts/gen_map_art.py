@@ -37,8 +37,12 @@ GATES = json.loads((ROOT / "game" / "data" / "config" / "map_art_gates.json").re
 TILE = int(SPEC["tile"])
 RAW = ROOT / SPEC["out_dir"] / "raw"
 MANIFEST = ROOT / SPEC["out_dir"] / "MANIFEST.json"
-ATLAS_IMG = ROOT / "game/assets/tiles/world_map_atlas.webp"
-ATLAS_JSON = ROOT / "game/assets/tiles/world_map_atlas.json"
+# Превью-атлас клетки: **вне дерева ассетов** (T-344). Клетку рисует процедурный лист
+# `HexCellArt` в памяти, файла-носителя в репозитории нет и быть не должно — сюда
+# пишем только промежуточный лист: его читают производные шаги (туман, дороги, декали)
+# и приёмка `scripts/check_map_art.py`.
+ATLAS_IMG = ROOT / "tmp/map_art/world_map_atlas.webp"
+ATLAS_JSON = ROOT / "tmp/map_art/world_map_atlas.json"
 OBJ_IMG = ROOT / "game/assets/objects/world_map_objects.webp"
 OBJ_FOG_IMG = ROOT / "game/assets/objects/world_map_objects_fog.webp"
 ROAD_IMG = ROOT / "game/assets/objects/world_map_roads.webp"

@@ -44,8 +44,6 @@ date: 2026-10-29
 | `game/assets/objects/world_map_roads.webp` | конвейер репо `scripts/gen_map_art.py` (категория `roads`, world-map-art-variety 6.1) | лист декалей дорог 82 px: 6 полос (2 покрытия × 3 оси) + 6 мостов + 2 перекрёстка + 12 кромок; comfyui/image-clone, seed'ы в `image-clone/map/MANIFEST.json` | права на модель Krea-2 turbo не проверялись | жёлтый |
 | `game/assets/objects/world_map_roads_fog.webp` | то же, побратим «в тумане» (`gen_map_art.py --fog-twin`) | тот же лист дорог, яркость ×0.45 = `GameNumbersMap.MAP_FOG_DIM` | производный от листа дорог; права на модель не проверялись | жёлтый |
 | `game/assets/objects/world_map_threat.webp` | конвейер репо `scripts/gen_map_art.py` (категория `threat`, world-map-art-variety 8.1) | 3 носителя тира вражеских стэков 82 px (кольца 1/2/3); comfyui/image-clone, seed'ы в `image-clone/map/MANIFEST.json` | права на модель Krea-2 turbo не проверялись | жёлтый |
-| `game/assets/tiles/` | не установлено — `44c5513b` (2026-09-03) | 1 png тайла | записей нет | неизвестно |
-| `game/assets/tiles/world_map_atlas.webp` | конвейер репо `scripts/gen_map_art.py` (world-map-art-variety) | comfyui/image-clone: 8 биомов × 4 варианта базы + 6 декалей границ на биом, 82 px; материал 1024² → зашивка шва → полоса M | права на модель Krea-2 turbo не проверялись | жёлтый |
 | `game/assets/ui/` | AI-генерация референса 04; `17e75cf4` как конверсия jpeg из «image-очереди» | `main_menu_bg.webp` 1920×1080 | права на генерацию не проверялись | жёлтый — перегенерация с чистой палитрой (UI-4) |
 | `game/assets/ui/backgrounds/battle_meadow.png` | прислано владельцем 2026-10-28 (`~/Downloads/Interface_battle/1793181620465-…png`) | 1 png 1920×1080 — луг БЕЗ собственной гекс-сетки; носитель поля боя (`BattleView.FIELD_ART`, T-269 → (б)) | права на генерацию не проверялись; носитель предоставлен владельцем | жёлтый |
 | `game/assets/ui/backgrounds/battle_snow.png` | передан владельцем 2026-10-27 (канон-арт, строка 01 `reference/INDEX.md`, md5 `f1f95b670d41e9f838cd16c72d8ee7cd`) | png 1679×937 — задний план снежного поля боя (`BattleView.BIOMES`, D-283) | происхождение и права на генерацию не проверялись | жёлтый |
@@ -156,6 +154,14 @@ date: 2026-10-29
   `44c5513b` (2026-09-03, astral-macro); md5/dHash-свип [[13-art-bible]] §12.1 совпадений
   не дал», статус `неизвестно`. Пиксель удалён, а не перекрашен: если лист вернут как
   резервный атлас (задача 4.2), строка обязана вернуться вместе с ним.
+- `game/assets/tiles/world_map_atlas.webp` + `.json` (манифест раскладки) — **сняты
+  2026-11-09 носителем T-344**: клетку рисует `HexCellArt` (процедурный лист в
+  памяти), файла-носителя нет, поэтому не нужна и строка провенанса — у картинки
+  нет источника вне репозитория, она выводится кодом. Заодно снят
+  `world_map_kit.{webp,json}` (резервный лист kit-решения): он **лежал в git** с
+  коммитов T-341 без единой строки провенанса и без единого читателя в коде;
+  запись «листа никогда не было в git» (CHANGELOG, 2026-11-09) верна лишь для
+  исходников image-clone, отслеженные файлы были.
 
 ## Что это реестр не закрывает
 

@@ -7,7 +7,7 @@ extends Control
 ## движения, причины недоступности) не вызывался из прод-кода никем — карта
 ## жила в тестах и в сейве, а игрок видел пустой фон. Поле — тот прод-вызывающий:
 ## оно читает биомы и туман из `RegionMap`, карточку и причины — из
-## `MapScreenModel`, рисунок гексов — из листа `TileAtlas`. Своего состояния у
+## `MapScreenModel`, рисунок гексов — из листа `HexCellArt`. Своего состояния у
 ## поля нет, кроме выбранного региона: ни в модели экрана, ни в `RegionMap`
 ## поля выбора нет, и заводить его там нечем (D-281).
 ##
@@ -27,15 +27,15 @@ const HEX_DIRECTIONS: Array[Vector2i] = [
 ## фолбэка на траву нет: гора, окрашенная как луг, — это ложь на кадре, а не
 ## недорисованный пиксель. Неизвестный биом рисуется серым и виден в кадре.
 const REGION_BIOME_TO_ATLAS := {
-	"plains": TileAtlas.Biome.GRASS,
-	"forest": TileAtlas.Biome.GRASS,
-	"sacred_grove": TileAtlas.Biome.GRASS,
-	"mountains": TileAtlas.Biome.ROCK,
-	"ruins": TileAtlas.Biome.ROCK,
-	"swamp": TileAtlas.Biome.SWAMP,
-	"scorched": TileAtlas.Biome.MUD,
-	"river": TileAtlas.Biome.WATER,
-	"ford": TileAtlas.Biome.WATER,
+	"plains": HexCellArt.Biome.GRASS,
+	"forest": HexCellArt.Biome.GRASS,
+	"sacred_grove": HexCellArt.Biome.GRASS,
+	"mountains": HexCellArt.Biome.ROCK,
+	"ruins": HexCellArt.Biome.ROCK,
+	"swamp": HexCellArt.Biome.SWAMP,
+	"scorched": HexCellArt.Biome.MUD,
+	"river": HexCellArt.Biome.WATER,
+	"ford": HexCellArt.Biome.WATER,
 }
 const COLOR_UNKNOWN := Color(0.32, 0.3, 0.28)
 const COLOR_FOG := Color(0.06, 0.06, 0.07)
@@ -263,12 +263,17 @@ func _draw() -> void:
 	if _map == null:
 		return
 	if _sheet == null:
-		_sheet = TileAtlas.sheet()  # процедурный лист биомов (T-344), файла нет
+		_sheet = HexCellArt.sheet()  # процедурный лист биомов (T-344), файла нет
 	for region in _centers:
 		var a := hex_points(region)
 		var center := _centers[region] as Vector2
 		var biome := _biome_of(String(region))
-		var rect := _atlas_rect(biome, -1)
+		# Вариант базы — по координате раскладки, а не по региону: соседние гексы
+		# обязаны различаться («разной густоты»), а раскладка детерминирована от
+		# карты, поэтому кадр остаётся тем же кадром при перезапуске.
+		var variant := HexCellArt.variant_for(
+				_axial.get(region, Vector2i.ZERO) as Vector2i, 0, HexCellArt.VARIANTS)
+		var rect := _atlas_rect(biome, -1, variant)
 		if not _map.open_regions.has(region):
 			draw_polygon(a, [COLOR_FOG])
 		elif rect == Rect2():
@@ -327,22 +332,22 @@ func _biome_of(region: String) -> int:
 ## Клетка листа: биом + сторона (`side` = −1 — база, иначе индекс `SIDES`). Пустой
 ## `Rect2` — биома нет в листе (или нет листа): гекс рисуется подложкой, а не
 ## чужой текстурой, иначе «неизвестный биом» выглядел бы лугом.
-func _atlas_rect(biome: int, side: int) -> Rect2:
+func _atlas_rect(biome: int, side: int, variant: int = 0) -> Rect2:
 	if _sheet == null or biome < 0:
 		return Rect2()
 	var cell := Vector2i.ZERO
 	if side < 0:
-		var cells: Array = TileAtlas.base_coords(biome)
+		var cells: Array = HexCellArt.base_coords(biome)
 		if cells.is_empty():
 			return Rect2()
-		cell = cells[0]
+		cell = cells[clampi(variant, 0, cells.size() - 1)]
 	else:
-		cell = TileAtlas.edge_coords(biome, String(TileAtlas.SIDES[side]))
+		cell = HexCellArt.edge_coords(biome, String(HexCellArt.SIDES[side]))
 		if cell.x < 0:
 			return Rect2()
 	# Клетка листа — bounding box гекса, а не квадрат (T-344): square-математика
 	# резала бы гекс по ширине и уползала бы вниз с каждой строкой листа.
-	var hex_ := Vector2(TileAtlas.HEX_SIZE)
+	var hex_ := Vector2(HexCellArt.HEX_SIZE)
 	return Rect2(cell.x * hex_.x, cell.y * hex_.y, hex_.x, hex_.y)
 
 
@@ -364,7 +369,6 @@ func _draw_transitions(region: String, pts: PackedVector2Array, center: Vector2,
 		if rect == Rect2():
 			continue
 		draw_polygon(pts, [Color.WHITE], _uvs(pts, rect, center), _sheet)
-
 
 ## UV гекса: те же вершины полигона, только в координатах клетки листа.
 func _uvs(pts: PackedVector2Array, rect: Rect2, center: Vector2) -> PackedVector2Array:
