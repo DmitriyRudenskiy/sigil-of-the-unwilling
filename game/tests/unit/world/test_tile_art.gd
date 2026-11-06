@@ -218,6 +218,58 @@ func test_variant_choice_is_stable() -> void:
 		assert_that(first).is_greater_equal(0)
 		assert_that(first).is_less(HexCellArt.VARIANTS)
 
+## Внешние нормали сторон гекса — та же геометрия, что у носителя
+## (hex_cell_art.gd SIDE_ANGLES), воспроизведена аналитически: нормы маски не
+## имеют права зависеть от приватных массивов носителя.
+func _hex_normals() -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for side in HexCellArt.SIDES:
+		var angle := deg_to_rad(float(HexCellArt.SIDE_ANGLES[String(side)]))
+		out.append(Vector2(cos(angle), sin(angle)))
+	return out
+
+
+## Норма D (T-344): геометрическая норма декора — краска не выходит за границу
+## гекса ПО ВСЕЙ маске, а не только в четырёх углах bbox (угол ловит грубый
+## вылет, вылет между углом и серединой стороны — нет; зонд Ф1 показал, что
+## именно такие «боковые» вылеты дают утечки маркеров на пустых соседях).
+## Юбка сглаживания (t ≤ 1 + AA) — часть клетки, всё за ней обязано быть
+## прозрачным. Проверяется весь лист: база и декали; tmax считается один раз
+## на клетку-геометрию и переиспользуется для всех клеток листа.
+func test_paint_stays_inside_hex_mask() -> void:
+	var img := _image()
+	var hex := HexCellArt.HEX_SIZE
+	var apothem := float(hex.x) * 0.5
+	var normals := _hex_normals()
+	var limit := 1.0 + HexCellArt.AA
+	var tmax := PackedFloat32Array()
+	tmax.resize(hex.x * hex.y)
+	var center := Vector2(hex.x * 0.5, hex.y * 0.5)
+	for y in hex.y:
+		for x in hex.x:
+			var p := Vector2(x + 0.5, y + 0.5) - center
+			var t := -1.0
+			for n in normals:
+				t = maxf(t, absf(p.dot(n) / apothem))
+			tmax[y * hex.x + x] = t
+	var leak: Array[String] = []
+	for biome in HexCellArt.Biome.size():
+		for row in HexCellArt.ROWS:
+			var ox := biome * hex.x
+			var oy := row * hex.y
+			for y in hex.y:
+				var base := y * hex.x
+				for x in hex.x:
+					if tmax[base + x] <= limit:
+						continue
+					if img.get_pixel(ox + x, oy + y).a > 0.0:
+						leak.append("%s/row%d@(%d,%d) t=%.2f" % [
+								HexCellArt.Biome.keys()[biome], row, x, y,
+								tmax[base + x]])
+	if not leak.is_empty():
+		_fail("краска за маской гекса (%d): %s" % [leak.size(), ", ".join(leak.slice(0, 9))])
+
+
 ## Норма C (T-344): аналитическая норма присутствия кольца угрозы. Кольцо рисует
 ## маркерный слой (draw_arc в marker_layer._draw), но вместимость его в клетку —
 ## геометрия НОСИТЕЛЯ: внешний край на пике пульса (0.30 + 0.08 = 0.38·hex) плюс
