@@ -24,6 +24,12 @@ MCP_NODE_SNAPSHOT="$(mktemp)"
 pgrep -f "build/index\.js" > "$MCP_NODE_SNAPSHOT" 2>/dev/null || true
 MCP_GODOT_SNAPSHOT="$(mktemp)"
 pgrep -f -- "--path $PWD" > "$MCP_GODOT_SNAPSHOT" 2>/dev/null || true
+# Снимок project.godot на входе (T-344): cleanup восстанавливает ЕГО, а не HEAD.
+# Прежний `git checkout -- project.godot` молча откатывал незакоммиченные правки
+# смены к содержимому коммита — трижды за смену 2026-11-09 автозагрузка
+# возвращалась к удалённому файлу, и прогон краснел на компиляции всего проекта.
+PROJECT_GODOT_SNAPSHOT="$(mktemp)"
+cp project.godot "$PROJECT_GODOT_SNAPSHOT" 2>/dev/null || true
 cleanup_mcp() {
 	local p
 	for p in $(pgrep -f "build/index\.js" 2>/dev/null); do
@@ -37,7 +43,10 @@ cleanup_mcp() {
 	# Вендорный MCP-сервер инжектит mcp_interaction_server.gd + autoload в
 	# project.godot и при выгрузке оставляет пустые строки — чистое дерево.
 	rm -f mcp_interaction_server.gd mcp_interaction_server.gd.uid
-	git checkout -- project.godot 2>/dev/null || true
+	if [ -s "$PROJECT_GODOT_SNAPSHOT" ] && ! cmp -s "$PROJECT_GODOT_SNAPSHOT" project.godot; then
+		cp "$PROJECT_GODOT_SNAPSHOT" project.godot
+	fi
+	rm -f "$PROJECT_GODOT_SNAPSHOT"
 }
 trap cleanup_mcp EXIT
 trap 'exit 130' INT
