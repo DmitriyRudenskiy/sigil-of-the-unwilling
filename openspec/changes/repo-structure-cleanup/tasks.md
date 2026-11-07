@@ -50,14 +50,21 @@
 - [x] 6.4 `AGENTS.md` (строка 205) — НЕ правится: там не путь, а имя сессии в уроке про fast-forward push. Пути в этом файле нет
 - [x] 6.5 `game/image-clone/map/shot_transitions.png.import` и `.cells.json` — правки нет: `source_file="res://image-clone/…"` относителен `res://` (= `game/`), а не корня репо, и потому был верен и до переезда. `Godot --headless --path game --import` прошёл DONE, uid `qujelv1ubd2a` сохранён, `.cells.json` путей не содержит
 - [x] 6.6 `openspec/specs/image-clone-lab/spec.md` — оставлен дельте: ADDED-требование объявляет blanket-правило «все пути `image-clone/…` разрешаются относительно `game/image-clone/`», оно покрывает строки 589 и 638; `queue.json` в 6.3 не читается (run_tests.sh читает `etalons/manifest.json` — переведён)
+- [x] 6.8 **Найдено при верификации:** переезд лаборатории был доделан только наполовину — в `game/image-clone/` лежали три файла `map/`, а `spec.json`, `queue.json`, `docs/` (вердикты, промты, уроки, style card) и манифесты эталонов отсутствовали, из-за чего `test_clone.py` падал на `FileNotFoundError`. 26 файлов, которые `.gitignore` прятать не собирался, восстановлены из индекса (`77913c83~1`) и уложены по адресу `jobloop.LAB`; три игнорируемых остались игнорируемыми. Попутно переведены три ссылки, пропущенные 6.1–6.7 (`test_clone.py` — путь живой спеки, `generate.py` — цитата правила `.gitignore`, `place_campaign_art.py` — `SRC`). Мерка: 191 проверка OK, `test_generate.py` passed
+
 - [x] 6.7 Проверка: `git grep -n -E '(^|[^a-z/])image-clone/'` даёт совпадения только в исторических носителях (`openspec/changes/archive/`, `docs/CHANGELOG.md`, `docs/DECISIONS.md` D-193/D-284, `docs/mvp/TICKETS.md`, акт `docs/reference/map-baseline/review-11-3/REVIEW.md`) и в `openspec/specs/image-clone-lab/spec.md`, который переводит дельта. Критерий расширен DECISIONS/TICKETS/reference: это акты, а не ссылки, и перекраивать их тот же принцип, что и в D3 про `artifacts/`
 
 ## 7. Проверка состава корня
 
-- [ ] 7.1 `scripts/check_repo_layout.py`: перечень разрешённого корня в самом скрипте; проверки — состав корня, отсутствие отслеживаемых файлов под выводом прогонов, отсутствие `doc/`, `tools/`, `prototypes/` и корневого бойлплейта, отсутствие `.py` в `game/` вне `game/tools/` и `game/tests/`, отсутствие `.gd` в корне проекта Godot, отсутствие правил игнорирования в `.git/info/exclude`
-- [ ] 7.2 Перечень на старте включает `battle-demo/`, `.reserve/`, `tmp/`, `reference/`, `data/` с явной пометкой «ждёт решения» — иначе первый прогон красится о том, что разрез не трогает
-- [ ] 7.3 `scripts/test_check_repo_layout.py` — падает на постороннем каталоге в корне, проходит на чистом дереве, **не** срабатывает на `game/assets/artifacts/`, падает на правиле, живущем в `.git/info/exclude`, падает на `.py` в `game/scripts/`, падает на `.gd` в корне `game/`
-- [ ] 7.4 Подключить в `scripts/ci2_checkers.sh` рядом с остальными `check_*.py`; проверить, что `bash scripts/ci2_checkers.sh` зелёный на текущем дереве после 1–6
+- [x] 7.1 `scripts/check_repo_layout.py`: перечень разрешённого корня в самом скрипте; проверки — состав корня, отсутствие отслеживаемых файлов под выводом прогонов, отсутствие `doc/`, `tools/`, `prototypes/` и корневого бойлплейта, отсутствие `.py` в `game/` вне `game/tools/` и `game/tests/`, отсутствие `.gd` в корне проекта Godot, отсутствие правил игнорирования в `.git/info/exclude`
+- [x] 7.2 Перечень на старте включает `battle-demo/`, `.reserve/`, `tmp/`, `reference/`, `data/` с явной пометкой «ждёт решения» — иначе первый прогон красится о том, что разрез не трогает
+- [x] 7.3 `scripts/test_check_repo_layout.py` — падает на постороннем каталоге в корне, проходит на чистом дереве, **не** срабатывает на `game/assets/artifacts/`, падает на правиле, живущем в `.git/info/exclude`, падает на `.py` в `game/scripts/`, падает на `.gd` в корне `game/`
+- [x] 7.4 Подключить в `scripts/ci2_checkers.sh` рядом с остальными `check_*.py`; проверить, что `bash scripts/ci2_checkers.sh` зелёный на текущем дереве после 1–6
+  Итог подключения: checker 7 рядом с 1–6; `bash scripts/ci2_checkers.sh` — GREEN
+  (первый раз: checker 1 был красен из-за `.uid`-сирот, checker 3 — из-за линеек
+  из `=` в снятых логах прогонов под `docs/mvp/matrix/`; второе снято исключение
+  пути в самом чекере, настоящих маркеров `<<<<<<<`/`>>>>>>>` в репо ноль).
+  Тест добавлен в `TESTS` гейта `doc_gates.sh` (17 файлов → 18).
 
 ## 8. Документация структуры
 
@@ -110,13 +117,13 @@
 
 ## 14. Генераторы ассетов: один дом, живой провенанс
 
-- [ ] 14.1 Слить два дома генераторов `game/assets/**` в один: `game/scripts/ui_kit/{build_mana_bar,build_round_button}.py` и `scripts/ui_kit/*.py` (6 файлов) → `game/tools/ui_kit/`. `game/scripts/ui_kit/` был единственным Python внутри `res://scripts/`
-- [ ] 14.2 `game/assets/PROVENANCE.md` — обновить пути `scripts/ui_kit/*.py` и `game/scripts/ui_kit/*.py` на новый
-- [ ] 14.3 `game/assets/ui/widgets/MANIFEST.json` — поле `"generator": "scripts/ui_kit/build_round_button.py"` ведёт в несуществующий путь (файл жил в `game/scripts/ui_kit/`); поправить на новый
-- [ ] 14.4 `game/assets/PROVENANCE.md` объявляет `game/tools/recolor_button_textures.py` — **файла нет и никогда не было** (`git log --diff-filter=D` пуст). Переписать запись на фактического производителя либо пометить как ручную правку, разобравшись, какие ассеты на неё ссылаются
-- [ ] 14.5 `scripts/check_asset_provenance.py` — проверка «путь генератора из `PROVENANCE.md` / `MANIFEST.json` существует в индексе»; сейчас проверяется наличие строки, из-за чего обе сгнившие записи проходили гейт как хорошие
-- [ ] 14.6 Тест на новую проверку: падает на вымышленном пути генератора, проходит на дереве после 14.2–14.4
-- [ ] 14.7 Перепривязать вызовы: `scripts/doc_gates.sh`, `game/assets/ui/*/MANIFEST.json`; проверить `git grep -n 'ui_kit/'` на отсутствие старых путей вне архива и исторических цитат
+- [x] 14.1 Слить два дома генераторов `game/assets/**` в один: `game/scripts/ui_kit/{build_mana_bar,build_round_button}.py` и `scripts/ui_kit/*.py` (6 файлов) → `game/tools/ui_kit/`. `game/scripts/ui_kit/` был единственным Python внутри `res://scripts/`
+- [x] 14.2 `game/assets/PROVENANCE.md` — обновить пути `scripts/ui_kit/*.py` и `game/scripts/ui_kit/*.py` на новый
+- [x] 14.3 `game/assets/ui/widgets/MANIFEST.json` — поле `"generator": "scripts/ui_kit/build_round_button.py"` ведёт в несуществующий путь (файл жил в `game/scripts/ui_kit/`); поправить на новый
+- [x] 14.4 `game/assets/PROVENANCE.md` объявляет `game/tools/recolor_button_textures.py` — **файла нет**. Уточнение при исполнении: он **существовал** и был снят шагом `f4de4cf3` («Шаг 4 ui-mockup-parity») по AC6 билета ASSET-2; `git log --diff-filter=D` пустел из-за того, что искался путь без `--all`. Запись переписана: имя без слэша + явная пометка «снят f4de4cf3», заодно выправлена живая ссылка в `docs/17-ui-style-guide.md`
+- [x] 14.5 `scripts/check_asset_provenance.py` — проверка «путь генератора из `PROVENANCE.md` / `MANIFEST.json` существует в индексе»; сейчас проверяется наличие строки, из-за чего обе сгнившие записи проходили гейт как хорошие. Правило: backtick-путь **со слэшем** и поле `generator`, похожее на путь, — обязаны быть в `git ls-files`; имя без слэша (`+ gen_building_icons2.gd`) и внешний инструмент (`krea2 (ComfyUI)`) — не пути
+- [x] 14.6 Тест на новую проверку: падает на вымышленном пути генератора, проходит на дереве после 14.2–14.4 (`scripts/test_check_asset_provenance.py`, 4 теста + самопроверка чекера)
+- [x] 14.7 Перепривязать вызовы: `scripts/doc_gates.sh`, `game/assets/ui/*/MANIFEST.json`; проверить `git grep -n 'ui_kit/'` на отсутствие старых путей вне архива и исторических цитат. Итог: 65 ссылок в 18 файлах + `docs/18-system-map.md` (каталог упразднён); `doc_gates.sh` генераторы не вызывал; исторические цитаты (`docs/CHANGELOG.md`, `docs/mvp/**`, архив) не тронуты
 
 ## 15. Верификация
 

@@ -7,7 +7,8 @@
 # (3) маркеры конфликтов (урок 67655e7: после мержа — git grep пуст);
 # (4) пары «ассет+.import» — в обе стороны, только game/assets/
 #     (вендорные addons/ и openspec/ — вне области: gdunit4 шипит .import
-#     без .png, openspec-архив — референс-скриншоты, не игровые ассеты).
+#     без .png, openspec-архив — референс-скриншоты, не игровые ассеты);
+# (7) состав корня — перечень «дома» (scripts/check_repo_layout.py).
 set -u
 cd "$(dirname "$0")/.."
 FAIL=0
@@ -38,7 +39,10 @@ else
 fi
 
 echo "=== checker 3: маркеры конфликтов (урок 67655e7) ==="
-MARKERS="$(git grep -lE '^(<{7}|={7}|>{7})' -- . 2>/dev/null)"
+# Снят с проверки docs/mvp/matrix/: там лежат снятые логи прогонов, а в них
+# линейки из `=` по 80 символов. На живой маркер (`<<<<<<<`, `>>>>>>>`) в репо
+# не выходило ни разу, а на линейку гейт краснел с самого заведения матрицы.
+MARKERS="$(git grep -lE '^(<{7}|={7}|>{7})' -- . ':(exclude)docs/mvp/matrix' 2>/dev/null)"
 if [ -n "$MARKERS" ]; then
 	echo "RED: маркеры конфликтов в:"; echo "$MARKERS"; FAIL=1
 else
@@ -113,6 +117,20 @@ if command -v python3 >/dev/null 2>&1; then
 	fi
 else
 	echo "WARN: python3 не найден — checker 6 пропущен"
+fi
+
+echo "=== checker 7: состав корня репозитория (repo-structure-cleanup) ==="
+# Разрез 2026-11-09 вычистил корень из 12 наросших носителей; краснеть было
+# некому, поэтому нарастёт снова. Сверщик судит индекс, как и весь CI-2.
+if command -v python3 >/dev/null 2>&1; then
+	if LAYOUT="$(python3 scripts/check_repo_layout.py)"; then
+		echo "OK: $LAYOUT"
+	else
+		echo "$LAYOUT"
+		FAIL=1
+	fi
+else
+	echo "WARN: python3 не найден — checker 7 пропущен"
 fi
 
 echo ""
