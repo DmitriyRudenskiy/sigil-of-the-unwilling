@@ -2,7 +2,6 @@
 
 [![OpenSpec](https://img.shields.io/badge/OpenSpec-enabled-blue)](https://github.com/Fission-AI/OpenSpec)
 [![Godot Engine](https://img.shields.io/badge/Godot-4.7-blue.svg)](https://godotengine.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ## 📖 Описание проекта
 
@@ -201,7 +200,6 @@ cd game && godot --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ig
 
 Техническая документация разработки:
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) — процесс вклада и стандарты
 - [AGENTS.md](AGENTS.md) — инструкции для AI-агентов
 - [Спецификации OpenSpec](openspec/specs/) — технические спецификации
 - [Система магии](game/assets/data/spells.json) — данные заклинаний
@@ -244,13 +242,8 @@ cd game && godot --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ig
 
 ### Стандарты кода
 
-- Используйте `.editorconfig` для форматирования
 - Следуйте стилю GDScript из [официальной документации Godot](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
 - Добавляйте тесты для новых функций
-
-## 📄 Лицензия
-
-Этот проект распространяется под лицензией MIT. См. файл [LICENSE](LICENSE) для деталей.
 
 ## 🔗 Ссылки
 
