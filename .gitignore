@@ -2,6 +2,23 @@
 /data/
 .godot/
 
+# Вывод прогонов (логи гейтов и смоков). В git — числа в задаче, не лог: вывод
+# воспроизводим повторным прогоном, а его текст ничего не закрепляет.
+/artifacts/
+
+# Каталог `user://` проекта Godot: создаётся движком при первом запуске рядом с
+# project.godot. В репозитории не было ни одного файла, но и правила не было.
+/game/user/
+
+# Рабочие доказательства сессий (растр, бандлы, мутации). В git — только
+# манифесты/тексты docs/. Правило жило в .git/info/exclude, то есть только на
+# машине автора: клон репозитория показывал 69 каталогов как новые файлы.
+.reserve/
+
+# Кэш pytest: закрыт и своим авто-`.gitignore` внутри каталога, но правило здесь
+# нужно, чтобы инвариант «игнорируемое общее» не зависел от наличия того кэша.
+.pytest_cache/
+
 # Pi agent state (local only)
 .pi/hindsight/
 
@@ -27,40 +44,44 @@ __pycache__/
 # Концепт-арт: 385 сгенерированных кадров (~60–90 МБ). В git — каталог (scripts/concept_art/spec.json),
 # генератор и docs/18-concept-art-variants.md; пиксели воспроизводимы прогоном. См. README.
 /concept_art/
+# Удвоенный путь: генератор писал вывод в scripts/concept_art/concept_art/, а
+# правило выше закрывает только корневой /concept_art/ — через эту щель 45
+# сгенерированных курсоров попали в индекс.
+scripts/concept_art/concept_art/
 
 # image-clone: пиксели лаборатории (попытки, принятые копии, пары, кропы).
 # В git — docs/, queue.json, spec.json: описание и версия решают, кадры воспроизводимы прогоном.
 # Кропы выводимы из листов, поэтому в git не идут; их содержимое закреплено хешами
-# в image-clone/references/manifest.json. Сами пиксели эталонов — чужие изображения
+# в game/image-clone/references/manifest.json. Сами пиксели эталонов — чужие изображения
 # и генерации без зафиксированных прав (reference/INDEX.md, «Почему не в git»),
 # поэтому в репозитории лежат каталог и манифест, а растр — на диске, в пути
 # внутри репозитория, а не в личной папке.
-/image-clone/references/*
-!/image-clone/references/manifest.json
-/image-clone/etalons/*
-!/image-clone/etalons/manifest.json
-/image-clone/attempts/
-/image-clone/matches/
-/image-clone/pairs/
-/image-clone/legacy/
-/image-clone/queue.lock
+/game/image-clone/references/*
+!/game/image-clone/references/manifest.json
+/game/image-clone/etalons/*
+!/game/image-clone/etalons/manifest.json
+/game/image-clone/attempts/
+/game/image-clone/matches/
+/game/image-clone/pairs/
+/game/image-clone/legacy/
+/game/image-clone/queue.lock
 # карта: сырые кадры ролей (1024²) выводимы прогоном scripts/gen_map_art.py по seed
 # из MANIFEST.json; носитель — game/assets/tiles|objects, он и лежит в git.
-/image-clone/map/*
-!/image-clone/map/MANIFEST.json
-/image-clone/gen_map_art.log
+/game/image-clone/map/*
+!/game/image-clone/map/MANIFEST.json
+/game/image-clone/gen_map_art.log
 
 # экран кампании: сырые кадры UI-носителей (1024²) выводимы прогоном
 # scripts/concept_art/generate.py --spec scripts/concept_art/campaign_ui_spec.json
 # по затравке из manifest.json; носитель — game/assets/ui/campaign, он и лежит в git.
-/image-clone/campaign_ui/*
-!/image-clone/campaign_ui/manifest.json
+/game/image-clone/campaign_ui/*
+!/game/image-clone/campaign_ui/manifest.json
 
 # git worktrees (изолированные рабочие деревья сессий) — не содержимое репо
 .worktrees/
 
 # Логи прогонов генератора карты (пиксели воспроизводимы прогоном, MANIFEST.json — в git)
-/image-clone/gen_map_*.log
+/game/image-clone/gen_map_*.log
 
 # Godot компилирует CSV-переводы рядом с источником: `.csv.import` и `.translation` —
 # вывод редактора, в репо лежит только `.csv` (ни одного такого файла не отслеживалось).
