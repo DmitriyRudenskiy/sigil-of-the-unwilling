@@ -7,7 +7,12 @@ const _HeroModelFactory = preload("res://scripts/ui/hero_model_factory.gd")
 
 ## Цель «Продолжить» (T-110) — кампанийная сцена; путь назван константой,
 ## чтобы тест проверял существование сцены-цели, а не строку наугад.
-const SCENE_CONTINUE := "res://scenes/ui/adventure_ui.tscn"
+# Нога «Продолжить» остаётся на кампейн-носителе: `pending_campaign_slot` читает
+# только `main.gd:81`, экран приключения про него не знает. Репойнт сюда ведёт себя
+# как «Продолжить, которое молча начинает новую игру» — серая плита была бы честнее
+# (T-350). Переезжает вместе с решением о формате сейва (remove-campaign-mechanic
+# 4.3: отказ с сообщением), а не раньше.
+const SCENE_CONTINUE := "res://scenes/main/main.tscn"
 
 @onready var _background: TextureRect = $Background
 @onready var _continue_btn: Button = $RightColumn/ContinueButton

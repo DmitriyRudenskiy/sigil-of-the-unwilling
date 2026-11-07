@@ -4,8 +4,8 @@
 Граница уровня (тот же урок, что у `test_main_menu_buttons_live`): настоящего
 попадания мышью из скрипта в Godot 4.7 нет — `push_input` из команды MCP-сервера
 обрывает сокет interaction server, а путь BaseButton «отпустил → pressed» требует
-мышиного фокуса viewport. Здесь поэтому: доводка носителя по полному игровому
-пути (меню → создание персонажа → Знак → `main.tscn`), состояние кнопки и экрана,
+мышиного фокуса viewport. Здесь поэтому: доводка носителя, поднятого
+напрямую (fixture `campaign_game` → `main.tscn`), состояние кнопки и экрана,
 и проводка сигналов эмитом `pressed` / `close_requested` вместо клика.
 
 Что именно это покрывает и не покрывает GdUnit: в юнит-тестах экраны города и
@@ -87,9 +87,9 @@ def _state(mcp) -> dict:
     )
 
 
-def test_carrier_bound_after_new_game(full_cycle):
+def test_carrier_bound_after_new_game(campaign_game):
     """Полный путь до `main.tscn`: слой поднят, город привязан, кнопка активна, экран закрыт."""
-    st = _state(full_cycle)
+    st = _state(campaign_game)
     assert st["turn"] >= 1, f"кампания не стартовала: {st}"
     assert st["hud"], f"слой носителя отсутствует в main.tscn: {st}"
     assert st["layer"] == 5, f"слой носителя должен быть 5 (над служебными слоями): {st}"
@@ -106,14 +106,14 @@ def test_carrier_bound_after_new_game(full_cycle):
     )
 
 
-def test_button_press_opens_city_screen(full_cycle):
+def test_button_press_opens_city_screen(campaign_game):
     """Нажатие «Город» открывает экран поверх кампании (вход носителя в живом рантайме)."""
-    full_cycle.execute_code(
+    campaign_game.execute_code(
         f'get_tree().current_scene.get_node("{BUTTON}").emit_signal("pressed")\n'
         "return true"
     )
-    full_cycle.wait_frames(30)
-    st = _state(full_cycle)
+    campaign_game.wait_frames(30)
+    st = _state(campaign_game)
     assert st["open"] and st["visible"], f"экран города не открылся по нажатию: {st}"
     assert st["at"] == "city", f"машина навигации не переведена в город: {st}"
     assert st["shown"] == ["city"], (
@@ -121,20 +121,20 @@ def test_button_press_opens_city_screen(full_cycle):
     )
 
 
-def test_second_press_closes_city_screen(full_cycle):
+def test_second_press_closes_city_screen(campaign_game):
     """Кнопка — переключатель: второе нажатие закрывает экран (тот же обработчик)."""
     for _ in range(2):
-        full_cycle.execute_code(
+        campaign_game.execute_code(
             f'get_tree().current_scene.get_node("{BUTTON}").emit_signal("pressed")\n'
             "return true"
         )
-        full_cycle.wait_frames(15)
-    st = _state(full_cycle)
+        campaign_game.wait_frames(15)
+    st = _state(campaign_game)
     assert not st["open"], f"второе нажатие не закрыло экран: {st}"
     assert st["visible"] is False, f"экран остался видимым после закрытия: {st}"
 
 
-def test_city_screen_carries_the_training_entry(full_cycle):
+def test_city_screen_carries_the_training_entry(campaign_game):
     """T-308 (D-302 (а)): тренировка покупается в панели поселения.
 
     Четвёртый уровень нужен потому, что в юнит-тестах экран города существует
@@ -142,8 +142,8 @@ def test_city_screen_carries_the_training_entry(full_cycle):
     обязан быть построен и объяснять своё состояние (party-training 7–11:
     недоступная заявка не исчезает, а называется причиной).
     """
-    _press(full_cycle, BUTTON)
-    opts = _state(full_cycle)["training_options"]
+    _press(campaign_game, BUTTON)
+    opts = _state(campaign_game)["training_options"]
     assert opts, f"в панели поселения нет блока тренировки: {opts}"
     for option in opts:
         assert option["text"], f"кнопка заявки без подписи: {option}"
@@ -156,32 +156,32 @@ def test_city_screen_carries_the_training_entry(full_cycle):
             assert "·" in option["tip"], f"заявка без стоимости и срока: {option}"
 
 
-def test_close_requested_signal_closes_carrier(full_cycle):
+def test_close_requested_signal_closes_carrier(campaign_game):
     """Проводка `close_requested` (её эмитирует Esc экрана) закрывает экран носителем."""
-    full_cycle.execute_code(
+    campaign_game.execute_code(
         f'get_tree().current_scene.get_node("{SCREEN}").emit_signal("close_requested")\n'
         "return true"
     )
-    full_cycle.wait_frames(15)
-    assert _state(full_cycle)["open"] is False, "Esc-путь экрана не закрыт носителем"
+    campaign_game.wait_frames(15)
+    assert _state(campaign_game)["open"] is False, "Esc-путь экрана не закрыт носителем"
 
 
-def test_carrier_survives_turn_tick(full_cycle):
+def test_carrier_survives_turn_tick(campaign_game):
     """Смена хода не роняет носитель: город переживает тик, кнопка остаётся доступной."""
-    full_cycle.execute_code(
+    campaign_game.execute_code(
         "var comp = get_tree().current_scene.composition\n"
         "comp.advance_turn()\n"
         "return {\"turn\": comp.campaign.current_turn}"
     )
-    full_cycle.wait_frames(30)
-    st = _state(full_cycle)
+    campaign_game.wait_frames(30)
+    st = _state(campaign_game)
     assert st["turn"] >= 2, f"ход не прошёл: {st}"
     assert st["hud"] and st["screen"] and st["disabled"] is False, (
         f"носитель потерял город или кнопку после смены хода: {st}"
     )
 
 
-def test_city_screen_registered_in_campaign_ui_manager(full_cycle):
+def test_city_screen_registered_in_campaign_ui_manager(campaign_game):
     """Экран города живёт в машине навигации (указание владельца 2026-10-23).
 
     Узел экрана по-прежнему строится носителем (`CampaignHud.bind_city`), но
@@ -190,7 +190,7 @@ def test_city_screen_registered_in_campaign_ui_manager(full_cycle):
     регистрации носитель был самостоятельным хостом, и «какой экран сейчас»
     нигде не было.
     """
-    st = _state(full_cycle)
+    st = _state(campaign_game)
     assert st["manager"], f"CampaignUIManager не поднят в main.tscn: {st}"
     assert st["at"] == "map", (
         f"кампания обязана стартовать на карте, а не на {st['at']}: {st}"
@@ -199,13 +199,13 @@ def test_city_screen_registered_in_campaign_ui_manager(full_cycle):
     assert st["shown"] == [], f"до открытия экрана не должно быть видно: {st}"
 
 
-def test_party_screen_registered_in_campaign_ui_manager(full_cycle):
+def test_party_screen_registered_in_campaign_ui_manager(campaign_game):
     """Экран партии поднят тем же носителем и зарегистрирован в машине (D-227).
 
     До этого раунда `PartyScreen` был техническим экраном без вызывающего:
     данные партии существовали, входа в них из игры — нет.
     """
-    st = _state(full_cycle)
+    st = _state(campaign_game)
     assert st["party_button"], f"кнопка «Партия» не построена: {st}"
     assert st["party_disabled"] is False, (
         f"кнопка «Партия» обязана стать доступной после привязки ростера: {st}"
@@ -221,10 +221,10 @@ def test_party_screen_registered_in_campaign_ui_manager(full_cycle):
     )
 
 
-def test_button_press_opens_party_screen_with_live_roster(full_cycle):
+def test_button_press_opens_party_screen_with_live_roster(campaign_game):
     """Нажатие «Партия» открывает экран с живым ростером кампании."""
-    _press(full_cycle, PARTY_BUTTON)
-    st = _state(full_cycle)
+    _press(campaign_game, PARTY_BUTTON)
+    st = _state(campaign_game)
     assert st["party_open"] and st["party_visible"], f"экран партии не открылся: {st}"
     assert st["at"] == "party", f"машина навигации не переведена в партию: {st}"
     assert st["shown"] == ["party"], f"инвариант одного активного экрана нарушен: {st}"
@@ -233,15 +233,15 @@ def test_button_press_opens_party_screen_with_live_roster(full_cycle):
     )
 
 
-def test_switching_city_to_party_closes_city_in_live_game(full_cycle):
+def test_switching_city_to_party_closes_city_in_live_game(campaign_game):
     """Смена экрана слоя в живом рантайме: город закрывается, а не лежит под партией.
 
     Машина запрещает `CITY→PARTY`, поэтому носитель идёт через карту — иначе
     игрок, открывший город, не смог бы попасть в партию вообще.
     """
-    _press(full_cycle, BUTTON)
-    _press(full_cycle, PARTY_BUTTON)
-    st = _state(full_cycle)
+    _press(campaign_game, BUTTON)
+    _press(campaign_game, PARTY_BUTTON)
+    st = _state(campaign_game)
     assert st["at"] == "party", f"машина не дошла до партии: {st}"
     assert st["open"] is False and st["visible"] is False, (
         f"город не закрылся при переходе в партию: {st}"
@@ -250,14 +250,14 @@ def test_switching_city_to_party_closes_city_in_live_game(full_cycle):
     assert st["shown"] == ["party"], f"под партией остался видимый экран: {st}"
 
 
-def test_counter_bar_shows_the_live_campaign_carrier(full_cycle):
+def test_counter_bar_shows_the_live_campaign_carrier(campaign_game):
     """Полоса счётчиков (7.10) в живом кампейне: значения — из носителя города.
 
     GdUnit поднимает `main.tscn` тоже, но четвёртый уровень нужен здесь потому,
     что полоса читает `City.resource_ctx` города, собранного игрой (меню →
     создание персонажа → Знак → `main.tscn`), а не город, собранный тестом.
     """
-    st = _state(full_cycle)
+    st = _state(campaign_game)
     assert st["bar"], f"полоса счётчиков не построена: {st}"
     assert st["counters"] == 3, (
         "видимых счётчика ровно три — MVP-триада food/wood/iron; остальным "
@@ -271,18 +271,18 @@ def test_counter_bar_shows_the_live_campaign_carrier(full_cycle):
     )
 
 
-def test_date_follows_the_day_in_live_game(full_cycle):
+def test_date_follows_the_day_in_live_game(campaign_game):
     """Дата макета (7.11) пересчитывается из дня кампании на каждый ход."""
-    before = _state(full_cycle)
+    before = _state(campaign_game)
     assert before["date"] == before["date_expected"] and before["date"] != "", (
         f"дата не равна пересчёту дня кампании: {before}"
     )
-    full_cycle.execute_code(
+    campaign_game.execute_code(
         "get_tree().current_scene._advance_day()\n"
         "return true"
     )
-    full_cycle.wait_frames(30)
-    after = _state(full_cycle)
+    campaign_game.wait_frames(30)
+    after = _state(campaign_game)
     assert after["date"] == after["date_expected"], (
         f"после хода дата разошлась с днём кампании: {after}"
     )

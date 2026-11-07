@@ -12,8 +12,10 @@ const SLOT_COUNT := MvpSaveManager.SLOT_COUNT
 
 ## Загрузка меняет сцену на кампанийный носитель — тот же путь, что у «Продолжить»
 ## (`main_menu.SCENE_CONTINUE`); константа своя, чтобы не зациклить preload
-## (`MainMenu` → экран → `MainMenu`).
-const SCENE_ADVENTURE := "res://scenes/ui/adventure_ui.tscn"
+## (`MainMenu` → экран → `MainMenu`). В экран приключения не ведёт: тот слот не
+## читает (`pending_campaign_slot` знает только `main.gd`), и «Загрузить» молча
+## стартовало бы новый мир (T-350).
+const SCENE_CAMPAIGN := "res://scenes/main/main.tscn"
 
 var _wired := false
 
@@ -170,7 +172,7 @@ func perform_load(slot: int) -> void:
 		# Тот же вход, что у «Продолжить»: слот читает уже кампанийный носитель
 		# (`main.gd` → `composition.load_save_state`).
 		persistence.pending_campaign_slot = slot
-	get_tree().change_scene_to_file(SCENE_ADVENTURE)
+	get_tree().change_scene_to_file(SCENE_CAMPAIGN)
 
 
 func perform_delete(slot: int) -> void:

@@ -270,10 +270,50 @@ def boot_menu(mcp) -> None:
 
 
 @pytest.fixture
+def campaign_game(mcp):
+    """Кампейн-слой поднят напрямую: `main.tscn`, без пре-игрового потока.
+
+    Срез 2026-11-05 выводит `main.tscn` из потока (после Знака — мир), но сам
+    кампейн живёт как сцена и слой до группы 3.3, поэтому его HUD-контрактам
+    (город, партия, счётчики) меню-путь не нужен: `composition` строится в `_ready`
+    независимо от того, откуда зашла сцена. Снимается вместе с кампанией.
+    """
+    mcp.run_scene("res://scenes/main/main.tscn")
+    mcp.wait_ready()
+    deadline = time.time() + 120
+    while time.time() < deadline:
+        try:
+            r = mcp.execute_code(
+                "var s = get_tree().current_scene\n"
+                'var c = s.get("composition") if s != null else null\n'
+                'return {"alive": c != null and c.campaign != null}',
+                timeout=15.0,
+            )
+            if r.get("alive"):
+                # D-229: авто-таймер дня снят — флага `_is_day_cycle_active` в
+                # сцене нет, а запись в несуществующее свойство роняет eval и рвёт
+                # сокет interaction server («Connection closed» у всех тестов
+                # дальше; CAPTURE-HELPER, правило 10). Ход двигает кнопка.
+                break
+        except Exception:  # noqa: BLE001 — загрузка сцены может блокировать main loop
+            pass
+        time.sleep(1.0)
+    else:
+        raise MCPError("CampaignComposition в main.tscn не стартовал за 120 с")
+    yield mcp
+
+
+@pytest.fixture
 def full_cycle(mcp):
-    """Полный цикл (cutover D-157): меню → создание персонажа → main.tscn
-    (K-канон-линия). Профиль персистится в persistence; потребление профиля
-    кампанией — слой за репойнтом (MVP-срез)."""
+    """Полный цикл потока (remove-campaign-mechanic 1.2, 2.3): меню → создание
+    персонажа → Знак → экран приключения (`adventure_ui.tscn`, носитель мира).
+
+    До среза 2026-11-05 (cutover D-157) третья нога вела в `main.tscn`. Кампейн
+    как сцена живёт, из потока он вышел, поэтому его контракты поднимают носитель
+    напрямую — fixture `campaign_game` выше. Профиль и Знак персистятся в
+    persistence и потребляются миром: герой на карте несёт `hero_name` и `sign_id`
+    (1.3).
+    """
     mcp.run_scene("res://scenes/main_menu.tscn")
     mcp.wait_ready()
     mcp.execute_code(
@@ -297,25 +337,22 @@ def full_cycle(mcp):
         'sc._on_sign_pressed("harmony")\n'
         'return {"ok": true}'
     )
-    _wait_for_scene(mcp, "scripts/main/main")
+    _wait_for_scene(mcp, "scripts/world/world_controller")
     deadline = time.time() + 120
     while time.time() < deadline:
         try:
             r = mcp.execute_code(
-                "var s = get_tree().current_scene\n"
-                'var c = s.get("composition") if s != null else null\n'
-                'return {"alive": c != null and c.campaign != null}',
+                "var w = get_tree().current_scene\n"
+                "var h = w.get_hero() if w != null else null\n"
+                'return {"hero": h != null,\n'
+                '    "sign": h.sign_id if h != null else ""}',
                 timeout=15.0,
             )
-            if r.get("alive"):
-                # D-229: авто-таймер дня снят — флага `_is_day_cycle_active` в
-                # сцене нет, а запись в несуществующее свойство роняет eval и рвёт
-                # сокет interaction server («Connection closed» у всех тестов
-                # дальше; CAPTURE-HELPER, правило 10). Ход двигает кнопка.
+            if r.get("hero"):
                 break
-        except Exception:  # noqa: BLE001 — загрузка сцены может блокировать main loop
+        except Exception:  # noqa: BLE001 — смена сцены блокирует main loop
             pass
         time.sleep(1.0)
     else:
-        raise MCPError("CampaignComposition в main.tscn не стартовал за 120 с")
+        raise MCPError("Экран приключения не поднял героя за 120 с")
     yield mcp

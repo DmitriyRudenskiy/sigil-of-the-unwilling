@@ -1,11 +1,10 @@
-"""Единый cutover smoke-контракт (D-157; сведение двойного исполнения,
-раунд 6 §1.2: «один smoke-контракт, одна реализация»).
+"""Единый smoke-контракт потока (D-157; remove-campaign-mechanic 1.2/2.3).
 
-Навигация: main_menu → character_creation → main.tscn (K-канон-линия) +
-первый ход (1→2). Профиль создания доходит до кампании (hero_name —
-проводка T-110). Три хода и полный цикл 21 — в композите
-(test_cutover_composite), не в smoke. Поглощены: test_character_creation
-(дубль навигации), test_cutover_smoke (дубль раунда 10).
+Навигация: main_menu → character_creation → Знак → экран приключения. Контракт
+проверяет, что поток донёс до мира: профиль создания (hero_name, T-110) и выбор
+Знака (T-002, проводка 1.3). Первый ход кампейна из контракта снят: после Знака
+игрок в мире, хода как кампейн-операции там нет (D-229 снял и авто-таймер дня).
+Кампейн-контракты — `test_campaign_carrier` поверх fixture `campaign_game`.
 """
 from __future__ import annotations
 
@@ -13,36 +12,21 @@ from __future__ import annotations
 def test_full_cycle_from_menu(full_cycle):
     mcp = full_cycle
 
-    # 1) Навигационная поверхность репойнта: мы в кампании, seed/население из конфига.
+    # 1) Навигационная поверхность репойнта: мы на экране приключения, мир собран.
     r = mcp.execute_code(
-        "var s = get_tree().current_scene\n"
-        'var c = s.get("composition")\n'
+        "var w = get_tree().current_scene\n"
+        "var h = w.get_hero()\n"
         "return {\n"
-        '    "script": s.get_script().resource_path,\n'
-        '    "turn": c.campaign.current_turn,\n'
-        '    "seed": c.campaign.seed,\n'
-        '    "roster": c.population_system.size(),\n'
-        '    "hero": c.hero_name,\n'
-        '    "sign": c.sign_id\n'
-        "}"
+        '    "script": w.get_script().resource_path,\n'
+        '    "map": w.get_map_gen() != null,\n'
+        '    "hero": h.hero_name if h != null else "",\n'
+        '    "sign": h.sign_id if h != null else ""}'
     )
-    assert r["script"].endswith("scripts/main/main.gd"), f"Не main.tscn: {r}"
-    assert r["turn"] == 1, f"Кампания не на ходе 1: {r}"
-    assert r["seed"] == 12345, f"CAMPAIGN_SEED не дошёл: {r}"
-    assert r["roster"] == 20, f"Стартовое население не из конфига: {r}"
+    assert r["script"].endswith("scripts/world/world_controller.gd"), f"Не экран приключения: {r}"
+    assert r["map"] is True, f"Мир не сгенерирован: {r}"
 
-    # 2) Проводка T-110: профиль создания дошёл до кампании.
+    # 2) Проводка T-110: профиль создания дошёл до героя на карте.
     assert r["hero"] == "McpCycleHero", f"pending_new_game не потреблён: {r}"
 
-    # 2b) Проводка T-002: выбор Знака дошёл до кампании (SignChoiceUI → main).
+    # 2b) Проводка T-002 + 1.3: выбор Знака дошёл до героя (SignChoiceUI → мир).
     assert r["sign"] == "harmony", f"pending_sign_id не потреблён: {r}"
-
-    # 3) Первый ход (минимум smoke: 1→2).
-    mcp.execute_code(
-        'get_tree().current_scene.get("composition").advance_turn()\n'
-        'return {"ok": true}'
-    )
-    after = mcp.execute_code(
-        'return get_tree().current_scene.get("composition").campaign.current_turn'
-    )
-    assert after == 2, f"Первый ход не прошёл: 1 -> {after}"
