@@ -70,44 +70,39 @@
 
 ```
 sigil-of-the-unwilling/
-├── game/                      # Основной проект Godot
+├── game/                      # Godot-проект (корень `res://`)
 │   ├── assets/                # Ресурсы игры
 │   │   ├── ui/                # UI элементы (иконки, курсоры, виджеты)
-│   │   │   ├── icons/         # resources/, buildings/, needs/, schools/ + fallback.png
-│   │   │   └── widgets/       # 9-slice текстуры: buttons/, panels/, progress_bars/, sliders/, decorators/
-│   │   └── cursors/           # спрайты курсоров 6 режимов (default/walk/collect/attack/spell/talk)
+│   │   ├── cursors/           # спрайты курсоров 6 режимов
 │   │   ├── tilesets/          # Гексагональные тайлсеты
 │   │   ├── data/              # JSON данные (заклинания, баланс)
-│   │   └── ...                # Спрайты, аудио
+│   │   ├── PROVENANCE.md      # Реестр происхождения ассетов (строка на файл)
+│   │   └── ...                # Спрайты, аудио, шрифты
 │   ├── scenes/                # Сцены Godot
-│   │   ├── MainMenu.tscn      # Главное меню
-│   │   ├── World.tscn         # Карта мира
-│   │   ├── Battle.tscn        # Боевая сцена
-│   │   └── CityArena.tscn     # Сцена города
-│   ├── scripts/               # Исходный код GDScript
-│   │   ├── autoload/          # Синглтоны (глобальные скрипты)
-│   │   ├── core/              # Базовые системы
-│   │   ├── systems/           # Игровые системы
-│   │   ├── entities/          # Сущности (юниты, здания)
-│   │   ├── world/             # Генерация мира
-│   │   ├── city/              # Логика города
-│   │   ├── ui/                # UI логика
-│   │   ├── economy/           # Экономика
-│   │   └── demographics/      # Демография
-│   ├── tests/                 # Тесты (gdUnit4 6.2.1, аддон ставится отдельно); прогон: tests/run_all.sh
-│   ├── tools/                 # Инструменты разработки
+│   ├── scripts/               # Исходный код GDScript (autoload/, core/,
+│   │                          #   systems/, entities/, world/, city/, ui/ ...)
+│   ├── image-clone/           # Лаборатория генерации ассетов (очередь, эталоны)
+│   ├── tests/                 # Тесты (gdUnit4); прогон: tests/run_all.sh
+│   ├── tools/                 # Инструменты проекта, в т.ч. ui_kit/ — генераторы
+│   │                          #   виджет-графики (host-Python, не res://)
 │   ├── project.godot          # Конфигурация проекта
 │   └── run_tests.sh           # Скрипт запуска тестов
-├── openspec/                  # Спецификации OpenSpec
-│   ├── changes/               # Предложения по изменениям
-│   │   ├── ui-icons-cursors-improvement/
-│   │   ├── quests-reputation-system/
-│   │   └── map-generation-enhancements/
-│   ├── specs/                 # Технические спецификации
-│   └── config.yaml            # Конфигурация OpenSpec
-├── docs/                      # Дизайн-документация (GDD, Obsidian-vault)
-└── tmp/                       # Временные файлы
+├── docs/                      # Obsidian-vault документации (GDD, ADR, журнал)
+├── scripts/                   # Репозиторные гейты и сверщики (host-Python)
+├── openspec/                  # Спецификации и открытые изменения OpenSpec
+├── reference/                 # Референс-комплект — носитель вердиктов (D-192)
+├── .pi/                       # Промпты и навыки агента
+│   ├── prompts/               #   /opsx-* (propose, apply, update, archive, ...)
+│   └── skills/ui-grid-review/ #   единственный местный навык: замеры кадров UI
+├── battle-demo/               # Движковый демо-стенд (вне игры; судьба — Q-M139)
+└── tmp/                       # Временные файлы (в git — только заглушка)
 ```
+
+Граница `scripts/` ↔ `game/tools/` несущая: первое — host-Python, который судит
+репозиторий (`docs/`, `openspec/`, git-индекс, `.github/`), второе — инструменты
+самого Godot-проекта. Python внутри `res://scripts/` не живёт: он попадает в
+чужой неймспейс и теряет покрытие `test_compile_all`. Состав корня сверяется
+машиной — `python3 scripts/check_repo_layout.py`.
 
 ## 🛠️ Разработка
 
@@ -117,9 +112,13 @@ sigil-of-the-unwilling/
 
 | Изменение | Статус | Описание |
 |-----------|--------|----------|
-| `ui-icons-cursors-improvement` | ✅ Реализовано | Улучшение UI, иконок и курсоров |
-| `quests-reputation-system` | 📋 Предложено | Система квестов и репутации |
-| `map-generation-enhancements` | 🚧 В разработке | Генерация рек, дорог, гор и лесов |
+| `world-hex-cell-art` | 🚧 34/36 | Арт гексагональной клетки поля |
+| `world-map-scene-slicing` | 🚧 12/38 | Нарезка сцены карты мира на носители |
+| `repo-structure-cleanup` | 🚧 70/93 | Разрез состава корня: переезды, гейты, удаление бойлплейта |
+| `remove-campaign-mechanic` | 📋 6/30 | Снятие механики кампании |
+
+Список — это каталоги `openspec/changes/` кроме `archive/`; сводённые спеки
+лежат в `openspec/specs/`, закрытые изменения — в `openspec/changes/archive/`.
 
 ### Создание нового изменения
 
