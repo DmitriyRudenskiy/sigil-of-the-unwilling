@@ -1,0 +1,845 @@
+MACHINE CONFIG: /Users/user/.pi/agent/env/sotu-machine.env
+MCP: X-контур выключен вызовом (MCP_SSH_HOST задан пустым — настройка машины не подставлена)
+GODOT: /Applications/Godot.app/Contents/MacOS/Godot
+AUTOLOAD-PRECHECK: OK (15 записей)
+TIER: full
+QUARANTINE: 0 (game/tests/quarantine.txt пуст)
+
+=== lint: gdlint (T-141, report-only) ===
+LINT: свои (scripts + tests + tools/*.gd): Failure: 361 problems found
+LINT: вендор-наследие (tools/mcp — патченная копия godot-mcp, вне дельты): Failure: 77 problems found
+LINT: вендор (addons, вне дельты): Failure: 836 problems found
+LINT: конфиг = /Users/user/sigil-of-the-unwilling/game/.gdlintrc (CWD=game); сигнал = ДЕЛЬТА против базы по СВОИМ 355, не «чисто» (T-141); гейт не подключён
+
+=== vacuous asserts: сканер T-123 (гейт) ===
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+
+=== пути узлов из скриптов ↔ сцены: сканер T-296 (гейт) ===
+=== путь узла из скрипта ↔ сцена (T-296) ===
+скриптов в парах со сценами: 50; литералов пути: 322
+  исключено: рантайм-имена 16, глобальные /root/… 0
+  исключений с причиной: 7
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+
+=== MCP tests (tugcantopaloglu/godot-mcp) ===
+============================= test session starts ==============================
+platform darwin -- Python 3.12.10, pytest-9.0.3, pluggy-1.6.0 -- /usr/local/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/user/sigil-of-the-unwilling/game/tests/mcp
+configfile: pytest.ini
+plugins: cov-7.1.0, timeout-2.4.0, asyncio-1.4.0, anyio-4.13.0
+timeout: 900.0s
+timeout method: signal
+timeout func_only: False
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 125 items
+
+tests/mcp/test_balance_probe.py::test_balance_probe_runs_early_game [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+
+[balance-probe] seed=20260913 turns=60 first_building=0 first_recruit=-1 first_collision=36 first_win=-1 losses=13 stuck_max=0 season=Зима endgame={'end_reason': '', 'state': 'RUNNING'}
+[balance-probe] WARNING: losses 13 > 1
+[balance-probe] WARNING: attribute-weight-system: ресурсы не добываются (0 extracted) — возможно, весовая система слишком жёсткая
+[balance-probe] отчёт: /Users/user/sigil-of-the-unwilling/game/tools/mcp/reports/balance_20260913.json
+PASSED
+tests/mcp/test_balance_probe.py::test_balance_probe_deterministic [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_battle_controller.py::test_battle_via_controller_reaches_winner [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_battle_full_e2e.py::test_full_battle_runs_to_winner [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_battle_hud_live_populated.py::test_live_battle_populates_hero_and_enemy_cards [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_battle_hud_live_populated.py::test_hud_blocks_sit_inside_the_frame [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_battle_hud_live_populated.py::test_card_labels_meet_the_font_floor [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+ERROR
+tests/mcp/test_battle_profiling.py::test_cluster_reset_in_battle_scene [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+SKIPPED
+tests/mcp/test_battle_tween.py::test_move_then_attack_no_teleport [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_campaign_carrier.py::test_carrier_bound_after_new_game [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_button_press_opens_city_screen [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_second_press_closes_city_screen [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_city_screen_carries_the_training_entry [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_close_requested_signal_closes_carrier [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_carrier_survives_turn_tick [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_city_screen_registered_in_campaign_ui_manager [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_party_screen_registered_in_campaign_ui_manager [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_button_press_opens_party_screen_with_live_roster [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_switching_city_to_party_closes_city_in_live_game [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_counter_bar_shows_the_live_campaign_carrier [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_carrier.py::test_date_follows_the_day_in_live_game [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_campaign_continue.py::test_continue_loads_campaign_slot [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+FAILED
+tests/mcp/test_capture.py::test_parse_size_принимает_канон_и_variants PASSED
+tests/mcp/test_capture.py::test_parse_size_отклоняет_мусор[] PASSED
+tests/mcp/test_capture.py::test_parse_size_отклоняет_мусор[1920] PASSED
+tests/mcp/test_capture.py::test_parse_size_отклоняет_мусор[1920xx1080] PASSED
+tests/mcp/test_capture.py::test_parse_size_отклоняет_мусор[a x b] PASSED
+tests/mcp/test_capture.py::test_parse_size_отклоняет_мусор[0x100] PASSED
+tests/mcp/test_capture.py::test_parse_size_отклоняет_мусор[-5x10] PASSED
+tests/mcp/test_capture.py::test_canonical_size_дефолт_и_override PASSED
+tests/mcp/test_capture.py::test_pointer_xy_разбирает_координату_или_нет[(1592.0, 632.0)-expected0] PASSED
+tests/mcp/test_capture.py::test_pointer_xy_разбирает_координату_или_нет[(0,0)-expected1] PASSED
+tests/mcp/test_capture.py::test_pointer_xy_разбирает_координату_или_нет[(1592.5, -3.5)-expected2] PASSED
+tests/mcp/test_capture.py::test_pointer_xy_разбирает_координату_или_нет[-None] PASSED
+tests/mcp/test_capture.py::test_pointer_xy_разбирает_координату_или_нет[(1592.0)-None] PASSED
+tests/mcp/test_capture.py::test_pointer_xy_разбирает_координату_или_нет[(a, b)-None] PASSED
+tests/mcp/test_capture.py::test_pointer_xy_разбирает_координату_или_нет[\u043d\u0438\u0447\u0435\u0433\u043e-None] PASSED
+tests/mcp/test_capture.py::test_pointer_xy_разбирает_координату_или_нет[None-None] PASSED
+tests/mcp/test_capture.py::test_pointer_is_moving_видит_чужое_движение_но_не_шум PASSED
+tests/mcp/test_capture.py::test_png_size_читает_IHDR PASSED
+tests/mcp/test_capture.py::test_png_size_отклоняет_не_PNG_и_обрезанный PASSED
+tests/mcp/test_capture.py::test_verify_frame_требует_канон PASSED
+tests/mcp/test_capture.py::test_verify_frame_падает_на_чужом_размере_с_диагностикой PASSED
+tests/mcp/test_capture.py::test_pin_window_code_не_уходит_в_полный_экран PASSED
+tests/mcp/test_capture.py::test_render_manifest_содержит_обязательные_поля PASSED
+tests/mcp/test_capture.py::test_reserve_dir_вне_репозитория PASSED
+tests/mcp/test_capture.py::test_setup_code_пусто_без_переменной PASSED
+tests/mcp/test_capture.py::test_setup_code_инлайн_и_срезает_края PASSED
+tests/mcp/test_capture.py::test_setup_code_читает_файл_по_собаке PASSED
+tests/mcp/test_capture.py::test_setup_code_падает_на_несуществующем_файле PASSED
+tests/mcp/test_capture.py::test_setup_code_ищет_голое_имя_в_tools_capture PASSED
+tests/mcp/test_capture.py::test_capture_scene_не_пишет_кадр_чужой_сцены PASSED
+tests/mcp/test_capture.py::test_capture_scene_ставит_состояние_после_пина_но_до_скриншота PASSED
+tests/mcp/test_capture.py::test_capture_scene_отдаёт_отчёт_кода_состояния PASSED
+tests/mcp/test_capture.py::test_capture_scene_без_кода_состояния_не_выдумывает_отчёт PASSED
+tests/mcp/test_capture.py::test_capture_scene_праймит_текстуру_до_отчётного_кадра PASSED
+tests/mcp/test_capture.py::test_capture_scene_без_состояния_не_вызывает_лишнего PASSED
+tests/mcp/test_capture.py::test_capture SKIPPED (съёмка только по
+запросу: CAPTURE_SCENE=res://... (см. docs/mvp/CAPTURE-HELPER.md))
+tests/mcp/test_city_cycle.py::test_farm_build_and_harvest [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_dest_marker_boot.py::test_dest_marker_is_mounted_after_world_boot [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_dest_marker_boot.py::test_dest_marker_leaves_on_teardown [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_disabled_reason_tooltip.py::test_disabled_button_tooltip_reaches_the_screen [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+CAPTURED /Users/user/.local/share/sigil-reserve/menu-tooltip-d252/menu_continue_hover.png (1920, 1080) 3d9b9b82fe39d0803d0771e8a8c2b24531b4bd5a2de4b065cd83ccb35bfe9cd7
+PASSED
+tests/mcp/test_endgame.py::test_endgame_victory_full_flow [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_fog_memory_visual.py::test_explored_but_unseen_terrain_stays_drawn_dimmed [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+размеры: never exp/vis 141/141, memory 153/141, bright 141/141
+кадр [1815, 1007], фон [77, 77, 77]; пустого в N 0.61; клеток памяти 12; пикселей различия N↔M 47962, из них темнее яркого кадра 47233
+PASSED
+tests/mcp/test_full_cycle.py::test_full_cycle_from_menu [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+ERROR
+tests/mcp/test_godot_launcher.py::test_launcher_exists_and_is_executable PASSED
+tests/mcp/test_godot_launcher.py::test_launcher_becomes_the_engine_so_kill_reaches_it PASSED
+tests/mcp/test_godot_launcher.py::test_version_goes_through_without_redirection PASSED
+tests/mcp/test_godot_launcher.py::test_without_log_env_launcher_is_transparent PASSED
+tests/mcp/test_godot_launcher.py::test_real_engine_writes_the_launch_log PASSED
+tests/mcp/test_godot_launcher.py::test_launch_log_tail_distinguishes_absent_empty_and_present PASSED
+tests/mcp/test_godot_launcher.py::test_readiness_error_keeps_signature_and_adds_launch_log PASSED
+tests/mcp/test_hero_death.py::test_hero_death_triggers_succession [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_hexutils_perf.py::test_map_generation_80x80 [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_hexutils_perf.py::test_astar_pathfinding_performance [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_hexutils_perf.py::test_bfs_reachable_performance [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_hexutils_perf.py::test_get_neighbor_no_config_call_overhead [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_main_menu_buttons_live.py::test_live_menu_column_matches_contract [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_main_menu_buttons_live.py::test_live_disabled_states [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_main_menu_buttons_live.py::test_live_load_entry_opens_the_campaign_slots [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_main_menu_buttons_live.py::test_disabled_credits_press_keeps_menu [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_marker_fog_visual.py::test_markers_do_not_shine_through_fog [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+маркеров ресурсов: 534, исследовано клеток: 134, кадр [1815, 1007], фон [77, 77, 77]; скрыто туманом: 913 px, нарисовано поверх пустого фона: 0 px
+PASSED
+tests/mcp/test_mcp_server_lifecycle.py::test_reconnect_after_client_leave PASSED
+tests/mcp/test_mcp_server_lifecycle.py::test_unknown_command_reports_error PASSED
+tests/mcp/test_mcp_server_lifecycle.py::test_start_is_idempotent PASSED
+tests/mcp/test_mcp_server_lifecycle.py::test_port_in_use_reports_clear_error PASSED
+tests/mcp/test_readiness_evidence.py::test_meminfo_and_loadavg_parse_absent_files_as_none PASSED
+tests/mcp/test_readiness_evidence.py::test_env_snapshot_reads_memory_load_and_godot_processes PASSED
+tests/mcp/test_readiness_evidence.py::test_zero_mem_available_is_not_rendered_as_unread PASSED
+tests/mcp/test_readiness_evidence.py::test_godot_processes_ignores_processes_with_godot_in_path PASSED
+tests/mcp/test_readiness_evidence.py::test_godot_processes_survives_missing_proc PASSED
+tests/mcp/test_readiness_evidence.py::test_blockage_degrades_without_kernel_files PASSED
+tests/mcp/test_readiness_evidence.py::test_evidence_names_absent_godot_instead_of_blaming_proc PASSED
+tests/mcp/test_readiness_evidence.py::test_evidence_survives_an_empty_snapshot PASSED
+tests/mcp/test_readiness_evidence.py::test_boot_trace_tail_separates_missing_from_empty PASSED
+tests/mcp/test_readiness_evidence.py::test_boot_trace_tail_keeps_the_last_lines PASSED
+tests/mcp/test_readiness_evidence.py::test_probe_listen_never_calls_a_live_port_absent PASSED
+tests/mcp/test_readiness_evidence.py::test_probe_timeout_is_reported_as_environment_not_as_silence PASSED
+tests/mcp/test_readiness_evidence.py::test_readiness_evidence_names_memory_and_trace PASSED
+tests/mcp/test_readiness_evidence.py::test_readiness_error_text_keeps_the_classifier_signature PASSED
+tests/mcp/test_readiness_evidence.py::test_live_game_writes_boot_trace [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_readiness_evidence.py::test_wait_ready_failure_carries_the_evidence_block PASSED
+tests/mcp/test_resource_and.py::test_extraction_strict_and [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_save_load_continue.py::test_save_load_then_continue [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_scenario_pilot_collector.py::test_scenario_pilot_collector_wizard [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+
+[scenario-pilot] class=wizard role=collector seed=35064404 turns=1 goal_met=True rare=50/10 goal_reached_turn=1
+[scenario-pilot] отчёт: /Users/user/sigil-of-the-unwilling/game/tools/mcp/reports/scenario_wizard_collector.json
+PASSED
+tests/mcp/test_scene_transitions.py::test_world_battle_world_transitions [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_session_reset.py::test_session_reset_caches [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_settings_menu.py::test_settings_screen_opens_from_menu [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_settings_menu.py::test_settings_change_persists [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_settlement_storm.py::test_settlement_survives_to_storm [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_settlement_storm.py::test_settlement_determinism [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_shard_pruning.py::test_prune_shards_no_crash [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_shard_pruning.py::test_prune_shards_with_stringname_keys [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_shard_pruning.py::test_full_save_load_cycle_with_many_shards [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_shard_pruning.py::test_prune_preserves_newest_shards [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_team_romance_e2e.py::test_romance_line_to_marriage [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_team_romance_e2e.py::test_adult_gate [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_team_romance_e2e.py::test_jealousy_and_betrayal [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_team_romance_e2e.py::test_save_load_relationships [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_threat_rings_visual.py::test_three_rings_differ_on_map_screenshot [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_threat_rings_visual.py::test_carrier_measure_survives_content_scale [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_threat_rings_visual.py::test_tier_change_changes_carrier [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_tooltip_plate_hover.py::test_tooltip_plate_is_drawn_by_real_hover [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+CAPTURED /Users/user/.local/share/sigil-reserve/theme-t228/tooltip_hover.png (1920, 1080) 011d466c085f3c9ef695f649833186ec8eddadb060cb87537540b869df17ac8b
+PASSED
+tests/mcp/test_village_capture.py::test_village_capture [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+tests/mcp/test_weight_carry_save_load.py::test_weight_carry_save_load [SERVER] Using Godot at: /Users/user/sigil-of-the-unwilling/game/tests/mcp/godot_launcher.sh
+Godot MCP server running on stdio
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Error response: Not connected to game interaction server.
+[SERVER] Connected to game interaction server on port 9090
+PASSED
+
+==================================== ERRORS ====================================
+____________ ERROR at setup of test_card_labels_meet_the_font_floor ____________
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:215: in battle_scene
+    mcp.wait_ready()
+tests/mcp/godot_mcp.py:444: in wait_ready
+    if self.execute_code("return GameEventBus != null", timeout=60.0) is True:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/mcp/godot_mcp.py:369: in execute_code
+    data = self._portal.call(self._execute_code, code, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/anyio/from_thread.py:334: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/anyio/from_thread.py:259: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/mcp/godot_mcp.py:419: in _execute_code
+    return await self._call("game_eval", {"code": code}, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/mcp/godot_mcp.py:456: in _call
+    result = await self._session.call_tool(name, args, read_timeout_seconds=_timeout_for(timeout))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/mcp/client/session.py:401: in call_tool
+    result = await self.send_request(
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/mcp/shared/session.py:281: in send_request
+    await self._write_stream.send(SessionMessage(message=JSONRPCMessage(jsonrpc_request), metadata=metadata))
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/anyio/streams/memory.py:249: in send
+    self.send_nowait(item)
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/anyio/streams/memory.py:218: in send_nowait
+    raise ClosedResourceError
+E   anyio.ClosedResourceError
+_____________ ERROR at setup of test_carrier_bound_after_new_game ______________
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+____________ ERROR at setup of test_button_press_opens_city_screen _____________
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+____________ ERROR at setup of test_second_press_closes_city_screen ____________
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+________ ERROR at setup of test_city_screen_carries_the_training_entry _________
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+_________ ERROR at setup of test_close_requested_signal_closes_carrier _________
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+______________ ERROR at setup of test_carrier_survives_turn_tick _______________
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+_____ ERROR at setup of test_city_screen_registered_in_campaign_ui_manager _____
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+____ ERROR at setup of test_party_screen_registered_in_campaign_ui_manager _____
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+___ ERROR at setup of test_button_press_opens_party_screen_with_live_roster ____
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+___ ERROR at setup of test_switching_city_to_party_closes_city_in_live_game ____
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+______ ERROR at setup of test_counter_bar_shows_the_live_campaign_carrier ______
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+___________ ERROR at setup of test_date_follows_the_day_in_live_game ___________
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+_________________ ERROR at setup of test_full_cycle_from_menu __________________
+/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/mcp/conftest.py:300: in full_cycle
+    _wait_for_scene(mcp, "scripts/main/main")
+tests/mcp/conftest.py:257: in _wait_for_scene
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+E   godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с
+=================================== FAILURES ===================================
+______________________ test_continue_loads_campaign_slot _______________________
+tests/mcp/test_campaign_continue.py:47: in test_continue_loads_campaign_slot
+    raise AssertionError("Continue не восстановил кампанию за 120 с")
+E   AssertionError: Continue не восстановил кампанию за 120 с
+- generated xml file: /var/folders/_s/c2vtwvvs4xn6qbhfw0hbzvq40000gn/T/tmp.UXDAxeNxDi -
+============================= slowest 25 durations =============================
+123.35s call     test_campaign_continue.py::test_continue_loads_campaign_slot
+91.28s call     test_balance_probe.py::test_balance_probe_deterministic
+63.36s setup    test_campaign_carrier.py::test_close_requested_signal_closes_carrier
+63.36s setup    test_campaign_carrier.py::test_carrier_survives_turn_tick
+63.35s setup    test_campaign_carrier.py::test_party_screen_registered_in_campaign_ui_manager
+63.34s setup    test_campaign_carrier.py::test_city_screen_registered_in_campaign_ui_manager
+63.27s setup    test_campaign_carrier.py::test_switching_city_to_party_closes_city_in_live_game
+63.23s setup    test_full_cycle.py::test_full_cycle_from_menu
+63.20s setup    test_campaign_carrier.py::test_button_press_opens_city_screen
+63.15s setup    test_campaign_carrier.py::test_carrier_bound_after_new_game
+62.99s setup    test_campaign_carrier.py::test_button_press_opens_party_screen_with_live_roster
+62.96s setup    test_campaign_carrier.py::test_second_press_closes_city_screen
+62.93s setup    test_campaign_carrier.py::test_date_follows_the_day_in_live_game
+62.92s setup    test_campaign_carrier.py::test_counter_bar_shows_the_live_campaign_carrier
+62.88s setup    test_campaign_carrier.py::test_city_screen_carries_the_training_entry
+45.45s call     test_balance_probe.py::test_balance_probe_runs_early_game
+8.94s call     test_scenario_pilot_collector.py::test_scenario_pilot_collector_wizard
+6.10s call     test_weight_carry_save_load.py::test_weight_carry_save_load
+5.79s call     test_disabled_reason_tooltip.py::test_disabled_button_tooltip_reaches_the_screen
+5.18s call     test_mcp_server_lifecycle.py::test_port_in_use_reports_clear_error
+5.15s call     test_tooltip_plate_hover.py::test_tooltip_plate_is_drawn_by_real_hover
+4.22s call     test_battle_full_e2e.py::test_full_battle_runs_to_winner
+4.19s call     test_battle_controller.py::test_battle_via_controller_reaches_winner
+3.34s setup    test_city_cycle.py::test_farm_build_and_harvest
+3.14s setup    test_hero_death.py::test_hero_death_triggers_succession
+=========================== short test summary info ============================
+SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+SKIPPED [1] tests/mcp/test_capture.py:333: съёмка только по запросу: CAPTURE_SCENE=res://... (см. docs/mvp/CAPTURE-HELPER.md)
+======= 1 failed, 108 passed, 2 skipped, 14 errors in 1280.98s (0:21:20) =======
+PYTEST LEDGER: passed=108 skipped=2 failed=1 errors=14 collected=125
+PYTEST SKIPPED (2 — уровень ничего не измерил, причина обязательна):
+  SKIPPED [1] tests/mcp/test_battle_profiling.py:33: нет узлов городов в сцене боя
+  SKIPPED [1] tests/mcp/test_capture.py:333: съёмка только по запросу: CAPTURE_SCENE=res://... (см. docs/mvp/CAPTURE-HELPER.md)
+MCP JUNIT: passed=108 skipped=2 failed=1 errors=14
+MCP RED: test_battle_hud_live_populated::test_card_labels_meet_the_font_floor [error] :: failed on setup with "anyio.ClosedResourceError" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asyncio/plugin.py:924: in pytest_fixture_set
+MCP RED: test_campaign_carrier::test_carrier_bound_after_new_game [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_button_press_opens_city_screen [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_second_press_closes_city_screen [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_city_screen_carries_the_training_entry [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_close_requested_signal_closes_carrier [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_carrier_survives_turn_tick [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_city_screen_registered_in_campaign_ui_manager [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_party_screen_registered_in_campaign_ui_manager [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_button_press_opens_party_screen_with_live_roster [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_switching_city_to_party_closes_city_in_live_game [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_counter_bar_shows_the_live_campaign_carrier [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_carrier::test_date_follows_the_day_in_live_game [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP RED: test_campaign_continue::test_continue_loads_campaign_slot [failure] :: AssertionError: Continue не восстановил кампанию за 120 с tests/mcp/test_campaign_continue.py:47: in test_continue_loads_campaign_slot
+MCP RED: test_full_cycle::test_full_cycle_from_menu [error] :: failed on setup with "godot_mcp.MCPError: Сцена scripts/main/main не загрузилась за 60 с" /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pytest_asy
+MCP VERDICT: RED
+=== python: генератор арта карты (scripts/test_gen_map_art.py) + концепт-арта (scripts/concept_art/test_generate.py) ===
+GENART: интерпретатор /usr/local/bin/python3
+......                                                                   [100%]
+6 passed in 2.34s
+=== python: классификатор MCP-журнала (scripts/test_classify_mcp_junit.py) ===
+.............                                                            [100%]
+13 passed in 0.02s
+READINESS-CLASSIFIER: selftest GREEN
+MCP VERDICT: exit=1 (0 = зелёный или readiness-жёлтый D-265; 100/1/2 — красный)
+GATE VERDICT: RED — MCP/pytest вернул rc=1
+PUSH: BLOCKED — красный гейт (исправить и прогнать full заново)

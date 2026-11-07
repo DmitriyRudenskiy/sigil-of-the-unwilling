@@ -78,12 +78,25 @@ trap 'exit 131' TERM
 # `: "${VAR:=…}"`). Свой путь — SOTU_MACHINE_ENV; отсутствие файла штатно: тогда
 # работают только переменные окружения и PATH.
 SOTU_MACHINE_ENV="${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}"
+# «Задано пусто» — не то же самое, что «не задано» (D-315). Вызов
+# `MCP_SSH_HOST= ./run_tests.sh` означает «без X-контура, меряй здесь», но файл
+# настроек пишет `: "${MCP_SSH_HOST:=хост}"`, а `:=` пустое значение считаетunset
+# и подставляет хост обратно: задокументированная форма молча уезжала на X-хост
+# (замер 2026-11-09 — при `MCP_SSH_HOST=` в протоколе «MCP: X-контур 192.168.0.86…»,
+# и весь MCP-уровень отработал там же). Различие даёт ${VAR+x}: пустая строка — тоже
+# «задано», и после source она восстанавливается.
+SOTU_SSH_HOST_SET=${MCP_SSH_HOST+x}
+SOTU_SSH_HOST_PRE="$MCP_SSH_HOST"
 if [ -r "$SOTU_MACHINE_ENV" ]; then
 		# shellcheck disable=SC1090
 		. "$SOTU_MACHINE_ENV"
 		echo "MACHINE CONFIG: $SOTU_MACHINE_ENV"
 else
 		echo "MACHINE CONFIG: нет ($SOTU_MACHINE_ENV) — только окружение и PATH"
+fi
+if [ -n "$SOTU_SSH_HOST_SET" ] && [ "$MCP_SSH_HOST" != "$SOTU_SSH_HOST_PRE" ]; then
+		MCP_SSH_HOST="$SOTU_SSH_HOST_PRE"
+		echo "MCP: X-контур выключен вызовом (MCP_SSH_HOST задан пустым — настройка машины не подставлена)"
 fi
 
 # Порядок разрешения Godot (2026-10-04, флаг 8; с 2026-11-03 — без угадывания пути
