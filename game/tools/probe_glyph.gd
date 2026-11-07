@@ -196,10 +196,11 @@ func _run() -> void:
 						continue
 				var bbox_center := (minx + maxx) / 2.0
 				var box_center := cx + bw / 2.0
-				print("[probe_glyph] %s: bbox_left=%d bbox_right=%d bbox_w=%d bbox_center_x=%.1f box_center_x=%.1f Δcenter_box=%.1f Δcenter_cell=%.1f ink_px=%d маска_пересечена=%s outside_px=%d вылет=%.1fpx" % [
-						v.label, minx, maxx, maxx - minx + 1, bbox_center, box_center,
-						bbox_center - box_center, bbox_center - cx, ink_px,
-						"ДА" if outside > 0 else "нет", outside, overshoot])
+				var line := "[probe_glyph] %s: bbox=[%d..%d] w=%d Δcenter_box=%.1f " % [
+						v.label, minx, maxx, maxx - minx + 1, box_center - bbox_center]
+				line += " Δcenter_cell=%.1f ink_px=%d маска=%s outside_px=%d вылет=%.1fpx" % [
+						bbox_center - cx, ink_px, "ДА" if outside > 0 else "нет", outside, overshoot]
+				print(line)
 		var fa := FileAccess.open(out_path, FileAccess.READ)
 		print("[probe_glyph] артефакт: %s (%d Б) — пиксели в git не идут (D-185)" % [
 				out_path, fa.get_length() if fa != null else -1])

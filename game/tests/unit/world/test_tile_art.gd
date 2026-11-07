@@ -212,7 +212,7 @@ func test_variant_choice_is_stable() -> void:
 		Vector2i(0, 0), Vector2i(3, -2), Vector2i(-7, 4), Vector2i(11, 11)]
 	for cell in cells:
 		var first := HexCellArt.variant_for(cell, 7, HexCellArt.VARIANTS)
-		for pass_ in 3:
+		for attempt in 3:
 			assert_that(HexCellArt.variant_for(cell, 7, HexCellArt.VARIANTS)).is_equal(first)
 		assert_that(HexCellArt.variant_for(cell, 7, 1)).is_equal(0)
 		assert_that(first).is_greater_equal(0)
