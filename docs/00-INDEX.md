@@ -19,7 +19,7 @@ date: 2026-10-14
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
 | [[BANK]] | Банк контента | reference | 2026-10-03 |
-| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-11-08 |
+| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-11-09 |
 | [[DECISIONS]] | Реестр решений и открытых вопросов | canon | 2026-10-30 |
 | [[QUESTIONS]] | Открытые вопросы — Фаза 4 (MVP и тикеты) | reference | 2026-11-04 |
 | [[ACTOR-ARMY]] | Актёрная модель армии (K-канон) | canon | 2026-10-11 |
@@ -63,7 +63,7 @@ date: 2026-10-14
 | [[ux-hero-screen-copy]] | — | — | — |
 | [[ux-map-screen-copy]] | — | — | — |
 
-## GDD и стиль (87)
+## GDD и стиль (90)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -118,6 +118,7 @@ date: 2026-10-14
 | [[NORMALIZATION_REPORT]] | — | архив (вне графа) | — |
 | [[STRUCTURE_AUDIT]] | Аудит структуры docs/ (Фаза 2) | active | 2026-10-02 |
 | [[UNIFICATION_CHANGES]] | — | архив (вне графа) | — |
+| [[races-economy]] | Экономический слой рас | draft | 2026-11-08 |
 | [[CONFLICTS]] | Реестр расхождений референса и канона | reference | 2026-10-16 |
 | [[README]] | docs/reference — справочники чужих игр (не канон Sigil) | reference | 2026-10-16 |
 | [[ats-buildings]] | Against the Storm: здания (Buildings) | reference | 2026-10-16 |
@@ -154,3 +155,5 @@ date: 2026-10-14
 | [[sigil-ats-notes]] | AtS-клон: обзор базы знаний (карантин) | reference | 2026-10-16 |
 | [[sigil-ats-races]] | AtS-клон: расы (карантин) | reference | 2026-10-16 |
 | [[terrascape-merged-buildings]] | TerraScape: объединённые здания | reference | 2026-10-16 |
+| [[save-matrix]] | SAVE_MATRIX — матрица покрытия сериализации | reference | 2026-11-08 |
+| [[social-mechanics]] | Социальный слой | draft | 2026-11-08 |

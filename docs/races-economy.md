@@ -254,7 +254,8 @@ adjacency-эффектами. ОР — новая валюта (Phase 2: ист�
 
 ## 10. JSON для реализации (Phase 2)
 
-Файл `game/assets/data/race_economy.json`, загрузчик `race_economy_loader.gd`:
+Файл `game/assets/data/race_economy.json`, загрузчик — класс `RaceEconomy`
+(`game/scripts/data/race_economy.gd`), реализовано:
 ```json
 [{"race_id":"dwarf","archetype":"engineer",
   "needs":{"primary":"tools","secondary":"wood","not_needed":["bread"]},
@@ -266,7 +267,8 @@ adjacency-эффектами. ОР — новая валюта (Phase 2: ист�
 **Точки входа (Phase 2):** 1) `EconomicTurnProcessor._process_city` — `building_eff` =
 максимум `production[race]` по работникам; 2) `logistics_calculator`/`AdjacencySystem` —
 `synergy.logistics`/`conflict.morale` по соседям; 3) happiness-процессор — дефицит нужд;
-4) новый `fusion_processor.gd` (рецепты §8, 1d20, ОР-валюта).
+4) процессор Слияния (рецепты §8, 1d20, ОР-валюта) — носителя нет по сей день,
+   Слияние считает `EconomicTurnProcessor`.
 
 ## 11. Будущие расширения (отложено)
 
