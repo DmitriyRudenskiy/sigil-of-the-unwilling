@@ -4,7 +4,9 @@
 Падает, если:
   1. у ассета нет строки в game/assets/PROVENANCE.md (ни файловой, ни классовой);
   2. строка реестра ведёт в никуда (файла/каталога нет);
-  3. у файла статус «красный» — чужой пиксель лежать в репо не может.
+  3. у файла статус «красный» — чужой пиксель лежать в репо не может;
+  4. записанный генератор ведёт в никуда — провенанс ссылается на скрипт, которого
+     нет в индексе (снят, не переименован, опечатка).
 
 Ассеты = изображения, аудио, шрифты. Данные (.json), .tres и .gd — авторский код
 репо, не проверяются. Чекер НЕ проверяет: очищены ли права (статусы «неизвестно» и
@@ -12,8 +14,10 @@
 существование которых проверять нечего. Вывод печатает свой охват (D-206).
 Запуск: python3 scripts/check_asset_provenance.py
 """
+import json
 import os
 import re
+import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,6 +26,64 @@ REGISTRY = os.path.join(ASSETS, "PROVENANCE.md")
 MEDIA_EXT = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg",
              ".ttf", ".otf", ".mp3", ".ogg", ".wav"}
 ROW = re.compile(r"^\|\s*`?([^|`]+?)`?\s*\|")
+# Объявленный генератор = backtick-путь со слэшем в реестре либо поле "generator"
+# в MANIFEST. Имя без слэша — это имя, а не путь («+ gen_building_icons2.gd»), и
+# «krea2 (ComfyUI)» — внешний инструмент, а не файл репо: проверять нечего.
+CODE_EXT = (".py", ".sh", ".gd")
+GEN_ROW = re.compile(r'`([A-Za-z0-9._%/+-]+\.(?:py|sh|gd))`')
+
+
+def declared_generators(registry_text, manifests):
+    """-> [(где записано, путь)] — только то, что обязано быть файлом репо."""
+    out = [("PROVENANCE.md", m.group(1)) for m in GEN_ROW.finditer(registry_text)
+           if "/" in m.group(1)]
+    for where, node in manifests:
+        for val in generator_fields(node):
+            if "/" in val and val.endswith(CODE_EXT):
+                out.append((where, val))
+    return out
+
+
+def generator_fields(node):
+    """Рекурсивно по MANIFEST: поле "generator" бывает и у манифеста целиком, и у
+    каждой карточки файла."""
+    if isinstance(node, dict):
+        for key, val in node.items():
+            if key == "generator" and isinstance(val, str):
+                yield val
+            else:
+                yield from generator_fields(val)
+    elif isinstance(node, list):
+        for val in node:
+            yield from generator_fields(val)
+
+
+def read_manifests():
+    """-> [(где записано, разобранный json)] — все game/assets/**/MANIFEST.json."""
+    out = []
+    for dirpath, _dirs, names in os.walk(ASSETS):
+        for name in sorted(names):
+            if name != "MANIFEST.json":
+                continue
+            full = os.path.join(dirpath, name)
+            rel = os.path.relpath(full, ROOT).replace(os.sep, "/")
+            try:
+                with open(full, encoding="utf-8") as fh:
+                    out.append((rel, json.load(fh)))
+            except (OSError, ValueError) as err:
+                out.append((rel, {"generator": "__НЕ_ЧИТАЕТСЯ__: %s" % err}))
+    return out
+
+
+def tracked_files():
+    """Индекс git — единственный ответ на «есть ли файл в репо»: файл может лежать
+    на диске и не быть закоммиченным. None если git недоступен (тогда сноска на диск)."""
+    try:
+        out = subprocess.run(["git", "-C", ROOT, "ls-files"], capture_output=True,
+                             text=True, check=True, timeout=60)
+    except Exception:
+        return None
+    return set(out.stdout.splitlines())
 
 
 def parse_registry():
@@ -102,9 +164,43 @@ def self_test():
     assert tally(["b/x.png"], files, classes)[0] == 0
     assert tally(["c/z.png", "a/1.png"], files, classes)[0] == 2
     assert tally(["c/orphan.png"], files, classes)[0] == 0
+    # объявленные генераторы: путь со слэшем считается, имя без слэша и внешний
+    # инструмент — нет; снятый скрипт обязан падать (D12)
+    reg = ("| `game/assets/x/` | генератор репо `game/tools/gen.py` | … | … | … | чисто |\n"
+           "| `game/assets/y/` | генератор `battle-demo/tools/gen_frames.py` | … | … | … | чисто |\n"
+           "| `game/assets/z/` | генератор репо `game/tools/gone.py` (+ `gen_other.gd`) | … | … | … | чисто |\n")
+    manifests = [("game/assets/x/MANIFEST.json",
+                  {"generator": "game/tools/gen.py",
+                   "files": [{"file": "a.png", "generator": "krea2 (ComfyUI) / qwen"},
+                             {"file": "b.png", "generator": "game/tools/moved.py"}]})]
+    declared = declared_generators(reg, manifests)
+    assert ("PROVENANCE.md", "game/tools/gen.py") in declared
+    assert ("PROVENANCE.md", "battle-demo/tools/gen_frames.py") in declared
+    assert ("PROVENANCE.md", "game/tools/gone.py") in declared
+    assert ("game/assets/x/MANIFEST.json", "game/tools/moved.py") in declared
+    # имя без слэша и модель без пути в объявленные генераторы не попадают
+    assert not any("gen_other.gd" in g for _w, g in declared)
+    assert not any("krea2" in g for _w, g in declared)
+    dead = {g for _w, g in declared if g not in {"game/tools/gen.py",
+                                                 "battle-demo/tools/gen_frames.py"}}
+    assert dead == {"game/tools/gone.py", "game/tools/moved.py"}
     print("SELF-TEST: OK (проекции статус/уровень строки расходятся: 4 = 2+1+1, "
-          "срез уровня 3/1)")
+          "срез уровня 3/1; генераторы: 4 пути считается, имя и модель — нет, "
+          "2 снятых ловятся)")
     return 0
+
+
+def check_generators(index):
+    """Провенанс обязан вести на живой скрипт: снятый генератор без пометки — это
+    ложное обещание воспроизводимости (D12)."""
+    problems = []
+    for where, gen in declared_generators(
+            open(REGISTRY, encoding="utf-8").read(), read_manifests()):
+        live = (gen in index) if index is not None else os.path.exists(os.path.join(ROOT, gen))
+        if not live:
+            problems.append("объявленный генератор не в индексе: %s (объявлен в %s)"
+                            % (gen, where))
+    return problems
 
 
 def main():
@@ -132,6 +228,7 @@ def main():
     for path in sorted(classes):
         if not os.path.isdir(os.path.join(ROOT, path)):
             problems.append("строка реестра без каталога: %s" % path)
+    problems += check_generators(tracked_files())
 
     if problems:
         print("ПРОВЕНАНС: %d проблем" % len(problems))
