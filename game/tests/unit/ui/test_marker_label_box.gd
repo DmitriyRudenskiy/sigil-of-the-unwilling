@@ -1,5 +1,4 @@
 extends BaseTest
-class_name TestMarkerLabelBox
 
 ## Норма `world-marker-containment` (T-344, пункт 2.7): бокс `draw_string`
 ## центрируется **центром клетки**, а не начинается в нём.
@@ -47,4 +46,5 @@ func test_spill_is_symmetric_and_defect_is_not() -> void:
 func test_vertical_offset_is_passed_through() -> void:
 	var center := Vector2(41.0, 47.5)
 	assert_float(MarkerLayer.label_origin(center, W_GLYPH).y).is_equal_approx(center.y, 0.001)
-	assert_float(MarkerLayer.label_origin(center, W_LABEL, -14.25).y).is_equal_approx(center.y - 14.25, 0.001)
+	var shifted: Vector2 = MarkerLayer.label_origin(center, W_LABEL, -14.25)
+	assert_float(shifted.y).is_equal_approx(center.y - 14.25, 0.001)
