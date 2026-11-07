@@ -53,7 +53,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--rows", type=int, default=10)
     p.add_argument("--out-dir", default="/tmp/ui-diff")
     p.add_argument("--min-change", type=float, default=0.5,
-                   help="% изменённых пикселей в ячейке, ниже которой ячейка считается нетронутой")
+                   help="%% изменённых пикселей в ячейке, ниже которой ячейка считается нетронутой")
     p.add_argument("--cell", default=None, metavar="A1",
                    help="интересует одна ячейка — напечатать только её")
     a = p.parse_args()

@@ -86,12 +86,12 @@
 
 ## 11. `.pi/skills/`: остаётся один навык
 
-- [ ] 11.1 `git rm -r .pi/skills/changelog .pi/skills/content-audit .pi/skills/create-epics .pi/skills/loop-me .pi/skills/verification-before-completion`; `ui-grid-review` остаётся
-- [ ] 11.2 `docs/19-gdd-workflow.md` — убрать вызовы удалённых навыков: шаг 1 (`content-audit`), шаг 3 (`loop-me`), шаг 4 (`create-epics`, `changelog`), раздел финализации (`verification-before-completion`) и строки таблицы 104. Иначе документ опишет процесс с пятью отсутствующими носителями
-- [ ] 11.3 Правки 11.1 и 11.2 — **одним коммитом**; проверить `git grep -n 'навык\|\.pi/skills' docs/19-gdd-workflow.md`
-- [ ] 11.4 Промпты `.pi/prompts/opsx-*.md` и `.pi/todos/` не трогать — они не в списке
-- [ ] 11.5 Фикс инструмента оставшегося навыка: `scripts/ui_diff.py` строка 55 — `%%` в help-строке `--min-change`. Сейчас `python3 scripts/ui_diff.py --help` падает (`ValueError: unsupported format character`), той же веткой `p.error()` падает и на `--cols 0`. Проверка: `--help` и `--cols 0` печатают usage, а не traceback
-- [ ] 11.6 Регрессия навыка после разреза: `ui_grid.py --self-check`, `ui_grid.py` на `reference/12_inventory_parchment_sheet.jpeg`, `ui_grid.py --cell D5 --zoom 3`, `ui_diff.py --before --after --cell`, `Godot --path game --script tools/ui_dump.gd -- --scene=res://scenes/ui/artifact_inventory_screen.tscn --cell=D5` — все пять шагов должны отработать как в замерах этого change (15 узлов D5, тронутые A1,C1,A2,C2,A3,C3)
+- [x] 11.1 `git rm -r .pi/skills/changelog .pi/skills/content-audit .pi/skills/create-epics .pi/skills/loop-me .pi/skills/verification-before-completion`; `ui-grid-review` остаётся
+- [x] 11.2 `docs/19-gdd-workflow.md` — убрать вызовы удалённых навыков: шаг 1 (`content-audit`), шаг 3 (`loop-me`), шаг 4 (`create-epics`, `changelog`), раздел финализации (`verification-before-completion`) и строки таблицы 104. Иначе документ опишет процесс с пятью отсутствующими носителями
+- [x] 11.3 Правки 11.1 и 11.2 — **одним коммитом**; проверить `git grep -n 'навык\|\.pi/skills' docs/19-gdd-workflow.md`
+- [x] 11.4 Промпты `.pi/prompts/opsx-*.md` и `.pi/todos/` не трогать — они не в списке
+- [x] 11.5 Фикс инструмента оставшегося навыка: `scripts/ui_diff.py` строка 55 — `%%` в help-строке `--min-change`. Сейчас `python3 scripts/ui_diff.py --help` падает (`ValueError: unsupported format character`), той же веткой `p.error()` падает и на `--cols 0`. Проверка: `--help` и `--cols 0` печатают usage, а не traceback
+- [x] 11.6 Регрессия навыка после разреза: `ui_grid.py --self-check`, `ui_grid.py` на `reference/12_inventory_parchment_sheet.jpeg`, `ui_grid.py --cell D5 --zoom 3`, `ui_diff.py --before --after --cell`, `Godot --path game --script tools/ui_dump.gd -- --scene=res://scenes/ui/artifact_inventory_screen.tscn --cell=D5` — все пять шагов должны отработать как в замерах этого change (15 узлов D5, тронутые A1,C1,A2,C2,A3,C3)
 
 ## 12. `game/report.sh` и сиротство D-138
 
