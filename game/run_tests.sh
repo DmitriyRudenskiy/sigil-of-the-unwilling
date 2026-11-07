@@ -86,7 +86,13 @@ SOTU_MACHINE_ENV="${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}"
 # и весь MCP-уровень отработал там же). Различие даёт ${VAR+x}: пустая строка — тоже
 # «задано», и после source она восстанавливается.
 SOTU_SSH_HOST_SET=${MCP_SSH_HOST+x}
-SOTU_SSH_HOST_PRE="$MCP_SSH_HOST"
+# `${VAR+x` выше — единственное место, где «не задано» ещё отличается от
+# «задано пусто»; здесь уже нельзя голой ссылкой: под `set -u` прогон умирал
+# на этой строке до source настроек машины (замер 2026-11-09: дефолтный вызов
+# `./run_tests.sh` на машине без экспорта MCP_SSH_HOST выходил с «unbound
+# variable», то есть гейт был мёртв две недели для любого вызова из чистого
+# окружения).
+SOTU_SSH_HOST_PRE="${MCP_SSH_HOST-}"
 if [ -r "$SOTU_MACHINE_ENV" ]; then
 		# shellcheck disable=SC1090
 		. "$SOTU_MACHINE_ENV"
