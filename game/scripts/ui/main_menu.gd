@@ -7,7 +7,7 @@ const _HeroModelFactory = preload("res://scripts/ui/hero_model_factory.gd")
 
 ## Цель «Продолжить» (T-110) — кампанийная сцена; путь назван константой,
 ## чтобы тест проверял существование сцены-цели, а не строку наугад.
-const SCENE_CONTINUE := "res://scenes/main/main.tscn"
+const SCENE_CONTINUE := "res://scenes/ui/adventure_ui.tscn"
 
 @onready var _background: TextureRect = $Background
 @onready var _continue_btn: Button = $RightColumn/ContinueButton
@@ -163,7 +163,7 @@ func _refresh_continue_button() -> void:
 func _on_continue() -> void:
     if not MvpSaveManager.has_save_in_slot(MvpSaveManager.CAMPAIGN_SLOT):
         return
-    # Проводка T-110: Continue → main.tscn → load_save_state (слот 1).
+    # Проводка T-110: Continue → экран приключения → load_save_state (слот 1).
     var persistence: WorldPersistence = Services.resolve(&"persistence")
     if persistence != null:
         persistence.pending_campaign_slot = MvpSaveManager.CAMPAIGN_SLOT

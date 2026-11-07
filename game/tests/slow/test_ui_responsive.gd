@@ -202,7 +202,7 @@ const _SCROLL_ALLOWED := {
 	"world_ui": [
 		# Единственная живая полоса в наборе: контент 1695 px в колонке 1060 px
 		# (кадр ~/.local/share/sigil-reserve/responsive-t173/world-720.png).
-		# Носителя у экрана нет: точка входа — scenes/archive/world.tscn, её
+		# Носителя у экрана нет: точка входа — scenes/ui/adventure_ui.tscn, её
 		# вызывает WorldStateSerializer.start_game(), у которого нет ни вызова,
 		# ни autoload (замер T-173). Архив остаётся в гейте ради проверок (1) и (2).
 		"WorldUILayer/AdventureUI/RightColumn/Box",

@@ -14,6 +14,9 @@ func after_test() -> void:
 			n.free()
 	_nodes.clear()
 
+	# Знак — состояние autoload-персистентности: не отдавать его следующему тесту.
+	Services.resolve(&"persistence").pending_sign_id = ""
+
 # Бут: World.tscn + помпа реальных кадров. _ready контроллера содержит await-цепочку,
 # поэтому ждём, пока finalize доберётся до _event_router (до 120 кадров).
 func _boot_world() -> WorldController:
@@ -28,6 +31,19 @@ func _boot_world() -> WorldController:
 		if wc._event_router != null:
 			break
 	return wc
+
+func test_pending_sign_reaches_the_hero() -> void:
+	# remove-campaign-mechanic 1.3: Знак из предыгры доезжает до героя мира
+	# (до сноса кампейна его читал только main.gd).
+	var persistence: WorldPersistence = Services.resolve(&"persistence")
+	persistence.pending_sign_id = "spark"
+	var wc := await _boot_world()
+	var hero := wc.get_hero()
+	assert_that(hero).is_not_null()
+	assert_str(hero.sign_id).is_equal("spark") \
+			.override_failure_message("pending_sign_id не дожил до героя мира")
+	assert_str(persistence.pending_sign_id).is_equal("")
+
 
 func test_boot_produces_bootstrap_result() -> void:
 	var wc := await _boot_world()

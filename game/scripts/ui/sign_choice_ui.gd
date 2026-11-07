@@ -3,10 +3,12 @@ extends Control
 
 ## T-002 «Выбор знака»: экран выбора 1 из 8 Знаков на всю игру (Q18, D12;
 ## каталог — data/signs.json, docs/02c-signs.md). Протагонист = Носитель (R1).
-## Выбор кладётся в WorldPersistence.pending_sign_id и уходит в кампанию
-## (main.gd → CampaignComposition.sign_id → сейв-секция "sign").
+## Выбор кладётся в WorldPersistence.pending_sign_id, после экрана — экран
+## приключения (указание владельца 2026-11-05). Кампейнский потребитель
+## (main.gd → CampaignComposition.set_sign) снят вместе с кампанией; носитель
+## Знака в world-слое — отдельная задача (tasks 1.3).
 
-const _CAMPAIGN_SCENE := "res://scenes/main/main.tscn"  # тот же срез, что у CharacterCreationUI (D-157)
+const _ADVENTURE_SCENE := "res://scenes/ui/adventure_ui.tscn"  # мир + adventure-HUD
 const _MENU_SCENE := "res://scenes/main_menu.tscn"
 
 var _selected: String = ""
@@ -54,7 +56,7 @@ func _on_sign_pressed(id: String) -> void:
 	_selected = id
 	var persistence: WorldPersistence = Services.resolve(&"persistence")
 	persistence.pending_sign_id = id
-	get_tree().change_scene_to_file(_CAMPAIGN_SCENE)
+	get_tree().change_scene_to_file(_ADVENTURE_SCENE)
 
 
 func _on_back() -> void:

@@ -265,6 +265,11 @@ static func _init_hero(R: BootstrapResult) -> void:
 			R.hero.apply_build(profile)
 			R.persistence.pending_new_game = null
 			_apply_class_effects(R.hero, profile)
+		# T-002: Знак доживает до мира (remove-campaign-mechanic 1.3) — раньше его
+		# читал только кампейн (main.gd → CampaignComposition.set_sign).
+		if R.persistence.pending_sign_id != "":
+			R.hero.sign_id = R.persistence.pending_sign_id
+			R.persistence.pending_sign_id = "" 
 
 static func _create_ui(parent: Node2D, _platform: Variant, R: BootstrapResult) -> void:
 	if R.ui_manager == null:

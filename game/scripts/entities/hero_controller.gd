@@ -59,6 +59,11 @@ var crafting_comp: HeroCraftingComponent
 ## Ранняя игра: новая партия — без стартовой армии, герой стартует один.
 var solo_start := false
 
+## T-002: Знак, выбранный до мира (`sign_choice_ui` → `WorldPersistence
+## .pending_sign_id` → `world_bootstrap`). С 2026-11-05 носитель Знака — герой,
+## а не кампейн: состояние и сейв здесь, эффект Знака — вне MVP (02c §1).
+var sign_id := "" 
+
 
 func _init() -> void:
 	_register_components()
@@ -452,12 +457,14 @@ func serialize() -> Dictionary:
 		var comp_data: Dictionary = comp.serialize()
 		for key in comp_data:
 			data[key] = comp_data[key]
+	data["sign_id"] = sign_id
 	return data
 
 func deserialize(data: Dictionary) -> void:
 	for comp_name in _components:
 		var comp: HeroComponent = _components[comp_name]
 		comp.deserialize(data)
+	sign_id = String(data.get("sign_id", ""))
 
 # ═══════════════════════════════════════════
 #  ВНУТРЕННЕЕ

@@ -26,6 +26,22 @@ func test_stats_sex_roundtrip_and_old_save() -> void:
 	assert_that(comp3.sex).is_equal("male")
 
 
+func test_sign_id_roundtrip_and_old_save() -> void:
+	# remove-campaign-mechanic 1.3: Знак из предыгры живёт в состоянии героя
+	var hero: HeroController = auto_free(HeroController.new())
+	hero.sign_id = "eagle"
+	var data: Dictionary = hero.serialize()
+	assert_that(data.get("sign_id")).is_equal("eagle")
+	var hero2: HeroController = auto_free(HeroController.new())
+	hero2.deserialize(data)
+	assert_that(hero2.sign_id).is_equal("eagle")
+	# старый сейв без поля
+	data.erase("sign_id")
+	var hero3: HeroController = auto_free(HeroController.new())
+	hero3.deserialize(data)
+	assert_that(hero3.sign_id).is_equal("")
+
+
 func test_army_serialize() -> void:
 	var army = auto_free( HeroArmyController.new())
 	var data = army.serialize()

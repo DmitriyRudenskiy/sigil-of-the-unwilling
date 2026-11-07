@@ -258,10 +258,14 @@ func _build(campaign_seed: int) -> void:
 	campaign.victory_check_hook = func() -> bool:
 		return _any_stock_positive()
 	# T-020/T-021: регион-граф — MVP-маска S1 (movement.json), герой в городе (R01).
-	# Запас партии на переход — 0 (пополнение из стока поселения — с UI, остаток T-021);
-	# headless: герой в городе (авто-рейд на него не ведётся — R5).
+	# Запас на переход — полный ранец (Q-M91): с 0 еды стоимость `party × days` больше
+	# любого соседа, и первый же ход после создания героя упирался в «мало провизии
+	# (0/2)» — пошевелиться было нельзя ни при каком раскладе. Число берётся у
+	# `SupplySystem` (канон R7: старт с полным запасом), а не пишется литералом.
+	# Пополнение из стока поселения — всё ещё остаток T-021.
 	region_map = RegionMap.new()
-	region_map.init_campaign(PartySystem.alive_members(party).size(), 0.0)
+	region_map.init_campaign(PartySystem.alive_members(party).size(),
+			float(supply_system.capacity()))
 	_connect_region_map()
 	# T-182: цели M3 на живом кампейне. Регион руин берётся из данных маски, а не из
 	# строки: у руин свои id в movement.json, и хардкод разошёлся бы с ними в тот же
