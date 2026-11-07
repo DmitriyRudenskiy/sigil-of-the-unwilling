@@ -16,13 +16,13 @@
 
 ## 3. `doc/` → `docs/`
 
-- [ ] 3.1 `git mv doc/SAVE_MATRIX.md docs/save-matrix.md`, `git mv doc/races-economy.md docs/`, `git mv doc/social-mechanics.md docs/`; каталог `doc/` исчезает
-- [ ] 3.2 Добавить трём файлам frontmatter по конвенции `docs/` (`title`, `tags`, `status: draft|reference`, `date`); wikilinks — без пути
-- [ ] 3.3 Перевести внутренние ссылки `social-mechanics.md` ↔ `races-economy.md` в форму wikilink без пути
-- [ ] 3.4 Обновить `scripts/check_save_matrix.py`: `DOC`, `DOC_DIR`, `SEARCH_ROOTS` (строки 35–39) и docstring (строки 2, 7, 13, 14) — адрес `docs/save-matrix.md`
-- [ ] 3.5 Обновить `scripts/test_check_save_matrix.py` под новый адрес; прогон `python3 -m pytest scripts/test_check_save_matrix.py` зелёный
-- [ ] 3.6 Обновить адрес в `openspec/specs/save-migration/spec.md` (строка 10) — тем же текстом, что дельта этого change
-- [ ] 3.7 Прогон `python3 scripts/check_docs_links.py` — зелёный; `python3 scripts/check_save_matrix.py` — зелёный
+- [x] 3.1 `git mv doc/SAVE_MATRIX.md docs/save-matrix.md`, `git mv doc/races-economy.md docs/`, `git mv doc/social-mechanics.md docs/`; каталог `doc/` исчезает
+- [x] 3.2 Добавить трём файлам frontmatter по конвенции `docs/` (`title`, `tags`, `status: draft|reference`, `date`); wikilinks — без пути
+- [x] 3.3 Перевести внутренние ссылки `social-mechanics.md` ↔ `races-economy.md` в форму wikilink без пути
+- [x] 3.4 Обновить `scripts/check_save_matrix.py`: `DOC`, `DOC_DIR`, `SEARCH_ROOTS` (строки 35–39) и docstring (строки 2, 7, 13, 14) — адрес `docs/save-matrix.md`
+- [x] 3.5 Обновить `scripts/test_check_save_matrix.py` под новый адрес; прогон `python3 -m pytest scripts/test_check_save_matrix.py` зелёный
+- [x] 3.6 Обновить адрес в `openspec/specs/save-migration/spec.md` (строка 10) — тем же текстом, что дельта этого change
+- [x] 3.7 Прогон `python3 scripts/check_docs_links.py` — зелёный; `python3 scripts/check_save_matrix.py` — зелёный
 
 ## 4. `rpg_system.py` → `game/tools/`
 
