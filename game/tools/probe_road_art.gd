@@ -27,7 +27,7 @@ func _dump(label: String, ts: TileSet) -> void:
 		if src == null:
 			print("   источник %d: не AtlasSource" % id)
 			continue
-		var tex: Texture2D = src.get_atlas_texture()
+		var tex: Texture2D = src.texture
 		var n := src.get_tiles_count()
 		print("   источник %d: region=%s тайлов=%d текстура=%s формат=%d" % [
 			id, src.texture_region_size, n,

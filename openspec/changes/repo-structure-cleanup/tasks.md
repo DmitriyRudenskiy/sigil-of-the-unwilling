@@ -76,13 +76,13 @@
 
 ## 10. Мусор внутри `scripts/`
 
-- [ ] 10.1 `git rm -r --cached scripts/concept_art/concept_art` — 45 отслеживаемых сгенерированных курсоров, ноль ссылок; живые курсоры (`game/assets/cursors/*.png`, 12 файлов) не затронуты, проверить счётчик до и после
-- [ ] 10.2 Добавить в `.gitignore` правило на удвоенный путь `scripts/concept_art/concept_art/` — строка 29 закрывает только корневой `/concept_art/`, и именно через эту щель носитель попал в индекс
-- [ ] 10.3 `git rm scripts/concept_art/spec_copy.json scripts/concept_art/spec_copy{2,3,4,5,6}.json` — шесть неиспользуемых копий; **`spec_copy48.json` остаётся** (его читает `jobloop.py:398`)
-- [ ] 10.4 `git rm scripts/split_02f.py` — одноразовая миграция `docs/02f-social.md`, уже исполненная, ноль ссылок
-- [ ] 10.5 **Не трогать:** `scripts/hero_anim/out/**/picked.json` (`.gitignore:71` прямо объясняет, что в git попадает вердикт выбора варианта), `scripts/concept_art/etalons_*/` (живые: `game/assets/ui/campaign_screen/MANIFEST.json`, `game/assets/PROVENANCE.md`), `scripts/concept_art/test_clone.py` (906 строк assert-ов — живой самотест лаборатории, не обвязанный в `doc_gates.sh`, а не мусор)
-- [ ] 10.6 `game/tools/probe_road_art.gd` (untracked, без `.uid`) — либо завести с `.uid`, либо удалить; в текущем виде `git add -A` сделает checker 1 `ci2_checkers.sh` красным
-- [ ] 10.7 Добавить в `.gitignore` `game/user/` — каталог `user://` пуст сейчас и появится при первом запуске, а правила нет
+- [x] 10.1 `git rm -r --cached scripts/concept_art/concept_art` — 45 отслеживаемых сгенерированных курсоров, ноль ссылок; живые курсоры (`game/assets/cursors/*.png`, 12 файлов) не затронуты, проверить счётчик до и после
+- [x] 10.2 Добавить в `.gitignore` (сделано в 2.2: правило легло до снятия файлов, щель закрыта первой) правило на удвоенный путь `scripts/concept_art/concept_art/` — строка 29 закрывает только корневой `/concept_art/`, и именно через эту щель носитель попал в индекс
+- [x] 10.3 `git rm scripts/concept_art/spec_copy.json scripts/concept_art/spec_copy{2,3,4,5,6}.json` — шесть неиспользуемых копий; **`spec_copy48.json` остаётся** (его читает `jobloop.py:398`)
+- [x] 10.4 `git rm scripts/split_02f.py` — одноразовая миграция `docs/02f-social.md`, уже исполненная, ноль ссылок
+- [x] 10.5 **Не трогать:** `scripts/hero_anim/out/**/picked.json` (`.gitignore:71` прямо объясняет, что в git попадает вердикт выбора варианта), `scripts/concept_art/etalons_*/` (живые: `game/assets/ui/campaign_screen/MANIFEST.json`, `game/assets/PROVENANCE.md`), `scripts/concept_art/test_clone.py` (906 строк assert-ов — живой самотест лаборатории, не обвязанный в `doc_gates.sh`, а не мусор)
+- [x] 10.6 `game/tools/probe_road_art.gd` — заведён с `.uid` и починен: `src.get_atlas_texture()` не существует в Godot 4.7, взят `src.texture`. Зонд заработал и сразу выдал предмет охоты: у листов дорог и объектов `region=(82,82)` при `tile_size=(82,95)`. Оставлять untracked-файл значило оставить его без носителя — его не было в git вовсе
+- [x] 10.7 Добавить в `.gitignore` `game/user/` (сделано в 2.3) — каталог `user://` пуст сейчас и появится при первом запуске, а правила нет
 
 ## 11. `.pi/skills/`: остаётся один навык
 
