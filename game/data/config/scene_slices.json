@@ -483,6 +483,360 @@
      "in_band_share_recolored": 0.779
     },
     "sha256": "f16f99e55c77503f1c1c4d7f5c73d5cf4ded15f48422f2a1ae2b29e3d24d0af0"
+   },
+   "props": {
+    "cells": 19,
+    "objects": 16,
+    "roads": 3,
+    "patches": 2,
+    "dropped_tiny": 496,
+    "props_per_cell_p95": 2,
+    "area_share_p50": 0.14,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       0,
+       5
+      ],
+      "bbox": [
+       60,
+       70,
+       321,
+       647
+      ],
+      "cell_share": 5.831,
+      "elong": 2.02,
+      "angle": -90.0
+     },
+     {
+      "kind": "road",
+      "cell": [
+       4,
+       1
+      ],
+      "bbox": [
+       431,
+       70,
+       189,
+       22
+      ],
+      "cell_share": 0.345,
+      "elong": 8.95,
+      "angle": -90.0
+     },
+     {
+      "kind": "road",
+      "cell": [
+       7,
+       1
+      ],
+      "bbox": [
+       782,
+       70,
+       212,
+       21
+      ],
+      "cell_share": 0.293,
+      "elong": 10.55,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       1
+      ],
+      "bbox": [
+       1018,
+       70,
+       152,
+       22
+      ],
+      "cell_share": 0.233,
+      "elong": 7.19,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       2
+      ],
+      "bbox": [
+       705,
+       129,
+       43,
+       65
+      ],
+      "cell_share": 0.101,
+      "elong": 1.12,
+      "angle": -50.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       3
+      ],
+      "bbox": [
+       699,
+       202,
+       50,
+       57
+      ],
+      "cell_share": 0.14,
+      "elong": 1.05,
+      "angle": -34.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       3
+      ],
+      "bbox": [
+       155,
+       229,
+       47,
+       27
+      ],
+      "cell_share": 0.101,
+      "elong": 1.8,
+      "angle": -2.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       4
+      ],
+      "bbox": [
+       699,
+       278,
+       38,
+       49
+      ],
+      "cell_share": 0.11,
+      "elong": 1.27,
+      "angle": -43.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       5
+      ],
+      "bbox": [
+       704,
+       337,
+       45,
+       36
+      ],
+      "cell_share": 0.103,
+      "elong": 1.22,
+      "angle": -42.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       5
+      ],
+      "bbox": [
+       710,
+       354,
+       55,
+       53
+      ],
+      "cell_share": 0.108,
+      "elong": 1.71,
+      "angle": -34.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       6
+      ],
+      "bbox": [
+       698,
+       429,
+       52,
+       41
+      ],
+      "cell_share": 0.123,
+      "elong": 1.4,
+      "angle": -9.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       6
+      ],
+      "bbox": [
+       182,
+       452,
+       67,
+       33
+      ],
+      "cell_share": 0.131,
+      "elong": 2.24,
+      "angle": -78.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       7
+      ],
+      "bbox": [
+       697,
+       491,
+       70,
+       70
+      ],
+      "cell_share": 0.286,
+      "elong": 1.01,
+      "angle": -3.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       9
+      ],
+      "bbox": [
+       708,
+       660,
+       39,
+       51
+      ],
+      "cell_share": 0.115,
+      "elong": 1.29,
+      "angle": -5.7
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       1,
+       11
+      ],
+      "bbox": [
+       60,
+       712,
+       373,
+       228
+      ],
+      "cell_share": 6.162,
+      "elong": 1.64,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       10
+      ],
+      "bbox": [
+       293,
+       747,
+       41,
+       37
+      ],
+      "cell_share": 0.103,
+      "elong": 1.15,
+      "angle": -75.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       11
+      ],
+      "bbox": [
+       722,
+       809,
+       43,
+       75
+      ],
+      "cell_share": 0.203,
+      "elong": 1.83,
+      "angle": -86.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       12
+      ],
+      "bbox": [
+       1055,
+       822,
+       255,
+       118
+      ],
+      "cell_share": 1.478,
+      "elong": 2.17,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       12
+      ],
+      "bbox": [
+       467,
+       830,
+       55,
+       48
+      ],
+      "cell_share": 0.112,
+      "elong": 1.85,
+      "angle": -36.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       12
+      ],
+      "bbox": [
+       739,
+       874,
+       82,
+       66
+      ],
+      "cell_share": 0.355,
+      "elong": 1.25,
+      "angle": -90.0
+     },
+     {
+      "kind": "road",
+      "cell": [
+       4,
+       12
+      ],
+      "bbox": [
+       419,
+       879,
+       168,
+       61
+      ],
+      "cell_share": 0.518,
+      "elong": 3.32,
+      "angle": -11.9
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.441,
+      0.559
+     ],
+     "delta_e": 36.1
+    }
    }
   },
   "1793630023618-025bda8a-33e7-4635-9ba1-08073f87492a-01a19cad-ad81-7f35-abf0-ddc6b064f7a4.png": {
@@ -942,6 +1296,344 @@
      "in_band_share_recolored": 0.845
     },
     "sha256": "126aa8180175d035e2c875ec14e09e64d129f306284313101d211d1baccaccd4"
+   },
+   "props": {
+    "cells": 20,
+    "objects": 17,
+    "roads": 1,
+    "patches": 2,
+    "dropped_tiny": 552,
+    "props_per_cell_p95": 1,
+    "area_share_p50": 0.175,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       5,
+       8
+      ],
+      "bbox": [
+       0,
+       0,
+       1484,
+       1028
+      ],
+      "cell_share": 64.36,
+      "elong": 1.44,
+      "angle": -90.0
+     },
+     {
+      "kind": "road",
+      "cell": [
+       6,
+       0
+      ],
+      "bbox": [
+       601,
+       0,
+       164,
+       40
+      ],
+      "cell_share": 0.5,
+      "elong": 4.18,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       0
+      ],
+      "bbox": [
+       902,
+       0,
+       107,
+       24
+      ],
+      "cell_share": 0.175,
+      "elong": 4.61,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       0
+      ],
+      "bbox": [
+       1121,
+       0,
+       135,
+       46
+      ],
+      "cell_share": 0.53,
+      "elong": 2.98,
+      "angle": -90.0
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       12,
+       1
+      ],
+      "bbox": [
+       1081,
+       0,
+       403,
+       254
+      ],
+      "cell_share": 4.213,
+      "elong": 1.72,
+      "angle": -65.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       0
+      ],
+      "bbox": [
+       1391,
+       0,
+       63,
+       16
+      ],
+      "cell_share": 0.131,
+      "elong": 4.13,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       1
+      ],
+      "bbox": [
+       934,
+       25,
+       86,
+       55
+      ],
+      "cell_share": 0.184,
+      "elong": 2.31,
+      "angle": -26.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       1
+      ],
+      "bbox": [
+       775,
+       43,
+       98,
+       32
+      ],
+      "cell_share": 0.137,
+      "elong": 4.06,
+      "angle": -9.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       3
+      ],
+      "bbox": [
+       1070,
+       198,
+       53,
+       41
+      ],
+      "cell_share": 0.151,
+      "elong": 1.34,
+      "angle": -3.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       3
+      ],
+      "bbox": [
+       1403,
+       205,
+       81,
+       53
+      ],
+      "cell_share": 0.18,
+      "elong": 2.32,
+      "angle": -24.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       14,
+       4
+      ],
+      "bbox": [
+       1442,
+       256,
+       42,
+       60
+      ],
+      "cell_share": 0.126,
+      "elong": 1.6,
+      "angle": -38.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       4
+      ],
+      "bbox": [
+       1304,
+       269,
+       53,
+       34
+      ],
+      "cell_share": 0.1,
+      "elong": 1.18,
+      "angle": -26.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       5
+      ],
+      "bbox": [
+       1378,
+       343,
+       106,
+       110
+      ],
+      "cell_share": 0.521,
+      "elong": 1.9,
+      "angle": -29.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       6
+      ],
+      "bbox": [
+       1329,
+       432,
+       41,
+       34
+      ],
+      "cell_share": 0.102,
+      "elong": 1.12,
+      "angle": -39.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       14,
+       8
+      ],
+      "bbox": [
+       1364,
+       464,
+       120,
+       282
+      ],
+      "cell_share": 1.572,
+      "elong": 2.36,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       7
+      ],
+      "bbox": [
+       967,
+       488,
+       45,
+       38
+      ],
+      "cell_share": 0.13,
+      "elong": 1.07,
+      "angle": -57.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       8
+      ],
+      "bbox": [
+       1319,
+       563,
+       47,
+       36
+      ],
+      "cell_share": 0.121,
+      "elong": 1.43,
+      "angle": -8.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       9
+      ],
+      "bbox": [
+       1064,
+       630,
+       50,
+       43
+      ],
+      "cell_share": 0.13,
+      "elong": 1.15,
+      "angle": -50.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       10
+      ],
+      "bbox": [
+       1317,
+       704,
+       58,
+       46
+      ],
+      "cell_share": 0.202,
+      "elong": 1.07,
+      "angle": -50.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       11
+      ],
+      "bbox": [
+       826,
+       790,
+       81,
+       31
+      ],
+      "cell_share": 0.118,
+      "elong": 3.08,
+      "angle": -8.5
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.412,
+      0.588
+     ],
+     "delta_e": 62.4
+    }
    }
   },
   "1793630103023-4c022438-746d-48d8-8d47-f140386a0d81-01a19cae-de17-7aeb-9945-8af33e4ef3eb.png": {
@@ -1401,6 +2093,344 @@
      "in_band_share_recolored": 0.951
     },
     "sha256": "9e7031d6626c06c7550f0ef6ec0883464426f0cb44158adc7bfefdf1a9b2ed1e"
+   },
+   "props": {
+    "cells": 20,
+    "objects": 19,
+    "roads": 0,
+    "patches": 1,
+    "dropped_tiny": 388,
+    "props_per_cell_p95": 1,
+    "area_share_p50": 0.236,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       6,
+       7
+      ],
+      "bbox": [
+       0,
+       0,
+       1470,
+       894
+      ],
+      "cell_share": 74.716,
+      "elong": 1.65,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       0
+      ],
+      "bbox": [
+       612,
+       0,
+       62,
+       30
+      ],
+      "cell_share": 0.148,
+      "elong": 2.1,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       2
+      ],
+      "bbox": [
+       448,
+       113,
+       90,
+       26
+      ],
+      "cell_share": 0.145,
+      "elong": 3.83,
+      "angle": -83.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       3
+      ],
+      "bbox": [
+       781,
+       163,
+       71,
+       38
+      ],
+      "cell_share": 0.17,
+      "elong": 2.44,
+      "angle": -69.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       3
+      ],
+      "bbox": [
+       1125,
+       182,
+       43,
+       31
+      ],
+      "cell_share": 0.119,
+      "elong": 1.56,
+      "angle": -36.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       3
+      ],
+      "bbox": [
+       1000,
+       193,
+       67,
+       26
+      ],
+      "cell_share": 0.123,
+      "elong": 2.82,
+      "angle": -5.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       4
+      ],
+      "bbox": [
+       258,
+       207,
+       278,
+       112
+      ],
+      "cell_share": 0.358,
+      "elong": 2.52,
+      "angle": -6.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       4
+      ],
+      "bbox": [
+       820,
+       233,
+       116,
+       58
+      ],
+      "cell_share": 0.562,
+      "elong": 2.02,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       5
+      ],
+      "bbox": [
+       985,
+       289,
+       117,
+       77
+      ],
+      "cell_share": 0.738,
+      "elong": 1.57,
+      "angle": -83.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       6
+      ],
+      "bbox": [
+       828,
+       353,
+       51,
+       29
+      ],
+      "cell_share": 0.12,
+      "elong": 1.77,
+      "angle": -4.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       7
+      ],
+      "bbox": [
+       403,
+       359,
+       111,
+       124
+      ],
+      "cell_share": 0.131,
+      "elong": 2.85,
+      "angle": -50.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       6
+      ],
+      "bbox": [
+       1071,
+       397,
+       68,
+       21
+      ],
+      "cell_share": 0.132,
+      "elong": 3.43,
+      "angle": -6.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       7
+      ],
+      "bbox": [
+       1137,
+       423,
+       81,
+       54
+      ],
+      "cell_share": 0.356,
+      "elong": 1.58,
+      "angle": -2.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       8
+      ],
+      "bbox": [
+       828,
+       480,
+       76,
+       46
+      ],
+      "cell_share": 0.16,
+      "elong": 1.67,
+      "angle": -48.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       8
+      ],
+      "bbox": [
+       1166,
+       495,
+       69,
+       43
+      ],
+      "cell_share": 0.242,
+      "elong": 2.04,
+      "angle": -36.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       9
+      ],
+      "bbox": [
+       885,
+       550,
+       94,
+       40
+      ],
+      "cell_share": 0.236,
+      "elong": 2.54,
+      "angle": -84.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       10
+      ],
+      "bbox": [
+       939,
+       574,
+       142,
+       84
+      ],
+      "cell_share": 0.673,
+      "elong": 1.72,
+      "angle": -40.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       11
+      ],
+      "bbox": [
+       979,
+       633,
+       110,
+       87
+      ],
+      "cell_share": 0.38,
+      "elong": 1.01,
+      "angle": -38.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       11
+      ],
+      "bbox": [
+       806,
+       682,
+       73,
+       32
+      ],
+      "cell_share": 0.165,
+      "elong": 2.46,
+      "angle": -86.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       12
+      ],
+      "bbox": [
+       850,
+       748,
+       130,
+       25
+      ],
+      "cell_share": 0.273,
+      "elong": 5.38,
+      "angle": -90.0
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.319,
+      0.681
+     ],
+     "delta_e": 62.8
+    }
    }
   },
   "1793630189379-90ea3ba9-f438-4cb2-9f59-213b969688b7-01a19cb0-305f-7e3b-b3f5-b188014aa81b.png": {
@@ -2109,6 +3139,440 @@
      "in_band_share_recolored": 0.682
     },
     "sha256": "2e91c7232df6172e1446bf8b2eb874e9b06c768bb0eae206091e33fc3d56b60f"
+   },
+   "props": {
+    "cells": 26,
+    "objects": 21,
+    "roads": 1,
+    "patches": 4,
+    "dropped_tiny": 343,
+    "props_per_cell_p95": 1,
+    "area_share_p50": 0.357,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       6,
+       7
+      ],
+      "bbox": [
+       0,
+       0,
+       1468,
+       915
+      ],
+      "cell_share": 74.21,
+      "elong": 1.61,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       1
+      ],
+      "bbox": [
+       787,
+       0,
+       65,
+       62
+      ],
+      "cell_share": 0.391,
+      "elong": 1.09,
+      "angle": -82.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       1
+      ],
+      "bbox": [
+       1040,
+       0,
+       30,
+       76
+      ],
+      "cell_share": 0.159,
+      "elong": 2.66,
+      "angle": -87.6
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       11,
+       1
+      ],
+      "bbox": [
+       1072,
+       0,
+       215,
+       149
+      ],
+      "cell_share": 2.115,
+      "elong": 1.45,
+      "angle": -90.0
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       14,
+       2
+      ],
+      "bbox": [
+       1276,
+       0,
+       260,
+       364
+      ],
+      "cell_share": 8.553,
+      "elong": 1.4,
+      "angle": -90.0
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       10,
+       3
+      ],
+      "bbox": [
+       963,
+       74,
+       292,
+       228
+      ],
+      "cell_share": 2.553,
+      "elong": 1.4,
+      "angle": -40.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       4
+      ],
+      "bbox": [
+       330,
+       159,
+       204,
+       147
+      ],
+      "cell_share": 0.313,
+      "elong": 1.4,
+      "angle": -3.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       3
+      ],
+      "bbox": [
+       1197,
+       162,
+       44,
+       29
+      ],
+      "cell_share": 0.114,
+      "elong": 1.6,
+      "angle": -81.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       5
+      ],
+      "bbox": [
+       483,
+       213,
+       211,
+       218
+      ],
+      "cell_share": 0.357,
+      "elong": 1.65,
+      "angle": -54.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       4
+      ],
+      "bbox": [
+       1152,
+       239,
+       46,
+       36
+      ],
+      "cell_share": 0.135,
+      "elong": 1.75,
+      "angle": -68.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       4
+      ],
+      "bbox": [
+       953,
+       245,
+       55,
+       56
+      ],
+      "cell_share": 0.275,
+      "elong": 1.27,
+      "angle": -62.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       5
+      ],
+      "bbox": [
+       823,
+       315,
+       56,
+       55
+      ],
+      "cell_share": 0.368,
+      "elong": 1.02,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       6
+      ],
+      "bbox": [
+       954,
+       329,
+       123,
+       135
+      ],
+      "cell_share": 0.948,
+      "elong": 2.23,
+      "angle": -53.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       6
+      ],
+      "bbox": [
+       855,
+       395,
+       74,
+       44
+      ],
+      "cell_share": 0.3,
+      "elong": 1.74,
+      "angle": -2.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       8
+      ],
+      "bbox": [
+       848,
+       436,
+       136,
+       151
+      ],
+      "cell_share": 0.67,
+      "elong": 1.93,
+      "angle": -47.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       7
+      ],
+      "bbox": [
+       1005,
+       452,
+       74,
+       43
+      ],
+      "cell_share": 0.299,
+      "elong": 1.82,
+      "angle": -86.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       8
+      ],
+      "bbox": [
+       788,
+       459,
+       92,
+       103
+      ],
+      "cell_share": 0.516,
+      "elong": 1.52,
+      "angle": -50.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       8
+      ],
+      "bbox": [
+       955,
+       517,
+       51,
+       39
+      ],
+      "cell_share": 0.113,
+      "elong": 2.57,
+      "angle": -44.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       8
+      ],
+      "bbox": [
+       1271,
+       524,
+       66,
+       51
+      ],
+      "cell_share": 0.356,
+      "elong": 1.36,
+      "angle": -88.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       9
+      ],
+      "bbox": [
+       834,
+       553,
+       34,
+       47
+      ],
+      "cell_share": 0.136,
+      "elong": 1.14,
+      "angle": -54.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       10
+      ],
+      "bbox": [
+       1297,
+       626,
+       56,
+       79
+      ],
+      "cell_share": 0.269,
+      "elong": 1.43,
+      "angle": -69.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       11
+      ],
+      "bbox": [
+       956,
+       655,
+       75,
+       126
+      ],
+      "cell_share": 0.618,
+      "elong": 1.6,
+      "angle": -82.3
+     },
+     {
+      "kind": "road",
+      "cell": [
+       11,
+       10
+      ],
+      "bbox": [
+       1056,
+       655,
+       201,
+       65
+      ],
+      "cell_share": 0.681,
+      "elong": 3.96,
+      "angle": -83.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       11
+      ],
+      "bbox": [
+       1017,
+       692,
+       178,
+       83
+      ],
+      "cell_share": 1.011,
+      "elong": 2.31,
+      "angle": -3.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       12
+      ],
+      "bbox": [
+       610,
+       746,
+       52,
+       36
+      ],
+      "cell_share": 0.111,
+      "elong": 1.46,
+      "angle": -86.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       13
+      ],
+      "bbox": [
+       1092,
+       822,
+       64,
+       27
+      ],
+      "cell_share": 0.107,
+      "elong": 2.78,
+      "angle": -76.0
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.389,
+      0.611
+     ],
+     "delta_e": 68.0
+    }
    }
   },
   "1793630374414-ca9dd1ee-f541-4157-a842-588f3175ef3b-01a19cb3-0db1-73b0-8d78-f250d6226242.png": {
@@ -2813,6 +4277,200 @@
      "in_band_share_recolored": 0.855
     },
     "sha256": "5a14482b852d1d185d2a9f8124a0ecbe8904b326032b0cd207a2cfc9723c514f"
+   },
+   "props": {
+    "cells": 11,
+    "objects": 10,
+    "roads": 0,
+    "patches": 1,
+    "dropped_tiny": 424,
+    "props_per_cell_p95": 1,
+    "area_share_p50": 0.153,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       7,
+       6
+      ],
+      "bbox": [
+       0,
+       0,
+       1536,
+       935
+      ],
+      "cell_share": 65.09,
+      "elong": 1.64,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       0
+      ],
+      "bbox": [
+       642,
+       0,
+       125,
+       34
+      ],
+      "cell_share": 0.352,
+      "elong": 3.76,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       5
+      ],
+      "bbox": [
+       158,
+       312,
+       47,
+       33
+      ],
+      "cell_share": 0.141,
+      "elong": 1.44,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       5
+      ],
+      "bbox": [
+       229,
+       345,
+       47,
+       35
+      ],
+      "cell_share": 0.153,
+      "elong": 1.35,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       6
+      ],
+      "bbox": [
+       1166,
+       387,
+       50,
+       40
+      ],
+      "cell_share": 0.104,
+      "elong": 2.14,
+      "angle": -49.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       14,
+       8
+      ],
+      "bbox": [
+       1469,
+       507,
+       67,
+       71
+      ],
+      "cell_share": 0.294,
+      "elong": 1.12,
+      "angle": -31.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       8
+      ],
+      "bbox": [
+       182,
+       558,
+       47,
+       36
+      ],
+      "cell_share": 0.152,
+      "elong": 1.33,
+      "angle": -1.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       10
+      ],
+      "bbox": [
+       403,
+       668,
+       60,
+       45
+      ],
+      "cell_share": 0.224,
+      "elong": 1.4,
+      "angle": -85.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       11
+      ],
+      "bbox": [
+       989,
+       770,
+       63,
+       27
+      ],
+      "cell_share": 0.109,
+      "elong": 2.49,
+      "angle": -7.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       12
+      ],
+      "bbox": [
+       514,
+       809,
+       95,
+       40
+      ],
+      "cell_share": 0.253,
+      "elong": 2.69,
+      "angle": -81.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       13
+      ],
+      "bbox": [
+       395,
+       920,
+       79,
+       14
+      ],
+      "cell_share": 0.12,
+      "elong": 6.0,
+      "angle": -90.0
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.201,
+      0.799
+     ],
+     "delta_e": 70.9
+    }
    }
   },
   "1793630714620-904115ac-f371-4f4d-9cdb-4c542aa01f9e-01a19cb8-3639-7e14-8fee-5cef01c85e25.png": {
@@ -4274,6 +5932,216 @@
      "in_band_share_recolored": 0.832
     },
     "sha256": "c513b958679ef327d0c5f32df0b7f1d83c0818d5c80afd4aacfa9e2b9d6a9d13"
+   },
+   "props": {
+    "cells": 11,
+    "objects": 8,
+    "roads": 0,
+    "patches": 4,
+    "dropped_tiny": 390,
+    "props_per_cell_p95": 2,
+    "area_share_p50": 0.332,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       1,
+       1
+      ],
+      "bbox": [
+       0,
+       0,
+       290,
+       236
+      ],
+      "cell_share": 3.487,
+      "elong": 1.54,
+      "angle": -39.5
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       7,
+       10
+      ],
+      "bbox": [
+       0,
+       0,
+       1453,
+       1052
+      ],
+      "cell_share": 26.975,
+      "elong": 1.38,
+      "angle": -0.2
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       12,
+       1
+      ],
+      "bbox": [
+       951,
+       0,
+       519,
+       311
+      ],
+      "cell_share": 6.888,
+      "elong": 1.67,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       2
+      ],
+      "bbox": [
+       1223,
+       149,
+       49,
+       37
+      ],
+      "cell_share": 0.129,
+      "elong": 1.23,
+      "angle": -76.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       3
+      ],
+      "bbox": [
+       0,
+       206,
+       69,
+       123
+      ],
+      "cell_share": 0.343,
+      "elong": 1.79,
+      "angle": -90.0
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       13,
+       7
+      ],
+      "bbox": [
+       1285,
+       299,
+       185,
+       513
+      ],
+      "cell_share": 5.319,
+      "elong": 2.86,
+      "angle": -87.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       5
+      ],
+      "bbox": [
+       0,
+       363,
+       57,
+       71
+      ],
+      "cell_share": 0.169,
+      "elong": 1.67,
+      "angle": -54.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       5
+      ],
+      "bbox": [
+       40,
+       432,
+       49,
+       27
+      ],
+      "cell_share": 0.124,
+      "elong": 1.91,
+      "angle": -5.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       6
+      ],
+      "bbox": [
+       0,
+       452,
+       66,
+       100
+      ],
+      "cell_share": 0.332,
+      "elong": 1.94,
+      "angle": -24.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       8
+      ],
+      "bbox": [
+       1211,
+       642,
+       71,
+       60
+      ],
+      "cell_share": 0.298,
+      "elong": 1.06,
+      "angle": -63.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       9
+      ],
+      "bbox": [
+       1271,
+       697,
+       57,
+       51
+      ],
+      "cell_share": 0.161,
+      "elong": 1.27,
+      "angle": -86.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       10
+      ],
+      "bbox": [
+       1203,
+       787,
+       65,
+       73
+      ],
+      "cell_share": 0.19,
+      "elong": 2.39,
+      "angle": -40.8
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.475,
+      0.525
+     ],
+     "delta_e": 57.7
+    }
    }
   },
   "1793631425594-81708aca-7041-47fd-b57e-bf67e423ffd5-01a19cc3-0d07-70c4-bf54-401f6d252e00.png": {
@@ -4971,6 +6839,472 @@
      "in_band_share_recolored": 0.914
     },
     "sha256": "42688530e880e4b1351337dba5e4da23ee31e02b084587a7bc0a9d3ff2136b06"
+   },
+   "props": {
+    "cells": 25,
+    "objects": 25,
+    "roads": 1,
+    "patches": 2,
+    "dropped_tiny": 230,
+    "props_per_cell_p95": 2,
+    "area_share_p50": 0.173,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       9,
+       5
+      ],
+      "bbox": [
+       0,
+       0,
+       1536,
+       939
+      ],
+      "cell_share": 50.029,
+      "elong": 1.64,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       3
+      ],
+      "bbox": [
+       1281,
+       204,
+       47,
+       45
+      ],
+      "cell_share": 0.178,
+      "elong": 1.29,
+      "angle": -60.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       3
+      ],
+      "bbox": [
+       357,
+       208,
+       51,
+       38
+      ],
+      "cell_share": 0.17,
+      "elong": 1.17,
+      "angle": -23.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       4
+      ],
+      "bbox": [
+       800,
+       246,
+       69,
+       78
+      ],
+      "cell_share": 0.352,
+      "elong": 1.06,
+      "angle": -63.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       4
+      ],
+      "bbox": [
+       214,
+       266,
+       38,
+       46
+      ],
+      "cell_share": 0.111,
+      "elong": 1.21,
+      "angle": -42.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       4
+      ],
+      "bbox": [
+       173,
+       288,
+       48,
+       31
+      ],
+      "cell_share": 0.107,
+      "elong": 1.54,
+      "angle": -1.8
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       2,
+       10
+      ],
+      "bbox": [
+       0,
+       291,
+       685,
+       645
+      ],
+      "cell_share": 12.213,
+      "elong": 1.84,
+      "angle": -46.1
+     },
+     {
+      "kind": "road",
+      "cell": [
+       7,
+       7
+      ],
+      "bbox": [
+       724,
+       316,
+       125,
+       405
+      ],
+      "cell_share": 2.551,
+      "elong": 3.63,
+      "angle": -4.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       5
+      ],
+      "bbox": [
+       475,
+       343,
+       35,
+       46
+      ],
+      "cell_share": 0.134,
+      "elong": 1.31,
+      "angle": -17.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       5
+      ],
+      "bbox": [
+       1292,
+       345,
+       37,
+       33
+      ],
+      "cell_share": 0.115,
+      "elong": 1.09,
+      "angle": -14.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       6
+      ],
+      "bbox": [
+       796,
+       346,
+       51,
+       85
+      ],
+      "cell_share": 0.194,
+      "elong": 1.85,
+      "angle": -7.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       5
+      ],
+      "bbox": [
+       964,
+       349,
+       53,
+       45
+      ],
+      "cell_share": 0.211,
+      "elong": 1.02,
+      "angle": -71.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       6
+      ],
+      "bbox": [
+       277,
+       422,
+       54,
+       40
+      ],
+      "cell_share": 0.126,
+      "elong": 1.31,
+      "angle": -66.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       6
+      ],
+      "bbox": [
+       178,
+       424,
+       58,
+       39
+      ],
+      "cell_share": 0.173,
+      "elong": 1.64,
+      "angle": -68.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       7
+      ],
+      "bbox": [
+       800,
+       479,
+       41,
+       50
+      ],
+      "cell_share": 0.159,
+      "elong": 1.39,
+      "angle": -81.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       7
+      ],
+      "bbox": [
+       1261,
+       485,
+       66,
+       50
+      ],
+      "cell_share": 0.248,
+      "elong": 1.33,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       8
+      ],
+      "bbox": [
+       817,
+       544,
+       34,
+       53
+      ],
+      "cell_share": 0.11,
+      "elong": 2.28,
+      "angle": -23.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       8
+      ],
+      "bbox": [
+       162,
+       557,
+       44,
+       47
+      ],
+      "cell_share": 0.13,
+      "elong": 2.01,
+      "angle": -35.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       8
+      ],
+      "bbox": [
+       1336,
+       560,
+       52,
+       39
+      ],
+      "cell_share": 0.171,
+      "elong": 1.29,
+      "angle": -28.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       8
+      ],
+      "bbox": [
+       274,
+       565,
+       56,
+       41
+      ],
+      "cell_share": 0.151,
+      "elong": 1.45,
+      "angle": -76.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       9
+      ],
+      "bbox": [
+       140,
+       610,
+       64,
+       57
+      ],
+      "cell_share": 0.233,
+      "elong": 1.09,
+      "angle": -75.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       9
+      ],
+      "bbox": [
+       1057,
+       629,
+       58,
+       46
+      ],
+      "cell_share": 0.218,
+      "elong": 1.09,
+      "angle": -61.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       10
+      ],
+      "bbox": [
+       383,
+       698,
+       75,
+       48
+      ],
+      "cell_share": 0.239,
+      "elong": 1.52,
+      "angle": -19.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       10
+      ],
+      "bbox": [
+       927,
+       705,
+       37,
+       29
+      ],
+      "cell_share": 0.111,
+      "elong": 1.35,
+      "angle": -9.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       10
+      ],
+      "bbox": [
+       471,
+       708,
+       44,
+       36
+      ],
+      "cell_share": 0.128,
+      "elong": 1.26,
+      "angle": -75.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       11
+      ],
+      "bbox": [
+       1026,
+       795,
+       77,
+       60
+      ],
+      "cell_share": 0.247,
+      "elong": 1.49,
+      "angle": -82.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       13
+      ],
+      "bbox": [
+       457,
+       900,
+       53,
+       36
+      ],
+      "cell_share": 0.131,
+      "elong": 2.03,
+      "angle": -60.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       13
+      ],
+      "bbox": [
+       341,
+       911,
+       75,
+       25
+      ],
+      "cell_share": 0.222,
+      "elong": 3.08,
+      "angle": -90.0
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.249,
+      0.751
+     ],
+     "delta_e": 63.1
+    }
    }
   },
   "1793632186230-39ef79a1-45de-4eef-b7bf-1992a99d2995-01a19cce-a3ec-763c-a004-a6aaf296d8ba.png": {
@@ -6930,6 +9264,568 @@
      "in_band_share_recolored": 0.944
     },
     "sha256": "02c5572bbb02655766fbb63f2a1cdc9554ccef8218159195ef73ac9f75c5a6e9"
+   },
+   "props": {
+    "cells": 34,
+    "objects": 25,
+    "roads": 4,
+    "patches": 5,
+    "dropped_tiny": 430,
+    "props_per_cell_p95": 1,
+    "area_share_p50": 0.352,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       2,
+       7
+      ],
+      "bbox": [
+       0,
+       0,
+       714,
+       961
+      ],
+      "cell_share": 27.792,
+      "elong": 1.81,
+      "angle": -13.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       1
+      ],
+      "bbox": [
+       62,
+       0,
+       139,
+       126
+      ],
+      "cell_share": 0.934,
+      "elong": 1.08,
+      "angle": -2.3
+     },
+     {
+      "kind": "road",
+      "cell": [
+       8,
+       1
+      ],
+      "bbox": [
+       683,
+       0,
+       455,
+       70
+      ],
+      "cell_share": 0.937,
+      "elong": 7.12,
+      "angle": -88.7
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       11,
+       1
+      ],
+      "bbox": [
+       1177,
+       0,
+       163,
+       162
+      ],
+      "cell_share": 1.613,
+      "elong": 1.1,
+      "angle": -80.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       0
+      ],
+      "bbox": [
+       1390,
+       0,
+       81,
+       19
+      ],
+      "cell_share": 0.106,
+      "elong": 4.44,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       1
+      ],
+      "bbox": [
+       1432,
+       12,
+       104,
+       80
+      ],
+      "cell_share": 0.418,
+      "elong": 1.53,
+      "angle": -63.8
+     },
+     {
+      "kind": "road",
+      "cell": [
+       4,
+       1
+      ],
+      "bbox": [
+       384,
+       18,
+       293,
+       101
+      ],
+      "cell_share": 1.369,
+      "elong": 3.52,
+      "angle": -81.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       1
+      ],
+      "bbox": [
+       1391,
+       29,
+       37,
+       51
+      ],
+      "cell_share": 0.125,
+      "elong": 1.43,
+      "angle": -86.4
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       12,
+       3
+      ],
+      "bbox": [
+       1340,
+       72,
+       196,
+       229
+      ],
+      "cell_share": 2.337,
+      "elong": 1.26,
+      "angle": -16.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       1
+      ],
+      "bbox": [
+       577,
+       83,
+       131,
+       54
+      ],
+      "cell_share": 0.277,
+      "elong": 2.92,
+      "angle": -5.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       1
+      ],
+      "bbox": [
+       1104,
+       95,
+       59,
+       37
+      ],
+      "cell_share": 0.135,
+      "elong": 2.07,
+      "angle": -69.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       2
+      ],
+      "bbox": [
+       628,
+       135,
+       108,
+       25
+      ],
+      "cell_share": 0.21,
+      "elong": 4.58,
+      "angle": -83.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       3
+      ],
+      "bbox": [
+       236,
+       202,
+       38,
+       45
+      ],
+      "cell_share": 0.161,
+      "elong": 1.16,
+      "angle": -88.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       3
+      ],
+      "bbox": [
+       336,
+       202,
+       57,
+       38
+      ],
+      "cell_share": 0.22,
+      "elong": 1.51,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       3
+      ],
+      "bbox": [
+       453,
+       202,
+       64,
+       47
+      ],
+      "cell_share": 0.241,
+      "elong": 1.62,
+      "angle": -78.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       4
+      ],
+      "bbox": [
+       387,
+       266,
+       90,
+       65
+      ],
+      "cell_share": 0.444,
+      "elong": 1.73,
+      "angle": -14.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       4
+      ],
+      "bbox": [
+       273,
+       268,
+       74,
+       46
+      ],
+      "cell_share": 0.284,
+      "elong": 1.56,
+      "angle": -76.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       5
+      ],
+      "bbox": [
+       337,
+       339,
+       75,
+       53
+      ],
+      "cell_share": 0.41,
+      "elong": 1.42,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       5
+      ],
+      "bbox": [
+       563,
+       344,
+       73,
+       49
+      ],
+      "cell_share": 0.383,
+      "elong": 1.5,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       6
+      ],
+      "bbox": [
+       391,
+       416,
+       86,
+       55
+      ],
+      "cell_share": 0.421,
+      "elong": 1.57,
+      "angle": -90.0
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       4,
+       7
+      ],
+      "bbox": [
+       394,
+       418,
+       189,
+       181
+      ],
+      "cell_share": 2.018,
+      "elong": 1.32,
+      "angle": -78.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       6
+      ],
+      "bbox": [
+       616,
+       423,
+       47,
+       35
+      ],
+      "cell_share": 0.194,
+      "elong": 1.35,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       7
+      ],
+      "bbox": [
+       1475,
+       457,
+       61,
+       73
+      ],
+      "cell_share": 0.352,
+      "elong": 1.2,
+      "angle": -90.0
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       13,
+       9
+      ],
+      "bbox": [
+       1406,
+       561,
+       130,
+       264
+      ],
+      "cell_share": 1.665,
+      "elong": 2.71,
+      "angle": -76.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       9
+      ],
+      "bbox": [
+       669,
+       646,
+       37,
+       34
+      ],
+      "cell_share": 0.138,
+      "elong": 1.09,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       9
+      ],
+      "bbox": [
+       574,
+       659,
+       64,
+       34
+      ],
+      "cell_share": 0.211,
+      "elong": 1.91,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       11
+      ],
+      "bbox": [
+       1242,
+       724,
+       172,
+       99
+      ],
+      "cell_share": 0.448,
+      "elong": 2.19,
+      "angle": -77.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       10
+      ],
+      "bbox": [
+       646,
+       726,
+       38,
+       28
+      ],
+      "cell_share": 0.122,
+      "elong": 1.37,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       10
+      ],
+      "bbox": [
+       505,
+       734,
+       83,
+       42
+      ],
+      "cell_share": 0.266,
+      "elong": 2.04,
+      "angle": -88.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       11
+      ],
+      "bbox": [
+       713,
+       775,
+       49,
+       86
+      ],
+      "cell_share": 0.195,
+      "elong": 2.03,
+      "angle": -8.7
+     },
+     {
+      "kind": "road",
+      "cell": [
+       11,
+       12
+      ],
+      "bbox": [
+       991,
+       812,
+       472,
+       148
+      ],
+      "cell_share": 4.421,
+      "elong": 3.2,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       12
+      ],
+      "bbox": [
+       714,
+       866,
+       69,
+       33
+      ],
+      "cell_share": 0.179,
+      "elong": 2.24,
+      "angle": -81.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       12
+      ],
+      "bbox": [
+       922,
+       882,
+       53,
+       47
+      ],
+      "cell_share": 0.128,
+      "elong": 1.23,
+      "angle": -64.0
+     },
+     {
+      "kind": "road",
+      "cell": [
+       6,
+       13
+      ],
+      "bbox": [
+       647,
+       899,
+       257,
+       61
+      ],
+      "cell_share": 0.719,
+      "elong": 5.11,
+      "angle": -7.6
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.403,
+      0.597
+     ],
+     "delta_e": 56.7
+    }
    }
   },
   "1793632909351-d45d6187-7828-441b-9789-25d9561c3af8-01a19cd9-b358-7795-8adf-d3e54d10190c.png": {
@@ -9607,6 +12503,232 @@
      "in_band_share_recolored": 0.718
     },
     "sha256": "1cc3c912fca1032346a4900c041aee95bccd66c4b603424b0ad8a70bd042599f"
+   },
+   "props": {
+    "cells": 13,
+    "objects": 12,
+    "roads": 0,
+    "patches": 1,
+    "dropped_tiny": 288,
+    "props_per_cell_p95": 1,
+    "area_share_p50": 0.164,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       7,
+       7
+      ],
+      "bbox": [
+       0,
+       0,
+       1536,
+       856
+      ],
+      "cell_share": 129.729,
+      "elong": 1.8,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       0
+      ],
+      "bbox": [
+       997,
+       0,
+       89,
+       18
+      ],
+      "cell_share": 0.197,
+      "elong": 5.18,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       3
+      ],
+      "bbox": [
+       436,
+       132,
+       63,
+       51
+      ],
+      "cell_share": 0.202,
+      "elong": 1.39,
+      "angle": -35.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       3
+      ],
+      "bbox": [
+       481,
+       136,
+       80,
+       59
+      ],
+      "cell_share": 0.421,
+      "elong": 1.94,
+      "angle": -62.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       5
+      ],
+      "bbox": [
+       1087,
+       213,
+       162,
+       107
+      ],
+      "cell_share": 0.236,
+      "elong": 1.23,
+      "angle": -29.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       6
+      ],
+      "bbox": [
+       1054,
+       320,
+       86,
+       110
+      ],
+      "cell_share": 0.165,
+      "elong": 1.78,
+      "angle": -34.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       7
+      ],
+      "bbox": [
+       1147,
+       331,
+       72,
+       98
+      ],
+      "cell_share": 0.131,
+      "elong": 2.23,
+      "angle": -54.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       8
+      ],
+      "bbox": [
+       1053,
+       435,
+       82,
+       114
+      ],
+      "cell_share": 0.164,
+      "elong": 2.46,
+      "angle": -64.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       10
+      ],
+      "bbox": [
+       629,
+       550,
+       26,
+       51
+      ],
+      "cell_share": 0.155,
+      "elong": 2.0,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       10
+      ],
+      "bbox": [
+       1086,
+       550,
+       52,
+       61
+      ],
+      "cell_share": 0.1,
+      "elong": 1.37,
+      "angle": -85.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       10
+      ],
+      "bbox": [
+       329,
+       585,
+       32,
+       25
+      ],
+      "cell_share": 0.115,
+      "elong": 1.29,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       11
+      ],
+      "bbox": [
+       1104,
+       611,
+       75,
+       104
+      ],
+      "cell_share": 0.135,
+      "elong": 3.18,
+      "angle": -51.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       13
+      ],
+      "bbox": [
+       1000,
+       745,
+       45,
+       33
+      ],
+      "cell_share": 0.146,
+      "elong": 2.26,
+      "angle": -19.4
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.369,
+      0.631
+     ],
+     "delta_e": 57.6
+    }
    }
   },
   "1793634749339-7f3bfdb0-f178-4410-8e23-db86c6567497-01a19cf5-c493-7c25-8ceb-b108f827af70.png": {
@@ -11223,6 +14345,216 @@
      "in_band_share_recolored": 0.878
     },
     "sha256": "e90565156b61d0d69ada403442113ae90a915774dff75767c756871876e21feb"
+   },
+   "props": {
+    "cells": 12,
+    "objects": 11,
+    "roads": 0,
+    "patches": 1,
+    "dropped_tiny": 555,
+    "props_per_cell_p95": 1,
+    "area_share_p50": 0.124,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       7,
+       6
+      ],
+      "bbox": [
+       0,
+       0,
+       1536,
+       886
+      ],
+      "cell_share": 51.432,
+      "elong": 1.73,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       0
+      ],
+      "bbox": [
+       814,
+       0,
+       97,
+       29
+      ],
+      "cell_share": 0.16,
+      "elong": 4.37,
+      "angle": -7.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       4
+      ],
+      "bbox": [
+       1497,
+       246,
+       39,
+       39
+      ],
+      "cell_share": 0.119,
+      "elong": 1.0,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       4
+      ],
+      "bbox": [
+       1248,
+       273,
+       40,
+       40
+      ],
+      "cell_share": 0.104,
+      "elong": 1.63,
+      "angle": -54.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       5
+      ],
+      "bbox": [
+       1399,
+       345,
+       46,
+       36
+      ],
+      "cell_share": 0.125,
+      "elong": 1.41,
+      "angle": -53.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       5
+      ],
+      "bbox": [
+       1070,
+       360,
+       56,
+       23
+      ],
+      "cell_share": 0.115,
+      "elong": 2.5,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       6
+      ],
+      "bbox": [
+       1018,
+       430,
+       45,
+       34
+      ],
+      "cell_share": 0.108,
+      "elong": 1.96,
+      "angle": -63.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       7
+      ],
+      "bbox": [
+       1392,
+       483,
+       40,
+       46
+      ],
+      "cell_share": 0.113,
+      "elong": 1.5,
+      "angle": -64.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       8
+      ],
+      "bbox": [
+       680,
+       543,
+       68,
+       38
+      ],
+      "cell_share": 0.168,
+      "elong": 2.06,
+      "angle": -79.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       8
+      ],
+      "bbox": [
+       1509,
+       569,
+       27,
+       54
+      ],
+      "cell_share": 0.112,
+      "elong": 2.04,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       9
+      ],
+      "bbox": [
+       1068,
+       639,
+       74,
+       35
+      ],
+      "cell_share": 0.147,
+      "elong": 2.24,
+      "angle": -85.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       9
+      ],
+      "bbox": [
+       1409,
+       638,
+       55,
+       31
+      ],
+      "cell_share": 0.124,
+      "elong": 1.84,
+      "angle": -1.6
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.241,
+      0.759
+     ],
+     "delta_e": 65.2
+    }
    }
   },
   "1793636438706-03b53cf3-ea9d-4e1c-8a7f-7cdc53e1f887-01a19d0f-7d1c-7a55-b9fa-8f2056fa3b05.png": {
@@ -11675,6 +15007,392 @@
      "in_band_share_recolored": 0.874
     },
     "sha256": "cbebe11d3ae3c81be6f5beeacf001ee69ad083f50af94d4ce04c10f11c0e4995"
+   },
+   "props": {
+    "cells": 23,
+    "objects": 21,
+    "roads": 0,
+    "patches": 2,
+    "dropped_tiny": 363,
+    "props_per_cell_p95": 1,
+    "area_share_p50": 0.195,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       6,
+       7
+      ],
+      "bbox": [
+       0,
+       0,
+       1391,
+       1101
+      ],
+      "cell_share": 49.997,
+      "elong": 1.26,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       0
+      ],
+      "bbox": [
+       173,
+       0,
+       68,
+       27
+      ],
+      "cell_share": 0.164,
+      "elong": 2.58,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       0
+      ],
+      "bbox": [
+       459,
+       0,
+       103,
+       24
+      ],
+      "cell_share": 0.222,
+      "elong": 4.43,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       2
+      ],
+      "bbox": [
+       246,
+       179,
+       99,
+       45
+      ],
+      "cell_share": 0.15,
+      "elong": 2.5,
+      "angle": -85.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       3
+      ],
+      "bbox": [
+       216,
+       214,
+       67,
+       63
+      ],
+      "cell_share": 0.212,
+      "elong": 1.06,
+      "angle": -5.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       3
+      ],
+      "bbox": [
+       110,
+       229,
+       111,
+       112
+      ],
+      "cell_share": 0.375,
+      "elong": 1.03,
+      "angle": -47.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       4
+      ],
+      "bbox": [
+       501,
+       286,
+       49,
+       64
+      ],
+      "cell_share": 0.167,
+      "elong": 1.16,
+      "angle": -27.9
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       0,
+       5
+      ],
+      "bbox": [
+       0,
+       292,
+       191,
+       307
+      ],
+      "cell_share": 3.624,
+      "elong": 1.59,
+      "angle": -6.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       4
+      ],
+      "bbox": [
+       178,
+       296,
+       60,
+       133
+      ],
+      "cell_share": 0.313,
+      "elong": 2.21,
+      "angle": -88.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       4
+      ],
+      "bbox": [
+       1197,
+       300,
+       56,
+       48
+      ],
+      "cell_share": 0.191,
+      "elong": 1.14,
+      "angle": -87.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       5
+      ],
+      "bbox": [
+       1308,
+       343,
+       83,
+       92
+      ],
+      "cell_share": 0.552,
+      "elong": 1.14,
+      "angle": -78.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       5
+      ],
+      "bbox": [
+       251,
+       413,
+       79,
+       50
+      ],
+      "cell_share": 0.131,
+      "elong": 2.08,
+      "angle": -21.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       6
+      ],
+      "bbox": [
+       1342,
+       435,
+       49,
+       54
+      ],
+      "cell_share": 0.195,
+      "elong": 1.1,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       6
+      ],
+      "bbox": [
+       153,
+       453,
+       93,
+       123
+      ],
+      "cell_share": 0.365,
+      "elong": 1.57,
+      "angle": -67.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       7
+      ],
+      "bbox": [
+       312,
+       539,
+       53,
+       30
+      ],
+      "cell_share": 0.112,
+      "elong": 1.96,
+      "angle": -20.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       8
+      ],
+      "bbox": [
+       168,
+       594,
+       55,
+       69
+      ],
+      "cell_share": 0.203,
+      "elong": 1.22,
+      "angle": -11.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       8
+      ],
+      "bbox": [
+       1310,
+       601,
+       81,
+       81
+      ],
+      "cell_share": 0.612,
+      "elong": 1.0,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       8
+      ],
+      "bbox": [
+       1197,
+       618,
+       56,
+       40
+      ],
+      "cell_share": 0.159,
+      "elong": 1.34,
+      "angle": -75.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       9
+      ],
+      "bbox": [
+       226,
+       694,
+       63,
+       42
+      ],
+      "cell_share": 0.169,
+      "elong": 1.89,
+      "angle": -20.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       10
+      ],
+      "bbox": [
+       163,
+       753,
+       46,
+       55
+      ],
+      "cell_share": 0.134,
+      "elong": 1.18,
+      "angle": -17.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       11
+      ],
+      "bbox": [
+       216,
+       828,
+       64,
+       59
+      ],
+      "cell_share": 0.197,
+      "elong": 1.07,
+      "angle": -20.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       11
+      ],
+      "bbox": [
+       519,
+       832,
+       55,
+       63
+      ],
+      "cell_share": 0.194,
+      "elong": 1.32,
+      "angle": -69.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       11
+      ],
+      "bbox": [
+       64,
+       879,
+       29,
+       34
+      ],
+      "cell_share": 0.108,
+      "elong": 1.18,
+      "angle": -90.0
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.496,
+      0.504
+     ],
+     "delta_e": 52.5
+    }
    }
   },
   "1793636510893-16a87429-857c-4338-b1fe-a3d47db26aab-01a19d10-9e44-742e-87f0-039deaf048af.png": {
@@ -16171,6 +19889,632 @@
      "in_band_share_recolored": 0.887
     },
     "sha256": "b50f87e87312a8f251ef73535d9a838f8848317bd46691fe4e7279be41c942f6"
+   },
+   "props": {
+    "cells": 37,
+    "objects": 29,
+    "roads": 2,
+    "patches": 7,
+    "dropped_tiny": 420,
+    "props_per_cell_p95": 2,
+    "area_share_p50": 0.435,
+    "items": [
+     {
+      "kind": "patch",
+      "cell": [
+       2,
+       1
+      ],
+      "bbox": [
+       0,
+       0,
+       423,
+       213
+      ],
+      "cell_share": 5.34,
+      "elong": 1.99,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       0
+      ],
+      "bbox": [
+       518,
+       0,
+       53,
+       50
+      ],
+      "cell_share": 0.206,
+      "elong": 1.06,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       6,
+       0
+      ],
+      "bbox": [
+       579,
+       0,
+       107,
+       44
+      ],
+      "cell_share": 0.233,
+      "elong": 2.94,
+      "angle": -4.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       0
+      ],
+      "bbox": [
+       684,
+       0,
+       92,
+       27
+      ],
+      "cell_share": 0.25,
+      "elong": 3.5,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       1
+      ],
+      "bbox": [
+       813,
+       0,
+       168,
+       108
+      ],
+      "cell_share": 0.764,
+      "elong": 1.68,
+      "angle": -85.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       0
+      ],
+      "bbox": [
+       1031,
+       0,
+       132,
+       78
+      ],
+      "cell_share": 0.571,
+      "elong": 1.54,
+      "angle": -49.2
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       12,
+       2
+      ],
+      "bbox": [
+       989,
+       0,
+       400,
+       168
+      ],
+      "cell_share": 2.939,
+      "elong": 2.43,
+      "angle": -86.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       0
+      ],
+      "bbox": [
+       1275,
+       0,
+       34,
+       42
+      ],
+      "cell_share": 0.104,
+      "elong": 2.1,
+      "angle": -69.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       0
+      ],
+      "bbox": [
+       1365,
+       0,
+       68,
+       76
+      ],
+      "cell_share": 0.212,
+      "elong": 1.82,
+      "angle": -52.9
+     },
+     {
+      "kind": "road",
+      "cell": [
+       7,
+       1
+      ],
+      "bbox": [
+       619,
+       19,
+       230,
+       63
+      ],
+      "cell_share": 0.773,
+      "elong": 4.04,
+      "angle": -6.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       2
+      ],
+      "bbox": [
+       397,
+       75,
+       144,
+       72
+      ],
+      "cell_share": 0.656,
+      "elong": 2.04,
+      "angle": -74.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       5
+      ],
+      "bbox": [
+       1319,
+       172,
+       151,
+       251
+      ],
+      "cell_share": 1.344,
+      "elong": 2.35,
+      "angle": -13.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       6
+      ],
+      "bbox": [
+       0,
+       281,
+       119,
+       154
+      ],
+      "cell_share": 0.822,
+      "elong": 1.3,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       7
+      ],
+      "bbox": [
+       99,
+       407,
+       101,
+       72
+      ],
+      "cell_share": 0.29,
+      "elong": 3.55,
+      "angle": -54.7
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       13,
+       8
+      ],
+      "bbox": [
+       1325,
+       485,
+       145,
+       184
+      ],
+      "cell_share": 1.667,
+      "elong": 1.26,
+      "angle": -81.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       8
+      ],
+      "bbox": [
+       412,
+       532,
+       85,
+       44
+      ],
+      "cell_share": 0.18,
+      "elong": 2.62,
+      "angle": -72.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       9
+      ],
+      "bbox": [
+       548,
+       595,
+       90,
+       50
+      ],
+      "cell_share": 0.229,
+      "elong": 3.14,
+      "angle": -70.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       9
+      ],
+      "bbox": [
+       0,
+       598,
+       48,
+       46
+      ],
+      "cell_share": 0.166,
+      "elong": 1.23,
+      "angle": -45.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       9
+      ],
+      "bbox": [
+       49,
+       605,
+       47,
+       27
+      ],
+      "cell_share": 0.124,
+      "elong": 1.84,
+      "angle": -84.6
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       12,
+       13
+      ],
+      "bbox": [
+       1158,
+       657,
+       291,
+       369
+      ],
+      "cell_share": 6.365,
+      "elong": 1.73,
+      "angle": -74.3
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       1,
+       12
+      ],
+      "bbox": [
+       0,
+       685,
+       228,
+       211
+      ],
+      "cell_share": 1.979,
+      "elong": 1.51,
+      "angle": -65.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       11
+      ],
+      "bbox": [
+       873,
+       717,
+       95,
+       62
+      ],
+      "cell_share": 0.254,
+      "elong": 2.06,
+      "angle": -60.6
+     },
+     {
+      "kind": "road",
+      "cell": [
+       4,
+       13
+      ],
+      "bbox": [
+       247,
+       798,
+       313,
+       125
+      ],
+      "cell_share": 1.788,
+      "elong": 3.14,
+      "angle": -83.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       12
+      ],
+      "bbox": [
+       1088,
+       807,
+       72,
+       53
+      ],
+      "cell_share": 0.195,
+      "elong": 1.26,
+      "angle": -56.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       12
+      ],
+      "bbox": [
+       981,
+       813,
+       85,
+       31
+      ],
+      "cell_share": 0.25,
+      "elong": 2.83,
+      "angle": -88.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       13
+      ],
+      "bbox": [
+       77,
+       831,
+       39,
+       62
+      ],
+      "cell_share": 0.113,
+      "elong": 1.64,
+      "angle": -2.4
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       10,
+       14
+      ],
+      "bbox": [
+       815,
+       831,
+       385,
+       195
+      ],
+      "cell_share": 3.245,
+      "elong": 2.06,
+      "angle": -7.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       13
+      ],
+      "bbox": [
+       561,
+       853,
+       41,
+       46
+      ],
+      "cell_share": 0.115,
+      "elong": 1.05,
+      "angle": -50.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       13
+      ],
+      "bbox": [
+       18,
+       870,
+       49,
+       51
+      ],
+      "cell_share": 0.178,
+      "elong": 1.15,
+      "angle": -17.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       14
+      ],
+      "bbox": [
+       147,
+       871,
+       144,
+       156
+      ],
+      "cell_share": 1.245,
+      "elong": 1.08,
+      "angle": -90.0
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       5,
+       15
+      ],
+      "bbox": [
+       457,
+       895,
+       289,
+       132
+      ],
+      "cell_share": 1.849,
+      "elong": 2.2,
+      "angle": -0.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       14
+      ],
+      "bbox": [
+       30,
+       903,
+       118,
+       124
+      ],
+      "cell_share": 0.858,
+      "elong": 1.14,
+      "angle": -29.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       14
+      ],
+      "bbox": [
+       281,
+       909,
+       134,
+       72
+      ],
+      "cell_share": 0.579,
+      "elong": 2.14,
+      "angle": -5.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       14
+      ],
+      "bbox": [
+       436,
+       918,
+       55,
+       61
+      ],
+      "cell_share": 0.233,
+      "elong": 1.03,
+      "angle": -36.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       15
+      ],
+      "bbox": [
+       418,
+       976,
+       43,
+       49
+      ],
+      "cell_share": 0.161,
+      "elong": 1.27,
+      "angle": -8.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       15
+      ],
+      "bbox": [
+       749,
+       977,
+       99,
+       49
+      ],
+      "cell_share": 0.435,
+      "elong": 2.04,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       15
+      ],
+      "bbox": [
+       283,
+       985,
+       129,
+       42
+      ],
+      "cell_share": 0.506,
+      "elong": 3.25,
+      "angle": -87.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       15
+      ],
+      "bbox": [
+       960,
+       999,
+       60,
+       27
+      ],
+      "cell_share": 0.191,
+      "elong": 2.27,
+      "angle": -90.0
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.224,
+      0.776
+     ],
+     "delta_e": 46.9
+    }
    }
   },
   "1793645500580-21f527c8-257b-43cc-91f4-168f61897841-01a19d99-e172-7f05-a6a3-3581557eb028.png": {
@@ -16609,6 +20953,680 @@
      "in_band_share_recolored": 0.894
     },
     "sha256": "40acba7d221447b3ee27f74becf1fb049e694966cadb9b2fc9fcf4b922ec34ad"
+   },
+   "props": {
+    "cells": 39,
+    "objects": 37,
+    "roads": 3,
+    "patches": 1,
+    "dropped_tiny": 271,
+    "props_per_cell_p95": 2,
+    "area_share_p50": 0.219,
+    "items": [
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       1
+      ],
+      "bbox": [
+       302,
+       0,
+       32,
+       49
+      ],
+      "cell_share": 0.187,
+      "elong": 1.57,
+      "angle": -85.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       1
+      ],
+      "bbox": [
+       337,
+       34,
+       29,
+       45
+      ],
+      "cell_share": 0.117,
+      "elong": 2.35,
+      "angle": -14.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       14,
+       1
+      ],
+      "bbox": [
+       1421,
+       38,
+       35,
+       39
+      ],
+      "cell_share": 0.177,
+      "elong": 1.31,
+      "angle": -63.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       3
+      ],
+      "bbox": [
+       195,
+       91,
+       65,
+       47
+      ],
+      "cell_share": 0.36,
+      "elong": 1.83,
+      "angle": -73.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       3
+      ],
+      "bbox": [
+       93,
+       130,
+       50,
+       41
+      ],
+      "cell_share": 0.13,
+      "elong": 1.87,
+      "angle": -24.7
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       4
+      ],
+      "bbox": [
+       13,
+       138,
+       33,
+       52
+      ],
+      "cell_share": 0.101,
+      "elong": 2.91,
+      "angle": -31.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       4
+      ],
+      "bbox": [
+       49,
+       164,
+       60,
+       62
+      ],
+      "cell_share": 0.291,
+      "elong": 1.02,
+      "angle": -30.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       4
+      ],
+      "bbox": [
+       287,
+       169,
+       69,
+       49
+      ],
+      "cell_share": 0.292,
+      "elong": 1.51,
+      "angle": -86.4
+     },
+     {
+      "kind": "road",
+      "cell": [
+       4,
+       5
+      ],
+      "bbox": [
+       411,
+       170,
+       209,
+       81
+      ],
+      "cell_share": 1.112,
+      "elong": 3.41,
+      "angle": -80.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       5
+      ],
+      "bbox": [
+       174,
+       191,
+       66,
+       74
+      ],
+      "cell_share": 0.451,
+      "elong": 1.1,
+      "angle": -15.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       5
+      ],
+      "bbox": [
+       1284,
+       194,
+       75,
+       43
+      ],
+      "cell_share": 0.308,
+      "elong": 1.83,
+      "angle": -11.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       5
+      ],
+      "bbox": [
+       1114,
+       217,
+       113,
+       36
+      ],
+      "cell_share": 0.411,
+      "elong": 3.56,
+      "angle": -84.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       14,
+       5
+      ],
+      "bbox": [
+       1431,
+       219,
+       36,
+       43
+      ],
+      "cell_share": 0.144,
+      "elong": 1.06,
+      "angle": -79.1
+     },
+     {
+      "kind": "road",
+      "cell": [
+       9,
+       5
+      ],
+      "bbox": [
+       864,
+       222,
+       156,
+       37
+      ],
+      "cell_share": 0.41,
+      "elong": 4.58,
+      "angle": -7.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       5
+      ],
+      "bbox": [
+       1383,
+       230,
+       36,
+       40
+      ],
+      "cell_share": 0.16,
+      "elong": 1.24,
+      "angle": -81.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       5
+      ],
+      "bbox": [
+       743,
+       236,
+       98,
+       24
+      ],
+      "cell_share": 0.219,
+      "elong": 4.18,
+      "angle": -4.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       5
+      ],
+      "bbox": [
+       1019,
+       241,
+       69,
+       25
+      ],
+      "cell_share": 0.182,
+      "elong": 3.28,
+      "angle": -86.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       15,
+       6
+      ],
+      "bbox": [
+       1505,
+       266,
+       31,
+       43
+      ],
+      "cell_share": 0.141,
+      "elong": 1.41,
+      "angle": -38.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       7
+      ],
+      "bbox": [
+       0,
+       293,
+       45,
+       47
+      ],
+      "cell_share": 0.217,
+      "elong": 1.5,
+      "angle": -36.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       7
+      ],
+      "bbox": [
+       94,
+       338,
+       61,
+       35
+      ],
+      "cell_share": 0.199,
+      "elong": 1.95,
+      "angle": -32.8
+     },
+     {
+      "kind": "object",
+      "cell": [
+       15,
+       8
+      ],
+      "bbox": [
+       1472,
+       363,
+       55,
+       47
+      ],
+      "cell_share": 0.163,
+      "elong": 2.69,
+      "angle": -40.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       14,
+       8
+      ],
+      "bbox": [
+       1436,
+       372,
+       50,
+       30
+      ],
+      "cell_share": 0.196,
+      "elong": 1.59,
+      "angle": -39.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       9
+      ],
+      "bbox": [
+       130,
+       424,
+       65,
+       56
+      ],
+      "cell_share": 0.327,
+      "elong": 1.69,
+      "angle": -61.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       14,
+       9
+      ],
+      "bbox": [
+       1498,
+       445,
+       38,
+       29
+      ],
+      "cell_share": 0.136,
+      "elong": 1.78,
+      "angle": -23.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       10
+      ],
+      "bbox": [
+       61,
+       483,
+       51,
+       40
+      ],
+      "cell_share": 0.26,
+      "elong": 1.23,
+      "angle": -16.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       14,
+       11
+      ],
+      "bbox": [
+       1486,
+       531,
+       45,
+       46
+      ],
+      "cell_share": 0.161,
+      "elong": 1.33,
+      "angle": -57.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       12
+      ],
+      "bbox": [
+       119,
+       591,
+       49,
+       47
+      ],
+      "cell_share": 0.282,
+      "elong": 1.37,
+      "angle": -20.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       13
+      ],
+      "bbox": [
+       173,
+       618,
+       71,
+       34
+      ],
+      "cell_share": 0.22,
+      "elong": 3.26,
+      "angle": -75.0
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       13,
+       15
+      ],
+      "bbox": [
+       1348,
+       653,
+       123,
+       146
+      ],
+      "cell_share": 1.614,
+      "elong": 2.17,
+      "angle": -65.5
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       14
+      ],
+      "bbox": [
+       1292,
+       694,
+       38,
+       28
+      ],
+      "cell_share": 0.105,
+      "elong": 1.33,
+      "angle": -13.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       15
+      ],
+      "bbox": [
+       164,
+       705,
+       65,
+       42
+      ],
+      "cell_share": 0.405,
+      "elong": 1.56,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       3,
+       15
+      ],
+      "bbox": [
+       300,
+       713,
+       51,
+       50
+      ],
+      "cell_share": 0.198,
+      "elong": 1.32,
+      "angle": -28.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       12,
+       15
+      ],
+      "bbox": [
+       1256,
+       725,
+       62,
+       33
+      ],
+      "cell_share": 0.224,
+      "elong": 1.84,
+      "angle": -15.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       15
+      ],
+      "bbox": [
+       477,
+       734,
+       101,
+       31
+      ],
+      "cell_share": 0.31,
+      "elong": 3.51,
+      "angle": -81.1
+     },
+     {
+      "kind": "road",
+      "cell": [
+       5,
+       16
+      ],
+      "bbox": [
+       368,
+       743,
+       276,
+       89
+      ],
+      "cell_share": 1.831,
+      "elong": 3.15,
+      "angle": -86.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       15
+      ],
+      "bbox": [
+       1170,
+       743,
+       92,
+       42
+      ],
+      "cell_share": 0.37,
+      "elong": 2.84,
+      "angle": -78.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       16
+      ],
+      "bbox": [
+       763,
+       754,
+       43,
+       24
+      ],
+      "cell_share": 0.109,
+      "elong": 2.37,
+      "angle": -28.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       16
+      ],
+      "bbox": [
+       1012,
+       759,
+       87,
+       73
+      ],
+      "cell_share": 0.685,
+      "elong": 1.23,
+      "angle": -3.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       17
+      ],
+      "bbox": [
+       1146,
+       797,
+       51,
+       35
+      ],
+      "cell_share": 0.284,
+      "elong": 1.47,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       9,
+       17
+      ],
+      "bbox": [
+       955,
+       799,
+       39,
+       33
+      ],
+      "cell_share": 0.174,
+      "elong": 1.52,
+      "angle": -26.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       8,
+       17
+      ],
+      "bbox": [
+       862,
+       803,
+       47,
+       29
+      ],
+      "cell_share": 0.164,
+      "elong": 1.64,
+      "angle": -90.0
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.331,
+      0.669
+     ],
+     "delta_e": 45.4
+    }
    }
   },
   "1793645668466-a4f216e0-41c2-4417-a6f8-cdc4e652a16d-01a19d9c-77a2-7baa-8f1d-650380e809b7.png": {
@@ -18161,6 +23179,392 @@
      "in_band_share_recolored": 0.908
     },
     "sha256": "f8ff8283d48a7fae04b30837c5a37cc0886284a6af085a14287c541d5674064e"
+   },
+   "props": {
+    "cells": 23,
+    "objects": 15,
+    "roads": 3,
+    "patches": 5,
+    "dropped_tiny": 191,
+    "props_per_cell_p95": 1,
+    "area_share_p50": 0.312,
+    "items": [
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       0
+      ],
+      "bbox": [
+       1317,
+       8,
+       70,
+       35
+      ],
+      "cell_share": 0.162,
+      "elong": 2.25,
+      "angle": -6.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       0
+      ],
+      "bbox": [
+       4,
+       15,
+       67,
+       33
+      ],
+      "cell_share": 0.151,
+      "elong": 2.38,
+      "angle": -83.3
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       0,
+       3
+      ],
+      "bbox": [
+       0,
+       75,
+       254,
+       254
+      ],
+      "cell_share": 3.471,
+      "elong": 1.3,
+      "angle": -67.9
+     },
+     {
+      "kind": "road",
+      "cell": [
+       2,
+       1
+      ],
+      "bbox": [
+       212,
+       74,
+       290,
+       79
+      ],
+      "cell_share": 1.354,
+      "elong": 3.86,
+      "angle": -85.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       1
+      ],
+      "bbox": [
+       41,
+       79,
+       69,
+       39
+      ],
+      "cell_share": 0.166,
+      "elong": 2.17,
+      "angle": -77.2
+     },
+     {
+      "kind": "road",
+      "cell": [
+       6,
+       1
+      ],
+      "bbox": [
+       601,
+       84,
+       265,
+       18
+      ],
+      "cell_share": 0.412,
+      "elong": 15.53,
+      "angle": -90.0
+     },
+     {
+      "kind": "road",
+      "cell": [
+       9,
+       2
+      ],
+      "bbox": [
+       867,
+       90,
+       217,
+       65
+      ],
+      "cell_share": 0.885,
+      "elong": 3.43,
+      "angle": -88.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       10,
+       1
+      ],
+      "bbox": [
+       1096,
+       93,
+       116,
+       16
+      ],
+      "cell_share": 0.121,
+      "elong": 7.85,
+      "angle": -0.5
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       12,
+       3
+      ],
+      "bbox": [
+       1212,
+       104,
+       175,
+       313
+      ],
+      "cell_share": 2.582,
+      "elong": 2.25,
+      "angle": -26.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       2
+      ],
+      "bbox": [
+       431,
+       127,
+       69,
+       23
+      ],
+      "cell_share": 0.122,
+      "elong": 3.27,
+      "angle": -85.1
+     },
+     {
+      "kind": "object",
+      "cell": [
+       11,
+       2
+      ],
+      "bbox": [
+       1103,
+       128,
+       80,
+       23
+      ],
+      "cell_share": 0.123,
+      "elong": 4.16,
+      "angle": -6.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       5,
+       2
+      ],
+      "bbox": [
+       473,
+       171,
+       87,
+       18
+      ],
+      "cell_share": 0.143,
+      "elong": 5.06,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       2,
+       3
+      ],
+      "bbox": [
+       276,
+       180,
+       94,
+       32
+      ],
+      "cell_share": 0.25,
+      "elong": 3.08,
+      "angle": -87.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       6
+      ],
+      "bbox": [
+       27,
+       305,
+       114,
+       190
+      ],
+      "cell_share": 1.163,
+      "elong": 1.95,
+      "angle": -12.2
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       7
+      ],
+      "bbox": [
+       62,
+       483,
+       57,
+       73
+      ],
+      "cell_share": 0.312,
+      "elong": 1.03,
+      "angle": -67.3
+     },
+     {
+      "kind": "object",
+      "cell": [
+       13,
+       8
+      ],
+      "bbox": [
+       1291,
+       504,
+       96,
+       151
+      ],
+      "cell_share": 1.034,
+      "elong": 1.46,
+      "angle": -63.4
+     },
+     {
+      "kind": "object",
+      "cell": [
+       1,
+       8
+      ],
+      "bbox": [
+       81,
+       557,
+       91,
+       83
+      ],
+      "cell_share": 0.596,
+      "elong": 1.07,
+      "angle": -4.6
+     },
+     {
+      "kind": "object",
+      "cell": [
+       0,
+       9
+      ],
+      "bbox": [
+       99,
+       648,
+       38,
+       56
+      ],
+      "cell_share": 0.167,
+      "elong": 1.61,
+      "angle": -78.7
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       2,
+       13
+      ],
+      "bbox": [
+       109,
+       707,
+       369,
+       314
+      ],
+      "cell_share": 6.84,
+      "elong": 2.21,
+      "angle": -61.5
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       10,
+       13
+      ],
+      "bbox": [
+       931,
+       782,
+       386,
+       239
+      ],
+      "cell_share": 7.666,
+      "elong": 1.62,
+      "angle": -90.0
+     },
+     {
+      "kind": "object",
+      "cell": [
+       4,
+       12
+      ],
+      "bbox": [
+       367,
+       840,
+       98,
+       32
+      ],
+      "cell_share": 0.176,
+      "elong": 3.97,
+      "angle": -76.2
+     },
+     {
+      "kind": "patch",
+      "cell": [
+       6,
+       14
+      ],
+      "bbox": [
+       502,
+       871,
+       351,
+       150
+      ],
+      "cell_share": 4.179,
+      "elong": 2.55,
+      "angle": -81.9
+     },
+     {
+      "kind": "object",
+      "cell": [
+       7,
+       13
+      ],
+      "bbox": [
+       749,
+       934,
+       72,
+       37
+      ],
+      "cell_share": 0.181,
+      "elong": 2.23,
+      "angle": -75.6
+     }
+    ],
+    "biome_pair": {
+     "shares": [
+      0.304,
+      0.696
+     ],
+     "delta_e": 52.8
+    }
    }
   }
  },
@@ -18203,5 +23607,21 @@
    "dominant": "k = 7 (тон-кластеры, как в генераторе), доминантой считается тон с долей ≥ 0.08"
   },
   "cell_geometry": "точечные гексы; W = col_step_px, R = radius_px; сторона = 2R, шаг по X = W"
+ },
+ "props_dedupe": {
+  "props": 266,
+  "note": "набор пропсов меряется порогами ткани (D-312); нормированные поля — «тот же силуэт» (r ≥ 0.9), сырые RMS — «та же краска», ΔE-гейт приёмки не трогает",
+  "raw": {
+   "rms_2": 266,
+   "rms_8": 206,
+   "rms_16": 35,
+   "rms_32": 4
+  },
+  "normalized": {
+   "corr_0.9": 266,
+   "corr_0.75": 264,
+   "corr_0.5": 233,
+   "corr_0.25": 91
+  }
  }
 }
