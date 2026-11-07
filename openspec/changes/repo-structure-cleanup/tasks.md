@@ -143,17 +143,42 @@
 
 ## 15. Верификация
 
-- [ ] 15.1 `python3 scripts/check_docs_links.py` — зелёный
-- [ ] 15.2 `python3 scripts/check_save_matrix.py` — зелёный
-- [ ] 15.3 `python3 scripts/check_repo_layout.py` — зелёный
-- [ ] 15.4 `python3 scripts/check_asset_provenance.py` — зелёный, включая новую проверку путей генераторов
-- [ ] 15.5 `bash scripts/doc_gates.sh` — зелёный: он вызывает 35 скриптов по пути и потому является главным регресс-тестом переездов `ui_kit`
-- [ ] 15.6 `bash game/run_tests.sh` — полный набор, 0 failures / 0 errors / 0 orphans
-- [ ] 15.7 `openspec validate repo-structure-cleanup --type change --strict` — valid
-- [ ] 15.8 `git status` чист; `git ls-files artifacts tools doc image-clone prototypes data scripts/concept_art/concept_art` пуст; `git ls-files game/assets/artifacts | wc -l` = 120, как в `e7af3b70`
-- [ ] 15.9 `git ls-files game/assets/fonts/LICENSE.txt` непустой; `git ls-files LICENSE SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md .editorconfig CHANGELOG.md game/report.sh scripts/split_02f.py` пуст
-- [ ] 15.10 `grep -c '2026-09-25' docs/CHANGELOG.md` > 0 — перенесённый журнал пережил удаление файла
-- [ ] 15.11 `git ls-files .pi/skills` даёт ровно `ui-grid-review/SKILL.md`; `git ls-files .pi/prompts | wc -l` = 6 (промпты не затронуты)
-- [ ] 15.12 `git ls-files game | grep -E '^game/[^/]+\.(gd|py)$'` пуст; `git ls-files game | grep '\.py$' | grep -vE '^game/(tools|tests)/'` пуст
-- [ ] 15.13 `git ls-files game/assets/cursors | wc -l` = 12 — живые курсоры не задеты группой 10
-- [ ] 15.14 `python3 scripts/ui_diff.py --help` печатает usage, а не traceback — оставшийся навык обязан быть исправен
+- [x] 15.1 `python3 scripts/check_docs_links.py` — зелёный
+- [x] 15.2 `python3 scripts/check_save_matrix.py` — зелёный
+- [x] 15.3 `python3 scripts/check_repo_layout.py` — зелёный
+- [x] 15.4 `python3 scripts/check_asset_provenance.py` — зелёный, включая новую проверку путей генераторов
+- [x] 15.5 `bash scripts/doc_gates.sh` — зелёный: он вызывает 35 скриптов по пути и потому является главным регресс-тестом переездов `ui_kit`
+- [x] 15.6 `bash game/run_tests.sh` — полный набор, 0 failures / 0 errors / 0 orphans
+- [x] 15.7 `openspec validate repo-structure-cleanup --type change --strict` — valid
+- [x] 15.8 `git status` чист; `git ls-files artifacts tools doc image-clone prototypes data scripts/concept_art/concept_art` пуст; `git ls-files game/assets/artifacts | wc -l` = 120, как в `e7af3b70`
+- [x] 15.9 `git ls-files game/assets/fonts/LICENSE.txt` непустой; `git ls-files LICENSE SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md .editorconfig CHANGELOG.md game/report.sh scripts/split_02f.py` пуст
+- [x] 15.10 `grep -c '2026-09-25' docs/CHANGELOG.md` > 0 — перенесённый журнал пережил удаление файла
+- [x] 15.11 `git ls-files .pi/skills` даёт ровно `ui-grid-review/SKILL.md`; `git ls-files .pi/prompts | wc -l` = 6 (промпты не затронуты)
+- [x] 15.12 `git ls-files game | grep -E '^game/[^/]+\.(gd|py)$'` пуст; `git ls-files game | grep '\.py$' | grep -vE '^game/(tools|tests)/'` пуст
+- [x] 15.13 `git ls-files game/assets/cursors | wc -l` = 12 — живые курсоры не задеты группой 10
+- [x] 15.14 `python3 scripts/ui_diff.py --help` печатает usage, а не traceback — оставшийся навык обязан быть исправен
+Итог верификации (2026-11-09). Зелёные: 15.1 (132 заметки), 15.2, 15.3
+(14 носителей), 15.4 (993 строки реестра), 15.7 (`Change 'repo-structure-cleanup'
+is valid`), 15.6 — `GATE VERDICT: GREEN`: 3694 тест-кейса, 0 errors / 0 failures /
+0 orphans, TIER COVERAGE 394/394, MCP 123 passed / 2 skipped (причины обязательны:
+нет узлов городов в сцене боя; съёмка по запросу), READINESS-CLASSIFIER GREEN,
+`PUSH: OK`. Мерка 15.8–15.14 совпала целиком: снятые пути пусты,
+`game/assets/artifacts` = 120 как в `e7af3b70`, бойлплейт отсутствует,
+`game/assets/fonts/LICENSE.txt` на месте, `2026-09-25` в журнале пережил удаление
+файла, `.pi/skills` = один `ui-grid-review/SKILL.md` при шести промптах, в корне
+`game/` ни `.gd`, ни `.py`, Python только в `tools/` и `tests/`, живых курсоров 12,
+`ui_diff.py --help` печатает usage.
+
+Два красных в 15.5 (`doc_gates.sh`) — не этого разреза, сверено с worktree на
+`77913c83~1`: (а) рэтчет `testmap` `merge_files 146 → 148 (+2)` — те же числа до
+разреза; (б) `audit_docs_vs_code` — семь ссылок доков на `scenes/archive/world.tscn`
+(носитель снят катом D-157, доки не сведены), `ProbeGlyphLayer` (класс добавлен
+`5671d941`, чужая сессия), устаревший allowlist `CampaignCity` и базлайн
+`adventure_hud.tscn`. До разреза аудит показывал девять строк
+`doc_ref`, осталось семь; сами четыре предмета относятся к архиву мира и к чужой
+инициативе — править их здесь значит перелезть через чужой незавершённый свод.
+
+Попутно, потому что без этого 15.6 не исполняется: `game/run_tests.sh` был мёртв
+для любого вызова из чистого окружения (`set -u` + голая ссылка `$MCP_SSH_HOST`
+до `source` настроек машины, живёт с `f375146d`), и GENART-секция роняла вывод
+лаборатории в `game/concept_art/`. Оба сняты `3b899c9b`.
