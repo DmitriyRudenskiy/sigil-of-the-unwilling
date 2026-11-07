@@ -32,7 +32,7 @@
 | Тесты | `game/run_tests.sh` (GdUnit4 headless + MCP e2e) |
 | MCP e2e venv | путь — **в настройке машины** (`MCP_PYTEST_PY`); на X-хосте venv есть (pytest + pytest-timeout + pytest-xdist + mcp + anyio; + numpy/Pillow/scipy — их требует `scripts/test_gen_map_art.py`, T-223), на машинах без него раннер берёт `python3` с `mcp`+`anyio` |
 | MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
-| Ремот `origin` | `git@github.com:DmitriyRudenskiy/sigil-of-the-unwilling.git` — **SSH** (ключ `~/.ssh/id_ed25519`). HTTPS не работает: токен в `gh auth` просрочен (проверено 2026-10-17) → `git push`/`git fetch` идут по SSH, `gh`-операции трекера — отдельный вопрос (реестр тикетов — `docs/mvp/TICKETS.md`, хост — зеркало) |
+| Ремот `origin` | `git@github.com:DmitriyRudenskiy/sigil-of-the-unwilling.git` — **SSH** (ключ `~/.ssh/id_ed25519`) → `git push`/`git fetch` идут по SSH. `gh`-операции трекера **работают**: `gh auth status` — залогинен, scopes `repo`/`workflow` (переснято 2026-11-09, выпуском зеркала T-348 → issue #32; прежняя строка «токен просрочен, проверено 2026-10-17» устарела и снималась задачей T-344 п.5.4). Реестр тикетов — `docs/mvp/TICKETS.md`, хост — зеркало (D-139) |
 
 | OpenSpec | `openspec/changes/<name>/`, CLI: `openspec` (npm `@fission-ai/openspec` 1.14.3). В неинтерактивной оболочке PATH его не видит — звать `node "$(npm root -g)/@fission-ai/openspec/bin/openspec.js"` (путь вычисляется, а не хранится: в этой строке когда-то лежал путь одной машины, и на другой он расходился с действительностью) |
 

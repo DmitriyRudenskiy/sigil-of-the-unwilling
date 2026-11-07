@@ -31,6 +31,17 @@ var _terrain_mgr: Variant = null
 var _terrain_pos: Dictionary = {}
 var _fog: RefCounted = null
 
+## Норма `world-marker-containment` (T-344, ступень 1 лестницы): `draw_string` тянет
+## бокс ширины `box_width` ВПРАВО от точки отсчёта, а `HORIZONTAL_ALIGNMENT_CENTER`
+## центрует текст внутри бокса, а не вокруг точки отсчёта. Значит отсчёт — центр
+## клетки со сдвигом `−box_width/2`; без поправки вся подпись уезжает восточному
+## соседу (замер зонда `tools/probe_glyph_layer.gd`: Δcenter +46.5 px, вылет за
+## маску 31.5 px, 41 px чернил на пустом фоне в e2e). Оба call site ниже идут через
+## эту функцию, чтобы норма жила в одном месте, а не в двух магических числах.
+static func label_origin(cell_center: Vector2, box_width: int, dy: float = 0.0) -> Vector2:
+	return Vector2(cell_center.x - box_width / 2.0, cell_center.y + dy)
+
+
 func setup(map: MapGenerator) -> void:
 		_map_gen = map
 		z_index = 5
@@ -183,13 +194,11 @@ func _draw() -> void:
 				var pos: Vector2 = m.pos
 				draw_circle(pos, _hex_size * 0.22, ThemeConfig.C_MARKER_MAGIC_FILL)
 				draw_arc(pos, _hex_size * 0.22, 0.0, TAU, 32, ThemeConfig.C_MARKER_MAGIC_RING, 2.0)
-				# Бокс центровки обязан стоять НА КЛЕТКЕ: draw_string тянет бокс ширины
-				# width ВПРАВО от pos, и CENTER центрует текст внутри него — бокс от
-				# центра клетки клал подпись восточному соседу (зонд Ф1: Δcenter_cell
-				# +46.5 px, вылет за маску 31.5 px, leaks 41 px в e2e). Сдвиг на −W/2
-				# возвращает подпись в свою клетку (T-344, ступень 1 лестницы).
+				# Бокс центровки обязан стоять НА КЛЕТКЕ: сдвиг `−W/2` задаёт
+				# `label_origin` (норма `world-marker-containment`, ступень 1).
 				draw_string(
-						ThemeDB.fallback_font, pos + Vector2(-_hex_size, -_hex_size * 0.30),
+						ThemeDB.fallback_font,
+						label_origin(pos, int(_hex_size * 2.0), -_hex_size * 0.30),
 						m.city.display_name, HORIZONTAL_ALIGNMENT_CENTER,
 						int(_hex_size * 2.0), 14, ThemeConfig.C_MARKER_LABEL)
 
@@ -201,9 +210,8 @@ func _draw() -> void:
 				var glyph: String = "✗" if m["exhausted"] else "⛏️"
 				var color: Color = ThemeConfig.C_MARKER_EXHAUSTED if m["exhausted"] else ThemeConfig.C_MARKER_ACTIVE
 				# Тот же сдвиг бокса −W/2, что у подписи города выше: глиф обязан быть
-				# в СВОЕЙ клетке (зонд Ф1: Δcenter_cell +37.5 px, вылет 2.5 px — второй
-				# call site того же дефекта; правятся оба, T-344 ступень 1).
-				draw_string(ThemeDB.fallback_font, pos + Vector2(-_hex_size * 0.8, 0.0), glyph,
+				# в СВОЕЙ клетке (второй call site того же дефекта, правятся оба).
+				draw_string(ThemeDB.fallback_font, label_origin(pos, int(_hex_size * 1.6)), glyph,
 						HORIZONTAL_ALIGNMENT_CENTER, int(_hex_size * 1.6), 14, color)
 
 		if not _visible:
