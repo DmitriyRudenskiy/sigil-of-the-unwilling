@@ -1,0 +1,41 @@
+{
+ "version": "etalons-01d2c2c57084",
+ "files": [
+  {
+   "file": "1791780027871-01a12e67-c922-7390-adb4-faf055ff8ba7.jpeg",
+   "category": "buildings",
+   "bytes": 1100848,
+   "sha256": "da6a1325ee23934c0896a56569a4849d294fc1c220a05bb04f140c57d2146d9f"
+  },
+  {
+   "file": "cursor.jpeg",
+   "category": "cursors",
+   "bytes": 666816,
+   "sha256": "c4826f3edfa5d4272ba9a995e8e38848c9064c35af15d790213780cac906b867"
+  },
+  {
+   "file": "resources.png",
+   "category": "resources",
+   "bytes": 286243,
+   "sha256": "8350d01eb36fe04dd998163755d36fa95e00a4afd4478eef3cff58e9489909a2"
+  },
+  {
+   "file": "1791970213325-01a139be-d2ce-786a-9d3b-1f9bbd4cd245.png",
+   "category": "signs",
+   "bytes": 2741359,
+   "sha256": "ca5182f67c89a2a2cb6f82f706b860e402f910d54de8a8235edee3990c0574be"
+  },
+  {
+   "file": "1791999397246-01a13b7a-0abb-7b89-a0aa-4d39e5f5f207.jpeg",
+   "category": "ui",
+   "bytes": 629331,
+   "sha256": "4f5b4d4b3c569c9acc0ada24b1f0ad878c40a4e776776c1530d0cabea11c7f06"
+  },
+  {
+   "file": "1791743136546-01a12c34-3cb2-72fb-914d-2361d7698797.jpeg",
+   "category": "units",
+   "bytes": 930544,
+   "sha256": "26a997417fcb9adeaba0026b100cc2975df1237293cc58e641704b65a77d912b"
+  }
+ ]
+}

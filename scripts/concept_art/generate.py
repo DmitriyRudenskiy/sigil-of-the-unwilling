@@ -50,7 +50,7 @@ TERMINAL_BAD = ("error", "not_found", "canceled")
 
 def load_spec(path: Path = SPEC_PATH, check_files: bool = True) -> dict:
     """Спека прогона. `check_files=False` — режим самопроверки на машине без пикселей
-    (D-307): `/image-clone/etalons/*` в git намеренно нет (D-185), поэтому наличие
+    (D-307): `/game/image-clone/etalons/*` в git намеренно нет (D-185), поэтому наличие
     кадров не проверяется, а сверяется то, что версионируется, — `manifest.json`
     эталонов (`file`/`category`/`sha256`) против перечня категорий спеки. Прогон
     генератора по-прежнему идёт с `check_files=True`: без пикселей рисовать не с чем."""

@@ -704,7 +704,7 @@ ok(g.seed_of({}, art, attempt=1) == g.seed_of({}, art, attempt=1) != g.seed_of({
    "конвейер ассетов потерял выводимую затравку")
 
 # 85. живая спека лаборатории: цепочка калибрована, сид 43, кадр 1024, негатив мёртв
-lab = json.loads((Path(j.__file__).resolve().parents[2] / "image-clone" / "spec.json").read_text())
+lab = json.loads((Path(j.__file__).resolve().parents[2] / "game" / "image-clone" / "spec.json").read_text())
 ok(lab.get("seed") == 43, f"spec лаборатории без пин-сида: {lab.get('seed')}")
 ok(lab.get("chain") == ["krea2", "ernie"], f"порядок цепочки: {lab.get('chain')}")
 ok(all(j.sty_bar(s, lab) != j.STY_TARGET for s in lab["chain"]),
