@@ -1,4 +1,4 @@
-"""Тесты сверщика `doc/SAVE_MATRIX.md` (`check_save_matrix.py`).
+"""Тесты сверщика `docs/save-matrix.md` (`check_save_matrix.py`).
 
 Зачем тесты самому сверщику (та же логика, что у `test_check_hero_layout_map.py`):
 реестр покрытия — это список ссылок, а список без проверки ссылок — это

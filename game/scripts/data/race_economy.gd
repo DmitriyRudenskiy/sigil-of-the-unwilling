@@ -2,7 +2,7 @@ class_name RaceEconomy
 extends RefCounted
 
 ## race-economy (Phase 2): 7 расовых экономических профилей.
-## Данные: res://assets/data/race_economy.json. Дизайн: doc/races-economy.md.
+## Данные: res://assets/data/race_economy.json. Дизайн: docs/races-economy.md.
 ##
 ## Хуки (doc §2, §9):
 ## - production -> ProductionChain.building_eff (специализация расы)

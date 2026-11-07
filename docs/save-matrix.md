@@ -1,3 +1,11 @@
+---
+title: SAVE_MATRIX — матрица покрытия сериализации
+tags:
+  - process
+status: reference
+date: 2026-11-08
+---
+
 # SAVE_MATRIX — матрица покрытия сериализации
 
 > Требование спеки `save-migration` (`openspec/specs/save-migration/spec.md:10`):
@@ -13,9 +21,12 @@
 >
 > Легенда: ✅ покрыто · ⚠️ gap (нет ассерта) · N/A — не состояние игрока.
 >
-> Файл лежит в `doc/` (адрес из спеки), а не в `docs/`-хранилище: wikilinks здесь
-> не работают, `check_docs_links.py` и `audit_docs_vs_code.py` сканируют `docs/`.
-> Проверка ссылок этого файла — `scripts/check_save_matrix.py`.
+> Исторически файл лежал в `doc/` — отдельном от `docs/` каталоге, где wikilinks
+> не работают, а `check_docs_links.py` и `audit_docs_vs_code.py` его не видят.
+> С `repo-structure-cleanup` он здесь, `docs/save-matrix.md`, и входит в граф
+> ссылок наравне с остальными документами. Собственная проверка ссылок этого
+> файла остаётся — `scripts/check_save_matrix.py`: она сверяет не wikilinks, а
+> пути, тесты, миграции и секции схемы с деревом.
 
 ## 1. Три носителя сейва (факт 2026-10-29)
 
@@ -40,11 +51,13 @@
   под-ключ), батарея —
   `game/tools/mut_save_sections.sh` (M1 `map.threats`, M2 `city.sm`, M3 `birth_carry`).
 
-### 1.2 Мир (`SaveData`) — наследный путь, сцена в архиве
+### 1.2 Мир (`SaveData`) — наследный путь, сцена вне игрового меню
 
 `SaveData.CURRENT_VERSION = 10`, `CURRENT_GENERATOR_VERSION = 2`
-(`game/scripts/core/save_data.gd`). Носитель сцены — `game/scenes/archive/world.tscn`
-(туда же смотрит `game/scripts/autoload/world_state_serializer.gd:130`); живое меню
+(`game/scripts/core/save_data.gd`). Носитель сцены — `game/scenes/ui/adventure_ui.tscn`
+(туда же смотрит `game/scripts/autoload/world_state_serializer.gd:130`; в архиве
+`game/scenes/archive/` сцена лежала до указания владельца от 2026-11-05 и вернулась
+в рантайм-путь, см. `game/scenes/archive/README.md`); живое меню
 (`game/scenes/main_menu.tscn`) в мир не ведёт: Continue → `scenes/main/main.tscn`.
 Тесты пути зелёные и исполняются в гейте, но из игрового пути вызова нет — строки
 раздела 3 помечены «наследие». Смежные хвосты: T-268 (`world_state_serializer.gd`

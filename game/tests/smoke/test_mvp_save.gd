@@ -236,7 +236,7 @@ func test_every_missing_section_rejected() -> void:
 	assert_str(MvpSaveSchema.validate(_sample_state())).is_equal("")
 
 
-# — T-301: зубы у столбца «покрыто» в doc/SAVE_MATRIX.md ----------------------
+# — T-301: зубы у столбца «покрыто» в docs/save-matrix.md ----------------------
 #
 # Байтовый контракт round-trip (test_cutover_composite, test_campaign_victory)
 # сверяет состояние с состоянием: под-ключ, пустой с обеих сторон, потерей не

@@ -1,0 +1,136 @@
+## 1. Снять с отслеживания то, чего уже нет в дереве
+
+- [x] 1.1 `git rm -r --cached image-clone tools` — снять 29 файлов `image-clone/` и 6 файлов `tools/spellbook_sheets/` с отслеживания; содержимое рабочего дерева не трогать (его уже нет)
+- [x] 1.2 Убедиться, что `git status` после 1.1 не содержит ` D` по этим путям, а `git ls-files image-clone tools` пуст
+- [x] 1.3 Снять с отслеживания два журнала под корневым `artifacts/` (`head_export_gate_2026-11-09.log`, `mcp_smoke_local_2026-11-09.log`); третий (`full_gate_local_2026-11-09.log`) не отслеживается и остаётся на диске
+
+## 2. `.gitignore`: актуализация
+
+- [x] 2.1 Добавить в `.gitignore` корневой `artifacts/` с комментарием «вывод прогонов; в git — числа в задаче, не лог»
+- [x] 2.2 Перевести блок `image-clone/` (строки 31–63) на `/game/image-clone/`, перенеся **все** исключения `!…/manifest.json` и `!…/MANIFEST.json` без изменений
+- [x] 2.3 Перенести правило `.reserve/` из `.git/info/exclude:9` в `.gitignore` — **в том же коммите**, где удаляется строка из `info/exclude`; проверить, что между правками `git status --porcelain` не показывает 69 каталогов
+- [x] 2.4 Добавить `.pytest_cache/` (сейчас закрыт своим авто-`.gitignore`, косметика); `/data/` со строки 2 **оставить** как страховку от повторения
+- [x] 2.5 Проверить блок на реальном дереве: `git status --ignored` показывает `game/image-clone/map/shot_transitions.png` как отслеживаемый, а пиксели попыток — как ignored
+- [x] 2.6 Убедиться, что правило 2.1 корень-анкоред: `git check-ignore -v game/assets/artifacts/wolf_medallion.png` не даёт совпадения
+- [x] 2.7 `git check-ignore -v .reserve` после 2.3 ссылается на `.gitignore`, а не на `.git/info/exclude`
+
+## 3. `doc/` → `docs/`
+
+- [ ] 3.1 `git mv doc/SAVE_MATRIX.md docs/save-matrix.md`, `git mv doc/races-economy.md docs/`, `git mv doc/social-mechanics.md docs/`; каталог `doc/` исчезает
+- [ ] 3.2 Добавить трём файлам frontmatter по конвенции `docs/` (`title`, `tags`, `status: draft|reference`, `date`); wikilinks — без пути
+- [ ] 3.3 Перевести внутренние ссылки `social-mechanics.md` ↔ `races-economy.md` в форму wikilink без пути
+- [ ] 3.4 Обновить `scripts/check_save_matrix.py`: `DOC`, `DOC_DIR`, `SEARCH_ROOTS` (строки 35–39) и docstring (строки 2, 7, 13, 14) — адрес `docs/save-matrix.md`
+- [ ] 3.5 Обновить `scripts/test_check_save_matrix.py` под новый адрес; прогон `python3 -m pytest scripts/test_check_save_matrix.py` зелёный
+- [ ] 3.6 Обновить адрес в `openspec/specs/save-migration/spec.md` (строка 10) — тем же текстом, что дельта этого change
+- [ ] 3.7 Прогон `python3 scripts/check_docs_links.py` — зелёный; `python3 scripts/check_save_matrix.py` — зелёный
+
+## 4. `rpg_system.py` → `game/tools/`
+
+- [ ] 4.1 `git mv rpg_system.py game/tools/rpg_system.py` (дом — `game/tools/`, где Python-инструменты живут и так; `prototypes/` уходит по группе 5)
+- [ ] 4.2 Проверить, что `python3 game/tools/rpg_system.py` печатает прогон так же, как до переезда (модуль автономен, `__main__`-симуляция)
+- [ ] 4.3 Убедиться, что ни одна ссылка в репозитории не осталась битой (`git grep -n rpg_system`)
+- [ ] 4.4 Убедиться, что `game/tests/smoke/test_compile_all.gd` и `scripts/check_asset_provenance.py` прогоняются с новым файлом без исключений
+
+## 5. Корневой бойлплейт
+
+- [ ] 5.1 Перенести три раздела корневого `CHANGELOG.md` (2026-09-27, 2026-09-25, 2026-02-22) в `docs/CHANGELOG.md` — принятый носитель журнала; тексты разделов не переписывать
+- [ ] 5.2 Проверить перенос: `grep -c '2026-09-25\|2026-02-22' docs/CHANGELOG.md` > 0 **до** удаления файла
+- [ ] 5.3 `git rm CHANGELOG.md` — только после 5.2
+- [ ] 5.4 `git rm LICENSE SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md .editorconfig`
+- [ ] 5.5 **Ничего не удалять и не перемещать внутри `game/`:** `game/assets/fonts/LICENSE.txt` (OFL, шрифты PT) остаётся; проверить `git status` на отсутствие удалений под `game/`
+- [ ] 5.6 `git rm prototypes/battle-hud/index.html && git rm -r prototypes` — каталог-убежище из дерева уходит
+- [ ] 5.7 `README.md`: убрать строку 5 (бейдж на `LICENSE`), строку 204 (`CONTRIBUTING.md`), строку 247 (`.editorconfig`), строку 253 (раздел «Лицензия»)
+- [ ] 5.8 Проверка: `git grep -n -E 'SECURITY\.md|CODE_OF_CONDUCT|CONTRIBUTING\.md|\.editorconfig'` даёт совпадения только в `openspec/changes/archive/` и `battle-demo/`
+
+## 6. Перепривязка ссылок на `game/image-clone/`
+
+- [ ] 6.1 `scripts/gen_map_art.py` — docstring (строка 12) и путь сырья (строка 507)
+- [ ] 6.2 `game/assets/objects/world_map_objects.json`, `world_map_roads.json`, `world_map_threat.json` — поле `source` меняет префикс на `game/image-clone/map/raw/`
+- [ ] 6.3 `game/run_tests.sh` и `game/tests/smoke/test_compile_all.gd` — путь лаборатории
+- [ ] 6.4 `AGENTS.md` (строка 205) — упоминание сессии image-clone в том же worktree
+- [ ] 6.5 `game/image-clone/map/shot_transitions.png.import` и `.cells.json` — пути внутри `.import` пересняты Godot-импортом, а не правкой руками
+- [ ] 6.6 `openspec/specs/image-clone-lab/spec.md` — пути `image-clone/…` (строки 29, 32, 589, 638) переводятся дельтой этого change на apply; руками сейчас правится только явный `queue.json`-адрес, если 6.3 его читает
+- [ ] 6.7 Проверка: `git grep -n -E '(^|[^a-z/])image-clone/'` не даёт ни одного совпадения на старый корневой путь вне `openspec/changes/archive/` и `docs/CHANGELOG.md`
+
+## 7. Проверка состава корня
+
+- [ ] 7.1 `scripts/check_repo_layout.py`: перечень разрешённого корня в самом скрипте; проверки — состав корня, отсутствие отслеживаемых файлов под выводом прогонов, отсутствие `doc/`, `tools/`, `prototypes/` и корневого бойлплейта, отсутствие `.py` в `game/` вне `game/tools/` и `game/tests/`, отсутствие `.gd` в корне проекта Godot, отсутствие правил игнорирования в `.git/info/exclude`
+- [ ] 7.2 Перечень на старте включает `battle-demo/`, `.reserve/`, `tmp/`, `reference/`, `data/` с явной пометкой «ждёт решения» — иначе первый прогон красится о том, что разрез не трогает
+- [ ] 7.3 `scripts/test_check_repo_layout.py` — падает на постороннем каталоге в корне, проходит на чистом дереве, **не** срабатывает на `game/assets/artifacts/`, падает на правиле, живущем в `.git/info/exclude`, падает на `.py` в `game/scripts/`, падает на `.gd` в корне `game/`
+- [ ] 7.4 Подключить в `scripts/ci2_checkers.sh` рядом с остальными `check_*.py`; проверить, что `bash scripts/ci2_checkers.sh` зелёный на текущем дереве после 1–6
+
+## 8. Документация структуры
+
+- [ ] 8.1 `README.md` § «Структура проекта» — привести перечень к фактическому корню: `game/`, `docs/`, `scripts/`, `openspec/`, `reference/`, `.pi/`, `tmp/`; убрать строки про удалённые носители
+- [ ] 8.2 `README.md` — описать `.pi/` (промпты `/opsx-*`, единственный навык `ui-grid-review`) наравне с прочими носителями
+- [ ] 8.3 `docs/DECISIONS.md` — запись о переездах (`doc/`→`docs/`, `image-clone/`→`game/image-clone/`, `rpg_system.py`→`game/tools/`, генераторы `ui_kit`→`game/tools/ui_kit/`, `dbg_stats.gd`→`game/tools/`), об удалении корневого бойлплейта, о сокращении `.pi/skills/` и о том, что вывод прогонов в дерево не попадает
+- [ ] 8.4 `docs/QUESTIONS.md` — новый Q-M## под решение о судьбе `battle-demo/` (следующий свободный номер после Q-M138; пометку AGENTS.md «занято до Q-M101» не читать как факт — реестр идёт дальше)
+- [ ] 8.5 `docs/CHANGELOG.md` — запись по конвенции журнала: что, почему так, чем измерено (176/176 md5, 0 расхождений; 0 отслеживаемых файлов в `data/`; 45 снимаемых курсоров; две сгнившие записи провенанса)
+
+## 9. `data/` — расчистка диска (исполняется последним из всех шагов; не откатывается через git)
+
+- [ ] 9.1 Убедиться, что `git ls-files data | wc -l` = 0 и `git check-ignore data` подтверждает правило — в git этот шаг не входит ни при каком исходе
+- [ ] 9.2 `lsof +D data` пустой; живой `openviking-server` держит хранилище в `cwd` процесса (`run_bowser/data/`), а не здесь — проверить, что это всё ещё так
+- [ ] 9.3 `rm -rf data` — только после 9.1 и 9.2 и только после того, как группы 1–8 и 10–14 зелёные
+- [ ] 9.4 Правило `/data/` в `.gitignore` не удалять: оно страхует повторение
+
+## 10. Мусор внутри `scripts/`
+
+- [ ] 10.1 `git rm -r --cached scripts/concept_art/concept_art` — 45 отслеживаемых сгенерированных курсоров, ноль ссылок; живые курсоры (`game/assets/cursors/*.png`, 12 файлов) не затронуты, проверить счётчик до и после
+- [ ] 10.2 Добавить в `.gitignore` правило на удвоенный путь `scripts/concept_art/concept_art/` — строка 29 закрывает только корневой `/concept_art/`, и именно через эту щель носитель попал в индекс
+- [ ] 10.3 `git rm scripts/concept_art/spec_copy.json scripts/concept_art/spec_copy{2,3,4,5,6}.json` — шесть неиспользуемых копий; **`spec_copy48.json` остаётся** (его читает `jobloop.py:398`)
+- [ ] 10.4 `git rm scripts/split_02f.py` — одноразовая миграция `docs/02f-social.md`, уже исполненная, ноль ссылок
+- [ ] 10.5 **Не трогать:** `scripts/hero_anim/out/**/picked.json` (`.gitignore:71` прямо объясняет, что в git попадает вердикт выбора варианта), `scripts/concept_art/etalons_*/` (живые: `game/assets/ui/campaign_screen/MANIFEST.json`, `game/assets/PROVENANCE.md`), `scripts/concept_art/test_clone.py` (906 строк assert-ов — живой самотест лаборатории, не обвязанный в `doc_gates.sh`, а не мусор)
+- [ ] 10.6 `game/tools/probe_road_art.gd` (untracked, без `.uid`) — либо завести с `.uid`, либо удалить; в текущем виде `git add -A` сделает checker 1 `ci2_checkers.sh` красным
+- [ ] 10.7 Добавить в `.gitignore` `game/user/` — каталог `user://` пуст сейчас и появится при первом запуске, а правила нет
+
+## 11. `.pi/skills/`: остаётся один навык
+
+- [ ] 11.1 `git rm -r .pi/skills/changelog .pi/skills/content-audit .pi/skills/create-epics .pi/skills/loop-me .pi/skills/verification-before-completion`; `ui-grid-review` остаётся
+- [ ] 11.2 `docs/19-gdd-workflow.md` — убрать вызовы удалённых навыков: шаг 1 (`content-audit`), шаг 3 (`loop-me`), шаг 4 (`create-epics`, `changelog`), раздел финализации (`verification-before-completion`) и строки таблицы 104. Иначе документ опишет процесс с пятью отсутствующими носителями
+- [ ] 11.3 Правки 11.1 и 11.2 — **одним коммитом**; проверить `git grep -n 'навык\|\.pi/skills' docs/19-gdd-workflow.md`
+- [ ] 11.4 Промпты `.pi/prompts/opsx-*.md` и `.pi/todos/` не трогать — они не в списке
+- [ ] 11.5 Фикс инструмента оставшегося навыка: `scripts/ui_diff.py` строка 55 — `%%` в help-строке `--min-change`. Сейчас `python3 scripts/ui_diff.py --help` падает (`ValueError: unsupported format character`), той же веткой `p.error()` падает и на `--cols 0`. Проверка: `--help` и `--cols 0` печатают usage, а не traceback
+- [ ] 11.6 Регрессия навыка после разреза: `ui_grid.py --self-check`, `ui_grid.py` на `reference/12_inventory_parchment_sheet.jpeg`, `ui_grid.py --cell D5 --zoom 3`, `ui_diff.py --before --after --cell`, `Godot --path game --script tools/ui_dump.gd -- --scene=res://scenes/ui/artifact_inventory_screen.tscn --cell=D5` — все пять шагов должны отработать как в замерах этого change (15 узлов D5, тронутые A1,C1,A2,C2,A3,C3)
+
+## 12. `game/report.sh` и сиротство D-138
+
+- [ ] 12.1 `git rm game/report.sh`
+- [ ] 12.2 `docs/DECISIONS.md` — запись, что **D-138 остаётся правилом** («ни одно число в отчёте не пишется по памяти»), но перестал быть автоматизированным: блоки отчёта собираются командами вручную, метод счёта тестов — `grep -c 'func test_'` по `game/tests`. Без этой строки реестр продолжит ссылаться на несуществующий носитель
+- [ ] 12.3 `AGENTS.md:446` — убрать упоминание `game/report.sh`-блока под флагом `ENABLE_CI_WAIT` (сам запрет CI-поллинга остаётся в силе)
+- [ ] 12.4 Архивные упоминания не переписывать (D3): `docs/CHANGELOG.md`, `docs/mvp/TICKETS.md:551`, `docs/mvp/TEST-MAP.md:707`, `game/run_tests.sh:131` — исторические цитаты; проверить, что `git grep -n report\.sh` даёт совпадения только там
+
+## 13. `game/dbg_stats.gd` → `game/tools/`
+
+- [ ] 13.1 `git mv game/dbg_stats.gd game/tools/dbg_stats.gd` и `git mv game/dbg_stats.gd.uid game/tools/dbg_stats.gd.uid` — парой, иначе checker 1 `ci2_checkers.sh` краснеет на `.gd` без `.uid`
+- [ ] 13.2 `game/tests/smoke/test_compile_all.gd` строка 26 — комментарий перечисляет файл по имени («scripts 418 + scenes 2 + dbg_stats.gd», всего 421); после переезда счётчик 420, `MIN_COMPILED := 400` цел. Комментарий правится в том же коммите
+- [ ] 13.3 Осознанное последствие: `tools` входит в `SKIP` этого теста, то есть файл перестаёт компилироваться гейтом. Для 15-строчной диагностики без загрузчиков это согласовано с соседями (`diag_*.gd`, `map_shot.gd`) и фиксируется здесь, а не остаётся незамеченным
+- [ ] 13.4 Прогон `test_compile_all.gd` зелёный после переезда
+- [ ] 13.5 Проверка: `git ls-files game | grep -E '^game/[^/]+\.gd$'` пуст — в корне проекта Godot больше нет скриптов
+
+## 14. Генераторы ассетов: один дом, живой провенанс
+
+- [ ] 14.1 Слить два дома генераторов `game/assets/**` в один: `game/scripts/ui_kit/{build_mana_bar,build_round_button}.py` и `scripts/ui_kit/*.py` (6 файлов) → `game/tools/ui_kit/`. `game/scripts/ui_kit/` был единственным Python внутри `res://scripts/`
+- [ ] 14.2 `game/assets/PROVENANCE.md` — обновить пути `scripts/ui_kit/*.py` и `game/scripts/ui_kit/*.py` на новый
+- [ ] 14.3 `game/assets/ui/widgets/MANIFEST.json` — поле `"generator": "scripts/ui_kit/build_round_button.py"` ведёт в несуществующий путь (файл жил в `game/scripts/ui_kit/`); поправить на новый
+- [ ] 14.4 `game/assets/PROVENANCE.md` объявляет `game/tools/recolor_button_textures.py` — **файла нет и никогда не было** (`git log --diff-filter=D` пуст). Переписать запись на фактического производителя либо пометить как ручную правку, разобравшись, какие ассеты на неё ссылаются
+- [ ] 14.5 `scripts/check_asset_provenance.py` — проверка «путь генератора из `PROVENANCE.md` / `MANIFEST.json` существует в индексе»; сейчас проверяется наличие строки, из-за чего обе сгнившие записи проходили гейт как хорошие
+- [ ] 14.6 Тест на новую проверку: падает на вымышленном пути генератора, проходит на дереве после 14.2–14.4
+- [ ] 14.7 Перепривязать вызовы: `scripts/doc_gates.sh`, `game/assets/ui/*/MANIFEST.json`; проверить `git grep -n 'ui_kit/'` на отсутствие старых путей вне архива и исторических цитат
+
+## 15. Верификация
+
+- [ ] 15.1 `python3 scripts/check_docs_links.py` — зелёный
+- [ ] 15.2 `python3 scripts/check_save_matrix.py` — зелёный
+- [ ] 15.3 `python3 scripts/check_repo_layout.py` — зелёный
+- [ ] 15.4 `python3 scripts/check_asset_provenance.py` — зелёный, включая новую проверку путей генераторов
+- [ ] 15.5 `bash scripts/doc_gates.sh` — зелёный: он вызывает 35 скриптов по пути и потому является главным регресс-тестом переездов `ui_kit`
+- [ ] 15.6 `bash game/run_tests.sh` — полный набор, 0 failures / 0 errors / 0 orphans
+- [ ] 15.7 `openspec validate repo-structure-cleanup --type change --strict` — valid
+- [ ] 15.8 `git status` чист; `git ls-files artifacts tools doc image-clone prototypes data scripts/concept_art/concept_art` пуст; `git ls-files game/assets/artifacts | wc -l` = 120, как в `e7af3b70`
+- [ ] 15.9 `git ls-files game/assets/fonts/LICENSE.txt` непустой; `git ls-files LICENSE SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md .editorconfig CHANGELOG.md game/report.sh scripts/split_02f.py` пуст
+- [ ] 15.10 `grep -c '2026-09-25' docs/CHANGELOG.md` > 0 — перенесённый журнал пережил удаление файла
+- [ ] 15.11 `git ls-files .pi/skills` даёт ровно `ui-grid-review/SKILL.md`; `git ls-files .pi/prompts | wc -l` = 6 (промпты не затронуты)
+- [ ] 15.12 `git ls-files game | grep -E '^game/[^/]+\.(gd|py)$'` пуст; `git ls-files game | grep '\.py$' | grep -vE '^game/(tools|tests)/'` пуст
+- [ ] 15.13 `git ls-files game/assets/cursors | wc -l` = 12 — живые курсоры не задеты группой 10
+- [ ] 15.14 `python3 scripts/ui_diff.py --help` печатает usage, а не traceback — оставшийся навык обязан быть исправен

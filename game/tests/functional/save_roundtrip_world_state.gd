@@ -1,6 +1,6 @@
 extends BaseTest
 ## save-load-coverage-expansion 4.1: roundtrip для оставшихся строк матрицы
-## (doc/SAVE_MATRIX.md): GameSession, Chronicle, Shards, Characters.
+## (docs/save-matrix.md): GameSession, Chronicle, Shards, Characters.
 
 const _Chronicle = preload("res://scripts/core/chronicle.gd")
 const _CharacterRegistry = preload("res://scripts/demographics/character_registry.gd")

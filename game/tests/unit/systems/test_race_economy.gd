@@ -1,6 +1,6 @@
 extends BaseTest
 ## race-economy (Phase 2): loader for 7 race economic profiles + building
-## race assignment (variant A). Schema: doc/races-economy.md §3, §4, §10.
+## race assignment (variant A). Schema: docs/races-economy.md §3, §4, §10.
 
 var _uid_seq := 0
 

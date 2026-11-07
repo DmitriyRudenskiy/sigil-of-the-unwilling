@@ -1,3 +1,12 @@
+---
+title: Экономический слой рас
+tags:
+  - gdd
+  - economy
+status: draft
+date: 2026-11-08
+---
+
 # Экономический слой рас — Sigil of the Unwilling (Fission AI)
 
 > Дизайн-док: экономпрофили 7 рас + D&D-расы по группам + интеграция зданий (кварталы,
@@ -5,7 +14,7 @@
 > ресурсов, системы `zoning_system`, `adjacency_system`, `logistics_calculator`,
 > `reputation_system`, `ProductionChain.building_eff`.
 >
-> Связь: `social-mechanics.md` = политический слой, этот док = экономический.
+> Связь: [[social-mechanics]] = политический слой, этот док = экономический.
 > Статус: черновик. Числа — стартовые, под баланс. Фаза 1 (профили), фаза 2 — по JSON §10.
 
 ## 1. Назначение

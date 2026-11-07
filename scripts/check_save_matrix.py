@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""Сверка `doc/SAVE_MATRIX.md` с деревом (T-301).
+"""Сверка `docs/save-matrix.md` с деревом (T-301).
 
 Зачем. Матрица покрытия сейвов — реестр ссылок: файл, тест, версия миграции,
 секция схемы. Всё это гниёт молча: тест переименовали, секцию добавили, ссылку в
 прошлой матрице просто потеряли вместе с файлом в `5f412a37`. Отдельно заметим:
-`doc/` лежит вне `docs`-хранилища (адрес выбран спекой), поэтому ни
-`check_docs_links.py`, ни `audit_docs_vs_code.py` его не видят — ни одна проверка
-ссылок здесь не работала бы сама собой. Этот сверщик и есть та проверка;
-`run`-строка в `scripts/doc_gates.sh` красит расхождение уровнем RED.
+реестр живёт в `docs/` и потому попадает в `check_docs_links.py` и
+`audit_docs_vs_code.py`, но те проверяют wikilinks и код-ссылки, а не пути,
+миграции и секции схемы — эта проверка не заменяется графом документов.
+Этот сверщик и есть та проверка; `run`-строка в `scripts/doc_gates.sh` красит
+расхождение уровнем RED.
 
 Правила (каждое печатает строку, молчание = RED по D-265-семейству):
-  1. CJK в `doc/*.md` — смесь раскладки, а не текст (тот же класс, что и в `docs/`).
-  2. каждый путь `game/…`, `scripts/…`, `doc/…` из реестра существует;
+  1. CJK в `docs/*.md` — смесь раскладки, а не текст (тот же класс, что и в `docs/`).
+  2. каждый путь `game/…`, `scripts/…`, `docs/…` из реестра существует;
   3. каждое голое имя файла резолвится ровно в один файл дерева (иначе реестр
      ссылается на «test_save.gd», которого в репо три);
   4. каждая ссылка `файл.gd::test_имя` — функция с таким именем там есть;
@@ -32,8 +33,8 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DOC = ROOT / "doc" / "SAVE_MATRIX.md"
-DOC_DIR = ROOT / "doc"
+DOC = ROOT / "docs" / "save-matrix.md"
+DOC_DIR = ROOT / "docs"
 SCHEMA = ROOT / "game" / "scripts" / "campaign" / "save" / "mvp_save_schema.gd"
 SAVE_DATA = ROOT / "game" / "scripts" / "core" / "save_data.gd"
 SEARCH_ROOTS = [ROOT / "game", ROOT / "scripts", DOC_DIR]
@@ -42,7 +43,7 @@ CJK_RE = re.compile(
     r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uac00-\ud7af\u31f0-\u31ff]"
 )
 BACKTICK_RE = re.compile(r"`([^`\n]+)`")
-PATH_RE = re.compile(r"^(?:game|scripts|doc|openspec)/\S*$")
+PATH_RE = re.compile(r"^(?:game|scripts|docs|openspec)/\S*$")
 # Голые имена файлов, в том числе с адресом строки: `population_system.gd:245-246`.
 BARE_RE = re.compile(
     r"^([A-Za-z0-9_\-]+\.(?:gd|py|tscn|tres|json|md))(?::\d+(?:-\d+)?)?$")
