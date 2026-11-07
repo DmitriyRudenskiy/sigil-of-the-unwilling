@@ -531,11 +531,15 @@ S(152.0, 526.4)`; `gap_left = gap_right = 40 px`, `offenders []` — ни оди
 
 **Живой носитель экрана — модель нового героя.** Путь игрока: Настройки → «Модель
 героя» (воин/маг) → `settings_screen.gd:200` → `main_menu.gd:222-228` →
-`HeroModelFactory.build_hero`. Фабрика не вызывает `HeroController.setup(map)`,
+`HeroModelFactory.build_hero`. Фабрика не вызывает `HeroController.setup(map)`, 
 поэтому у модели пустой ростер (`HeroArmyController.initialize()` вызывается
-только из `setup`) и `mana_max = 0`. Мирной хост экрана лежит в
-`game/scenes/archive/world.tscn` и поднимается только
-`WorldStateSerializer.start_game()` без вызывающих (замер T-173).
+только из `setup`) и `mana_max = 0`. Мирной хост экрана —
+`game/scenes/ui/adventure_ui.tscn`; замер T-173 снимался на тогдашнем
+`game/scenes/archive/world.tscn` (этот носитель удалён срезом T-347, в репо от него
+остался только `README`), и тогда экран поднимался только
+`WorldStateSerializer.start_game()` без вызывающих. У теперешнего носителя
+вызывающие есть (`main_menu.gd:10`, `sign_choice_ui.gd:11`,
+`world_state_serializer.gd:130`) — оговорка T-173 на него не переносится.
 
 **Замер кадра (1920×1080, герой фабрики, ростер наполнен фикстурой; возврат
 фикстуры — в `MANIFEST.md` съёмки).**
