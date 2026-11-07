@@ -34,7 +34,7 @@ sys.path.insert(0, str(HERE))
 from generate import seed_for        # затравку считает генератор, не копия формулы
 ROOT = HERE.parents[1]
 
-LAB = ROOT / "image-clone"
+LAB = ROOT / "game" / "image-clone"
 REFS = LAB / "references"
 CROPS = REFS / "crops"
 ATTEMPTS = LAB / "attempts"
@@ -826,7 +826,7 @@ def sty_delta(prev: dict | None, rows: dict) -> dict | None:
 def head_ratio(spec: str | None):
     """Пропорции головы: `--head-ratio 17/15` = эталон 17%, попытка 15% (высота головы
     от макушки до подбородка без ушей и головного убора / высота фигуры, способ
-    зафиксирован в `image-clone/docs/style-card.md` §5). Дельта — в журнале;
+    зафиксирован в `game/image-clone/docs/style-card.md` §5). Дельта — в журнале;
     в STY-% не входит."""
     if not spec:
         return None

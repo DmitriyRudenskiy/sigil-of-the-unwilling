@@ -481,7 +481,7 @@ if [ -n "${MCP_SSH_HOST:-}" ] && [ -z "${SOTU_ON_X_HOST:-}" ]; then
 		SOTU_TAR=()
 		[ "$(uname -s)" = "Darwin" ] && SOTU_TAR=(--no-mac-metadata --no-xattrs)
 		if ! ( cd .. && { git ls-files -z game scripts; \
-						git ls-files -z -- image-clone/etalons/manifest.json; \
+						git ls-files -z -- game/image-clone/etalons/manifest.json; \
 						# -L обязателен (владелец, 2026-11-09): без него find НЕ идёт ни в
 						# symlink-каталог, ни по symlink-файлам. Дерево, где node_modules —
 						# ссылка (scratch-дерево, досылка чужой сборки), уезжало на X-контур

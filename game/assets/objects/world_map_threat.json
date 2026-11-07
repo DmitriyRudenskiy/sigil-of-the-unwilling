@@ -21,7 +21,7 @@
     0,
     0
    ],
-   "source": "image-clone/map/raw/threat_ring1_wild.webp"
+   "source": "game/image-clone/map/raw/threat_ring1_wild.webp"
   },
   {
    "id": "threat_ring2_raiders",
@@ -35,7 +35,7 @@
     1,
     0
    ],
-   "source": "image-clone/map/raw/threat_ring2_raiders.webp"
+   "source": "game/image-clone/map/raw/threat_ring2_raiders.webp"
   },
   {
    "id": "threat_ring3_monsters",
@@ -49,7 +49,7 @@
     2,
     0
    ],
-   "source": "image-clone/map/raw/threat_ring3_monsters.webp"
+   "source": "game/image-clone/map/raw/threat_ring3_monsters.webp"
   }
  ]
 }

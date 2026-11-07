@@ -1,7 +1,7 @@
 {
  "_comment": "Роли графики карты (openspec: world-map-art-variety). Отдельно от spec.json: тот каталог — разведка стиля (5 вариантов × один сюжет на сравнительный борд), здесь — производственный прогон одного утверждённого режима. Сюжеты и промпт-слои живут здесь, в коде их нет. Тона цели — полоса M (game/data/config/map_art_gates.json), снятая с reference/10_map_campaign_town.jpeg.",
  "comfy": "http://192.168.0.230:8188",
- "out_dir": "image-clone/map",
+ "out_dir": "game/image-clone/map",
  "export": {
   "format": "WEBP",
   "quality": 90,
@@ -335,7 +335,7 @@
    "isolated": true,
    "frame": "one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text",
    "style": "hand-painted world map threat marker, one single marker standing alone, muted natural pigments with one cold or sickly accent, readable silhouette, fine brush grain",
-   "_note": "world-map-art-variety 8.1: носитель тира вражеского стэка (три кольца угрозы). Кольца различаются и силуэтом, и тоном — требование спеки «Визуальный носитель тира»: различие смежных колец обязано быть измеримым, поэтому слова про силуэт и тон в subject'ах не декоративные. Сырьё ролей — image-clone/map/raw/threat_ring*.webp; лист собирается в game/assets/objects/world_map_threat.webp (отдельный от объектов: объектные raw-кадры на этой машине потеряны, а assemble() пишет лист только из наличных ролей). Побратим-в-тумане не нужен: вражеские стэки в открытой, но не видимой клетке скрыты целиком (вердикт В2 → (в), D-205).",
+   "_note": "world-map-art-variety 8.1: носитель тира вражеского стэка (три кольца угрозы). Кольца различаются и силуэтом, и тоном — требование спеки «Визуальный носитель тира»: различие смежных колец обязано быть измеримым, поэтому слова про силуэт и тон в subject'ах не декоративные. Сырьё ролей — game/image-clone/map/raw/threat_ring*.webp; лист собирается в game/assets/objects/world_map_threat.webp (отдельный от объектов: объектные raw-кадры на этой машине потеряны, а assemble() пишет лист только из наличных ролей). Побратим-в-тумане не нужен: вражеские стэки в открытой, но не видимой клетке скрыты целиком (вердикт В2 → (в), D-205).",
    "items": [
     {
      "id": "threat_ring1_wild",

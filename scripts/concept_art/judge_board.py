@@ -14,7 +14,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[2]
-LAB = ROOT / "image-clone"
+LAB = ROOT / "game" / "image-clone"
 MODELS = ("krea2", "ernie")
 H = 420
 

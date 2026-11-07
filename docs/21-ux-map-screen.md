@@ -161,7 +161,7 @@ Q-M113 в [[QUESTIONS]].
 | `emblems` | 10 | медальон-свиток, бейдж, монеты, дом, яблоко, повозка, маркер, книга, шестерня, большая кнопка хода |
 | `glyphs` | 6 | **партия v2:** иконки валют `drop_red`/`gem_green`/`gold` (T-159) и глифы тайлов `castle`/`banner`/`list` (T-259) |
 
-Сырые кадры — `image-clone/campaign_ui/` (gitignored по специальному правилу,
+Сырые кадры — `game/image-clone/campaign_ui/` (gitignored по специальному правилу,
 воспроизводимы прогоном по `manifest.json`, он в git); **носителем в git
 становится отобранное** в `game/assets/ui/campaign_screen/` со строкой
 `game/assets/PROVENANCE.md` и атласом `campaign_screen_atlas.json`. Урок T-262:

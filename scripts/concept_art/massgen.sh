@@ -13,18 +13,18 @@ set -u
 cd "$(dirname "$0")/../.." || exit 1
 J=scripts/concept_art/jobloop.py
 SCOPE="$*"
-CHAIN=$(python3 -c "import json;print(' '.join(json.load(open('image-clone/spec.json'))['chain']))")
+CHAIN=$(python3 -c "import json;print(' '.join(json.load(open('game/image-clone/spec.json'))['chain']))")
 
 pending() {
   python3 - <<'PY'
 import json
 import sys
 from pathlib import Path
-q = json.load(open("image-clone/queue.json"))
-A = Path("image-clone/attempts")
+q = json.load(open("game/image-clone/queue.json"))
+A = Path("game/image-clone/attempts")
 # Модель берётся из цепочки спека, а не из списка литералов: выпавшую стадию
 # конвейер больше не просит доснимать
-chain = json.load(open("image-clone/spec.json"))["chain"]
+chain = json.load(open("game/image-clone/spec.json"))["chain"]
 # Скоуп задаётся аргументами: старая партия IMG-001..060 гонялась на qwen21,
 # без фильтра конвейер поставил бы ей krea2/ernie второй заход.
 scope = set(sys.argv[1:])

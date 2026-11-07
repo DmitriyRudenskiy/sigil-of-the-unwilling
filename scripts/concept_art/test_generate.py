@@ -84,7 +84,7 @@ with tempfile.TemporaryDirectory() as tmp:
     (clean / "manifest.json").write_text((SPEC["_references"] / "manifest.json").read_text())
     spec_clean = clean / "spec.json"
     spec_clean.write_text(Path(g.SPEC_PATH).read_text().replace(
-        '"references_dir": "image-clone/etalons"', f'"references_dir": "{clean}"', 1))
+        '"references_dir": "game/image-clone/etalons"', f'"references_dir": "{clean}"', 1))
     g.load_spec(spec_clean, check_files=False)
     ok(True, "спека без пикселей не загрузилась по манифесту")
     try:

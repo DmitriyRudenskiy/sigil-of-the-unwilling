@@ -9,7 +9,7 @@
     python3 scripts/gen_map_art.py --contact-sheet       # лист приёмки (вердикт — за владельцем)
     python3 scripts/gen_map_art.py --repro mat_rock_0    # тот же (P,R) → тот же кадр
 
-Сырьё 1024² (gitignored) — image-clone/map/raw/, носитель — game/assets/tiles/ и
+Сырьё 1024² (gitignored) — game/image-clone/map/raw/, носитель — game/assets/tiles/ и
 game/assets/objects/. Промпты и сюжеты — scripts/concept_art/map_spec.json, в коде их нет.
 """
 from __future__ import annotations
@@ -504,7 +504,7 @@ def build_road_sheet(roads: list[dict]) -> list[dict]:
 
 
 def whole_or_skip(category: str, present: list[dict], sheet: Path) -> list[dict]:
-    """Сырьё ролей — в gitignored `image-clone/map/raw`, лист — в репо и на него уже
+    """Сырьё ролей — в gitignored `game/image-clone/map/raw`, лист — в репо и на него уже
     смотрит игра. Поэтому неполное сырьё — не повод писать укороченный лист:
     `assemble()` перебирает наличные роли, и на машине, где половина кадров
     потеряна, он собрал бы лист из того, что есть, а манифест перестал бы описывать

@@ -20,7 +20,7 @@
     0,
     0
    ],
-   "source": "image-clone/map/raw/obj_tree_deciduous.webp"
+   "source": "game/image-clone/map/raw/obj_tree_deciduous.webp"
   },
   {
    "id": "obj_tree_deciduous_large",
@@ -33,7 +33,7 @@
     1,
     0
    ],
-   "source": "image-clone/map/raw/obj_tree_deciduous_large.webp"
+   "source": "game/image-clone/map/raw/obj_tree_deciduous_large.webp"
   },
   {
    "id": "obj_conifer",
@@ -46,7 +46,7 @@
     2,
     0
    ],
-   "source": "image-clone/map/raw/obj_conifer.webp"
+   "source": "game/image-clone/map/raw/obj_conifer.webp"
   },
   {
    "id": "obj_conifer_large",
@@ -59,7 +59,7 @@
     3,
     0
    ],
-   "source": "image-clone/map/raw/obj_conifer_large.webp"
+   "source": "game/image-clone/map/raw/obj_conifer_large.webp"
   },
   {
    "id": "obj_bush",
@@ -72,7 +72,7 @@
     4,
     0
    ],
-   "source": "image-clone/map/raw/obj_bush.webp"
+   "source": "game/image-clone/map/raw/obj_bush.webp"
   },
   {
    "id": "obj_reeds",
@@ -85,7 +85,7 @@
     5,
     0
    ],
-   "source": "image-clone/map/raw/obj_reeds.webp"
+   "source": "game/image-clone/map/raw/obj_reeds.webp"
   },
   {
    "id": "obj_dead_tree",
@@ -98,7 +98,7 @@
     6,
     0
    ],
-   "source": "image-clone/map/raw/obj_dead_tree.webp"
+   "source": "game/image-clone/map/raw/obj_dead_tree.webp"
   },
   {
    "id": "obj_rock_small",
@@ -111,7 +111,7 @@
     7,
     0
    ],
-   "source": "image-clone/map/raw/obj_rock_small.webp"
+   "source": "game/image-clone/map/raw/obj_rock_small.webp"
   },
   {
    "id": "obj_rock_large",
@@ -124,7 +124,7 @@
     0,
     1
    ],
-   "source": "image-clone/map/raw/obj_rock_large.webp"
+   "source": "game/image-clone/map/raw/obj_rock_large.webp"
   },
   {
    "id": "obj_boulder_snow",
@@ -137,7 +137,7 @@
     1,
     1
    ],
-   "source": "image-clone/map/raw/obj_boulder_snow.webp"
+   "source": "game/image-clone/map/raw/obj_boulder_snow.webp"
   },
   {
    "id": "obj_peak",
@@ -150,7 +150,7 @@
     2,
     1
    ],
-   "source": "image-clone/map/raw/obj_peak.webp"
+   "source": "game/image-clone/map/raw/obj_peak.webp"
   },
   {
    "id": "obj_plinth_wood",
@@ -163,7 +163,7 @@
     3,
     1
    ],
-   "source": "image-clone/map/raw/obj_plinth_wood.webp"
+   "source": "game/image-clone/map/raw/obj_plinth_wood.webp"
   },
   {
    "id": "obj_plinth_stone",
@@ -176,7 +176,7 @@
     4,
     1
    ],
-   "source": "image-clone/map/raw/obj_plinth_stone.webp"
+   "source": "game/image-clone/map/raw/obj_plinth_stone.webp"
   },
   {
    "id": "obj_plinth_food",
@@ -189,7 +189,7 @@
     5,
     1
    ],
-   "source": "image-clone/map/raw/obj_plinth_food.webp"
+   "source": "game/image-clone/map/raw/obj_plinth_food.webp"
   },
   {
    "id": "obj_plinth_herb",
@@ -202,7 +202,7 @@
     6,
     1
    ],
-   "source": "image-clone/map/raw/obj_plinth_herb.webp"
+   "source": "game/image-clone/map/raw/obj_plinth_herb.webp"
   },
   {
    "id": "obj_undergrowth",
@@ -215,7 +215,7 @@
     7,
     1
    ],
-   "source": "image-clone/map/raw/obj_undergrowth.webp"
+   "source": "game/image-clone/map/raw/obj_undergrowth.webp"
   },
   {
    "id": "obj_slope",
@@ -228,7 +228,7 @@
     0,
     2
    ],
-   "source": "image-clone/map/raw/obj_slope.webp"
+   "source": "game/image-clone/map/raw/obj_slope.webp"
   },
   {
    "id": "obj_summit",
@@ -241,7 +241,7 @@
     1,
     2
    ],
-   "source": "image-clone/map/raw/obj_summit.webp"
+   "source": "game/image-clone/map/raw/obj_summit.webp"
   },
   {
    "id": "obj_camp_wood",
@@ -254,7 +254,7 @@
     2,
     2
    ],
-   "source": "image-clone/map/raw/obj_camp_wood.webp"
+   "source": "game/image-clone/map/raw/obj_camp_wood.webp"
   },
   {
    "id": "obj_camp_stone",
@@ -267,7 +267,7 @@
     3,
     2
    ],
-   "source": "image-clone/map/raw/obj_camp_stone.webp"
+   "source": "game/image-clone/map/raw/obj_camp_stone.webp"
   },
   {
    "id": "obj_camp_food",
@@ -280,7 +280,7 @@
     4,
     2
    ],
-   "source": "image-clone/map/raw/obj_camp_food.webp"
+   "source": "game/image-clone/map/raw/obj_camp_food.webp"
   },
   {
    "id": "obj_camp_herb",
@@ -293,7 +293,7 @@
     5,
     2
    ],
-   "source": "image-clone/map/raw/obj_camp_herb.webp"
+   "source": "game/image-clone/map/raw/obj_camp_herb.webp"
   }
  ]
 }

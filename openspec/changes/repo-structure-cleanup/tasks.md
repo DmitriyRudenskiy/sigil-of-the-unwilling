@@ -26,31 +26,31 @@
 
 ## 4. `rpg_system.py` → `game/tools/`
 
-- [ ] 4.1 `git mv rpg_system.py game/tools/rpg_system.py` (дом — `game/tools/`, где Python-инструменты живут и так; `prototypes/` уходит по группе 5)
-- [ ] 4.2 Проверить, что `python3 game/tools/rpg_system.py` печатает прогон так же, как до переезда (модуль автономен, `__main__`-симуляция)
-- [ ] 4.3 Убедиться, что ни одна ссылка в репозитории не осталась битой (`git grep -n rpg_system`)
-- [ ] 4.4 Убедиться, что `game/tests/smoke/test_compile_all.gd` и `scripts/check_asset_provenance.py` прогоняются с новым файлом без исключений
+- [x] 4.1 `git mv rpg_system.py game/tools/rpg_system.py` (дом — `game/tools/`, где Python-инструменты живут и так; `prototypes/` уходит по группе 5)
+- [x] 4.2 Проверить, что `python3 game/tools/rpg_system.py` печатает прогон так же, как до переезда (модуль автономен, `__main__`-симуляция)
+- [x] 4.3 Убедиться, что ни одна ссылка в репозитории не осталась битой (`git grep -n rpg_system`)
+- [x] 4.4 Убедиться, что `game/tests/smoke/test_compile_all.gd` и `scripts/check_asset_provenance.py` прогоняются с новым файлом без исключений
 
 ## 5. Корневой бойлплейт
 
-- [ ] 5.1 Перенести три раздела корневого `CHANGELOG.md` (2026-09-27, 2026-09-25, 2026-02-22) в `docs/CHANGELOG.md` — принятый носитель журнала; тексты разделов не переписывать
-- [ ] 5.2 Проверить перенос: `grep -c '2026-09-25\|2026-02-22' docs/CHANGELOG.md` > 0 **до** удаления файла
-- [ ] 5.3 `git rm CHANGELOG.md` — только после 5.2
-- [ ] 5.4 `git rm LICENSE SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md .editorconfig`
-- [ ] 5.5 **Ничего не удалять и не перемещать внутри `game/`:** `game/assets/fonts/LICENSE.txt` (OFL, шрифты PT) остаётся; проверить `git status` на отсутствие удалений под `game/`
-- [ ] 5.6 `git rm prototypes/battle-hud/index.html && git rm -r prototypes` — каталог-убежище из дерева уходит
-- [ ] 5.7 `README.md`: убрать строку 5 (бейдж на `LICENSE`), строку 204 (`CONTRIBUTING.md`), строку 247 (`.editorconfig`), строку 253 (раздел «Лицензия»)
-- [ ] 5.8 Проверка: `git grep -n -E 'SECURITY\.md|CODE_OF_CONDUCT|CONTRIBUTING\.md|\.editorconfig'` даёт совпадения только в `openspec/changes/archive/` и `battle-demo/`
+- [x] 5.1 Перенести три раздела корневого `CHANGELOG.md` (2026-09-27, 2026-09-25, 2026-02-22) в `docs/CHANGELOG.md` — принятый носитель журнала; тексты разделов не переписывать
+- [x] 5.2 Проверить перенос: `grep -c '2026-09-25\|2026-02-22' docs/CHANGELOG.md` > 0 **до** удаления файла
+- [x] 5.3 `git rm CHANGELOG.md` — только после 5.2
+- [x] 5.4 `git rm LICENSE SECURITY.md CODE_OF_CONDUCT.md CONTRIBUTING.md .editorconfig`
+- [x] 5.5 **Ничего не удалять и не перемещать внутри `game/`:** `game/assets/fonts/LICENSE.txt` (OFL, шрифты PT) остаётся; проверить `git status` на отсутствие удалений под `game/`
+- [x] 5.6 `git rm prototypes/battle-hud/index.html && git rm -r prototypes` — каталог-убежище из дерева уходит
+- [x] 5.7 `README.md`: убрать строку 5 (бейдж на `LICENSE`), строку 204 (`CONTRIBUTING.md`), строку 247 (`.editorconfig`), строку 253 (раздел «Лицензия»)
+- [x] 5.8 Проверка: `git grep -n -E 'SECURITY\.md|CODE_OF_CONDUCT|CONTRIBUTING\.md|\.editorconfig'` даёт совпадения только в `openspec/changes/archive/` и `battle-demo/`
 
 ## 6. Перепривязка ссылок на `game/image-clone/`
 
-- [ ] 6.1 `scripts/gen_map_art.py` — docstring (строка 12) и путь сырья (строка 507)
-- [ ] 6.2 `game/assets/objects/world_map_objects.json`, `world_map_roads.json`, `world_map_threat.json` — поле `source` меняет префикс на `game/image-clone/map/raw/`
-- [ ] 6.3 `game/run_tests.sh` и `game/tests/smoke/test_compile_all.gd` — путь лаборатории
-- [ ] 6.4 `AGENTS.md` (строка 205) — упоминание сессии image-clone в том же worktree
-- [ ] 6.5 `game/image-clone/map/shot_transitions.png.import` и `.cells.json` — пути внутри `.import` пересняты Godot-импортом, а не правкой руками
-- [ ] 6.6 `openspec/specs/image-clone-lab/spec.md` — пути `image-clone/…` (строки 29, 32, 589, 638) переводятся дельтой этого change на apply; руками сейчас правится только явный `queue.json`-адрес, если 6.3 его читает
-- [ ] 6.7 Проверка: `git grep -n -E '(^|[^a-z/])image-clone/'` не даёт ни одного совпадения на старый корневой путь вне `openspec/changes/archive/` и `docs/CHANGELOG.md`
+- [x] 6.1 `scripts/gen_map_art.py` — docstring (строка 12) и путь сырья (строка 507)
+- [x] 6.2 `game/assets/objects/world_map_objects.json`, `world_map_roads.json`, `world_map_threat.json` — поле `source` меняет префикс на `game/image-clone/map/raw/` (51 поле)
+- [x] 6.3 `game/run_tests.sh` — путь лаборатории переведён. `test_compile_all.gd` НЕ правится: SKIP сверяет имя каталога верхнего уровня `res://`, а при `--path game` лаборатория остаётся `res://image-clone` — запись уже верная
+- [x] 6.4 `AGENTS.md` (строка 205) — НЕ правится: там не путь, а имя сессии в уроке про fast-forward push. Пути в этом файле нет
+- [x] 6.5 `game/image-clone/map/shot_transitions.png.import` и `.cells.json` — правки нет: `source_file="res://image-clone/…"` относителен `res://` (= `game/`), а не корня репо, и потому был верен и до переезда. `Godot --headless --path game --import` прошёл DONE, uid `qujelv1ubd2a` сохранён, `.cells.json` путей не содержит
+- [x] 6.6 `openspec/specs/image-clone-lab/spec.md` — оставлен дельте: ADDED-требование объявляет blanket-правило «все пути `image-clone/…` разрешаются относительно `game/image-clone/`», оно покрывает строки 589 и 638; `queue.json` в 6.3 не читается (run_tests.sh читает `etalons/manifest.json` — переведён)
+- [x] 6.7 Проверка: `git grep -n -E '(^|[^a-z/])image-clone/'` даёт совпадения только в исторических носителях (`openspec/changes/archive/`, `docs/CHANGELOG.md`, `docs/DECISIONS.md` D-193/D-284, `docs/mvp/TICKETS.md`, акт `docs/reference/map-baseline/review-11-3/REVIEW.md`) и в `openspec/specs/image-clone-lab/spec.md`, который переводит дельта. Критерий расширен DECISIONS/TICKETS/reference: это акты, а не ссылки, и перекраивать их тот же принцип, что и в D3 про `artifacts/`
 
 ## 7. Проверка состава корня
 

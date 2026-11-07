@@ -220,7 +220,7 @@ import generate as g                                                 # noqa: E40
 
 art = {"model_key": "qwen21", "variant": "copy", "category": "unit-01", "id": "IMG-001",
        "size": [512, 512]}
-PREFIX = "image-clone/IMG-001/qwen21_IMG-001_v1"
+PREFIX = "game/image-clone/IMG-001/qwen21_IMG-001_v1"
 
 
 def by_class(graph, ct):
@@ -684,7 +684,7 @@ for name, graph in g.WORKFLOWS.items():
 art1k = dict(art, size=[1024, 1024])
 for model in ("ernie", "zimage"):
     gr = g.workflow(model, {"steps": 8, "cfg": 1.0}, art1k, "ПРОМТ", "", 43,
-                    f"image-clone/IMG-001/{model}_IMG-001_v1")
+                    f"game/image-clone/IMG-001/{model}_IMG-001_v1")
     lat = [n["inputs"] for n in gr.values()
            if n["class_type"].startswith("Empty") and n["class_type"].endswith("LatentImage")]
     ok(lat and all(x["width"] == 1024 and x["height"] == 1024 for x in lat),
@@ -694,7 +694,7 @@ for model in ("ernie", "zimage"):
     ok(gr[neg_id]["class_type"] == "ConditioningZeroOut",
        f"{model}: negative не обнулён узлом ({gr[neg_id]['class_type']}) — текст там мёртв")
     ok(ks["seed"] == 43, f"{model}: граф ушёл не с пином 43")
-    ok(by_class(gr, "SaveImage")[0]["inputs"]["filename_prefix"].startswith(f"image-clone/IMG-001/{model}_"),
+    ok(by_class(gr, "SaveImage")[0]["inputs"]["filename_prefix"].startswith(f"game/image-clone/IMG-001/{model}_"),
        f"{model}: имя кадра не доехало до узла сохранения")
 
 # 84. пин-сида: правка, версия и attempt затравку не круят (7.2)
