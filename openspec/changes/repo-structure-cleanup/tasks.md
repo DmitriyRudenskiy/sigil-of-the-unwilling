@@ -102,11 +102,11 @@
 
 ## 13. `game/dbg_stats.gd` → `game/tools/`
 
-- [ ] 13.1 `git mv game/dbg_stats.gd game/tools/dbg_stats.gd` и `git mv game/dbg_stats.gd.uid game/tools/dbg_stats.gd.uid` — парой, иначе checker 1 `ci2_checkers.sh` краснеет на `.gd` без `.uid`
-- [ ] 13.2 `game/tests/smoke/test_compile_all.gd` строка 26 — комментарий перечисляет файл по имени («scripts 418 + scenes 2 + dbg_stats.gd», всего 421); после переезда счётчик 420, `MIN_COMPILED := 400` цел. Комментарий правится в том же коммите
-- [ ] 13.3 Осознанное последствие: `tools` входит в `SKIP` этого теста, то есть файл перестаёт компилироваться гейтом. Для 15-строчной диагностики без загрузчиков это согласовано с соседями (`diag_*.gd`, `map_shot.gd`) и фиксируется здесь, а не остаётся незамеченным
-- [ ] 13.4 Прогон `test_compile_all.gd` зелёный после переезда
-- [ ] 13.5 Проверка: `git ls-files game | grep -E '^game/[^/]+\.gd$'` пуст — в корне проекта Godot больше нет скриптов
+- [x] 13.1 `git mv game/dbg_stats.gd game/tools/dbg_stats.gd` и `git mv game/dbg_stats.gd.uid game/tools/dbg_stats.gd.uid` — парой, иначе checker 1 `ci2_checkers.sh` краснеет на `.gd` без `.uid`
+- [x] 13.2 `game/tests/smoke/test_compile_all.gd` строка 26 — комментарий перечисляет файл по имени («scripts 418 + scenes 2 + dbg_stats.gd», всего 421); после переезда счётчик 420, `MIN_COMPILED := 400` цел. Комментарий правится в том же коммите
+- [x] 13.3 Осознанное последствие: `tools` входит в `SKIP` этого теста, то есть файл перестаёт компилироваться гейтом. Для 15-строчной диагностики без загрузчиков это согласовано с соседями (`diag_*.gd`, `map_shot.gd`) и фиксируется здесь, а не остаётся незамеченным
+- [x] 13.4 Прогон `test_compile_all.gd` зелёный после переезда
+- [x] 13.5 Проверка: `git ls-files game | grep -E '^game/[^/]+\.gd$'` пуст — в корне проекта Godot больше нет скриптов
 
 ## 14. Генераторы ассетов: один дом, живой провенанс
 

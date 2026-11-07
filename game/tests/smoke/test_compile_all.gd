@@ -22,9 +22,9 @@ const SKIP := [
 	"locale", "reports", "scenes", "scripts", "tests", "tmp", "tools", "user", "venv",
 ]
 
-# Пол: 421 версионированный .gd в SCAN+файлах верхнего уровня (замер 2026-11-02:
-# scripts 418 + scenes 2 + dbg_stats.gd). Нужен, чтобы переименованный каталог в SCAN
-# не превращал проверку в зелёную на нуле.
+# Пол: 420 версионированных .gd в SCAN (замер 2026-11-09: scripts 418 + scenes 2;
+# dbg_stats.gd переехал в tools/ и выпал из SCAN — tools входит в SKIP).
+# Нужен, чтобы переименованный каталог в SCAN не превращал проверку в зелёную на нуле.
 const MIN_COMPILED := 400
 
 var _bad: Array[String] = []
