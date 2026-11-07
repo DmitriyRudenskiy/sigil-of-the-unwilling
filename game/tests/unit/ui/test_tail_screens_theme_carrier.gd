@@ -27,7 +27,7 @@ extends BaseTest
 # надо проверять мутацией, а не доверять её наличию терминалов.
 const _THEME := preload("res://assets/theme/game_theme.tres")
 const _SCENES := {
-	"adventure_ui": preload("res://scenes/ui/adventure_ui.tscn"),
+	"adventure_ui": preload("res://scenes/ui/adventure_hud.tscn"),
 	"info_panel": preload("res://scenes/ui/info_panel.tscn"),
 	"resource_collect_popup": preload("res://scenes/ui/resource_collect_popup.tscn"),
 	"artifact_chest_dialog": preload("res://scenes/ui/artifact_chest_dialog.tscn"),
@@ -39,7 +39,7 @@ const _SCENES := {
 # сидят ArmyPanel, MinimapPanel — у них свои хвосты и своя ответственность).
 const _SOURCES := [
 	"res://scripts/ui/adventure_ui.gd",
-	"res://scenes/ui/adventure_ui.tscn",
+	"res://scenes/ui/adventure_hud.tscn",
 	"res://scripts/ui/info_panel.gd",
 	"res://scenes/ui/info_panel.tscn",
 	"res://scripts/ui/resource_collect_popup.gd",

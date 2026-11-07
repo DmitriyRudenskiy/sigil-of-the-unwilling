@@ -59,7 +59,7 @@ func test_world_role_trader_completes_a_sale_headlessly() -> void:
 	const role_id := "trader"
 	var seed_value: int = ScenarioTargets.seed_for(class_id, role_id)
 	assert_that(ScenarioPilot.prepare_world(seed_value, class_id).get("status")).is_equal("prepared")
-	var world: Node = load("res://scenes/archive/world.tscn").instantiate()
+	var world: Node = load("res://scenes/ui/adventure_ui.tscn").instantiate()
 	get_tree().root.add_child(world)
 	for _i in 20:
 		await get_tree().process_frame
@@ -92,7 +92,7 @@ func test_fighter_trader_returns_to_market_with_real_cargo() -> void:
 	const role_id := "trader"
 	var seed_value: int = ScenarioTargets.seed_for(class_id, role_id)
 	assert_that(ScenarioPilot.prepare_world(seed_value, class_id).get("status")).is_equal("prepared")
-	var world: Node = load("res://scenes/archive/world.tscn").instantiate()
+	var world: Node = load("res://scenes/ui/adventure_ui.tscn").instantiate()
 	get_tree().root.add_child(world)
 	for _i in 20:
 		await get_tree().process_frame

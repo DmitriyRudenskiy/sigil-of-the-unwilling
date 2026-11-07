@@ -22,7 +22,7 @@ from godot_mcp import GodotMCPClient, MCPError
 NODE_BIN = os.environ.get("NODE_BIN", "node")
 GODOT_BIN = os.environ.get("GODOT_PATH", "/Applications/Godot.app/Contents/MacOS/Godot")
 
-WORLD_SCENE = "res://scenes/archive/world.tscn"
+WORLD_SCENE = "res://scenes/ui/adventure_ui.tscn"
 BATTLE_SCENE = "res://scenes/battle.tscn"
 
 PROJECT_GODOT = GAME_DIR / "project.godot"

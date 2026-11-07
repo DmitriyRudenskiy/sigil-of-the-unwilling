@@ -47,7 +47,7 @@ extends SceneTree
 ## идентификаторы резолвятся только после SceneTree::initialize() (тот же приём,
 ## что в `tools/diag_biome_resources.gd`).
 
-const WORLD_SCENE := "res://scenes/archive/world.tscn"
+const WORLD_SCENE := "res://scenes/ui/adventure_ui.tscn"
 ## `ScenarioPilot` грузится в рантайме, а не через `class_name`: скрипт ссылается на
 ## autoload `Services`, а скрипт инструмента компилируется на старте — до регистрации
 ## autoload'ов (тот же приём и та же ловушка, что в `tools/diag_biome_resources.gd`).

@@ -12,7 +12,7 @@ extends SceneTree
 ## повторяет её предусловия через `CityService.recruit_military`-гейты и печатает причину.
 ## Строка `DIAG|…` — снимок состояния, а не вердикт: вердикт выносится в тред задачи 7.2.
 
-const WORLD_SCENE := "res://scenes/archive/world.tscn"
+const WORLD_SCENE := "res://scenes/ui/adventure_ui.tscn"
 const SCENARIO_PILOT_GD := "res://scripts/probe/scenario_pilot.gd"
 const PILOT_SCENE := "res://scenes/probe/ScenarioPilot.tscn"
 const LEADERSHIP_CHECK_GD := "res://scripts/systems/leadership_check.gd"

@@ -4,7 +4,7 @@
 # геометрия колонки = прототип (clamp 300..430, поля 14).
 extends BaseTest
 
-const _Scene := preload("res://scenes/ui/adventure_ui.tscn")
+const _Scene := preload("res://scenes/ui/adventure_hud.tscn")
 var _ui: Node = null
 
 func after_test() -> void:

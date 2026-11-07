@@ -4,7 +4,7 @@ extends BaseTest
 ## порог среза — 2 с; замер 2026-11-02, «Стоимость прогона» в docs/mvp/TEST-MAP.md) —
 ## грузит живую сцену мира. В `--tier=fast` не входит, собирается `full`.
 
-const WORLD_SCENE: String = "res://scenes/archive/world.tscn"
+const WORLD_SCENE: String = "res://scenes/ui/adventure_ui.tscn"
 const MAIN_MENU_SCENE: String = "res://scenes/main_menu.tscn"
 const MAX_SECONDS: float = 4.0
 

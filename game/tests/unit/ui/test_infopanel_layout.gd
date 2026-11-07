@@ -3,7 +3,7 @@
 extends BaseTest
 
 const _Scene := preload("res://scenes/ui/info_panel.tscn")
-const _Adventure := preload("res://scenes/ui/adventure_ui.tscn")
+const _Adventure := preload("res://scenes/ui/adventure_hud.tscn")
 var _panel: Node = null
 var _ui: Node = null
 

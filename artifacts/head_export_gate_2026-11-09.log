@@ -1,0 +1,65 @@
+# Три мерки одного дня: сломано ли закоммиченное состояние и чинится ли оно одними путями
+# (T-344 задачи 5.0.1/5.5; реестры T-347, T-349)
+#
+# Почему прогон не в общем дереве: дерево занято чужим незакоммиченным срезом
+# (remove-campaign-mechanic), его краснота этому вердикту не принадлежит; git stash и
+# git worktree занятому общему дереву запрещены (AGENTS.md, D-201).
+#
+# Экспорт:  git archive HEAD | tar -x -C /tmp/sotu-{baseline,head}
+#   ln -s <repo>/game/addons/godot-mcp/{node_modules,build} /tmp/sotu-head/game/addons/godot-mcp/
+#   (node_modules и build/index.js gitignored — досланы symlink'ами; сам проект не тронут)
+# Прогон:   MCP_SSH_HOST= ./game/run_tests.sh [--tier=fast]
+#   '' — выключить X-контур из настройки машины (D-315); раннер печатает
+#   «MCP: X-контур выключен вызовом», Godot поднимается локально под Xvfb.
+#
+# МЕРКА 0 — HEAD f375146d как есть, --tier=fast: КРАСНО (9 ошибок, 7 падений).
+# МЕРКА 1 — HEAD + 18 из 20 файлов ремонта (цикл adventure_ui ⇄ world_ui не разорван),
+#           --tier=full: КРАСНО (4 ошибки, 3 падения), до MCP-уровня не дошёл.
+# МЕРКА 2 — полный ремонт (20 файлов, только литералы путей), --tier=full: ЗЕЛЕНО
+#           (GdUnit 3689/0/0/0; MCP 125 собрано, 123 passed, 2 skipped, 0 failed).
+#
+=== МЕРКА 0 — HEAD как есть (--tier=fast) ===
+MCP: X-контур выключен вызовом (MCP_SSH_HOST задан пустым — настройка машины не подставлена)
+res://tests/smoke/test_scene_boot.gd > test_all_scenes_instantiate FAILED 117ms
+res://tests/unit/ui/test_tail_screens_theme_carrier.gd > test_adventure_column_carries_transcribed_style FAILED 557ms
+res://tests/unit/ui/test_tail_screens_theme_carrier.gd > test_options_popup_had_dead_override_only FAILED 534ms
+res://tests/unit/ui/test_infopanel_layout.gd > test_minimap_is_first_sidebar_panel FAILED 532ms
+res://tests/unit/ui/test_adventure_ui_layout.gd > test_sidebar_paths_and_order FAILED 547ms
+res://tests/unit/ui/test_adventure_ui_layout.gd > test_sidebar_geometry_matches_prototype FAILED 567ms
+res://tests/unit/ui/test_adventure_ui_layout.gd > test_scroll_vertical_only_and_content_expands FAILED 523ms
+res://tests/unit/ui/test_adventure_ui_layout.gd > test_sidebar_pinned_top_full_height FAILED 520ms
+res://tests/unit/core/test_mcp_server.gd > test_scene_path_whitelist FAILED 4ms
+res://tests/unit/data/test_audio_world_entry.gd > test_world_entry_starts_world_music FAILED 11ms
+res://tests/functional/test_world_scenario.gd > test_new_game_save_load_death_succession FAILED 17ms
+Overall Summary: 3645 test cases | 9 errors | 7 failures | 0 flaky | 0 skipped | 0 orphans |
+
+=== МЕРКА 1 — HEAD + 18 файлов (--tier=full) ===
+MCP: X-контур выключен вызовом (MCP_SSH_HOST задан пустым — настройка машины не подставлена)
+res://tests/unit/ui/test_tail_screens_theme_carrier.gd > test_adventure_column_carries_transcribed_style FAILED 539ms
+res://tests/unit/ui/test_tail_screens_theme_carrier.gd > test_options_popup_had_dead_override_only FAILED 516ms
+res://tests/unit/ui/test_infopanel_layout.gd > test_minimap_is_first_sidebar_panel FAILED 521ms
+res://tests/functional/test_world_scenario.gd > test_new_game_save_load_death_succession FAILED 549ms
+Overall Summary: 3689 test cases | 4 errors | 3 failures | 0 flaky | 0 skipped | 0 orphans |
+
+=== МЕРКА 2 — HEAD + 20 файлов, MCP-уровень (--tier=full) ===
+MCP: X-контур выключен вызовом (MCP_SSH_HOST задан пустым — настройка машины не подставлена)
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+================== 123 passed, 2 skipped in 385.15s (0:06:25) ==================
+PYTEST LEDGER: passed=123 skipped=2 failed=0 errors=0 collected=125
+MCP JUNIT: passed=123 skipped=2 failed=0 errors=0
+MCP VERDICT: GREEN
+MCP VERDICT: exit=0 (0 = зелёный или readiness-жёлтый D-265; 100/1/2 — красный)
+GATE VERDICT: GREEN — измеренные уровни зелёные, пропусков уровней нет
+PUSH: OK — failed = 0, все уровни измерены
+
+=== МЕРКА 2 — GdUnit-уровень того же состава (--tier=full) ===
+MCP: X-контур выключен вызовом (MCP_SSH_HOST задан пустым — настройка машины не подставлена)
+Overall Summary: 3689 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PATH-GATE: OK — каждый литерал пути либо существует в сцене, либо исключён с причиной
+NODE-PATH-GATE: OK
+GATE VERDICT: YELLOW — уровень не мерился (MCP e2e: нет MCP-сервера (/tmp/sotu-head/game/addons/godot-mcp/build/index.js)); зелёного без e2e не бывает
+PUSH: BLOCKED — уровень не мерился (MCP e2e: нет MCP-сервера (/tmp/sotu-head/game/addons/godot-mcp/build/index.js)); пуш по неполному прогону запрещён (D-224)

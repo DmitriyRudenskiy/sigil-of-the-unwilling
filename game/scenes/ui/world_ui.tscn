@@ -1,7 +1,7 @@
 [gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/world_ui_manager.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/ui/adventure_ui.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/adventure_hud.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/artifact_inventory_screen.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/artifact_chest_dialog.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/city_screen.tscn" id="5"]

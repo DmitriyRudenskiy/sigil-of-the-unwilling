@@ -20,7 +20,7 @@ extends SceneTree
 ## не загружаются (`Invalid call. Nonexistent function 'from_dict'`), и прогон тихо
 ## становится другим: вместо `unsuccessored_death` на том же seed вышел `total_collapse`.
 
-const WORLD_SCENE := "res://scenes/archive/world.tscn"
+const WORLD_SCENE := "res://scenes/ui/adventure_ui.tscn"
 const SCENARIO_PILOT_GD := "res://scripts/probe/scenario_pilot.gd"
 const PILOT_SCENE := "res://scenes/probe/ScenarioPilot.tscn"
 const FRAME_CAP := 30000
