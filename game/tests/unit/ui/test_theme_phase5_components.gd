@@ -16,7 +16,7 @@ extends BaseTest
 const _THEME := preload("res://assets/theme/game_theme.tres")
 const _SOOT := Color(0, 0, 0, 0.6)  # §3: тень — сажа rgba(0,0,0,0.6)
 
-# Толщина рамки носителя (обрез+блик+борозда+линия) — `scripts/ui_kit/build_ui_kit.py`,
+# Толщина рамки носителя (обрез+блик+борозда+линия) — `game/tools/ui_kit/build_ui_kit.py`,
 # шаг 4: сталь макета 09. Маржа 9-слиса обязана её накрывать.
 const _FRAME_PX := {"panel": 7, "slot": 6}
 

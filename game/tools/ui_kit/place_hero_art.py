@@ -11,7 +11,7 @@
 окно в решётке щита — это фон, запертый контуром предмета). Мелкое белое
 остаётся: блик на клинке и вспышка на звезде — рисунок, а не фон.
 
-Запуск: python3 scripts/ui_kit/place_hero_art.py [--only id1,id2] [--dry]
+Запуск: python3 game/tools/ui_kit/place_hero_art.py [--only id1,id2] [--dry]
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from pathlib import Path
 
 from PIL import Image, ImageFilter
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 SRC = ROOT / "concept_art/krea2/h1_painted"
 OUT = ROOT / "game/assets"
 NEAR_WHITE = 232          # порог «белый» фона (кадр сжимается WEBP, 255 не держится)

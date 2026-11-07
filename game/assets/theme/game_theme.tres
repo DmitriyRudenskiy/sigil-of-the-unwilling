@@ -1102,7 +1102,7 @@ border_color = Color(0.16, 0.11, 0.06, 1)
 
 ; Мана-полоса макета 11 — синий #1a75bd (замер по макету), а не тонированный
 ; зелёный: умножение цвета по зелёной текстуре даёт грязный сине-зелёный.
-; Поэтому у маны своя заливка той же геометрии (scripts/ui_kit/build_mana_bar.py).
+; Поэтому у маны своя заливка той же геометрии (game/tools/ui_kit/build_mana_bar.py).
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bar_fill_mana"]
 texture = ExtResource("24_fill_mana")
 margin_left = 4.0
@@ -1558,7 +1558,7 @@ LabelBarNumber/font_shadow_size_1 = 2
 LabelBarNumber/font_shadow_offset_x = 0
 LabelBarNumber/font_shadow_offset_y = 1
 ; Шаг 5 (макет 11): нижний ряд боя — круглые кованые медальоны, а не плитки
-; меню. Плашка генерируется по разрезу макета (scripts/ui_kit/build_round_button.py),
+; меню. Плашка генерируется по разрезу макета (game/tools/ui_kit/build_round_button.py),
 ; геометрия и состояния — только здесь; в сцене остаются размер и иконка.
 RoundIconButton/base_type = "Button"
 ; Глиф команды — золотая эмблема-иконка (Button.icon + expand_icon), а не текст:

@@ -1,6 +1,6 @@
 {
  "mockup": "reference/12_inventory_parchment_sheet.jpeg",
- "generator": "scripts/ui_kit/build_hero_kit.py",
+ "generator": "game/tools/ui_kit/build_hero_kit.py",
  "scale": "макет 2816×1584 → канва 1600×900 (×0.5682)",
  "method": "векторная геометрия + зерно из замера, без диффузии (D-275)",
  "note": "носители экрана «Герой» (D-278). Марджины 9-slice — в px носителя; в сцене TextureRect растягивает крайнюю полосу под фактический размер (пересчёт в hero_layout.gd).",
@@ -137,7 +137,7 @@
     512,
     368
    ],
-   "source": "comfyui krea2 по scripts/concept_art/hero_screen_spec.json (эталон — макет 12), укладка scripts/ui_kit/place_hero_art.py",
+   "source": "comfyui krea2 по scripts/concept_art/hero_screen_spec.json (эталон — макет 12), укладка game/tools/ui_kit/place_hero_art.py",
    "note": "портрет героя (макет 12: чёрные волосы, латунные заклёпки, тёмный шарф); читают artifact_inventory_screen.gd и battle_ui.gd; бокс = пропорция HERO['Portrait']"
   },
   "hero/figure.png": {
@@ -146,7 +146,7 @@
     428,
     478
    ],
-   "source": "comfyui krea2 по scripts/concept_art/hero_screen_spec.json (эталон — макет 12), укладка scripts/ui_kit/place_hero_art.py",
+   "source": "comfyui krea2 по scripts/concept_art/hero_screen_spec.json (эталон — макет 12), укладка game/tools/ui_kit/place_hero_art.py",
    "note": "фигура-кукла: алый капюшон, поднятая рука, кремовая обводка; фон срезан по связным областям (place_hero_art.py); бокс = пропорция HERO['Figure']"
   }
  }

@@ -15,7 +15,7 @@ cентре — золотая эмблема. Первый вариант эт�
 геометрия ряда эта правка не трогает. Текстура — 144 px (медальон занимает канву целиком, запас 6 px
 под сдвиг нажатого состояния), рисуется в 4× и даунсэмплируется: на 144 круг зубчится.
 
-Запуск: python3 game/scripts/ui_kit/build_round_button.py
+Запуск: python3 game/tools/ui_kit/build_round_button.py
 """
 
 from __future__ import annotations
@@ -376,7 +376,7 @@ def main() -> None:
 
     plate_note = (
         "круглый медальон нижней панели боя (макет 11); генератор "
-        "scripts/ui_kit/build_round_button.py; радиусы — числовой разрез макета по "
+        "game/tools/ui_kit/build_round_button.py; радиусы — числовой разрез макета по "
         "медальону «Menu» (бронзовое кольцо 1.00..0.90, паз 0.90..0.82, золотая "
         "нить 0.82..0.78, тёмное кольцо 0.78..0.66, пластина 0.66..0); носитель "
         "квадратный, рисуется целиком (без 9-slice): у круга нет фаски, которую "
@@ -399,7 +399,7 @@ def main() -> None:
         "золотая эмблема медальона нижней панели боя (макет 11) — иконка кнопки "
         "(Button.icon), а не текст: emoji-глифы рисуются цветной битмап-шрифтом, "
         "поэтому font_color их не красит в золото макета; генератор "
-        "scripts/ui_kit/build_round_button.py; форма своя (в макете — сюжетные "
+        "game/tools/ui_kit/build_round_button.py; форма своя (в макете — сюжетные "
         "картинки: пирог, колчан с шаром, конь с кольцом), металл общий — золото с "
         "вертикальным градиентом и тенью со смещением; носитель: "
     )
@@ -411,7 +411,7 @@ def main() -> None:
         }
 
     manifest["round_button"] = {
-        "generator": "scripts/ui_kit/build_round_button.py",
+        "generator": "game/tools/ui_kit/build_round_button.py",
         "mockup": "reference/11_battle_hex_snow.jpeg — нижний ряд боя: кованые медальоны, а не плиты макета 09",
         "measure": {
             "cut": "медальон «Menu», разрез y=1462 от x=44 к центру x=128, кадр 2816×1584, R=81 px",
@@ -438,7 +438,7 @@ def main() -> None:
         "files": written,
     }
     manifest["battle_emblems"] = {
-        "generator": "scripts/ui_kit/build_round_button.py",
+        "generator": "game/tools/ui_kit/build_round_button.py",
         "mockup": "reference/11_battle_hex_snow.jpeg — золотые эмблемы на пластине, не цветные иконки",
         "note": (
             "Эмблема — иконка кнопки (Button.icon), пластина — stylebox. Золото с "

@@ -11,7 +11,7 @@
 пары (флаг/бегущая ↔ «отступить», меч/бегущая ↔ «автобой») решены design.md §4,
 а не на глаз — см. `CELLS`.
 
-Запуск: python3 scripts/ui_kit/slice_battle_buttons.py [--dry]
+Запуск: python3 game/tools/ui_kit/slice_battle_buttons.py [--dry]
        [--src=путь/к/листу.png] [--trim=0.045] [--gen9]   # лист генерации 7.4: 9 ячеек
 """
 from __future__ import annotations
@@ -21,7 +21,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 
 def _arg(name: str, default: str) -> str:

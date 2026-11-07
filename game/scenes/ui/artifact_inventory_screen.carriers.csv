@@ -46,7 +46,7 @@
 # REMOVED-BY-INVENTORY-ACT `hero/banner.png` и `hero/mini.png` (T-247): узлы `Side`,
 #   `Banner`, `Mini` сняты со сцены D-278; grep по имени и по пути дал ноль
 #   потребителей — файлы удалены из репозитория вместе со строками MANIFEST и из
-#   списка генератора scripts/ui_kit/build_hero_kit.py.
+#   списка генератора game/tools/ui_kit/build_hero_kit.py.
 row,mockup_type,mockup,node,asset,data,status,note
 1,пергамент,A1–D10,Center/Window/Sheet/Left/Bg,hero/panel_parchment.png,декор,covered,D-280
 2,плита,D1–I10,Center/Window/Sheet/Stone/Bg,hero/panel_stone.png,декор,covered,T-257 — марджа 9-slice 40 px

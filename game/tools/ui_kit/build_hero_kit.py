@@ -32,7 +32,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 OUT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                     os.pardir, os.pardir,
-                                    "game", "assets", "ui", "hero"))
+                                    "assets", "ui", "hero"))
 
 # ─── палитра: значения замера макета 12 (провенанс — docstring) ────────────
 PARCH = (218, 202, 185)      # #DACAB9 поле пергамента
@@ -301,7 +301,7 @@ def main():
 
     manifest = {
         "mockup": "reference/12_inventory_parchment_sheet.jpeg",
-        "generator": "scripts/ui_kit/build_hero_kit.py",
+        "generator": "game/tools/ui_kit/build_hero_kit.py",
         "scale": "макет 2816×1584 → канва 1600×900 (×0.5682)",
         "method": "векторная геометрия + зерно из замера, без диффузии (D-275)",
         "note": "носители экрана «Герой» (D-278). Марджины 9-slice — в px "

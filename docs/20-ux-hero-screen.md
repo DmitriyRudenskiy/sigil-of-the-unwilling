@@ -123,7 +123,7 @@ date: 2026-10-30
 | `Center/Window/Left/Exp_*` | **перенос целиком** → строка уровня (A5–D6) |
 | `Center/Window/Bottom` (7 × `ArmySlot_*`) | **заменяется** колонкой `Bottom/Card_0..3` со скроллом: имя, уровень, две полосы, количество (макет I1–J9); имя узла `Bottom` сохранено — на него повязаны тема `ArtifactBottom` и theme-carrier тесты |
 | `_tex(path, w, h)` с `Image.resize(INTERPOLATE_BILINEAR)` | **удаляется** — пересэмплирование носителя запрещено D-275; вместо 9-slice `margin` из `MANIFEST.json` и `STRETCH_SCALE` |
-| `hero/banner.png`, `hero/mini.png` | **удалены актом инвентаря T-247** (2026-10-30): сняты со сцены D-278, потребителей нет (grep по имени и по пути), строки сняты из `MANIFEST.json` (17 → 15) и из списка генератора `scripts/ui_kit/build_hero_kit.py` — §8 |
+| `hero/banner.png`, `hero/mini.png` | **удалены актом инвентаря T-247** (2026-10-30): сняты со сцены D-278, потребителей нет (grep по имени и по пути), строки сняты из `MANIFEST.json` (17 → 15) и из списка генератора `game/tools/ui_kit/build_hero_kit.py` — §8 |
 
 COVERAGE-строка пишется по формату `covered N / outside-mockup M / missing K`
 и лежит вместе с инвентарём строк (§8).

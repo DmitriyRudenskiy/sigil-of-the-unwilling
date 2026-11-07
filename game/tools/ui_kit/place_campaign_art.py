@@ -12,7 +12,7 @@
 фактический размер, чужая пропорция = искажённый рисунок. Плита 9-slice своей
 пропорции не меняет — её носитель и есть сам рисунок (см. `plate_box`).
 
-Запуск: python3 scripts/ui_kit/place_campaign_art.py [--only id1,id2] [--dry]
+Запуск: python3 game/tools/ui_kit/place_campaign_art.py [--only id1,id2] [--dry]
 """
 from __future__ import annotations
 
@@ -26,8 +26,8 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from place_hero_art import fit, keyed, trim  # общий альфа-ключ
 
-ROOT = Path(__file__).resolve().parents[2]
-SRC = ROOT / "image-clone"
+ROOT = Path(__file__).resolve().parents[3]
+SRC = ROOT / "game" / "image-clone"
 OUT = ROOT / "game/assets/ui/campaign_screen"
 GENERATOR = "krea2 (ComfyUI) / qwen-image-text-to-image"
 

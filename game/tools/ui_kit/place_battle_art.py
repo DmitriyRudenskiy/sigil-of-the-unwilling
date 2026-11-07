@@ -19,7 +19,7 @@ Interface_battle/1793072846892-…_NN_….png`). Фон снимается су�
 на белом, поэтому `wolves`/`red_dragon` остаются портретами (правило 3.2
 «нет совпадения силуэта — нет фигуры»).
 
-Запуск: python3 scripts/ui_kit/place_battle_art.py [--dry]
+Запуск: python3 game/tools/ui_kit/place_battle_art.py [--dry]
 """
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import place_hero_art as kit  # noqa: E402  (тот же вырезатель, не второй экземпляр)
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 SRC = Path.home() / "Downloads/Interface_battle"
 OUT = ROOT / "game/assets/units/figures"
 ALPHA_TRIM = 8            # порог отреза: ниже — уже фон, а не кромка фигуры

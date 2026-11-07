@@ -13,7 +13,7 @@
 цвет — градиент макета по яркости исходника: полоса остаётся парной HP-полосе
 геометрически и отличается только палитрой (мандат: цвет — из макета).
 
-Запуск: python3 scripts/ui_kit/build_mana_bar.py  (из game/)
+Запуск: python3 game/tools/ui_kit/build_mana_bar.py  (из game/)
 """
 
 from __future__ import annotations

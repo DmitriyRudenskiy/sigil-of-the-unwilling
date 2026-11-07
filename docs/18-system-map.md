@@ -71,8 +71,9 @@ date: 2026-10-29
 - **`world/`** — карта и мировой режим: `map_generator.gd`, `map_renderer.gd`,
   `map_roads.gd`, `map_threat.gd`, `world_camera.gd`, `world_persistence.gd`;
   разбор 19 живущих здесь имён — §3а.
-- **`ui/`** — экраны и панели; **`ui_kit/`** пуст (0 `.gd`) — общие виджеты живут in
-  `ui/` (FormRow/FormStack) и в теме.
+- **`ui/`** — экраны и панели; общие виджеты живут in `ui/` (FormRow/FormStack) и в теме.
+  Каталог `ui_kit/` здесь упразднён: он был единственным местом, где внутри
+  `res://scripts/` жил Python (0 `.gd`), и переехал целиком в `game/tools/ui_kit/`.
 - **`probe/`** — балансовые роли-разведчики (`collector_role.gd` = `CollectorRole`,
   `survival_role.gd` = `SurvivalRole`, `scenario_pilot.gd` = `ScenarioPilot`), не
   игровой контент. Имена файлов с 2026-10-29 — в нижнем регистре, как и в

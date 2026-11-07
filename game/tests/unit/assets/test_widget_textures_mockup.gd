@@ -13,7 +13,7 @@ extends BaseTest
 #   спека требует ненулевого разброса яркости (проверка 1);
 #   копии-состояния — hover/pressed/disabled как копия normal (проверка 3).
 #
-# Пороги — свойство генератора scripts/ui_kit/build_ui_kit.py, а не макета:
+# Пороги — свойство генератора game/tools/ui_kit/build_ui_kit.py, а не макета:
 # зерно поля он кладёт заведомо больше порога, плоская плашка под него не проходит.
 
 const THEME_PATH := "res://assets/theme/game_theme.tres"

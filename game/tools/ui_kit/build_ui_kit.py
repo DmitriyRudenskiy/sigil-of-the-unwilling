@@ -26,8 +26,8 @@
 детерминированным преобразованием (см. STATES ниже) и помечены как вывод —
 по требованию спеки «Макет молчит о состоянии».
 
-Запуск:  python3 scripts/ui_kit/build_ui_kit.py [--out game/assets/ui/widgets]
-Предпросмотр:  python3 scripts/ui_kit/build_ui_kit.py --preview /tmp/kit.png
+Запуск:  python3 game/tools/ui_kit/build_ui_kit.py [--out game/assets/ui/widgets]
+Предпросмотр:  python3 game/tools/ui_kit/build_ui_kit.py --preview /tmp/kit.png
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ from datetime import date
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
-REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 MOCKUP = os.path.join(REPO, "reference", "09_start_screen_throne.jpeg")
 SCALE = 1.4333333  # native → game px (2752 / 1920)
 SS = 4             # суперсэмпл: гладкие фаски и косые линии
@@ -278,7 +278,7 @@ def build(out_dir, preview=None):
     g, gprov = grain()
     man = {
         "generated": str(date.today()),
-        "generator": "scripts/ui_kit/build_ui_kit.py",
+        "generator": "game/tools/ui_kit/build_ui_kit.py",
         "mockup": os.path.relpath(MOCKUP, REPO),
         "measure": {
             "plate_game_px": [292, 68], "chamfer_game_px": 14,
