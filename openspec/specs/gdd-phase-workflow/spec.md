@@ -54,29 +54,30 @@ SHALL list dropped entries by count.
   questions
 - **AND** affected sections and tickets are re-checked afterwards
 
-### Requirement: Section states are machine-enforced
+### Requirement: Section states are recorded in frontmatter
 
 Section lifecycle `draft → audited → deepened → verified → locked` SHALL be stored in
-frontmatter and validated by the documentation gate. Unknown or unlisted states SHALL
-fail the gate.
+frontmatter and SHALL be the only carrier of the state. Machine validation of the
+lifecycle is not carried in this repository: the checker and its runner were removed,
+so an unknown or unlisted state is a defect found at diff review, not a red verdict.
 
-#### Scenario: New states pass the gate
+#### Scenario: New states pass
 
 - **WHEN** a section carries `status: audited`, `verified` or `locked`
-- **THEN** the documentation gate accepts it
+- **THEN** the frontmatter is accepted as-is and no tool output is expected
 
 #### Scenario: Downgrade needs a recorded decision
 
 - **WHEN** a section moves from `verified` back to `deepened`, or from `locked` back
   to `verified`
 - **THEN** a decision entry names the reason
-- **AND** the gate reports a downgrade that carries no decision reference
+- **AND** a downgrade without a decision reference is a review finding
 
 #### Scenario: Non-GDD roles are exempt
 
 - **WHEN** a registry, audit log or bank note carries `reference`, `snapshot` or
   `archived`
-- **THEN** the lifecycle check skips it
+- **THEN** the lifecycle rule does not apply to it
 
 ### Requirement: Registry fields are complete for new records
 

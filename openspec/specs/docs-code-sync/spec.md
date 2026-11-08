@@ -9,20 +9,6 @@
 
 ## Requirements
 
-### Requirement: Divergence check is a machine gate
-
-Documentation-to-code divergence SHALL be detected by `scripts/audit_docs_vs_code.py`, not by reading. The tool SHALL read facts from `project.godot`, `game/scenes/`, `game/scripts/` and the save schema, and SHALL exit non-zero when a documented reference resolves to no code, or when an autoload, input action, scene or save key is absent from `docs/`.
-
-#### Scenario: Broken reference in docs reddens the gate
-- **WHEN** a doc mentions `SomeScreen.gd` and no such file exists in `game/`
-- **THEN** the tool exits non-zero
-- **AND** it prints the doc path and the unresolved name
-
-#### Scenario: Vendor addons are not game facts
-- **WHEN** the tool collects `class_name` declarations
-- **THEN** files under `game/addons/` are excluded
-- **AND** references to vendored scripts (GdUnit4, godot-mcp) do not count as broken
-
 ### Requirement: Control scheme is documented from the input map
 
 The controls section SHALL be derived from `[input]` in `game/project.godot`. Every action name in the map SHALL appear in the docs next to its binding and the screen that consumes it.

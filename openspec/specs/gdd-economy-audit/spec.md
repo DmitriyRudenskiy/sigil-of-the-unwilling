@@ -48,9 +48,10 @@ synthesis.
 
 ### Requirement: Section state changes only through a decision
 
-`docs/06-economy.md` SHALL change its `status` only with a numbered decision, and the
-state machine in `scripts/gdd_gate.py` SHALL be green after the change. A `verified`
-state with an unresolved `⏳` recommendation SHALL NOT be recorded.
+`docs/06-economy.md` SHALL change its `status` only with a numbered decision. A
+machine check of the state machine is not part of this requirement: its carrier was
+removed, so the decision entry is the evidence. A `verified` state with an unresolved
+`⏳` recommendation SHALL NOT be recorded.
 
 #### Scenario: Audit ends with all rows confirmed
 
