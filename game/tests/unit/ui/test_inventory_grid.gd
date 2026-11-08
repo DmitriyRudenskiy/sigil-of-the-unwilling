@@ -2,7 +2,7 @@ extends BaseTest
 
 # Рюкзак экрана «Герой» — сетка 10×5 = 50 клеток макета 12 (D-280).
 #
-# Носитель состава — reference/12_inventory_parchment_sheet.jpeg (сумка в камне
+# Носитель состава — ~/sigil-reference/12_inventory_parchment_sheet.jpeg (сумка в камне
 # центра), геометрия — scripts/ui/hero_layout.gd, вместимость —
 # GameNumbers.INVENTORY_GRID / MAX_BACKPACK_SIZE. Клетки лежат в сцене (их пишет
 # gen_inventory_scene.gd) и растянуты долями, поэтому проверка смотрит на

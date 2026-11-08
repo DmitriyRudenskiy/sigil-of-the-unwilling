@@ -7,9 +7,9 @@ date: 2026-10-30
 
 # Экран «Герой»: карта элементов (макет 12)
 
-> Единственный носитель состава — `reference/12_inventory_parchment_sheet.jpeg`
+> Единственный носитель состава — `~/sigil-reference/12_inventory_parchment_sheet.jpeg`
 > (2816×1584, md5 `e64035d859d8170106a27e5f5a51115f`, канон D-203, строка
-> `reference/INDEX.md` №12). До D-280 экран не имел макета-носителя: состав
+> `docs/style-reference-index.md` №12). До D-280 экран не имел макета-носителя: состав
 > задавала сцена, а не макет.
 >
 > **Носитель экрана на `main`** — `game/scenes/ui/artifact_inventory_screen.tscn`
@@ -179,7 +179,7 @@ COVERAGE-строка пишется по формату `covered N / outside-mo
 
 **Вердикт: ux-review НЕ пройден.** Кадр: `tmp/shots/hero-3.png` (1900×1007,
 съёмка `tools/shot_scene.gd`, фикстура `inventory_grid`, 8 предметов в сетке
-(10,5)); макет — `reference/12_inventory_parchment_sheet.jpeg`.
+(10,5)); макет — `~/sigil-reference/12_inventory_parchment_sheet.jpeg`.
 AC1 (состав макета на экране) — **частично**: носители фона, куклы, сумки,
 карточек и плиток на месте; AC2 (значения в каждом блоке-носителе) — **FAIL**
 (#5–#9, #11: `artifact_inventory_screen.gd` читает старый состав); AC3 (каждый
@@ -230,7 +230,7 @@ T-251/T-253; AC3 (каждый блок макета с носителем) — 
 
 ## 6.3 Шаг 5 — ux-review машиным зрением по паре кадров
 
-Метод: `reference/12_inventory_parchment_sheet.jpeg` (макет, сжат до 1500 px)
+Метод: `~/sigil-reference/12_inventory_parchment_sheet.jpeg` (макет, сжат до 1500 px)
 и `tmp/shots/hero-9.png` (тот же масштаб + кропки `/tmp/f_left.png`,
 `/tmp/f_mid.png`) открыты инструментом чтения изображений и разобраны
 поэлементно. Вердикт пишет агент, не владелец (директива 2026-10-23).
@@ -304,11 +304,11 @@ CAPTURE_SETUP=hero_equip_rows` ([[CAPTURE-HELPER]]). Фикстура
 | Тон носителей: кремовый пергамент | пергамент по-прежнему серый, яркость кадра 27.5 | FAIL, без изменений | T-253 (вне объёма этой смены) |
 
 **Ограничение приёмки (замерено здесь же).** Пикселей макета
-`reference/12_inventory_parchment_sheet.jpeg` на этой машине нет:
+`~/sigil-reference/12_inventory_parchment_sheet.jpeg` на этой машине нет:
 `python3 scripts/check_reference_index.py` даёт `ROW WITHOUT FILE` для этого и
 ещё пяти файлов, статусы строк при этом не `утрачен` (T-298). Сравнение шло по
 карте элементов §2–§3 (она сама снята с макета) и по описанию строки 12 в
-`reference/INDEX.md` — то есть расхождение «кадр ↔ макет» измеряется картой, а
+`docs/style-reference-index.md` — то есть расхождение «кадр ↔ макет» измеряется картой, а
 не пикселем, и этот шаг не закрывает T-253/T-258 (тон и геометрия носителей).
 
 **AC после шага 6:** AC2 (значение в каждом блоке-носителе) — надетое, мана,

@@ -8,7 +8,7 @@ cентре — золотая эмблема. Первый вариант эт�
 снимке сравнения с макетом это читалось как чужой UI. Теперь пластина и эмблема —
 ассет, кнопка несёт только иконку.
 
-Замеры сняты с `reference/11_battle_hex_snow.jpeg` (2816×1584) числовым разрезом
+Замеры сняты с `~/sigil-reference/11_battle_hex_snow.jpeg` (2816×1584) числовым разрезом
 по медальону «Menu» — горизонталью через центр (128, 1462). Внешний радиус
 медальона 57 px, диаметр 114 px при ширине кадра 2816 = 78 px на 1920. В сцене
 стоит контрол 100 px при шаге ряда 120 px (принято вторым проходом зрения §5),
@@ -412,7 +412,7 @@ def main() -> None:
 
     manifest["round_button"] = {
         "generator": "game/tools/ui_kit/build_round_button.py",
-        "mockup": "reference/11_battle_hex_snow.jpeg — нижний ряд боя: кованые медальоны, а не плиты макета 09",
+        "mockup": "~/sigil-reference/11_battle_hex_snow.jpeg — нижний ряд боя: кованые медальоны, а не плиты макета 09",
         "measure": {
             "cut": "медальон «Menu», разрез y=1462 от x=44 к центру x=128, кадр 2816×1584, R=81 px",
             "rings_ratio_of_outer_radius": {
@@ -439,7 +439,7 @@ def main() -> None:
     }
     manifest["battle_emblems"] = {
         "generator": "game/tools/ui_kit/build_round_button.py",
-        "mockup": "reference/11_battle_hex_snow.jpeg — золотые эмблемы на пластине, не цветные иконки",
+        "mockup": "~/sigil-reference/11_battle_hex_snow.jpeg — золотые эмблемы на пластине, не цветные иконки",
         "note": (
             "Эмблема — иконка кнопки (Button.icon), пластина — stylebox. Золото с "
             "вертикальным градиентом и тенью со смещением: металл лежит на пластине. "

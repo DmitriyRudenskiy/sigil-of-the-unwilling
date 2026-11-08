@@ -39,7 +39,7 @@ CLEAN = [
     "game/tools/gen_resource_icons.py",
     "game/tools/ui_kit/build_ui_kit.py",
     "openspec/changes/repo-structure-cleanup/tasks.md",
-    "reference/INDEX.md",
+    "docs/style-reference-index.md",
     "scripts/check_repo_layout.py",
 ]
 

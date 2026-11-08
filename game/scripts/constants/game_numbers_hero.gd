@@ -10,7 +10,7 @@ const TOOL_INVENTORY_SLOTS      := 8
 ## переполнение наступает при неполной сетке.
 const MAX_BACKPACK_SIZE         := 50
 ## Сетка снаряжения (grid-inventory-and-merchant): макет 12 рисует 10×5 = 50
-## ячеек сумки (reference/12_inventory_parchment_sheet.jpeg, x 0.357–0.807,
+## ячеек сумки (~/sigil-reference/12_inventory_parchment_sheet.jpeg, x 0.357–0.807,
 ## y 0.572–0.966; замер — docs/20-ux-hero-screen.md §2). Ширина 10 — чтобы
 ## копьё 1×6 ложилось и горизонтально, и вертикально (исторический смысл
 ## ширины 6 сохранён). Число — заявка на баланс (docs/07-balance.md §10).

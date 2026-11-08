@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-# Кадр = размер вьюпорта проекта (project.godot) и макетов reference/*.png.
+# Кадр = размер вьюпорта проекта (project.godot) и макетов ~/sigil-reference/*.png.
 CANONICAL_SIZE = (1920, 1080)
 # Сколько кадров ждём между праймингом и отчётным снимком (см. capture_scene).
 PRIME_SETTLE_FRAMES = 5

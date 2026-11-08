@@ -1,5 +1,5 @@
 {
- "_comment": "Роли графики карты (openspec: world-map-art-variety). Отдельно от spec.json: тот каталог — разведка стиля (5 вариантов × один сюжет на сравнительный борд), здесь — производственный прогон одного утверждённого режима. Сюжеты и промпт-слои живут здесь, в коде их нет. Тона цели — полоса M (game/data/config/map_art_gates.json), снятая с reference/10_map_campaign_town.jpeg.",
+ "_comment": "Роли графики карты (openspec: world-map-art-variety). Отдельно от spec.json: тот каталог — разведка стиля (5 вариантов × один сюжет на сравнительный борд), здесь — производственный прогон одного утверждённого режима. Сюжеты и промпт-слои живут здесь, в коде их нет. Тона цели — полоса M (game/data/config/map_art_gates.json), снятая с ~/sigil-reference/10_map_campaign_town.jpeg.",
  "comfy": "http://192.168.0.230:8188",
  "out_dir": "game/image-clone/map",
  "export": {

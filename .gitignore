@@ -32,18 +32,9 @@
 /.pi/skills/openspec-*/
 game/balance_report.json
 
-# Локальные референсы стиля (чужие/сгенерированные пиксели, прав не зафиксировано).
-# В git — только карта reference/INDEX.md и тексты docs/13, docs/17. См. INDEX.md «Почему не в git».
-reference/*
-!reference/INDEX.md
-# Пиксели спелбука (264 кропа, 29 листов, QC) — локально; в git — текстовые
-# артефакты прогона (отчёт, состав листов, детекция). См. reference/spellbook/README.md.
-!reference/spellbook/
-reference/spellbook/*
-!reference/spellbook/README.md
-!reference/spellbook/report.md
-!reference/spellbook/sheets.json
-!reference/spellbook/detections.json
+# Комплект референсов стиля с 2026-11-08 не в рабочем дереве: пиксели лежат в
+# `SIGIL_REFERENCE_DIR` (по умолчанию ~/sigil-reference), карта — docs/style-reference-index.md.
+# Игнорировать нечего; проверка согласованности — scripts/check_reference_index.py.
 
 # Python-кэш (gen_docs_index.py импортирует check_docs_links; инструменты генерации ассетов game/tools, scripts/)
 __pycache__/
@@ -66,7 +57,7 @@ scripts/concept_art/concept_art/
 # В git — docs/, queue.json, spec.json: описание и версия решают, кадры воспроизводимы прогоном.
 # Кропы выводимы из листов, поэтому в git не идут; их содержимое закреплено хешами
 # в game/image-clone/references/manifest.json. Сами пиксели эталонов — чужие изображения
-# и генерации без зафиксированных прав (reference/INDEX.md, «Почему не в git»),
+# и генерации без зафиксированных прав (docs/style-reference-index.md, «Почему не в git»),
 # поэтому в репозитории лежат каталог и манифест, а растр — на диске, в пути
 # внутри репозитория, а не в личной папке.
 /game/image-clone/references/*

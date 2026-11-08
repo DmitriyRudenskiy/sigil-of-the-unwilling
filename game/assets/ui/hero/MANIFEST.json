@@ -1,5 +1,5 @@
 {
- "mockup": "reference/12_inventory_parchment_sheet.jpeg",
+ "mockup": "~/sigil-reference/12_inventory_parchment_sheet.jpeg",
  "generator": "game/tools/ui_kit/build_hero_kit.py",
  "scale": "макет 2816×1584 → канва 1600×900 (×0.5682)",
  "method": "векторная геометрия + зерно из замера, без диффузии (D-275)",

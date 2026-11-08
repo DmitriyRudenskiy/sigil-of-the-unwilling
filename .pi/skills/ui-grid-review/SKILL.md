@@ -38,7 +38,7 @@ description: Приёмка экрана Godot против макета адр�
 
 ```sh
 python3 scripts/ui_grid.py ~/.local/share/sigil-reserve/<имя>/frame.png --out /tmp/g.frame.png
-python3 scripts/ui_grid.py reference/12_inventory_parchment_sheet.jpeg --out /tmp/g.ref.png
+python3 scripts/ui_grid.py ~/sigil-reference/12_inventory_parchment_sheet.jpeg --out /tmp/g.ref.png
 ```
 
 `--cols/--rows` у обоих обязаны совпадать (дефолт 10×10), иначе «D5 в макете» и

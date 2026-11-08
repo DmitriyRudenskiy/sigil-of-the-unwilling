@@ -63,7 +63,7 @@ date: 2026-10-14
 | [[ux-hero-screen-copy]] | — | — | — |
 | [[ux-map-screen-copy]] | — | — | — |
 
-## GDD и стиль (90)
+## GDD и стиль (93)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -157,3 +157,6 @@ date: 2026-10-14
 | [[terrascape-merged-buildings]] | TerraScape: объединённые здания | reference | 2026-10-16 |
 | [[save-matrix]] | SAVE_MATRIX — матрица покрытия сериализации | reference | 2026-11-08 |
 | [[social-mechanics]] | Социальный слой | draft | 2026-11-08 |
+| [[report]] | — | — | — |
+| [[spellbook-sheets]] | SPELLBOOK-SHEETS — артефакты прогона листов иконок | reference | 2026-11-09 |
+| [[style-reference-index]] | STYLE-REFERENCE-INDEX — карта референсов стиля | reference | 2026-11-09 |

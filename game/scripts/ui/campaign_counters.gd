@@ -1,7 +1,7 @@
 class_name CampaignCounters
 extends RefCounted
 ## 7.9–7.10 (ui-mockup-parity) — реестр счётчиков верхней полосы макета карты
-## (`reference/10_map_campaign_town.jpeg`) и единственный способ достать из
+## (`~/sigil-reference/10_map_campaign_town.jpeg`) и единственный способ достать из
 ## носителя текст и иконку счётчика.
 ##
 ## Реестр — данные, не код полосы: `campaign_hud.gd` спрашивает у него строки,

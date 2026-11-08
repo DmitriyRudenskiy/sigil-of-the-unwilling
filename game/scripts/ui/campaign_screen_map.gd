@@ -1,7 +1,7 @@
 class_name CampaignScreenMap
 extends RefCounted
-## Поэлементная карта макета экрана кампании (`reference/10_map_campaign_town.jpeg`,
-## строка 10 карты `reference/INDEX.md`, D-203) и единственный способ спросить,
+## Поэлементная карта макета экрана кампании (`~/sigil-reference/10_map_campaign_town.jpeg`,
+## строка 10 карты `docs/style-reference-index.md`, D-203) и единственный способ спросить,
 ## **что** обязано лежать в кадре и **чем** оно наполнено.
 ##
 ## Реестр — данные, не код экрана (D-200, тот же приём, что у `CampaignCounters`):

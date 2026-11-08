@@ -19,7 +19,7 @@ sat — HSL).
   ИНВЕРСИЯ      — разница < 0 (кольцо светлее поля)
 
 Запуск:
-  python3 scripts/measure_frame_vs_content.py reference/*.jpeg reference/*.png
+  python3 scripts/measure_frame_vs_content.py ~/sigil-reference/*.jpeg ~/sigil-reference/*.png
 """
 
 from __future__ import annotations

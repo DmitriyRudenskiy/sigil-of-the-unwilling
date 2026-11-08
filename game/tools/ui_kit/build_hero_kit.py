@@ -5,7 +5,7 @@
 замера, диффузии нет (D-275). Отличия носителя: светлое поле (пергамент),
 рваный край панелей, квадратные клетки со скруглением, плитки ×/?.
 
-Числа — замер `reference/12_inventory_parchment_sheet.jpeg` (2816×1584;
+Числа — замер `~/sigil-reference/12_inventory_parchment_sheet.jpeg` (2816×1584;
 масштаб на канву 1600×900 = ×0.5682). Образцы (координаты — пиксели макета):
 
     поле пергамента   окно x 808..862, y 1060..1530   #DACAB9, σ=8
@@ -300,7 +300,7 @@ def main():
         put(legacy, {"kind": "image", "size": size, "source": "плейсхолдер UI-2", "note": note})
 
     manifest = {
-        "mockup": "reference/12_inventory_parchment_sheet.jpeg",
+        "mockup": "~/sigil-reference/12_inventory_parchment_sheet.jpeg",
         "generator": "game/tools/ui_kit/build_hero_kit.py",
         "scale": "макет 2816×1584 → канва 1600×900 (×0.5682)",
         "method": "векторная геометрия + зерно из замера, без диффузии (D-275)",

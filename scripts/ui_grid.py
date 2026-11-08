@@ -10,7 +10,7 @@ D5» и в кадре, и в макете — про одни и те же ко�
 является (D-228: пустой серый кадр против раскрашенного макета даёт «80%»), вердикт
 — разбор кадра глазом, а адрес ячейки только делает его проверяемым.
 
-  python3 scripts/ui_grid.py reference/12_inventory_parchment_sheet.jpeg \
+  python3 scripts/ui_grid.py ~/sigil-reference/12_inventory_parchment_sheet.jpeg \
       --out /tmp/ref.grid.png
   python3 scripts/ui_grid.py frame.png --cell D4 --zoom 3 --out /tmp/cell.D4.png
 

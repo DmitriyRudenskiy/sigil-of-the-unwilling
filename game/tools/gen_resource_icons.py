@@ -4,7 +4,7 @@
 Рисует 21 файл `assets/ui/icons/resources/icon_resource_<id>.png` (32×32, PNG-32
 с альфой, ≤ 6 КБ) — словарь игры (19 id бывшего HoMM-атласа + `food` + `iron`), а не словарь
 чужого листа. Вход «пиксели HoMM → перекрас → файл» отсутствует по построению:
-скрипт не читает ни `assets/textures/resources.png`, ни `reference/`, ни
+скрипт не читает ни `assets/textures/resources.png`, ни `~/sigil-reference/`, ни
 `___STYLE_BOOK/` — только константы ниже. Гард от этого — тест
 `tests/unit/assets/test_resource_icons_asset1.gd` (в т.ч. расстояние dHash до
 закоммиченных констант 16 ячеек референса 21).

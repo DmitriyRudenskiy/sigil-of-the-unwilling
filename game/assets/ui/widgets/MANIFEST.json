@@ -1,7 +1,7 @@
 {
   "generated": "2026-10-18",
   "generator": "game/tools/ui_kit/build_ui_kit.py",
-  "mockup": "reference/09_start_screen_throne.jpeg",
+  "mockup": "~/sigil-reference/09_start_screen_throne.jpeg",
   "measure": {
     "plate_game_px": [
       292,
@@ -23,7 +23,7 @@
     ]
   },
   "material": {
-    "source": "reference/09_start_screen_throne.jpeg",
+    "source": "~/sigil-reference/09_start_screen_throne.jpeg",
     "strips": [
       "y 765..777",
       "y 821..831",
@@ -454,7 +454,7 @@
   },
   "round_button": {
     "generator": "game/tools/ui_kit/build_round_button.py",
-    "mockup": "reference/11_battle_hex_snow.jpeg — нижний ряд боя: кованые медальоны, а не плиты макета 09",
+    "mockup": "~/sigil-reference/11_battle_hex_snow.jpeg — нижний ряд боя: кованые медальоны, а не плиты макета 09",
     "measure": {
       "cut": "медальон «Menu», разрез y=1462 от x=44 к центру x=128, кадр 2816×1584, R=81 px",
       "rings_ratio_of_outer_radius": {
@@ -541,7 +541,7 @@
   },
   "battle_emblems": {
     "generator": "game/tools/ui_kit/build_round_button.py",
-    "mockup": "reference/11_battle_hex_snow.jpeg — золотые эмблемы на пластине, не цветные иконки",
+    "mockup": "~/sigil-reference/11_battle_hex_snow.jpeg — золотые эмблемы на пластине, не цветные иконки",
     "note": "Эмблема — иконка кнопки (Button.icon), пластина — stylebox. Золото с вертикальным градиентом и тенью со смещением: металл лежит на пластине. Формы свои (шестерня/флаг/спаскруг/мечи/книга/песочные часы/щит/шевроны), сюжеты эмблем макета (пирог, колчан с шаром, конь с кольцом) не переносились: они нечитаемы на 44 px и не связаны с командами игры.",
     "files": [
       "emblem_gear.png",
