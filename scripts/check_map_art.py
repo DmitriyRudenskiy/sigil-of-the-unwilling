@@ -48,6 +48,7 @@ CONFIG = os.path.join(ROOT, "game/data/config/map_art_gates.json")
 # Превью-атлас клетки вне дерева ассетов (T-344): клетку рисует HexCellArt.
 ATLAS = os.path.join(ROOT, "tmp/map_art/world_map_atlas.json")
 OBJECTS = os.path.join(ROOT, "game/assets/objects/world_map_objects.json")
+ROADS = os.path.join(ROOT, "game/assets/objects/world_map_roads.json")
 PROVENANCE = os.path.join(ROOT, "game/assets/PROVENANCE.md")
 PATCH = 8          # во сколько сжимается патч клетки перед сравнением
 COLOR_BITS = 5     # квант канала в патче: 5 бит гасит шум сжатия, но не склеивает тайлы
@@ -208,6 +209,46 @@ def _lattice_shifts(cells: dict) -> list[tuple[int, int]]:
                 d = (-d[0], -d[1])
             counts[d] = counts.get(d, 0) + 1
     return [d for d, _ in sorted(counts.items(), key=lambda kv: -kv[1])[:3]]
+
+
+def hex_shape_check(label: str, manifest: dict, rgba, tile: int,
+                    cfg: dict) -> tuple[str, bool, str]:
+    """Форма клетки: каждый тайл обязан быть вырезан тем же гексом, что рисует
+    движок. Квадратная (непрозрачная по всему кваду) клетка в гекс-тайлсете красит
+    прямые углы поверх соседей: ряды кладутся с шагом 3/4 высоты, квады наезжают,
+    и по карте идёт сетка прямоугольников (T-143, глазной вердикт 11.3 «налепанные
+    заплаты»). Меряются и базы, и декали границы, и декали дорог — дефект один,
+    поэтому проверка одна и вызывается от каждого носителя."""
+    mask = np.asarray(hex_mask(tile), dtype=np.uint8)
+    hex_in = np.asarray(Image.fromarray(mask).filter(ImageFilter.MinFilter(5))) > 0
+    hex_out = np.asarray(Image.fromarray(mask).filter(ImageFilter.MaxFilter(5))) < 250
+    bad = []
+    for c in manifest["cells"]:
+        x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
+        alpha = np.asarray(rgba.crop((x, y, x + tile, y + tile)))[:, :, 3]
+        opaque = float(alpha[hex_in].mean()) / 255.0 >= float(cfg["atlas"]["min_base_opacity"])
+        corner = float(alpha[hex_out].max()) <= float(cfg["atlas"]["max_base_corner_alpha"])
+        # Внутри гекса декаль обязан полупрозрачным пером — это его природа
+        # (`atlas/decal-tone`), поэтому требовать от него непрозрачности нельзя.
+        if not corner or (c["kind"] == "base" and not opaque):
+            bad.append(c["id"])
+    return (f"{label}/hex-shape", not bad,
+            f"клеток вне гекса {len(bad)} из {len(manifest['cells'])} (порог "
+            f"{float(cfg['atlas']['min_base_opacity']):.2f} непрозрачных внутри гекса, "
+            f"угол ≤{float(cfg['atlas']['max_base_corner_alpha']):.0f})"
+            + (f" — {bad[:4]}" if bad else ""))
+
+
+def roads_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
+    """Лист дорог — носитель того же гекс-тайлсета, что база, и немаскированная
+    клетка рисует на карте прямоугольник (кадр adventure_ui, 2026-11-08: слой
+    дорог = сетка бежевых прямоугольников). Из атласных мер здесь одна форма
+    клетки: тонов, вариантов и швов у дорог нет."""
+    with open(manifest_path, encoding="utf-8") as f:
+        manifest = json.load(f)
+    rgba = Image.open(os.path.join(os.path.dirname(manifest_path),
+                                   manifest["image"])).convert("RGBA")
+    return [hex_shape_check("roads", manifest, rgba, int(manifest["tile"]), cfg)]
 
 
 def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
@@ -376,21 +417,7 @@ def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
     # тайлсете красит прямые углы поверх соседей: ряды кладутся с шагом 3/4 высоты,
     # квады наезжают, и по карте идёт сетка прямоугольников (T-143, глазной вердикт
     # 11.3 «налепанные заплаты»). Меряются и базы, и декали границы — дефект один.
-    bad = []
-    for c in manifest["cells"]:
-        x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
-        alpha = np.asarray(rgba.crop((x, y, x + tile, y + tile)))[:, :, 3]
-        opaque = float(alpha[hex_in].mean()) / 255.0 >= float(cfg["atlas"]["min_base_opacity"])
-        corner = float(alpha[hex_out].max()) <= float(cfg["atlas"]["max_base_corner_alpha"])
-        # Внутри гекса декаль обязан полупрозрачным пером — это его природа
-        # (`atlas/decal-tone`), поэтому требовать от него непрозрачности нельзя.
-        if not corner or (c["kind"] == "base" and not opaque):
-            bad.append(c["id"])
-    out.append(("atlas/hex-shape", not bad,
-                f"клеток вне гекса {len(bad)} из {len(manifest['cells'])} (порог "
-                f"{float(cfg['atlas']['min_base_opacity']):.2f} непрозрачных внутри гекса, "
-                f"угол ≤{float(cfg['atlas']['max_base_corner_alpha']):.0f})"
-                + (f" — {bad[:4]}" if bad else "")))
+    out.append(hex_shape_check("atlas", manifest, rgba, tile, cfg))
 
     # — замыкание переходов: у каждого биома все шесть направлений (см. test_tile_transitions) —
     # Словарь сторон = рёбра остроконечного шестиугольника: сетка odd-r
@@ -810,6 +837,7 @@ def main() -> int:
     ap.add_argument("--config", default=CONFIG)
     ap.add_argument("--atlas", default=ATLAS)
     ap.add_argument("--objects", default=OBJECTS)
+    ap.add_argument("--roads", default=ROADS)
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--self-test", action="store_true",
                     help="мутационная проверка гардов на синтетическом образце")
@@ -832,7 +860,8 @@ def main() -> int:
     else:
         skipped.append(("frame/*", "нет --shot: базовый снимок не переснят"))
     for label, path, run in (("atlas/*", args.atlas, atlas_checks),
-                             ("objects/*", args.objects, object_checks)):
+                             ("objects/*", args.objects, object_checks),
+                             ("roads/*", args.roads, roads_checks)):
         if os.path.exists(path):
             checks += run(path, cfg)
         else:

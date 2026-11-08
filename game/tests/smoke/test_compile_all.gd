@@ -15,11 +15,15 @@ const SCAN := ["scripts", "scenes", "assets", "data"]
 # `addons` — вендор (GdUnit4, godot-mcp), `tools` — утилиты прогона и патченная копия
 # godot-mcp, `tests` — сами тесты (их проверяет прогон GdUnit), `tmp`/`reports`/`venv`
 # — артефакты, `user`/`locale`/`image-clone`/`balance_reports` — не код.
+# `concept_art` — выход генератора концепт-арта (`krea2/…`), gitignored: он появляется
+# в рабочем дереве между прогонами и красил smoke на чужой машине (урок 2026-11-08,
+# тот же класс, что `tmp/fixture_hero4.gd` выше).
 # Файл `res://mcp_interaction_server.gd` — артефакт инъекции вендорного MCP-сервера
 # (в git его нет), в SCAN верхнего уровня он не участвует.
 const SKIP := [
-	".git", ".godot", "addons", "assets", "balance_reports", "data", "image-clone",
-	"locale", "reports", "scenes", "scripts", "tests", "tmp", "tools", "user", "venv",
+	".git", ".godot", "addons", "assets", "balance_reports", "concept_art", "data",
+	"image-clone", "locale", "reports", "scenes", "scripts", "tests", "tmp", "tools",
+	"user", "venv",
 ]
 
 # Пол: 420 версионированных .gd в SCAN (замер 2026-11-09: scripts 418 + scenes 2;

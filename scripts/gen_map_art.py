@@ -487,7 +487,14 @@ def build_road_sheet(roads: list[dict]) -> list[dict]:
                  "surface": surface(role), "side": side}, path)
 
     sheet = Image.new("RGBA", (8 * TILE, math.ceil(len(tiles) / 8) * TILE), (0, 0, 0, 0))
+    mask = hex_mask()
     for i, t in enumerate(tiles):
+        t = t.convert("RGBA")
+        # Маска гекса — та же, что у базы и кромки биомов (T-143): движок рисует
+        # каждый тайл квадратным квадом, поэтому немаскированные углы полосы и все
+        # шесть кромок клетки без соседей-дорог складываются в залитый прямоугольник
+        # поверх гексов (кадр adventure_ui, 2026-11-08: слой дорог = сетка прямоугольников).
+        t.putalpha(Image.fromarray(np.minimum(np.asarray(mask), np.asarray(t.split()[3]))))
         sheet.paste(t, ((i % 8) * TILE, (i // 8) * TILE))
     ROAD_IMG.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(ROAD_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
