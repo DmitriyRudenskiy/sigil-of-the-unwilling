@@ -164,7 +164,18 @@ func test_secondary_surface_by_road_type() -> void:
 
 
 ## Различие основной и второстепенной — числом, а не мнением: средний тон
-## принятой декали должен различаться заметно (замер листа: Δ ≈ 45 по каналу).
+## принятой декали должен различаться заметно. Пол — по замеру текущего листа
+## (`_mean_color` по непрозрачным пикселям клетки, 2026-11-10): полоса Δ = 47.1,
+## мост Δ = 19.3. Мост различим вдвое слабее полосы не потому, что арт слился
+## (палуба основной светлее, у второстепенной темнее и в рельсах), а потому, что
+## его тёмные леерные брусья и светлая палуба вытягивают средний тон друг к
+## другу. Отсюда по полу на пару, а не общий 20.0: он был выведен из полосы
+## (Δ ≈ 45) и для моста висел на 21.1, то есть падал от любой правки листа, не
+## связанной с различимостью. Последнее такое падение — перемаскирование гексом
+## 360ed7bd (срезанные углы клетки сдвинули средний тон моста на 1.8).
+const _MIN_DELTA := {"strip": 30.0, "bridge": 15.0}
+
+
 func test_primary_and_secondary_are_distinguishable() -> void:
 	var img: Image = (load(MapRoads.SHEET_PATH) as Texture2D).get_image()
 	assert_that(img).is_not_null()
@@ -176,7 +187,8 @@ func test_primary_and_secondary_are_distinguishable() -> void:
 				else MapRoads.bridge_id("ew", "secondary")
 		var a := _mean_color(img, MapRoads.coords_for(a_id))
 		var b := _mean_color(img, MapRoads.coords_for(b_id))
-		assert_that(a.distance_to(b)).is_greater(20.0)
+		var min_delta: float = float(_MIN_DELTA[k])
+		assert_that(a.distance_to(b)).is_greater(min_delta)
 
 
 ## Каждый выбор, который делает рендерер, обязан существовать в листе: 26 клеток
