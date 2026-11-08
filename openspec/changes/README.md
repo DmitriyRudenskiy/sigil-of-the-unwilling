@@ -17,11 +17,14 @@
 лежит в `openspec/changes/` (не в архиве), при этом этот файл утверждал «активных
 cиклов нет». Строка не правилась задним числом — каталог существует, запись о нём здесь.
 
-## Активный цикл 2026-11-09
+## Архив смены 2026-11-09
 
-| Цикл | Задачи | Что в нём | Спеки |
+| Цикл | Задачи | Что держит остаток | Спеки |
 | --- | --- | --- | --- |
-| `battle-demo-retire` | 0/38 | закрытие Q-M139: уникальные носители стенда (10 портретов, 20 кадров `cutthroat`, `walk-sample.png`, `build_sprite_frames.gd`, 21 документ) переезжают в `scripts/character_kit/`, `game/tools/` и `docs/archive/battle-demo/`, папка `battle-demo/` удаляется; боёвка стенда и её 42 теста не переезжают — модель боя противоречит канону `docs/02d-combat-core.md` | выведены `battle-demo-ui`, `roster-lineups`; изменена `battle-demo-sprites`; `turn-battle-core` не тронута — поднят Q-M140 `[human]` |
+| `battle-demo-retire` | 43/43 | остатка нет: Q-M139 закрыт (D-321), папка выведена, переехавшие носители — в `scripts/character_kit/`, `game/tools/build_sprite_frames.gd`, `docs/archive/battle-demo/`. Хвост вынесен новым вопросом **Q-M140** `[human]` — спека `turn-battle-core` валидна как текст и расходится с K2 | сведены: `battle-demo-ui` и `roster-lineups` удалены из `openspec/specs/` (все шесть требований каждой — REMOVED с Reason/Migration), в `battle-demo-sprites` правится одна строка (`INCOMPLETE` мёрит `scripts/character_kit/audit_sprites.py`, тест стенда удалён) |
+
+`openspec validate --all --strict` после синка: 88/94 — те же шесть падений, что и
+до (94 = 96 минус две сведённые способности).
 
 ## Архив 2026-11-02 (закрытие копи-цикла)
 
