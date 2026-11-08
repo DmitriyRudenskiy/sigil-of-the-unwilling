@@ -1,66 +1,124 @@
 ## 1. Проверить, что переезд ничего не рвёт (до первого `git mv`)
 
-- [ ] 1.1 Зафиксировать замеры в задачах числом: файлы/байты `battle-demo/`,
+- [x] 1.1 Зафиксировать замеры в задачах числом: файлы/байты `battle-demo/`,
   побайтовые двойники (`addons/gdunit4` 517/517, 176 кадров), уникальное
-  (10 портретов, 21 кадр `cutthroat`, `walk-sample.png`), размер `.godot/`.
-- [ ] 1.2 `git grep -n 'battle-demo' -- ':!battle-demo' ':!docs/DECISIONS.md'
+  (10 портретов, 20 кадров `cutthroat`, `walk-sample.png`), размер `.godot/`.
+- [x] 1.2 `git grep -n 'battle-demo' -- ':!battle-demo' ':!docs/DECISIONS.md'
   ':!docs/CHANGELOG.md' ':!docs/mvp' ':!openspec/changes/archive' ':!.reserve'` —
   размечить живые ссылки против исторических; живые переносятся в группу 6.
-- [ ] 1.3 Убедиться, что ни один шаг CI и ни один гейт не вызывает
+- [x] 1.3 Убедиться, что ни один шаг CI и ни один гейт не вызывает
   `battle-demo/run_tests.sh` и сцены стенда (`.github/workflows/*`,
   `scripts/doc_gates.sh`, `scripts/ci2_checkers.sh`, `game/run_tests.sh`).
-- [ ] 1.4 Проверить, что в стенде нет untracked носителя, кроме кэша и мусора
+- [x] 1.4 Проверить, что в стенде нет untracked носителя, кроме кэша и мусора
   (`.godot/`, `.DS_Store`): `git status --porcelain -uall battle-demo`.
+
+**Итог группы 1 (замерено 2026-11-09).** Стенд: 153 МБ, 3042 файла на диске,
+1075 в индексе, из них 111 МБ — кэш `.godot/`. Разбивка индекса: `addons` 517,
+`assets` 424, `tests` 42, `scripts` 32, `docs` 21, `tools` 18, `data` 12,
+`scenes` 4 + `project.godot`, `run_tests.sh`, `CHANGELOG.md`, `.gitignore`,
+`artifacts/.gdignore`. Уникальное: портреты 8,4 МБ (10 PNG), `cutthroat` 3,2 МБ
+(**20** PNG — пять дорожек по четыре, не 21), `walk-sample.png` 360 КБ.
+Двойники: `addons/gdunit4` 517 файлов, `assets/sprites` 196 PNG (176 вне
+`cutthroat`). Из `tools/` переезжает только `build_sprite_frames.gd` (+`.uid`);
+`author_data.gd`, `capture_*` (4 × 3 файла) и `smoke_battle.gd` кормили боёвку и
+данные стенда. CI и гейты (`workflows/*`, `doc_gates.sh`, `ci2_checkers.sh`,
+`game/run_tests.sh`) стенд не вызывают — 0 находок. Untracked в стенде 0.
+
+Живых ссылок (кроме уже перечисленных в группе 6) найдено две больше:
+`game/tests/functional/ui/test_disabled_controls_explain.gd:26` («зона
+battle-demo» про бой) и `scripts/hero_anim/integrate.py:5` («комплект того же
+формата, что несёт battle-demo»). Исторические, не правятся: `runs/*` (манифест,
+вердикты, логи), ключи вердиктов `battle-demo/artifacts/clips/…` в `gen_clip.py`,
+`gen_log.py`, `build_sprite_frames.py`, имя архивной смены
+`battle-demo-two-rosters`, комментарий в `.gitignore:59`, имена спек-способностей.
 
 ## 2. Переезд уникальных носителей (коммит «переезд»)
 
-- [ ] 2.1 `git mv battle-demo/assets/portraits scripts/character_kit/portraits`
+- [x] 2.1 `git mv battle-demo/assets/portraits scripts/character_kit/portraits`
   (10 PNG; `.import`-файлы удалить — у пикселей больше нет причин быть
   импортированными Godot).
-- [ ] 2.2 `git mv battle-demo/assets/sprites/cutthroat scripts/character_kit/sprites/cutthroat`
-  (21 кадр, те же `.import` удалить).
-- [ ] 2.3 `git mv battle-demo/assets/reference/walk-sample.png scripts/character_kit/runs/walk-sample.png`
+- [x] 2.2 `git mv battle-demo/assets/sprites/cutthroat scripts/character_kit/sprites/cutthroat`
+  (20 кадров, те же `.import` удалить).
+- [x] 2.3 `git mv battle-demo/assets/reference/walk-sample.png scripts/character_kit/runs/walk-sample.png`
   и удалить опустевший `assets/reference/`.
-- [ ] 2.4 `git mv battle-demo/tools/build_sprite_frames.gd game/tools/` вместе с
+- [x] 2.4 `git mv battle-demo/tools/build_sprite_frames.gd game/tools/` вместе с
   `.uid`; в самом файле — путь плана сборки (`res://` →
   `scripts/character_kit/runs/sprite-plan.json`) и сообщение об ошибке.
-- [ ] 2.5 `git mv battle-demo/docs docs/archive/battle-demo` и
+- [x] 2.5 `git mv battle-demo/docs docs/archive/battle-demo` и
   `git mv battle-demo/CHANGELOG.md docs/archive/battle-demo/CHANGELOG.md`.
-- [ ] 2.6 В перенесённых документах стенда править только адреса носителей,
+- [x] 2.6 В перенесённых документах стенда править только адреса носителей,
   на которые они ссылаются (`tools/gen_clip.py` → `scripts/character_kit/gen_clip.py`,
   `assets/reference/walk-sample.png` → новое место); текст решений не переписывать.
 
+**Итог группы 2 (отклонение от 2.6).** Перенесено `git mv`: 10 портретов,
+20 кадров `cutthroat`, `walk-sample.png`, `build_sprite_frames.gd` + `.uid`,
+21 документ + `CHANGELOG.md`. Спутные `.import` у переехавших пикселей удалены
+(в `game/` они не импортируются). От 2.6 отказались: править пути внутри 21
+документа — значит переписать запись, а читатель без адреса корня всё равно их не
+разрешит. Вместо этого — `docs/archive/battle-demo/README.md`: «пути читать от
+`battle-demo/`» плюс таблица «было → стало». Зона вне графа (группа 4), поэтому
+гейты эти пути не видят и не красят.
+
+**Найдено по ходу (2.4).** Переехавший `.gd` не собирался в принципе: `var path`
+в `_init` и `for path: String in animation["frames"]` в том же теле — Godot 4.7
+отказывается парсить скрипт («already a variable named "path"»). В стенде это
+никогда не всплывало: ни один гейт и ни один тест в `tools/` не заходили, а
+`.sprite_frames` в `game/assets/` собраны более ранней версией. Исправлено
+переименованием внешней переменной; прогон `godot --headless --path game --script
+res://tools/build_sprite_frames.gd` пишет `wolf.sprite_frames.tres` байт в байт
+как в индексе — то есть инструмент воспроизводит закоммиченный ресурс.
+
 ## 3. Конвейер перестаёт знать про стенд
 
-- [ ] 3.1 `scripts/character_kit/paths.py`: удалить корень `STAND`; домены
+- [x] 3.1 `scripts/character_kit/paths.py`: удалить корень `STAND`; домены
   остаются `REPO`/`PKG`/`OUT`/`RUNS`.
-- [ ] 3.2 `audit_sprites.py`: `SPRITES` → `game/assets/sprites`, `unit_ids()` →
+- [x] 3.2 `audit_sprites.py`: `SPRITES` → `game/assets/sprites`, `unit_ids()` →
   из `spec.json["characters"]` вместо `glob("*.tres")` стенда; `UNITS` убрать.
-- [ ] 3.3 `build_sprite_frames.py`: `SPRITES` → `game/assets/sprites`.
-- [ ] 3.4 `gen_kit.py`: `PORTRAITS` → `paths.PKG / "portraits"`, `SHOTS` →
+- [x] 3.3 `build_sprite_frames.py`: `SPRITES` → `game/assets/sprites`.
+- [x] 3.4 `gen_kit.py`: `PORTRAITS` → `paths.PKG / "portraits"`, `SHOTS` →
   `paths.OUT / "tmp/shots"`.
-- [ ] 3.5 `spec.json`: `portraits_dir` → `scripts/character_kit/portraits`.
-- [ ] 3.6 `test_character_kit.py`: инвариант ужесточить — ни один путь пакета не
+- [x] 3.5 `spec.json`: `portraits_dir` → `scripts/character_kit/portraits`.
+- [x] 3.6 `test_character_kit.py`: инвариант ужесточить — ни один путь пакета не
   содержит `battle-demo` (прежде было «мимо `paths.STAND`»); прогнать самопроверку.
-- [ ] 3.7 `scripts/character_kit/README.md`: новая раскладка, адрес архива
+- [x] 3.7 `scripts/character_kit/README.md`: новая раскладка, адрес архива
   записи (`docs/archive/battle-demo/`), чек-лист приёмки UI из спеки
   `battle-demo-ui`, пометка, что `ui_read_judge.py` рецензирует уже снятые кадры,
   и что девятый лист (`cutthroat`) игра не использует — вердикт в `runs/`.
-- [ ] 3.8 Прогнать импорт всех 17 модулей из корня репо и `audit_sprites.py` на
+- [x] 3.8 Прогнать импорт всех 17 модулей из корня репо и `audit_sprites.py` на
   дереве `game/assets/sprites` — аудит обязан отдавать тот же вердикт, что и до
   разреза (сверить с `runs/`).
 
+**Итог группы 3.** `paths.STAND` больше не существует; `SPRITES` =
+`game/assets/sprites`. `audit_sprites.py` выбирает комплекты по `NAME_RE` из
+`spec.json["characters"]` и ведёт аудит по двум корням (спрайты игры +
+`PKG/sprites` для `cutthroat`), потому что девятый лист игра не грузит. Вердикт
+совпал с головным деревом дословно: 196 кадров / 196 принято / 0 отбраковано.
+Попутно в индекс легли девять `a_pose_v2/*.png`, которые `gen_clip_apose.py` и
+`mirror_anim.py` читали из несуществующего места (прецедент — `beasts/wolf.png`
+уже в индексе).
+
 ## 4. Архивная зона документов вне графа
 
-- [ ] 4.1 `scripts/check_docs_links.py`: константа `ARCHIVE_DIR = docs/archive`
+- [x] 4.1 `scripts/check_docs_links.py`: константа `ARCHIVE_DIR = docs/archive`
   рядом с `BANK_DIR` и исключение зоны из `doc_files()`.
-- [ ] 4.2 Прогнать потребителей (`gen_docs_index.py`, `gdd_gate.py`,
+- [x] 4.2 Прогнать потребителей (`gen_docs_index.py`, `gdd_gate.py`,
   `audit_docs_vs_code.py`) — убедиться, что архив не лезет ни в индекс, ни в
   базлайны, ни в находки «доки ↔ код»; дописать исключение там, где оно нужно.
-- [ ] 4.3 Минимальная самопроверка в `scripts/test_check_docs_links.py`: файл в
+
+  Потребителей оказалось три правки, не ноль: `gen_docs_index.py` ходует через
+  `ck.doc_files()` и правится сам, а `gdd_gate.py` (два обхода `DOCS.rglob`) и
+  `audit_docs_vs_code.py` (`SKIP_DOC_PARTS`) обходят банк отдельно — им добавлен
+  `archive/`. Механизм `ARCHIVE_LOGS` для этого не годится: он ключуется базовым
+  именем файла, а имена стенда (`architecture.md`, `glossary.md`, `decisions.md`)
+  общие, и живой документ с таким именем молча выпал бы из графа.
+- [x] 4.3 Минимальная самопроверка в `scripts/test_check_docs_links.py`: файл в
   `docs/archive/` не участвует в графе и не требует фронтоматтера.
-- [ ] 4.4 Строка-адрес на архив там, где её будут искать: `docs/18-system-map.md`
+- [x] 4.4 Строка-адрес на архив там, где её будут искать: `docs/18-system-map.md`
   и `scripts/character_kit/README.md`.
+
+**Итог группы 4.** `check_docs_links.py` — 12 тестов зелёные, `OK: docs/ links
+consistent (135 notes checked)` — ровно столько же, сколько до переезда, то есть
+22 архивных документа в граф не попали.
 
 ## 5. Удаление папки (отдельный коммит)
 
@@ -76,13 +134,13 @@
 ## 6. Переадресовка живых ссылок
 
 - [ ] 6.1 `README.md`: убрать `battle-demo/` из дерева корня.
-- [ ] 6.2 `docs/18-system-map.md`, `docs/mvp/HERO-ANIM.md`,
+- [x] 6.2 `docs/18-system-map.md`, `docs/mvp/HERO-ANIM.md`,
   `game/scripts/entities/character_frames.gd`,
   `game/tests/unit/ui/test_battle_figures_animated.gd`: «носитель комплекта
   `battle-demo`» → `scripts/character_kit/` и `game/assets/sprites/`.
-- [ ] 6.3 `game/assets/PROVENANCE.md`: строки, ссылающиеся на путь стенда,
+- [x] 6.3 `game/assets/PROVENANCE.md`: строки, ссылающиеся на путь стенда,
   переадресовать на `scripts/character_kit/` (историю прогонов не переписывать).
-- [ ] 6.4 `scripts/character_kit/ui_read_judge.py`: шапка — чек-лист живёт в
+- [x] 6.4 `scripts/character_kit/ui_read_judge.py`: шапка — чек-лист живёт в
   README конвейера, а не в спеке `battle-demo-ui`.
 - [ ] 6.5 `openspec/changes/README.md`: у строки `battle-demo-two-rosters`
   пометить выведенный носитель и актуальные способности.

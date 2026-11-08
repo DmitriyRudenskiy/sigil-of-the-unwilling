@@ -27,6 +27,7 @@ def vault(tmp_path, monkeypatch):
     docs = tmp_path / "docs"
     (docs / "mvp").mkdir(parents=True)
     (docs / "bank").mkdir()
+    (docs / "archive" / "proekt").mkdir(parents=True)
     (docs / "01-core-loop.md").write_text(
         "---\ntitle: Цикл\nstatus: verified\ndate: 2026-10-27\n---\n\n# Цикл\n"
         "Основание: [[02-mechanics]].\n", encoding="utf-8")
@@ -35,6 +36,7 @@ def vault(tmp_path, monkeypatch):
         "См. [[01-core-loop]].\n", encoding="utf-8")
     monkeypatch.setattr(chk, "DOCS", str(docs))
     monkeypatch.setattr(chk, "BANK_DIR", str(docs / "bank"))
+    monkeypatch.setattr(chk, "ARCHIVE_DIR", str(docs / "archive"))
     return docs
 
 
@@ -106,6 +108,22 @@ def test_bank_zone_is_excluded(vault):
         "---\ntitle: Банк\nstatus: kakoj-to\n---\n\n[[09-net-chto-takogo]]\n", encoding="utf-8")
     files = chk.doc_files()
     assert not any("/bank/" in p for p in files)
+
+
+def test_archive_zone_is_excluded(vault):
+    """Архив выведенного проекта — как банк: без фронтоматтера и без ссылок.
+
+    Сюда ложится запись `battle-demo/` (21 документ без фронтоматтера), и имя
+    файла в ней — общее (`architecture.md`, `glossary.md`), поэтому зона
+    вырезается каталогом, а не списком имён: иначе живой документ с таким же
+    именем так же молча выпал бы из графа.
+    """
+    (vault / "archive" / "proekt" / "architecture.md").write_text(
+        "# Архитектура\n\n[[09-net-chto-takogo]]\n", encoding="utf-8")
+    files = chk.doc_files()
+    assert not any("/archive/" in p for p in files)
+    assert chk.check_wikilinks(files, _stems(files)) == []
+    assert chk.check_statuses(files) == []
 
 
 def test_cjk_in_docs_is_reported(tmp_path, capsys):

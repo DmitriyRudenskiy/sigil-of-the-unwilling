@@ -2,7 +2,7 @@
   "_comment": "Носитель прогона фазы 6 (задача 6.6): персонаж → кадр-источник → скелет позы → лист. Генерация — редактирование кадра-источника (D13), позу задаёт скелет DWPose этого же персонажа (D14). Пути относительные — от корня репо.",
   "comfy": "http://192.168.0.230:8188",
   "sources_dir": "/Users/user/sigil-of-the-unwilling-slop/Новая папка с объектами 2",
-  "portraits_dir": "battle-demo/assets/portraits",
+  "portraits_dir": "scripts/character_kit/portraits",
   "poses_dir": "scripts/character_kit/poses",
   "out_dir": "character_kit/artifacts/gen",
   "manifest": "scripts/character_kit/runs/generation-manifest.json",

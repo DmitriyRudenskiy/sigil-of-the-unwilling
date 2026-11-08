@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Реестр прогонов `scripts/character_kit/runs/generation-log.md` из манифеста (задача 6.10).
 
-Вердикт — ручная колонка в `battle-demo/artifacts/verdicts.json`
+Вердикт — ручная колонка в `scripts/character_kit/runs/verdicts.json`
 (`{"<путь к кадру>": "годен" | "брак: <причина>"}`); без записи — «не смотрен».
 
 Запуск: python3 scripts/character_kit/gen_log.py

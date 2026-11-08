@@ -36,8 +36,8 @@ ROOT = paths.REPO
 WORKFLOWS = HERE / "workflows"
 KIT = paths.OUT / "assets" / "kit"
 POSES = paths.OUT / "assets" / "a_pose"
-PORTRAITS = paths.STAND / "assets" / "portraits"
-SHOTS = paths.STAND / "tmp" / "shots"
+PORTRAITS = paths.PKG / "portraits"
+SHOTS = paths.OUT / "tmp" / "shots"
 DEFAULT_SEED = 43
 
 

@@ -9,8 +9,8 @@ Q-M139 (`[human]`) решён владельцем 2026-11-09: перенест�
 |---|---|---|
 | `addons/gdunit4/` | 517 файлов, 2,7 МБ | 517 из 517 побайтово равны `game/addons/gdunit4`, обе 6.2.1 |
 | `assets/sprites/` кроме `cutthroat/` | 176 кадров, 26,4 МБ | побайтово равны копиям в `game/assets/sprites/` |
-| `assets/portraits/` | 10 файлов, 7,9 МБ | в игре грузится только `res://assets/ui/hero/portrait.png` |
-| `assets/sprites/cutthroat/` | 21 кадр, 3,4 МБ | девятого персонажа нет ни в `CharacterFrames.ANIMATED`, ни в реестре юнитов игры |
+| `assets/portraits/` | 10 файлов, 8,4 МБ | в игре грузится только `res://assets/ui/hero/portrait.png` |
+| `assets/sprites/cutthroat/` | 20 кадров, 3,2 МБ | девятого персонажа нет ни в `CharacterFrames.ANIMATED`, ни в реестре юнитов игры |
 | `assets/reference/walk-sample.png` | 0,36 МБ | вне канона стиля D-319 (`~/sigil-reference/`), упомянут в `docs/known-issues.md` стенда |
 | `tools/build_sprite_frames.gd` | 1 файл | пишет `.tres` с путями `res://assets/sprites/…`, то есть работает деревом игры |
 | `docs/` + `CHANGELOG.md` | 21 + 1 файл, 200 КБ | запись отдельного проекта |

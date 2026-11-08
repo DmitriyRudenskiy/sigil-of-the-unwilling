@@ -338,7 +338,7 @@ def question_citations() -> list[str]:
     bad = []
     for f in sorted(DOCS.rglob("*.md")):
         rel = f.relative_to(DOCS).as_posix()
-        if rel.startswith("bank/"):
+        if rel.startswith(("bank/", "archive/")):
             continue
         for qid in sorted(set(re.findall(r"Q-M(\d+)", f.read_text(encoding="utf-8")))):
             if qid not in known:
@@ -360,7 +360,7 @@ def decision_citations() -> list[str]:
            for n in sorted(known) if nums.count(n) > 1]
     for f in sorted(DOCS.rglob("*.md")):
         rel = f.relative_to(DOCS).as_posix()
-        if rel.startswith("bank/"):
+        if rel.startswith(("bank/", "archive/")):
             continue  # зона без гейта — как у вопросов
         for did in sorted({d for d in re.findall(r"\bD-\d+\b",
                                                  f.read_text(encoding="utf-8"))

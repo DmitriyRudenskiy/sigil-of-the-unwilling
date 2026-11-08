@@ -17,6 +17,12 @@
 лежит в `openspec/changes/` (не в архиве), при этом этот файл утверждал «активных
 cиклов нет». Строка не правилась задним числом — каталог существует, запись о нём здесь.
 
+## Активный цикл 2026-11-09
+
+| Цикл | Задачи | Что в нём | Спеки |
+| --- | --- | --- | --- |
+| `battle-demo-retire` | 0/38 | закрытие Q-M139: уникальные носители стенда (10 портретов, 20 кадров `cutthroat`, `walk-sample.png`, `build_sprite_frames.gd`, 21 документ) переезжают в `scripts/character_kit/`, `game/tools/` и `docs/archive/battle-demo/`, папка `battle-demo/` удаляется; боёвка стенда и её 42 теста не переезжают — модель боя противоречит канону `docs/02d-combat-core.md` | выведены `battle-demo-ui`, `roster-lineups`; изменена `battle-demo-sprites`; `turn-battle-core` не тронута — поднят Q-M140 `[human]` |
+
 ## Архив 2026-11-02 (закрытие копи-цикла)
 
 | Смена | Задачи | Что держит остаток |
@@ -53,7 +59,7 @@ cиклов нет». Строка не правилась задним числ
 | `concept-art-style-variants` | 19/39 | канон стиля — акт владельца → **T-236** | создан `concept-art-pipeline` |
 | `image-clone` | 52/88 | сводка принятия и регламент очереди; очередь в момент архива грязная (работает другая сессия) → **T-237** | создан `image-clone-lab` |
 | `scenario-matrix-behavior-reliability` | 15/27 | матрица не собрана (есть пилот одного сценария) → **T-238** | создан `scenario-matrix-behavior`; `balance-probe` уже был |
-| `battle-demo-two-rosters` | 99/116 | приёмочные кадры боя (блок — T-241) и сводка баланса → **T-239** | `battle-demo-sprites`, `battle-demo-ui`, `roster-lineups`, `turn-battle-core` уже были — не перезаписаны |
+| `battle-demo-two-rosters` | 99/116 | приёмочные кадры боя (блок — T-241) и сводка баланса → **T-239** | `battle-demo-sprites`, `battle-demo-ui`, `roster-lineups`, `turn-battle-core` уже были — не перезаписаны. Носитель выведен 2026-11-09 (смена `battle-demo-retire`): `battle-demo-ui` и `roster-lineups` выведены вместе с папкой `battle-demo/`, запись — `docs/archive/battle-demo/`; из перечисленного живыми остались `battle-demo-sprites` (переписана на `scripts/character_kit/audit_sprites.py`) и `turn-battle-core` (вопрос Q-M140) |
 
 Ранее в тот же день архивированы: `2026-10-27-ci-speedup` (24/24, спек
 `ci-pipeline`), `2026-10-27-mvp-ui-flow` (17/21, спек `mvp-ui-flow`),

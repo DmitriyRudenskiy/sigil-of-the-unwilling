@@ -3,7 +3,7 @@ class_name CharacterFrames
 
 ## Анимированные фигурки на поле боя.
 ##
-## Носитель кадров — комплект `battle-demo` (задачи 8.1–8.3, ADR-008): холст 512×512,
+## Носитель кадров — `game/assets/sprites`, конвейер `scripts/character_kit/` (задачи 8.1–8.3, ADR-008): холст 512×512,
 ## ступни в (256, 448), дорожки `idle/walk/attack/hit/turn` собраны принятыми клипами
 ## (`scripts/character_kit/build_sprite_frames.py`). В игру файлы переезжают без правок:
 ## путь внутри `.tres` (`res://assets/sprites/<имя>/…`) совпадает с игровым `res://`.

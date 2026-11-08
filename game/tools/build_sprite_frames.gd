@@ -1,5 +1,6 @@
 extends SceneTree
-## Собирает `.sprite_frames` из плана `runs/sprite-plan.json` (задача 6.15).
+## Собирает `.sprite_frames` из плана `scripts/character_kit/runs/sprite-plan.json`
+## (задача 6.15).
 ##
 ## План пишет `scripts/character_kit/build_sprite_frames.py` — с 2026-11-09 он
 ## живёт в основном проекте, а не в стенде (перенос конвейера кадров): скрипт
@@ -8,28 +9,27 @@ extends SceneTree
 ## `ResourceSaver` гарантирует, что `.sprite_frames` останется ссылкой на
 ## текстуры, а не встроенными пикселями (пиксели в git не идут, D-185).
 ##
+## Скрипт лежит в `game/tools/` и работает деревом игры: план оперирует путями
+## `res://assets/sprites/…`, то есть корнем проекта обязан быть `game/`.
+##
 ## Запуск (текстуры должны быть импортированы):
 ##     python3 scripts/character_kit/build_sprite_frames.py --char knight
-##     godot --headless --path battle-demo --import
-##     godot --headless --path battle-demo --script res://tools/build_sprite_frames.gd
+##     godot --headless --path game --import
+##     godot --headless --path game --script res://tools/build_sprite_frames.gd
 
-const PLAN := "res://artifacts/sprite-plan.json"
+## План лежит в носителе конвейера, на уровень выше корня Godot-проекта.
+const PLAN := "../scripts/character_kit/runs/sprite-plan.json"
 
 
-## План пишется носителем конвейера, а не стендом; old адрес остаётся прочитанным,
-## пока в стенде лежит план прежнего прогона.
 func plan_path() -> String:
-	var here := ProjectSettings.globalize_path(PLAN)
-	if FileAccess.file_exists(here):
-		return here
-	return here.get_base_dir().get_base_dir() + "/scripts/character_kit/runs/sprite-plan.json"
+	return ProjectSettings.globalize_path("res://").path_join(PLAN)
 
 
 func _init() -> void:
-	var path := plan_path()
-	var plan: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var plan_file := plan_path()
+	var plan: Variant = JSON.parse_string(FileAccess.get_file_as_string(plan_file))
 	if typeof(plan) != TYPE_DICTIONARY:
-		push_error("нет плана сборки: %s (сначала python3 scripts/character_kit/build_sprite_frames.py)" % path)
+		push_error("нет плана сборки: %s (сначала python3 scripts/character_kit/build_sprite_frames.py --char …)" % plan_file)
 		quit(1)
 		return
 	var frames := SpriteFrames.new()

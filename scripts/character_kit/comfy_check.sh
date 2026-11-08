@@ -23,7 +23,7 @@ mcp() {
 echo "== initialize $MCP"
 HEADERS=$(mktemp)
 INIT=$(curl -sS -m 30 -D "$HEADERS" "${HDR[@]}" \
-	-d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"battle-demo","version":"1"}}}' "$MCP")
+	-d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"character-kit","version":"1"}}}' "$MCP")
 SID=$(grep -i '^mcp-session-id:' "$HEADERS" | tr -d '\r' | awk '{print $2}')
 rm -f "$HEADERS"
 echo "$INIT" | grep -o '"serverInfo":{[^}]*}'

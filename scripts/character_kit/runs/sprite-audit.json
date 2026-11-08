@@ -374,186 +374,6 @@
       ]
     },
     {
-      "file": "cutthroat/char_player_cutthroat_attack_01.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        73
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_attack_02.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        56
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_attack_03.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        67
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_attack_04.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        73
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_hit_01.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        73
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_hit_02.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        72
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_hit_03.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        63
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_hit_04.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        64
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_idle_01.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        73
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_idle_02.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        73
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_idle_03.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        72
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_idle_04.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        72
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_turn_01.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        71
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_turn_02.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        74
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_turn_03.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        66
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_turn_04.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        60
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_walk_01.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        48
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_walk_02.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        54
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_walk_03.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        36
-      ]
-    },
-    {
-      "file": "cutthroat/char_player_cutthroat_walk_04.png",
-      "ok": true,
-      "problems": [],
-      "fill": [
-        75,
-        36
-      ]
-    },
-    {
       "file": "knight/char_player_knight_attack_01.png",
       "ok": true,
       "problems": [],
@@ -1775,6 +1595,186 @@
       "fill": [
         75,
         69
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        56
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        67
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_hit_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_hit_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_hit_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        63
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_hit_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        64
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        66
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        60
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        48
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        54
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        36
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        36
       ]
     }
   ]

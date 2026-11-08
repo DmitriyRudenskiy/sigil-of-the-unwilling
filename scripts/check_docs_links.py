@@ -40,13 +40,25 @@ ARCHIVE_LOGS = {
 
 # Банковская зона: целиком исключена из чекера и гейтов (D-102).
 BANK_DIR = os.path.join(DOCS, "bank")
+# Архив выведенных проектов (запись `battle-demo/` и всё, что уйдёт следом):
+# это не живые доки, а запись, поэтому зона вне графа по тому же образцу, что
+# банк. Механизм ARCHIVE_LOGS для этого не годится: он ключуется базовым именем
+# файла, а имена стенда (`architecture.md`, `glossary.md`, `decisions.md`) —
+# общие, и живой документ с таким именем выпал бы из графа молча.
+ARCHIVE_DIR = os.path.join(DOCS, "archive")
+
+
+def out_of_graph():
+    """Зоны docs вне графа: банк (D-102) и архив выведенных проектов."""
+    return (BANK_DIR, ARCHIVE_DIR)
 
 
 def doc_files():
-    """Все .md/.canvas в docs/ (рекурсивно), кроме банковской зоны."""
+    """Все .md/.canvas в docs/, кроме зон вне графа (банк, архив)."""
     files = []
     for dirpath, dirnames, names in os.walk(DOCS):
-        if os.path.abspath(dirpath).startswith(os.path.abspath(BANK_DIR)):
+        if any(os.path.abspath(dirpath).startswith(os.path.abspath(z))
+               for z in out_of_graph()):
             dirnames[:] = []
             continue
         for n in sorted(names):

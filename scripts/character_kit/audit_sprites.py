@@ -39,8 +39,9 @@ import paths
 
 import build_sprite_frames as kit
 
-SPRITES = paths.STAND / "assets/sprites"
-UNITS = paths.STAND / "data/units"
+SPRITES = paths.SPRITES
+#: Девятый лист кита, которого игра не несёт, — в носителе конвейера.
+KIT = paths.PKG / "sprites"
 ANIMS = ("idle", "walk", "attack", "hit", "turn")
 INCOMPLETE = {"priest": {"hit"}}
 CHROMA = (0, 255, 0)
@@ -51,8 +52,33 @@ NAME_RE = re.compile(
 )
 
 
+def roots() -> list[Path]:
+    return [SPRITES, KIT]
+
+
+def key(path: Path) -> str:
+    """Ключ кадра в отчёте: `юнит/файл`, независимо от того, где он лежит."""
+    return f"{path.parent.name}/{path.name}"
+
+
+def kit_dir(unit: str) -> Path:
+    """Где лежит комплект: в игре, а девятого — в носителе конвейера."""
+    local = KIT / unit
+    return local if local.is_dir() else SPRITES / unit
+
+
 def unit_ids() -> list[str]:
-    return sorted(path.stem for path in UNITS.glob("*.tres"))
+    """Кого аудировать: комплекты, которые держат схему имён спеки.
+
+    До 2026-11-09 список давали `data/units/*.tres` стенда (10 юнитов). В
+    `game/assets/sprites` лежат и пять комплектов `scripts/hero_anim/` другой
+    генерации (`barehammer_attack_01.png`, 60 кадров) — их описывает не эта
+    спека, и под её схему имён они не попадают, а под её же приёмку по пикселям
+    их отдавать значит получить 300 «брака» из хороших кадров. Поэтому в объёме
+    аудита тот, чьё имя уже держит `NAME_RE`.
+    """
+    return sorted({p.name for root in roots() for p in root.iterdir()
+                   if p.is_dir() and any(NAME_RE.match(f.name) for f in p.glob("*.png"))})
 
 
 def expected() -> dict[str, Path]:
@@ -64,7 +90,7 @@ def expected() -> dict[str, Path]:
                 continue
             for index in range(kit.FRAME_COUNT):
                 name = kit.frame_name(id, anim, index)
-                want[name] = SPRITES / id / name
+                want[name] = kit_dir(id) / name
     return want
 
 
@@ -118,9 +144,9 @@ def check_file(path: Path) -> tuple[list[str], str]:
 
 def _summarize(rows: list[dict], want: dict[str, Path]) -> dict:
     present = {row["file"] for row in rows if row["ok"]}
-    missing = sorted(str(path.relative_to(SPRITES))
-                     for name, path in want.items()
-                     if str(path.relative_to(SPRITES)) not in present)
+    missing = sorted(key(path)
+                     for path in want.values()
+                     if key(path) not in present)
     rejected = [row for row in rows if not row["ok"]]
     heights = [row["fill"][0] for row in rows if row["fill"][0]]
     return {
@@ -137,7 +163,9 @@ def _summarize(rows: list[dict], want: dict[str, Path]) -> dict:
 
 
 def audit() -> dict:
-    files = sorted(SPRITES.glob("*/*.png"))
+    scope = set(unit_ids())
+    files = sorted(p for root in roots() for p in root.glob("*/*.png")
+                   if p.parent.name in scope)
     want = expected()
     rows: list[dict] = []
     by_digest: dict[str, str] = {}
@@ -160,27 +188,11 @@ def audit() -> dict:
             problems.append(f"побайтовый дубликат {twin}")
         elif not problems:
             by_digest[digest] = path.name
-        rows.append({"file": str(path.relative_to(SPRITES)),
+        rows.append({"file": key(path),
                      "ok": not problems, "problems": problems,
                      "fill": fill_share(path)})
 
     return _summarize(rows, want)
-
-    present = {row["file"] for row in rows if row["ok"]}
-    missing = sorted(str(path.relative_to(SPRITES))
-                     for name, path in want.items()
-                     if str(path.relative_to(SPRITES)) not in present)
-    rejected = [row for row in rows if not row["ok"]]
-    return {
-        "canvas": f"{kit.CANVAS}x{kit.CANVAS}",
-        "frames_per_track": kit.FRAME_COUNT,
-        "checked": len(rows),
-        "accepted": len(rows) - len(rejected),
-        "rejected": len(rejected),
-        "missing": missing,
-        "quarantine": [f"{id}/{anim}" for id, anims in INCOMPLETE.items() for anim in anims],
-        "files": rows,
-    }
 
 
 def main() -> int:

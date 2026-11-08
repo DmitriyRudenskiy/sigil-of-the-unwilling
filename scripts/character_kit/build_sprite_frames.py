@@ -42,7 +42,7 @@ import paths
 
 GODOT_ROOT = paths.REPO / "game"
 CLIPS = paths.OUT / "artifacts/clips"
-SPRITES = paths.STAND / "assets/sprites"
+SPRITES = paths.SPRITES
 VERDICTS = paths.RUNS / "verdicts.json"
 CLIP_MANIFEST = paths.RUNS / "clip-manifest.json"
 # Новый процесс: A-pose → 81 кадр. Дорожки отсюда перекрывают принятый комплект.
@@ -202,7 +202,7 @@ def build(char: str) -> dict:
     plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=2))
     return {"plan": str(plan_path.relative_to(paths.REPO)),
             "animations": {row["name"]: len(row["frames"]) for row in plan["animations"]},
-            "run": "godot --headless --path battle-demo --script res://tools/build_sprite_frames.gd"}
+            "run": "godot --headless --path game --script res://tools/build_sprite_frames.gd"}
 
 
 def main() -> int:

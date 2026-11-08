@@ -68,7 +68,7 @@ def render():
         "> **Автогенерат — руками не редактировать.** Перегенерация:",
         "> `python3 scripts/gen_docs_index.py`; проверка устаревания — тот же файл",
         "> с `--check`. Зона та же, что у `scripts/check_docs_links.py`:",
-        "> банковская зона `docs/bank/` вне индекса (D-102).",
+        "> банковская зона `docs/bank/` вне индекса (D-102), архив выведенных проектов `docs/archive/` — тоже",
         "",
         "> Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /",
         "> `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.",

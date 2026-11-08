@@ -4,8 +4,8 @@
 Две вещи, которые ломает перенос и которые не ловит «модуль импортируется»:
 
 1. Пути. До переноса `ROOT` значил то корень стенда, то корень репозитория.
-   Проверка держит инвариант: вывод прогона живёт вне дерева и не в git, а в
-   стенд путём может смотреть только `paths.STAND`.
+   Проверка держит инвариант: вывод прогона живёт вне дерева и не в git, а
+   путь внутри выведенного стенда не встречается ни в одном корне пакета.
 2. Приёмка. Кадр, который не прошёл, обязан быть завернут с причиной — иначе
    «годен» из отчёта ничего не значит.
 
@@ -28,13 +28,15 @@ import paths
 
 def test_paths() -> None:
     faults = []
-    if paths.STAND in paths.OUT.parents:
-        faults.append(f"вывод {paths.OUT} снова внутри стенда")
-    for name, value in (("gen_clip.CLIPS", gen_clip.CLIPS),
-                        ("gen_clip.VERDICTS", gen_clip.VERDICTS),
-                        ("audit_sprites.UNITS", audit_sprites.UNITS)):
-        if "battle-demo" in str(value) and paths.STAND not in value.parents:
-            faults.append(f"{name} смотрит в стенд мимо paths.STAND: {value}")
+    roots = {name: value for name, value in vars(paths).items()
+             if isinstance(value, Path)}
+    roots.update({f"{mod}.{name}": value for mod, name, value in (
+        ("gen_clip", "CLIPS", gen_clip.CLIPS),
+        ("gen_clip", "VERDICTS", gen_clip.VERDICTS),
+        ("audit_sprites", "SPRITES", audit_sprites.SPRITES))})
+    for name, value in roots.items():
+        if "battle-demo" in str(value):
+            faults.append(f"{name} смотрит в выведенный стенд: {value}")
     if paths.PKG not in paths.RUNS.parents:
         faults.append(f"запись прогонов {paths.RUNS} съехала из пакета")
     ignored = subprocess.run(
