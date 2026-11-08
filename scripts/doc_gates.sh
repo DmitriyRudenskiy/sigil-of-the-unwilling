@@ -68,6 +68,7 @@ TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 		scripts/test_check_save_matrix.py scripts/test_check_asset_provenance.py
 		scripts/test_check_repo_layout.py
 		scripts/test_check_autoloads.py
+		scripts/character_kit/test_character_kit.py
 		scripts/test_check_hero_frames.py
 		scripts/test_audit_hero_frames.py
 		scripts/test_scenario_matrix.py

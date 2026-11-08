@@ -17,18 +17,18 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 import comfy
+import paths
 import gen_clip
 
-ROOT = comfy.ROOT / "battle-demo"
-MIRROR = ROOT / "artifacts/clips-mirror"
+MIRROR = paths.OUT / "artifacts/clips-mirror"
 
 
 def mirrored(char: str) -> Path:
     """Зеркало нового A-pose: персонаж развёрнут влево (как враг в бою)."""
-    src = ROOT / "assets/a_pose_v2" / f"{char}.png"
+    src = paths.PKG / "a_pose_v2" / f"{char}.png"
     if not src.exists():
         raise SystemExit(f"нет {src}")
-    out = ROOT / "artifacts/mirror-src" / f"{char}_left.png"
+    out = paths.OUT / "artifacts/mirror-src" / f"{char}_left.png"
     out.parent.mkdir(parents=True, exist_ok=True)
     Image.open(src).convert("RGB").transpose(Image.FLIP_LEFT_RIGHT).save(out)
     return out
@@ -73,14 +73,14 @@ def main() -> int:
     frames = sorted(out_dir.glob("sprite_*.png"))
     if not frames:
         raise SystemExit("кадров нет")
-    sheet = ROOT / "artifacts/mirror-src" / f"{args.char}_{args.anim}_strip.jpg"
+    sheet = paths.OUT / "artifacts/mirror-src" / f"{args.char}_{args.anim}_strip.jpg"
     strip(frames, sheet)
     gif = sheet.with_suffix(".gif")
     big = [Image.open(p).convert("RGB").resize((256, 256), Image.LANCZOS) for p in frames]
     big[0].save(gif, save_all=True, append_images=big[1:], duration=180, loop=0)
-    print(json.dumps({"frames": [str(p.relative_to(ROOT.parent)) for p in frames],
-                      "strip": str(sheet.relative_to(ROOT.parent)),
-                      "gif": str(gif.relative_to(ROOT.parent))}, ensure_ascii=False, indent=1))
+    print(json.dumps({"frames": [str(p.relative_to(paths.REPO)) for p in frames],
+                      "strip": str(sheet.relative_to(paths.REPO)),
+                      "gif": str(gif.relative_to(paths.REPO))}, ensure_ascii=False, indent=1))
     return 0
 
 

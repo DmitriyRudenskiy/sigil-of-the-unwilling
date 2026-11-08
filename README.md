@@ -89,10 +89,14 @@ sigil-of-the-unwilling/
 │   └── run_tests.sh           # Скрипт запуска тестов
 ├── docs/                      # Obsidian-vault документации (GDD, ADR, журнал)
 ├── scripts/                   # Репозиторные гейты и сверщики (host-Python)
+│   ├── concept_art/           #   генерация концепт-арта и экранов (ComfyUI)
+│   └── character_kit/         #   конвейер кадров персонажа (ComfyUI): портрет →
+│                              #     A-pose → скелет позы → лист → .sprite_frames
 ├── openspec/                  # Спецификации и открытые изменения OpenSpec
 ├── .pi/                       # Проектные навыки агента
 │   └── skills/ui-grid-review/ #   единственный местный навык: замеры кадров UI
 ├── battle-demo/               # Движковый демо-стенд (вне игры; судьба — Q-M139)
+├── character_kit/             # Вывод конвейера кадров (~1,7 ГБ, вне git)
 └── tmp/                       # Временные файлы (в git — только заглушка)
 ```
 

@@ -6,7 +6,7 @@
 агент обязан сам выписать то, что нарисовано, а сверку с `CombatState` делает
 отчёт (`tools/capture_screens.gd` печатает модель рядом с каждым кадром).
 
-Запуск: python3 battle-demo/tools/ui_read_judge.py
+Запуск: python3 scripts/character_kit/ui_read_judge.py
 """
 import concurrent.futures as cf
 import os
@@ -15,13 +15,14 @@ import sys
 from datetime import date
 from pathlib import Path
 
-DEMO = Path(__file__).resolve().parent.parent
-SHOTS = DEMO / "artifacts/screenshots"
+import paths
+
+SHOTS = paths.OUT / "artifacts/screenshots"
 ## Раунд приёмки: `-r2`, `-r3`, … — отдельный файл на каждый прогон, чтобы
 ## итерации (задача 10.4: «по каждому fail — правка и повтор») не затирали
 ## предыдущий журнал. Пустая строка — первый раунд дня.
 ROUND = sys.argv[1] if len(sys.argv) > 1 else ""
-OUT = DEMO / f"docs/ui-read-judge-{date.today()}{ROUND}.md"
+OUT = paths.RUNS / f"ui-read-judge-{date.today()}{ROUND}.md"
 
 # Кадр → состояние, снятое с него (без чисел: их агент читает с пикселей).
 FRAMES = [

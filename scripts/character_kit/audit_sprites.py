@@ -17,8 +17,8 @@
 Схема имени, холст и число кадров берутся из `tools/build_sprite_frames.py` —
 единственного писателя комплекта, чтобы аудит и сборка не разъехались.
 
-    python3 battle-demo/tools/audit_sprites.py            # код 0 = комплект чист
-    python3 battle-demo/tools/audit_sprites.py --report /tmp/a.json
+    python3 scripts/character_kit/audit_sprites.py            # код 0 = комплект чист
+    python3 scripts/character_kit/audit_sprites.py --report /tmp/a.json
 
 Карантин `priest/hit` (ступни уезжают за цикл, `docs/known-issues.md`) — зеркало
 `INCOMPLETE` из `tests/unit/view/test_sprite_tracks.gd`: отсутствующая дорожка из
@@ -35,11 +35,12 @@ from pathlib import Path
 
 from PIL import Image
 
+import paths
+
 import build_sprite_frames as kit
 
-ROOT = Path(__file__).resolve().parents[1]
-SPRITES = ROOT / "assets/sprites"
-UNITS = ROOT / "data/units"
+SPRITES = paths.STAND / "assets/sprites"
+UNITS = paths.STAND / "data/units"
 ANIMS = ("idle", "walk", "attack", "hit", "turn")
 INCOMPLETE = {"priest": {"hit"}}
 CHROMA = (0, 255, 0)
@@ -184,7 +185,7 @@ def audit() -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--report", default=str(ROOT / "artifacts/sprite-audit.json"))
+    parser.add_argument("--report", default=str(paths.RUNS / "sprite-audit.json"))
     args = parser.parse_args()
     report = audit()
     Path(args.report).write_text(json.dumps(report, ensure_ascii=False, indent=2))

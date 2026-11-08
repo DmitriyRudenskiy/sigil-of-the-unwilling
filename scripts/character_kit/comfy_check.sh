@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Проверка сервера генерации перед фазой 6 (задача 6.2 tasks.md).
 # Каждый инструмент вызван, каждый узел запрошен — вывод в журнал
-# battle-demo/artifacts/comfy-check.log (пиксели в git не идут, логи — да).
+# scripts/character_kit/runs/comfy-check.log (пиксели в git не идут, логи — да).
 set -u
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."   # корень репо: пути в скрипте от него
 
 MCP="${MCP_URL:-http://192.168.0.230:9000/mcp}"
 COMFY="${COMFY_URL:-http://192.168.0.230:8188}"

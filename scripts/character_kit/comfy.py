@@ -13,7 +13,9 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+import paths
+
+ROOT = paths.REPO
 
 
 def load_spec(path: str | Path | None = None) -> dict:

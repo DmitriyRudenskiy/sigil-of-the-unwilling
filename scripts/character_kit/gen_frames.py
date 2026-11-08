@@ -10,8 +10,8 @@ id анимации, номер кадра, md5, seed, модель, путь к
 к источнику). Кадр, уже числящийся в манифесте, не перегенерируется.
 
 Запуск:
-  python3 battle-demo/tools/gen_frames.py --character knight --workers 3   # дым (6.7)
-  python3 battle-demo/tools/gen_frames.py                                   # всё
+  python3 scripts/character_kit/gen_frames.py --character knight --workers 3   # дым (6.7)
+  python3 scripts/character_kit/gen_frames.py                                   # всё
 """
 import argparse
 import concurrent.futures
@@ -23,8 +23,9 @@ import time
 from pathlib import Path
 
 import comfy
+import paths
 
-ROOT = comfy.ROOT
+ROOT = paths.REPO
 LOCK = threading.Lock()
 
 

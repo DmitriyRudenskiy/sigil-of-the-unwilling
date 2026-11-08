@@ -8,7 +8,7 @@
 Лист — рабочий инструмент просмотра, пиксели в git не идут (D-185): файл лежит в
 `artifacts/contact-sheet.jpg`, в репозитории остаётся этот инструмент.
 
-    python3 battle-demo/tools/gen_contact_sheet.py [--char knight] [--tile 128]
+    python3 scripts/character_kit/gen_contact_sheet.py [--char knight] [--tile 128]
 """
 from __future__ import annotations
 
@@ -18,10 +18,11 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-ROOT = Path(__file__).resolve().parents[1]
-GEN = ROOT / "artifacts/generation-manifest.json"
-CLIPS = ROOT / "artifacts/clip-manifest.json"
-OUT = ROOT / "artifacts/contact-sheet.jpg"
+import paths
+
+GEN = paths.RUNS / "generation-manifest.json"
+CLIPS = paths.RUNS / "clip-manifest.json"
+OUT = paths.RUNS / "contact-sheet.jpg"
 LABEL = 14
 
 
@@ -76,7 +77,7 @@ def main() -> int:
     args = parser.parse_args()
     found = sources(args.char)
     sheet(found, args.tile).save(OUT, quality=82)
-    print(json.dumps({"плиток": len(found), "tile": args.tile, "path": str(OUT.relative_to(ROOT.parent))},
+    print(json.dumps({"плиток": len(found), "tile": args.tile, "path": str(OUT.relative_to(paths.REPO))},
                      ensure_ascii=False))
     return 0
 

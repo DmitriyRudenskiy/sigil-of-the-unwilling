@@ -3,9 +3,9 @@
   "comfy": "http://192.168.0.230:8188",
   "sources_dir": "/Users/user/sigil-of-the-unwilling-slop/Новая папка с объектами 2",
   "portraits_dir": "battle-demo/assets/portraits",
-  "poses_dir": "battle-demo/assets/poses",
-  "out_dir": "battle-demo/artifacts/gen",
-  "manifest": "battle-demo/artifacts/generation-manifest.json",
+  "poses_dir": "scripts/character_kit/poses",
+  "out_dir": "character_kit/artifacts/gen",
+  "manifest": "scripts/character_kit/runs/generation-manifest.json",
   "filename_prefix": "sotu-battle",
   "prompt": "the same character as in the first image — {look} — same face, same hair, same clothes and same weapon, in the same hand-drawn game character illustration style as the first image, full body, standing in the pose from the second image, plain white background, no shadow on the ground",
   "negative_prompt": "photorealism, photograph, 3d render, text, watermark, frame, background scenery, shadow on the ground, extra fingers, deformed hands, extra limbs, cropped body",
@@ -103,7 +103,7 @@
   ],
   "motion_reference": {
     "walk": {
-      "dir": "battle-demo/assets/poses/_dwpose/walk-sample",
+      "dir": "scripts/character_kit/poses/_dwpose/walk-sample",
       "cells": [
         0,
         6,

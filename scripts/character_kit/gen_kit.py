@@ -29,14 +29,15 @@ from pathlib import Path
 from PIL import Image
 
 import comfy
+import paths
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[1]
+ROOT = paths.REPO
 WORKFLOWS = HERE / "workflows"
-KIT = ROOT / "battle-demo" / "assets" / "kit"
-POSES = ROOT / "battle-demo" / "assets" / "a_pose"
-PORTRAITS = ROOT / "battle-demo" / "assets" / "portraits"
-SHOTS = ROOT / "tmp" / "shots"
+KIT = paths.OUT / "assets" / "kit"
+POSES = paths.OUT / "assets" / "a_pose"
+PORTRAITS = paths.STAND / "assets" / "portraits"
+SHOTS = paths.STAND / "tmp" / "shots"
 DEFAULT_SEED = 43
 
 

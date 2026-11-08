@@ -6,7 +6,7 @@
 трогаем** (владелец, 2026-10-24): `seed` всегда 43, правка промпта даёт другого
 человека вместо персонажа источника.
 
-Только stdlib + PIL. Кадр кладётся в `battle-demo/assets/a_pose/<char>.png`;
+Только stdlib + PIL. Кадр кладётся в `character_kit/assets/a_pose/<char>.png` (вывод, вне git);
 наличие файла = шаг сделан (возобновляемость без манифеста).
 """
 import argparse
@@ -18,10 +18,11 @@ from pathlib import Path
 from PIL import Image
 
 import comfy
+import paths
 
 HERE = Path(__file__).resolve().parent
 WF = HERE / "workflows" / "00_a_pose_reference.json"
-A_POSE_DIR = comfy.ROOT / "battle-demo/assets/a_pose"
+A_POSE_DIR = paths.OUT / "assets/a_pose"
 SEED = 43
 
 
@@ -33,7 +34,7 @@ def load_graph() -> dict:
 
 
 def run_one(comfy_url: str, char: str, out: Path, timeout: int = 1200) -> dict:
-    portrait = comfy.ROOT / comfy.load_spec()["portraits_dir"] / f"{char}.png"
+    portrait = paths.REPO / comfy.load_spec()["portraits_dir"] / f"{char}.png"
     if not portrait.exists():
         raise SystemExit(f"нет портрета {portrait}")
     graph = load_graph()
@@ -80,7 +81,7 @@ def main() -> int:
     for char in chars:
         out = A_POSE_DIR / f"{char}.png"
         if out.exists() and not args.force:
-            print(f"[skip] {char}: уже есть {out.relative_to(comfy.ROOT)}", flush=True)
+            print(f"[skip] {char}: уже есть {out.relative_to(paths.REPO)}", flush=True)
             continue
         if not run_one(args.comfy, char, out)["verdict"].startswith("годен"):
             bad += 1

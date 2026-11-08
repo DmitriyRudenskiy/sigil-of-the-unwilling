@@ -26,7 +26,7 @@
 `ResourceSaver` на нём отвечает «File unrecognized». В git идёт и ресурс, и план
 сборки: они и есть контракт имени дорожки (D10) и порядка кадров.
 
-    python3 battle-demo/tools/build_sprite_frames.py --char knight
+    python3 scripts/character_kit/build_sprite_frames.py --char knight
 """
 from __future__ import annotations
 
@@ -38,14 +38,15 @@ from pathlib import Path
 
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parents[1]
-GODOT_ROOT = ROOT.parent / "game"
-CLIPS = ROOT / "artifacts/clips"
-SPRITES = ROOT / "assets/sprites"
-VERDICTS = ROOT / "artifacts/verdicts.json"
-CLIP_MANIFEST = ROOT / "artifacts/clip-manifest.json"
+import paths
+
+GODOT_ROOT = paths.REPO / "game"
+CLIPS = paths.OUT / "artifacts/clips"
+SPRITES = paths.STAND / "assets/sprites"
+VERDICTS = paths.RUNS / "verdicts.json"
+CLIP_MANIFEST = paths.RUNS / "clip-manifest.json"
 # Новый процесс: A-pose → 81 кадр. Дорожки отсюда перекрывают принятый комплект.
-APOSE = ROOT / "artifacts/clips-apose"
+APOSE = paths.OUT / "artifacts/clips-apose"
 ## У этих A-pose оружия нет вообще (`assets/a_pose_v2` снято до цепочки
 ## extract+merge из `tools/spec.json` «kit»), а в принятом idle оно есть: меч у
 ## рыцаря, лук у лучника, топор у варвара, кинжалы у разбойника. Перекрывать
@@ -177,7 +178,7 @@ def build(char: str) -> dict:
             continue
         path_dir = key
         frames = []
-        for index, path in enumerate(distinct_frames(ROOT.parent / path_dir, len(row["subsampled"]))):
+        for index, path in enumerate(distinct_frames(paths.REPO / path_dir, len(row["subsampled"]))):
             target, res_path = frame_target(char, row["anim"], index)
             normalize(path, target)
             frames.append(res_path)
@@ -197,9 +198,9 @@ def build(char: str) -> dict:
         ],
         "out": f"res://assets/sprites/{char}.sprite_frames.tres",
     }
-    plan_path = ROOT / "artifacts/sprite-plan.json"
+    plan_path = paths.RUNS / "sprite-plan.json"
     plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=2))
-    return {"plan": str(plan_path.relative_to(ROOT.parent)),
+    return {"plan": str(plan_path.relative_to(paths.REPO)),
             "animations": {row["name"]: len(row["frames"]) for row in plan["animations"]},
             "run": "godot --headless --path battle-demo --script res://tools/build_sprite_frames.gd"}
 

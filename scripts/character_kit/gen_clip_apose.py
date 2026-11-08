@@ -17,18 +17,19 @@ from pathlib import Path
 from PIL import Image, ImageOps
 
 import comfy
+import paths
 import gen_clip as gc
 
-ROOT = comfy.ROOT
+ROOT = paths.REPO
 WF = "06_apose_i2v_81_frames"
-OUT = ROOT / "battle-demo/artifacts/clips-apose"
+OUT = paths.OUT / "artifacts/clips-apose"
 # Развёрнуты влево → зеркалим источник (владелиц подтвердил на варваре: смотрит
 # влево). Критерий — куда смотрит голова, а не куда смотрят носки.
 FACES_LEFT = {"barbarian", "wizard", "sorcerer", "stormmage", "priest"}
 
 
 def source_image(char: str, mirror: bool, out_dir: Path) -> Path:
-    path = ROOT / f"battle-demo/assets/a_pose_v2/{char}.png"
+    path = paths.PKG / "a_pose_v2" / f"{char}.png"
     image = Image.open(path).convert("RGB")          # зелёный фон уже в пикселях
     if mirror:
         image = ImageOps.mirror(image)

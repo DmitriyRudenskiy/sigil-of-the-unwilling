@@ -6,7 +6,7 @@
 приходят из пикселей (D13). Файл грузится на сервер и становится первым входом
 графа; имя на сервере — `sotu-<id>.png`.
 
-Запуск: python3 battle-demo/tools/make_portraits.py [--no-upload]
+Запуск: python3 scripts/character_kit/make_portraits.py [--no-upload]
 """
 import argparse
 import hashlib
@@ -16,6 +16,7 @@ from pathlib import Path
 from PIL import Image, ImageChops
 
 import comfy
+import paths
 
 SIDE = 1024
 BG_TOLERANCE = 12
@@ -47,7 +48,7 @@ def main() -> int:
     args = parser.parse_args()
 
     spec = comfy.load_spec(args.spec)
-    portraits = comfy.ROOT / spec["portraits_dir"]
+    portraits = paths.REPO / spec["portraits_dir"]
     for character in spec["characters"]:
         source = Path(spec["sources_dir"]) / character["source"]
         out = portraits / f"{character['id']}.png"
@@ -56,7 +57,7 @@ def main() -> int:
         server = ""
         if not args.no_upload:
             server = comfy.upload(spec["comfy"], out, f"sotu-{character['id']}.png")
-        print(f"{character['id']}\t{width}x{height}\t{digest}\t{out.relative_to(comfy.ROOT)}\t{server}")
+        print(f"{character['id']}\t{width}x{height}\t{digest}\t{out.relative_to(paths.REPO)}\t{server}")
     return 0
 
 

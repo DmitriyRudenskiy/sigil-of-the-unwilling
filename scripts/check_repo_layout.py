@@ -61,7 +61,7 @@ ALLOWED: dict[str, str] = {
 }
 
 # Вывод прогонов: отслеживаемых файлов тут быть не может ни при каком решении.
-OUTPUT_DIRS = ("artifacts", "data", "concept_art")
+OUTPUT_DIRS = ("artifacts", "data", "concept_art", "character_kit")
 
 # Несущие носители, удалённые этим разрезом. Возврат одного из них = RED.
 BANNED_ROOT = (

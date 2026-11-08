@@ -23,13 +23,14 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
 import comfy
+import paths
 
 HERE = Path(__file__).resolve().parent
-ROOT = comfy.ROOT
+ROOT = paths.REPO
 WF = HERE / "workflows"
-CLIPS = ROOT / "battle-demo/artifacts/clips"
-MANIFEST = ROOT / "battle-demo/artifacts/clip-manifest.json"
-VERDICTS = ROOT / "battle-demo/artifacts/verdicts.json"
+CLIPS = paths.OUT / "artifacts/clips"
+MANIFEST = paths.RUNS / "clip-manifest.json"
+VERDICTS = paths.RUNS / "verdicts.json"
 GREEN = (0, 255, 0)
 # Анимации, которые в движке крутятся по кругу (D9): для них ищется стык петли.
 LOOP_ANIMS = {"idle", "walk"}
@@ -612,6 +613,8 @@ def main() -> int:
     MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     verdicts = json.loads(VERDICTS.read_text(encoding="utf-8")) if VERDICTS.exists() else {}
+    # Ключ вердикта — исторический идентификатор записи в verdicts.json, а не путь:
+    # переписывать его под новый дом означало бы открепить 9.5 КБ уже вынесенных вердиктов.
     verdicts[f"battle-demo/artifacts/clips/{args.char}/{args.anim}"] = report["verdict"]
     VERDICTS.write_text(json.dumps(verdicts, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return 0
@@ -632,7 +635,7 @@ def upload_portrait(spec: dict, char: str, comfy_url: str) -> str:
     входом генерации A-pose: из него оружие уходит вместе с позой, а словами
     оно не возвращается (распад предмета).
     """
-    assets = ROOT / "battle-demo/assets"
+    assets = paths.OUT / "assets"
     for path in (assets / "kit" / f"{char}_composed.png",
                  assets / "a_pose" / f"{char}.png",
                  ROOT / spec["portraits_dir"] / f"{char}.png"):

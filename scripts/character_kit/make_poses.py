@@ -7,7 +7,7 @@
 Рендер идёт тем же `dwpose.draw_poses`, что и базовая карта, поэтому модель
 видит привычный ей OpenPose-стиль.
 
-Запуск: python3 battle-demo/tools/make_poses.py
+Запуск: python3 scripts/character_kit/make_poses.py
 """
 import hashlib
 import json
@@ -15,14 +15,15 @@ import math
 import sys
 from pathlib import Path
 
-import comfy  # только ROOT + load_spec
+import comfy  # только load_spec
+import paths
 from dwpose import draw_poses, decode_json_as_poses
 from dwpose.util2 import HWC3
 from PIL import Image
 
-ROOT = comfy.ROOT
-DWPOSE_DIR = "battle-demo/assets/poses/_dwpose"
-OUT_DIR = "battle-demo/assets/poses"
+ROOT = paths.REPO
+DWPOSE_DIR = paths.PKG / "poses/_dwpose"
+OUT_DIR = paths.PKG / "poses"
 
 # OpenPose COCO-18: 0 nose, 1 neck, 2 RS, 3 RE, 4 RW, 5 LS, 6 LE, 7 LW,
 # 8 RH, 9 RK, 10 RA, 11 LH, 12 LK, 13 LA, 14 REye, 15 LEye, 16 REar, 17 LEar
@@ -184,7 +185,7 @@ def render(person: dict, canvas: int) -> Image.Image:
 
 def build_character(character: dict, animations: list, frames: int,
                     motion: dict) -> list:
-    source = json.loads((ROOT / DWPOSE_DIR / f"{character['id']}.json").read_text())
+    source = json.loads((DWPOSE_DIR / f"{character['id']}.json").read_text())
     rows = []
     for animation in animations:
         for frame in range(1, frames + 1):
@@ -211,7 +212,7 @@ def build_character(character: dict, animations: list, frames: int,
             }
             transform_extras(body, person, before["head"], after["head"],
                              before["rhand"], after["rhand"], before["lhand"], after["lhand"])
-            out = ROOT / OUT_DIR / character["id"] / f"{animation}_{frame:02d}.png"
+            out = OUT_DIR / character["id"] / f"{animation}_{frame:02d}.png"
             out.parent.mkdir(parents=True, exist_ok=True)
             render(person, source["canvas_height"]).save(out)
             rows.append((character["id"], animation, frame,
@@ -225,7 +226,7 @@ def main() -> int:
     for character in spec["characters"]:
         rows += build_character(character, spec["animations"], spec["frames"],
                                 spec.get("motion_reference", {}))
-    manifest = ROOT / OUT_DIR / "MANIFEST.md"
+    manifest = OUT_DIR / "MANIFEST.md"
     manifest.write_text(
         "# Манифест карт поз (задача 6.5)\n\n"
         "Скелет — DWPose кадра-источника этого персонажа (`_dwpose/<id>.json`), кадр — "

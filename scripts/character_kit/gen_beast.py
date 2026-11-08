@@ -16,8 +16,8 @@
 `gen_a_pose_v2` делает A-pose в три четверти вправо, и этого хватает, чтобы
 клип смотрел вправо без зеркала.
 
-    python3 battle-demo/tools/gen_beast.py --id wolf
-    python3 battle-demo/tools/gen_beast.py --id wolf --seed 1202 --force
+    python3 scripts/character_kit/gen_beast.py --id wolf
+    python3 scripts/character_kit/gen_beast.py --id wolf --seed 1202 --force
 """
 from __future__ import annotations
 
@@ -27,12 +27,13 @@ import sys
 from pathlib import Path
 
 import comfy
+import paths
 from make_portraits import crop_to_content
 
-sys.path.insert(0, str(comfy.ROOT / "scripts/concept_art"))
+sys.path.insert(0, str(paths.REPO / "scripts/concept_art"))
 import generate as concept       # noqa: E402  workflow / run_job / download
 
-OUT_DIR = comfy.ROOT / "battle-demo/assets/beasts"
+OUT_DIR = paths.PKG / "beasts"
 STYLE = ("hand-painted fantasy game character illustration, semi-realistic "
          "painterly style, soft airbrush shading with a few visible brush "
          "strokes, muted earth-tone palette, matte surfaces, no ink outlines")
@@ -65,9 +66,9 @@ def main() -> int:
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     raw = OUT_DIR / f"{args.id}.png"
-    portrait = comfy.ROOT / comfy.load_spec()["portraits_dir"] / f"{args.id}.png"
+    portrait = paths.REPO / comfy.load_spec()["portraits_dir"] / f"{args.id}.png"
     if raw.exists() and not args.force:
-        print(f"[skip] {raw.relative_to(comfy.ROOT)} уже есть, --force для пересъёмки")
+        print(f"[skip] {raw.relative_to(paths.REPO)} уже есть, --force для пересъёмки")
         return 0
 
     prompt = f"{STYLE}, {FRAME}, {BEASTS[args.id]}, no {NEGATIVE}"
@@ -78,8 +79,8 @@ def main() -> int:
     concept.download(args.comfy, image, raw)
     crop_to_content(raw, portrait)
     print(json.dumps({"id": args.id, "seed": args.seed, "model": args.model,
-                      "raw": str(raw.relative_to(comfy.ROOT)),
-                      "portrait": str(portrait.relative_to(comfy.ROOT))},
+                      "raw": str(raw.relative_to(paths.REPO)),
+                      "portrait": str(portrait.relative_to(paths.REPO))},
                      ensure_ascii=False, indent=1))
     return 0
 

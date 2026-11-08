@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
-"""Реестр прогонов `battle-demo/docs/generation-log.md` из манифеста (задача 6.10).
+"""Реестр прогонов `scripts/character_kit/runs/generation-log.md` из манифеста (задача 6.10).
 
 Вердикт — ручная колонка в `battle-demo/artifacts/verdicts.json`
 (`{"<путь к кадру>": "годен" | "брак: <причина>"}`); без записи — «не смотрен».
 
-Запуск: python3 battle-demo/tools/gen_log.py
+Запуск: python3 scripts/character_kit/gen_log.py
 """
 import json
 import sys
 from pathlib import Path
 
 import comfy
+import paths
 
-ROOT = comfy.ROOT
-MANIFEST = ROOT / "battle-demo/artifacts/generation-manifest.json"
-VERDICTS = ROOT / "battle-demo/artifacts/verdicts.json"
-OUT = ROOT / "battle-demo/docs/generation-log.md"
+ROOT = paths.REPO
+MANIFEST = paths.RUNS / "generation-manifest.json"
+VERDICTS = paths.RUNS / "verdicts.json"
+OUT = paths.RUNS / "generation-log.md"
 
 
 def main() -> int:
@@ -40,7 +41,7 @@ def main() -> int:
             f"| {row['resolution']} | `{row['path']}` | {row['md5'][:8]} "
             f"| {verdicts.get(row['path'], 'не смотрен')} |")
 
-    clip_manifest = ROOT / "battle-demo/artifacts/clip-manifest.json"
+    clip_manifest = paths.RUNS / "clip-manifest.json"
     clips = json.loads(clip_manifest.read_text()) if clip_manifest.exists() else []
     if clips:
         lines += [
@@ -65,7 +66,7 @@ def main() -> int:
                 f"| {verdicts.get(key, 'не смотрен')} |")
 
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"строк: {len(rows)} кадров + {len(clips)} клипов → {OUT.relative_to(ROOT)}")
+    print(f"строк: {len(rows)} кадров + {len(clips)} клипов → {OUT.relative_to(paths.REPO)}")
     return 0
 
 

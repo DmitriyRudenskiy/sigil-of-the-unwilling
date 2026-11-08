@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Скелет DWPose по картинке → openpose json (задача 6.5).
 
-`python3 battle-demo/tools/dwpose_cli.py <png> --out <json|каталог> [--size 1024] [--cells N]`
+`python3 scripts/character_kit/dwpose_cli.py <png> --out <json|каталог> [--size 1024] [--cells N]`
 
 `--cells N` — изображение нарезается N×N и скелет считается для каждой ячейки
 (образец походки — лист 5×5, по человеку на ячейку), json-ы складываются в

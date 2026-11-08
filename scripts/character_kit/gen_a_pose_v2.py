@@ -8,7 +8,7 @@
 перекладывается в API-форму без правок значений: этот файл — сериализатор, а не
 редактор.
 
-Выход — `battle-demo/assets/a_pose_v2/<char>.png`. Старый комплект
+Выход — `scripts/character_kit/a_pose_v2/<char>.png`. Старый комплект
 `assets/a_pose/` не трогается: из него сделаны первые кадры принятых клипов.
 
     python3 tools/gen_a_pose_v2.py --char knight
@@ -23,10 +23,11 @@ from pathlib import Path
 from PIL import Image
 
 import comfy
+import paths
 
 HERE = Path(__file__).resolve().parent
 WORKFLOW = Path("/Users/user/Downloads/A-pose_improved-2.json")
-OUT_DIR = comfy.ROOT / "battle-demo/assets/a_pose_v2"
+OUT_DIR = paths.PKG / "a_pose_v2"
 IN_NODE, OUT_NODE = "11", "10"        # LoadImage, SaveImage (владелец их не менял)
 
 # Виджет в /object_info — примитивный тип или список опций; всё остальное — связь.
@@ -87,7 +88,7 @@ def free(comfy_url: str) -> None:
 
 
 def run_one(comfy_url: str, char: str, api: dict, out: Path, timeout: int = 1200) -> dict:
-    portrait = comfy.ROOT / comfy.load_spec()["portraits_dir"] / f"{char}.png"
+    portrait = paths.REPO / comfy.load_spec()["portraits_dir"] / f"{char}.png"
     if not portrait.exists():
         raise SystemExit(f"нет портрета {portrait}")
     graph = json.loads(json.dumps(api))
@@ -101,7 +102,7 @@ def run_one(comfy_url: str, char: str, api: dict, out: Path, timeout: int = 1200
         raise SystemExit(f"{char}: прогон без изображений")
     comfy.save_output(comfy_url, images[0], out)
     size = list(Image.open(out).size)
-    print(f"[{char}] {out.relative_to(comfy.ROOT)} · {round(time.time() - started, 1)} с"
+    print(f"[{char}] {out.relative_to(paths.REPO)} · {round(time.time() - started, 1)} с"
           f" · {size[0]}×{size[1]}", flush=True)
     return {"char": char, "seconds": round(time.time() - started, 1), "size": size}
 
@@ -140,7 +141,7 @@ def main() -> int:
     for char in chars:
         out = OUT_DIR / f"{char}.png"
         if out.exists() and not args.force:
-            print(f"[skip] {char}: уже есть {out.relative_to(comfy.ROOT)}", flush=True)
+            print(f"[skip] {char}: уже есть {out.relative_to(paths.REPO)}", flush=True)
             continue
         run_one(args.comfy, char, api, out)
         free(args.comfy)

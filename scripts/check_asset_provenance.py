@@ -167,7 +167,7 @@ def self_test():
     # объявленные генераторы: путь со слэшем считается, имя без слэша и внешний
     # инструмент — нет; снятый скрипт обязан падать (D12)
     reg = ("| `game/assets/x/` | генератор репо `game/tools/gen.py` | … | … | … | чисто |\n"
-           "| `game/assets/y/` | генератор `battle-demo/tools/gen_frames.py` | … | … | … | чисто |\n"
+           "| `game/assets/y/` | генератор `scripts/character_kit/gen_frames.py` | … | … | … | чисто |\n"
            "| `game/assets/z/` | генератор репо `game/tools/gone.py` (+ `gen_other.gd`) | … | … | … | чисто |\n")
     manifests = [("game/assets/x/MANIFEST.json",
                   {"generator": "game/tools/gen.py",
@@ -175,14 +175,14 @@ def self_test():
                              {"file": "b.png", "generator": "game/tools/moved.py"}]})]
     declared = declared_generators(reg, manifests)
     assert ("PROVENANCE.md", "game/tools/gen.py") in declared
-    assert ("PROVENANCE.md", "battle-demo/tools/gen_frames.py") in declared
+    assert ("PROVENANCE.md", "scripts/character_kit/gen_frames.py") in declared
     assert ("PROVENANCE.md", "game/tools/gone.py") in declared
     assert ("game/assets/x/MANIFEST.json", "game/tools/moved.py") in declared
     # имя без слэша и модель без пути в объявленные генераторы не попадают
     assert not any("gen_other.gd" in g for _w, g in declared)
     assert not any("krea2" in g for _w, g in declared)
     dead = {g for _w, g in declared if g not in {"game/tools/gen.py",
-                                                 "battle-demo/tools/gen_frames.py"}}
+                                                 "scripts/character_kit/gen_frames.py"}}
     assert dead == {"game/tools/gone.py", "game/tools/moved.py"}
     print("SELF-TEST: OK (проекции статус/уровень строки расходятся: 4 = 2+1+1, "
           "срез уровня 3/1; генераторы: 4 пути считается, имя и модель — нет, "
