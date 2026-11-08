@@ -23,6 +23,13 @@
 .pi/hindsight/
 
 .pi/hindsight.json
+
+# Рабочий цикл OpenSpec: `openspec init --tools pi` пишет промпты (.pi/prompts/opsx-*.md)
+# и навыки (.pi/skills/openspec-*/) — порождение внешнего CLI. Проверено: сгенерированный
+# opsx-apply.md побайтово совпал с тем, что лежал в индексе. Носитель репозитория — только
+# авторские проектные навыки, их нечем перегенерировать.
+/.pi/prompts/
+/.pi/skills/openspec-*/
 game/balance_report.json
 
 # Локальные референсы стиля (чужие/сгенерированные пиксели, прав не зафиксировано).

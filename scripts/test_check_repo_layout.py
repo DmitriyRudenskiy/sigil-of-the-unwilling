@@ -27,7 +27,7 @@ spec.loader.exec_module(crl)
 CLEAN = [
     ".github/workflows/ci.yml",
     ".gitignore",
-    ".pi/prompts/opsx-apply.md",
+    ".pi/skills/ui-grid-review/SKILL.md",
     "AGENTS.md",
     "README.md",
     "docs/00-INDEX.md",

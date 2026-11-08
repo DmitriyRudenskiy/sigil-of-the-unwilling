@@ -46,7 +46,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 ALLOWED: dict[str, str] = {
     ".github": "CI",
     ".gitignore": "общие правила игнорирования (единственный носитель правил)",
-    ".pi": "промпты и навыки агента",
+    ".pi": "проектные навыки агента",
     "AGENTS.md": "инструкции агентам",
     "README.md": "вход в проект",
     "docs": "Obsidian-хранилище документации",
