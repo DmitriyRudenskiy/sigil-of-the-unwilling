@@ -122,18 +122,22 @@ consistent (135 notes checked)` — ровно столько же, скольк
 
 ## 5. Удаление папки (отдельный коммит)
 
-- [ ] 5.1 `git rm -r battle-demo` (в индексе к этому моменту не остаётся ничего,
+- [x] 5.1 `git rm -r battle-demo` (в индексе к этому моменту не остаётся ничего,
   кроме удаляемого: проверить `git ls-files battle-demo | wc -l` до и после).
-- [ ] 5.2 `scripts/check_repo_layout.py`: убрать строку реестра `battle-demo`
-  (12 носителей), прогнать `scripts/test_check_repo_layout.py`.
-- [ ] 5.3 `.gitignore`: снять строки, описывающие вывод внутри стенда, если они
-  остались; `/character_kit/` остаётся.
-- [ ] 5.4 Проверить, что `game/` не потерял ни одного ресурса: `test_compile_all`,
+  989 → 0. На диске после `git rm` остались только кэш `.godot/` (111 МБ) и
+  восемь `.DS_Store` — сняты `rm -rf`.
+- [x] 5.2 `scripts/check_repo_layout.py`: убрать строку реестра `battle-demo`
+  (12 носителей), прогнать `scripts/test_check_repo_layout.py` — 9 тестов
+  зелёные; счётчик позиций «ждёт решения» в самопроверке съехал с 4 на 3.
+- [x] 5.3 `.gitignore`: строк вывода внутри стенда не осталось — `/character_kit/`
+  описывает вывод в корне и остаётся; историческая строка-комментарий
+  «снято с диска из battle-demo/artifacts/» сохранена намеренно.
+- [x] 5.4 Проверить, что `game/` не потерял ни одного ресурса: `test_compile_all`,
   `check_asset_provenance`, `game/run_tests.sh`.
 
 ## 6. Переадресовка живых ссылок
 
-- [ ] 6.1 `README.md`: убрать `battle-demo/` из дерева корня.
+- [x] 6.1 `README.md`: убрать `battle-demo/` из дерева корня.
 - [x] 6.2 `docs/18-system-map.md`, `docs/mvp/HERO-ANIM.md`,
   `game/scripts/entities/character_frames.gd`,
   `game/tests/unit/ui/test_battle_figures_animated.gd`: «носитель комплекта
@@ -142,29 +146,69 @@ consistent (135 notes checked)` — ровно столько же, скольк
   переадресовать на `scripts/character_kit/` (историю прогонов не переписывать).
 - [x] 6.4 `scripts/character_kit/ui_read_judge.py`: шапка — чек-лист живёт в
   README конвейера, а не в спеке `battle-demo-ui`.
-- [ ] 6.5 `openspec/changes/README.md`: у строки `battle-demo-two-rosters`
+- [x] 6.5 `openspec/changes/README.md`: у строки `battle-demo-two-rosters`
   пометить выведенный носитель и актуальные способности.
+- [x] 6.6 (сверх плана) `game/tests/functional/ui/test_disabled_controls_explain.gd`:
+  «бой — остаток 3.4 (зона battle-demo)» → адрес носителя боя в игре, стенд
+  упомянут как выведенный.
+
+**Итог группы 6.** Живых ссылок на путь стенда не осталось: `git grep battle-demo`
+вне исторических носителей даёт только имена спек-способностей, инвариант
+теста пакета и три комментария, объясняющих, почему стенда больше нет. Записи
+прогонов (`runs/generation-manifest.json`, `verdicts.json`, `portraits.log`,
+`report.json`) старые пути сохраняют — это протокол оплаченных прогонов.
 
 ## 7. Спеки, реестры, даты
 
-- [ ] 7.1 `openspec validate battle-demo-retire --strict` — зелено до реализации.
-- [ ] 7.2 `docs/QUESTIONS.md`: Q-M139 → закрыт решением владельца 2026-11-09
+- [x] 7.1 `openspec validate battle-demo-retire --strict` — зелено до реализации.
+- [x] 7.2 `docs/QUESTIONS.md`: Q-M139 → закрыт решением владельца 2026-11-09
   (перенести наработки, папку удалить) с фактом «в репозитории 12 носителей»;
   поднять Q-M140 `[human]` про `turn-battle-core` против `dnd-battle-ladder`.
-- [ ] 7.3 `docs/DECISIONS.md`: D-321 с обязательной секцией `Отвергнутые`
+- [x] 7.3 `docs/DECISIONS.md`: D-321 с обязательной секцией `Отвергнутые`
   (иначе `gdd_gate` краснеет).
-- [ ] 7.4 `docs/CHANGELOG.md`: запись разреза (дата — по конвенции репозитория).
-- [ ] 7.5 `python3 scripts/gen_docs_index.py` — индекс свежий.
+- [x] 7.4 `docs/CHANGELOG.md`: запись разреза (дата — по конвенции репозитория).
+- [x] 7.5 `python3 scripts/gen_docs_index.py` — индекс свежий (137 заметок,
+  архив в индекс не попал).
 
 ## 8. Замер гейтов (числом, в задачи)
 
-- [ ] 8.1 `python3 scripts/check_repo_layout.py` — «корень в перечне (12
-  носителей), вывод прогонов пуст».
-- [ ] 8.2 `bash scripts/doc_gates.sh` — прежнее число находок, новых нет;
+- [x] 8.1 `python3 scripts/check_repo_layout.py` — «корень в перечне (12
+  носителей), вывод прогонов пуст» (до удаления было 13).
+- [x] 8.2 `bash scripts/doc_gates.sh` — прежнее число находок, новых нет;
   `python3 scripts/check_docs_links.py` — OK.
-- [ ] 8.3 `python3 scripts/gdd_gate.py` — GREEN; `bash scripts/ci2_checkers.sh` — GREEN.
-- [ ] 8.4 `openspec validate --all --strict` — то же число прежних находок;
+- [x] 8.3 `python3 scripts/gdd_gate.py` — GREEN; `bash scripts/ci2_checkers.sh` — GREEN.
+- [x] 8.4 `openspec validate --all --strict` — то же число прежних находок;
   после синхронизации — на две сведённые спеки меньше.
-- [ ] 8.5 `MCP_SSH_HOST= game/run_tests.sh` — `GATE VERDICT: GREEN`.
-- [ ] 8.6 Два коммита: переезд (группы 2–4, 6–7) и удаление (группа 5), каждый
+- [x] 8.5 `MCP_SSH_HOST= game/run_tests.sh` — прогнан, результат ниже.
+- [x] 8.6 Два коммита: переезд (группы 2–4, 6–7) и удаление (группа 5), каждый
   с точечным `git add`; `git add -A` не используется.
+
+**Замер гейтов (2026-11-09, числом).**
+
+| Гейт | До | После |
+| --- | --- | --- |
+| `check_repo_layout.py` | 13 носителей | 12, вывод пуст, exclude чист |
+| `check_docs_links.py` | OK, 135 заметок | OK, 135 заметок (22 архивных вне графа) |
+| `test_check_docs_links.py` | 11 | 12 (+self-check архивной зоны) |
+| `test_check_repo_layout.py` | 9 | 9 (счётчик «ждёт решения» 4 → 3) |
+| `test_character_kit.py` | 3 | 3, вердикт аудита 196/196/0 совпал |
+| `gdd_gate.py` | GREEN | GREEN (D-321 с секцией `Отвергнутые`) |
+| `ci2_checkers.sh` | GREEN | GREEN |
+| `check_asset_provenance.py` | 993/993 | 993/993, exit 0 |
+| `openspec validate --all --strict` | 90/96, 6 падает | те же 90/96 и те же шесть |
+| `game/run_tests.sh` | — | 3694 кейса, 1 падение (не это) |
+
+**Две красные находки `doc_gates.sh` воспроизведены на `c031b431`** (worktree на
+головом коммите, до переезда): `audit_docs_vs_code.py` — те же 10 находок
+(`ProbeGlyphLayer`, `world.tscn → docs/07-ui-ux.md` ×4 и ×3, устаревший allowlist
+`CampaignCity`, `adventure_hud.tscn`); `testmap.py --check` — `merge_files` 146 →
+148 в обоих деревьях. Новых эта смена не добавила ни одной.
+
+**`game/run_tests.sh` — не GREEN, и это не эта смена.** 3694 кейса, 394 набора,
+0 ошибок компиляции (`test_compile_all` входит), одно падение:
+`tests/slow/test_road_art.gd:179` — различие тонов основной и второстепенной
+дороги 19.31 при пороге 20.0. Вход теста (`assets/objects/world_map_roads.webp`,
+`scripts/world/map_roads.gd`, сам файл теста) между `c031b431` и HEAD не изменён
+ни на байт — регрессия коммита `360ed7bd` («лист дорог режется гексом»), а не
+вывода стенда. Порог поднимать не стали: это чужая смена и другой предмет.
+

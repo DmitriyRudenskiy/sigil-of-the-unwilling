@@ -93,10 +93,10 @@ def test_banned_boilerplate_returning_is_red():
 
 
 def test_pending_entries_are_not_red():
-    """`battle-demo/`, `tmp/`, `.reserve/`, `data/` помечены «ждёт решения» и
-    красным не являются. Кроме одного: отслеживаемый файл под `data/` падает всё
-    равно — какое бы решение ни приняла задача, вывод прогонов дерево не несёт."""
-    assert crl.check(CLEAN + ["battle-demo/main.gd", "tmp/.gitignore",
+    """`tmp/`, `.reserve/`, `data/` помечены «ждёт решения» и красным не
+    являются. Кроме одного: отслеживаемый файл под `data/` падает всё равно —
+    какое бы решение ни приняла задача, вывод прогонов дерево не несёт."""
+    assert crl.check(CLEAN + ["tmp/.gitignore",
                               ".reserve/x"], []) == {}
     assert crl.check(["data/x.bin"], [])["отслеживаемый файл под выводом "
                                           "прогонов"] == ["data/x.bin"]
@@ -105,4 +105,4 @@ def test_pending_entries_are_not_red():
 def test_every_allowed_entry_has_a_status():
     """Статус обязателен: пустая строка читается как «разрешено навсегда»."""
     assert all(v.strip() for v in crl.ALLOWED.values())
-    assert sum(1 for v in crl.ALLOWED.values() if "ждёт решения" in v) == 4
+    assert sum(1 for v in crl.ALLOWED.values() if "ждёт решения" in v) == 3
