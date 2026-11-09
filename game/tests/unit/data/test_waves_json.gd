@@ -173,16 +173,7 @@ func test_waves_reference_names() -> void:
 			"эталонное имя «%s» отсутствует в пуле" % name).is_true()
 
 
-func test_mvp_parity_waves_never_trigger_in_mvp_cycle() -> void:
-	# §1(д): волны не активны в MVP-кампании — конфиг загружается, не
-	# триггерится: у composition нет волнового состояния, сейв-секция waves
-	# отсутствует, полный цикл 21 ход проходит без волновых записей.
-	assert_int(_domains().size()).is_equal(7)  # конфиг читается
-	var c := CampaignComposition.from_campaign_config(12345)
-	c.set_sign("spark")
-	while not c.campaign.is_done():
-		c.advance_turn()
-	var state := c.build_save_state()
-	assert_bool((state.get("campaign", {}) as Dictionary).has("waves")) \
-		.override_failure_message("волновое состояние просочилось в MVP-сейв").is_false()
-	assert_bool(state.has("waves")).is_false()
+# Требование §1(д) «волны не активны в MVP-цикле» снято вместе с кампанией
+# (`remove-campaign-mechanic` 3.3, решение владельца (б) — T-354): носителя цикла
+# (21 ход `CampaignComposition`, кампейн-сейв) больше нет, а world-слой ходов не
+# считает. Проверяемая часть — инварианты данных волн — выше, она живёт.

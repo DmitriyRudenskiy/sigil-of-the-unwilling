@@ -1,7 +1,8 @@
 extends BaseTest
 
-## UI-AC7 (AC1–AC3) на **живых** носителях: экран города кампании и экраны,
-## поднимаемые главным меню (настройки, инвентарь артефактов, лента хроники).
+## UI-AC7 (AC1–AC3) на **живых** носителях: экран города (поднимается world-
+## носителем `adventure_ui.tscn`) и экраны, поднимаемые главным меню (настройки,
+## инвентарь артефактов, лента хроники).
 ##
 ## Билет UI-AC7 считал только сценевые `theme_override_font_sizes` и по ним же
 ## перечислял «три худшие сцены». За пределами этого счёта оставался кегль,
@@ -38,11 +39,11 @@ extends BaseTest
 ## контейнеры. Отрицательный контроль (кейс 6) показывает, что обход не пустой.
 
 const _CITY_SCRIPT := "res://scripts/ui/city_screen.gd"
-const _MAIN_SCENE := "res://scenes/main/main.tscn"
+const _WORLD_SCENE := "res://scenes/ui/adventure_ui.tscn"
 const _MENU_SCENE := "res://scenes/main_menu.tscn"
 const _ENTRY_SCENE := "res://scenes/ui/chronicle_entry.tscn"
 const _THEME := "res://assets/theme/game_theme.tres"
-const _CITY_SCREEN_PATH := "CampaignHUD/CampaignHud/CityScreen"
+const _CITY_SCREEN_PATH := "WorldUI/CityScreenLayer/CityScreen"
 
 ## Сцены, где кегль обязан приезжать из темы: проверяется текст файла, потому что
 ## запись в сцене — обход независимо от того, в какой узел она кладётся.
@@ -85,25 +86,38 @@ func _theme() -> Theme:
 	return theme
 
 
-## Кампейн поднимается так же, как его поднимает игра: сцена `main.tscn`, `_ready`
-## → `_init_campaign` → привязка слоя. Окно ставится явным размером: headless-окно
-## 64×64 легально включает компактный режим шапки.
-func _boot_campaign() -> Node:
+## Мир поднимается так же, как его поднимает игра: носитель `adventure_ui.tscn`,
+## `_ready` → бутстрап мира (await-цепочка, поэтому кадры помпятся, а не ждётся
+## один). Окно ставится явным размером: headless-окно 64×64 легально включает
+## компактный режим шапки. До среза `remove-campaign-mechanic` 2.2 здесь стоял
+## `main.tscn` с кампейн-HUD; экран города тот же (`city_screen.tscn`), поменялся
+## только хозяин слоя.
+func _boot_world() -> Node:
 	var window := _root() as Window
 	window.size = Vector2i(1920, 1080)
-	_main = load(_MAIN_SCENE).instantiate()
+	_main = load(_WORLD_SCENE).instantiate()
 	_root().add_child(_main)
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var hud: Node = _main.get_node("CampaignHUD/CampaignHud")
-	# Оверлей первой директивы (T-186) модален и лежит выше слоя HUD: он не мешает
-	# коду, но обязан быть снят, иначе измерялся бы кадр с закрытым экраном.
-	hud.bind_tutorial({})
+	for i in 120:
+		await get_tree().process_frame
+		if _main.get("_event_router") != null:
+			break
 	return _main
 
 
-func _hud() -> Node:
-	return _main.get_node("CampaignHUD/CampaignHud")
+## Город открывается штатным путём мира — `WorldUI.open_city_screen` (тот же вызов,
+## что клик по городу), а не инстансом второй копии экрана.
+func _open_city() -> Node:
+	var cities: CityManager = _main.get_cities()
+	assert_that(cities).is_not_null()
+	var cities_list: Array = cities.cities
+	assert_int(cities_list.size()).is_greater(0)
+	var city: City = cities_list[0]
+	_main.get_node("WorldUI").open_city_screen(city, city.center)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var screen: Node = _main.get_node(_CITY_SCREEN_PATH)
+	assert_that(screen).is_not_null()
+	return screen
 
 
 ## Обход живого дерева: собирает узлы, чей **разрешённый** кегль ниже порога.
@@ -163,14 +177,13 @@ func test_sources_have_no_sub_floor_font_size() -> void:
 # каталога, а не с потолка, поэтому кейс 3 сторожит и то, что обход дошёл до
 # карточек, а не прошёл по пустому экрану.
 func test_live_city_screen_is_readable() -> void:
-	var main := await _boot_campaign()
-	_hud().open_city_screen()
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var screen := main.get_node(_CITY_SCREEN_PATH) as Node
-	assert_that(screen).is_not_null()
+	var main := await _boot_world()
+	var screen := await _open_city()
 	var seen := _count_of(screen)
-	assert_int(seen).is_greater(400)
+	# Порог скромнее прежнего «>400»: столько давали 98 карточек кампейн-каталога,
+	# а он переживает снос слоя (3.3). Обход обязан доходить до живого дерева —
+	# за это отвечает отрицательный контроль (кейс 6).
+	assert_int(seen).is_greater(50)
 	assert_str(", ".join(_thin_of(screen))).is_empty()
 
 
@@ -179,11 +192,8 @@ func test_live_city_screen_is_readable() -> void:
 # вкладка — `CityTab` без кегля (тогда резолв = 16 темы, а не 12 обхода).
 func test_card_roles_resolve_kegl_from_theme() -> void:
 	var theme := _theme()
-	var main := await _boot_campaign()
-	_hud().open_city_screen()
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var screen := main.get_node(_CITY_SCREEN_PATH) as Node
+	await _boot_world()
+	var screen := await _open_city()
 	var cards := screen.find_child("CatalogCards", true, false)
 	assert_that(cards).is_not_null()
 	assert_int(cards.get_child_count()).is_greater(0)
@@ -218,11 +228,8 @@ func test_card_roles_resolve_kegl_from_theme() -> void:
 # колонка карточек обязаны влезать в свои контейнеры, иначе каталог начал бы
 # резать текст (у `CatalogScroll` горизонтальный скролл выключен намеренно).
 func test_catalog_layout_still_fits() -> void:
-	var main := await _boot_campaign()
-	_hud().open_city_screen()
-	await get_tree().process_frame
-	await get_tree().process_frame
-	var screen := main.get_node(_CITY_SCREEN_PATH) as Node
+	await _boot_world()
+	var screen := await _open_city()
 	var tabs := screen.find_child("CategoryTabs", true, false) as Control
 	var sidebar := tabs.get_parent() as Control
 	assert_bool(tabs.get_combined_minimum_size().x <= sidebar.size.x) \

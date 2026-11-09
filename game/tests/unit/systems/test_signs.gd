@@ -2,6 +2,9 @@ extends BaseTest
 
 ## T-002 «Выбор знака»: каталог 8 Знаков (02c verbatim) + сейв-раундтрип
 ## секции "sign" (выбор 1 из 8 на всю игру — Q18, D12).
+## С 2026-11-05 носитель Знака — герой (`hero_controller.gd:65`, serialize →
+## `sign_id`), поэтому раундтрип проверяется на герое, а не на кампейн-
+## композиции (`remove-campaign-mechanic` 2.2: контракт переживает снос слоя).
 
 
 func test_catalog_has_eight_signs():
@@ -41,21 +44,15 @@ func test_ordinals_one_through_eight():
 
 
 func test_save_roundtrip_preserves_sign():
-	var composition = _composition()
-	composition.sign_id = "harmony"
-	var raw: String = JSON.stringify(composition.build_save_state())
-	var restored = _composition()
-	restored.load_save_state(JSON.parse_string(raw))
+	var hero: HeroController = auto_free(HeroController.new())
+	hero.sign_id = "harmony"
+	var restored: HeroController = auto_free(HeroController.new())
+	restored.deserialize(JSON.parse_string(JSON.stringify(hero.serialize())))
 	assert_str(restored.sign_id).is_equal("harmony")
 
 
 func test_save_roundtrip_empty_sign_stays_empty():
-	var composition = _composition()
-	var raw: String = JSON.stringify(composition.build_save_state())
-	var restored = _composition()
-	restored.load_save_state(JSON.parse_string(raw))
+	var hero: HeroController = auto_free(HeroController.new())
+	var restored: HeroController = auto_free(HeroController.new())
+	restored.deserialize(JSON.parse_string(JSON.stringify(hero.serialize())))
 	assert_str(restored.sign_id).is_empty()
-
-
-func _composition() -> CampaignComposition:
-	return CampaignComposition.from_campaign_config(424242)
