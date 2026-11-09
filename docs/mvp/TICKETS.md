@@ -13045,3 +13045,77 @@ game/scripts/entities/` пуст), так что игрок получает р�
 `setup()`/`refresh()` — overlay тогда рисует террейн сам, `_tex_rect` остаётся пустым
 слоем; (б) overlay без текстуры не красит фон (прозрачный fallback), террейн остаётся за
 `_tex_rect`. Вариант (а) убирает и второй немой писатель.
+
+**T-354. Реестр двух вёдер сноса кампейна (`remove-campaign-mechanic` 2.1) — и граница, которая не даёт их разложить.**
+
+Статус: открыт, 2026-11-10. Блок для 2.2 и группы 3: ведро «перезаписывается» существует
+только если часть `scripts/campaign/` переживает снос.
+
+**Замер (машинный, а не из proposal).** Под `tests/` лежит **77** файлов GdUnit, у которых
+путь или имя содержит `campaign` (proposal и tasks говорили «39, из них 42 по имени» —
+счётчик устарел), плюс **2** pytest-файла (`tests/mcp/test_campaign_carrier.py`,
+`test_campaign_continue.py`) и **10** capture-фикстур `tools/campaign*`. Из 77+2 только
+**69** реально ссылаются на кампейн-носитель или кампейн-классы; остальные лежат в
+кампейн-каталоге по истории (например `tests/campaign/test_pregame_flow_model.gd` —
+предыгра, она живёт).
+
+**Ведро A — удалить (проверяют кампейн-правила, после сноса проверять нечего): 46 файлов.**
+Кампейн-HUD и его экраны — `functional/ui/test_campaign_{atlas,chronicle_carrier,city_carrier,goals_panel,hud_blocks,hud_composition,hud_counters,hud_entries,hud_layout,hud_turn,navigation_smoke,party_carrier,party_panel,sign_plaque,tutorial_overlay}.gd`;
+правила слоя — `campaign/test_{campaign_goal_tracker,campaign_goals_m3,campaign_navigation,campaign_ui_manager,campaign_victory,campaign_wiring,cutover_composite,map_screen_model,region_map,region_graph_data,scenario,turn_driver,threat_system,settlement_processor,telemetry,stocks_registers_seam,campaign_start_supply,campaign_terrain_margin,campaign_battle,chronicle_writers,party_screen,party_screen_model}.gd`;
+кампейн-город и его здания — `balance/test_campaign_city_balance_fixture.gd`,
+`campaign/test_campaign_city_economy_scenario.gd`, `unit/city/test_campaign_{building_construction_service,city_progression,construction_processor}.gd`,
+`unit/data/test_campaign_building_{catalog,merger,placement,runtime_catalog}.gd`,
+`unit/ui/test_campaign_{city_board,counters,screen_map}.gd`, `unit/screens/test_campaign_screen_frame_composition.gd`,
+`functional/test_campaign_map_field.gd`, `unit/world/test_campaign_{food_economy,worker_assignment}.gd`,
+`unit/campaign/test_{campaign_calendar,campaign_training_live,chronicle_log,training_class_mask}.gd`;
+якоря баланса T-041 — `smoke/test_t041_anchors.gd`, `balance/test_t041b_anchors.gd`
+(с ними мера баланса отсутствует — запись в proposal, повторять её в TICKETS при сносе).
+
+**Ведро B — перезаписать/сузить на world-носителе (общие системы, кампейн был удобным
+конструктором): 23 файла + 2 pytest.**
+Правила боя — `campaign/test_battle_{auto_ai,boss,flank,info_model,luck}.gd`;
+партия и герой — `campaign/test_{party_system,party_hp_rest,party_wiring,veteran}.gd`;
+предыгра и данные — `campaign/test_pregame_flow_model.gd`, `unit/data/test_waves_json.gd`,
+`unit/systems/test_signs.gd`; общие экраны — `functional/test_city_screen.gd`,
+`functional/ui/test_live_font_hygiene.gd` (убрать кампейн-кейс), `slow/test_ui_responsive.gd`,
+`unit/ui/test_enemy_card_always_visible.gd`; сейвы и контракты — `smoke/test_mvp_save.gd`,
+`smoke/test_crisis_effect_contract.gd`, `balance/test_mvp_invariants.gd`,
+`balance/test_balance_probe.gd`; e2e — `tests/mcp/conftest.py`, `test_scene_transitions.py`,
+`test_campaign_carrier.py` → `test_world_carrier.py`, `test_campaign_continue.py` → world-сейв.
+**Условно-красные** (переписывание бессмысленно без решения ниже): `campaign/test_district_{birth,disband,no_grant,system}.gd`,
+`campaign/test_population_{system,carriers_seam}.gd`, `smoke/test_crisis_effect_contract.gd`.
+
+**Находка, блокирующая 2.2 (факты, не предположение).**
+
+1. `scripts/campaign/` — не только кампейн-шелл: там же лежат **канонические носители
+   поселения**, названные в `AGENTS.md` § «Данные событий»: `district_system.gd`
+   (настроение 0–100, канал `morale_change`), `population_system.gd` (резиденты),
+   `ethics_system.gd`, `party_system.gd`, `chronicle_log.gd`, `sign_system.gd`.
+   Снос каталога по решению 2 design.md сносит их вместе с шеллом.
+2. Живой потребитель вне каталога: `scripts/systems/crisis_event_system.gd:724` —
+   `push_error(… без приёмника настроения (DistrictSystem))`, то есть каталог событий MVP
+   считает `DistrictSystem` обязательным приёмником; `scripts/balance/balance_metrics.gd:93`
+   делает `PopulationSystem.new()`, `:114-118` — `CampaignBattle`.
+3. **Драйвер хода умирает вместе с `main.gd`, и событийная механика остаётся без вызова.**
+   `GameManager.on_day_passed()` (`scripts/managers/game_manager.gd:79`) вызывается только
+   из кампейн-HUD (кнопка хода, `scripts/ui/campaign_hud.gd:32`); приёмник настроения
+   навешивается только там же — `scripts/main/main.gd:54`
+   (`game_manager.event_system.mood_sink = composition.districts`). После сноса
+   `game/data/events/` (MVP-носитель по Q-M82 → (б), D-199) снова не вызывается никем —
+   ровно та формулировка, которую D-198 признала ложной.
+4. `scripts/ui/city_screen.gd` **переживает** снос и при этом зовёт кампейн-классы:
+   `:1347`, `:1391` — `PartySystem.alive_members(_party)`, `:1388` —
+   `CampaignTrainingService.next_recruit_id(...)`, `:1331` — `bind_party()` (вызывался
+   только кампанием). В Impact-таблице proposal этого файла нет; правка обязательна тем же
+   коммитом, иначе мир не соберётся.
+
+Что выбирать (нужно решение владельца, пока нет — 2.2 не начинается):
+(а) **вынести живые системы** (`district_system.gd`, `population_system.gd`, при желании
+`ethics_system.gd`, `party_system.gd`) в `scripts/systems/` или `scripts/settlement/`
+до сноса каталога — ведро B становится реальным, AGENTS остаётся правдой, цена — ~6 файлов
+и правка `class_name`-потребителей;
+(б) **снести вместе с шеллом** — тогда канон поселения (резиденты, настроение) и канал
+настроения событий аннулируются, `AGENTS.md` § «Данные событий» и `crisis_event_system.gd`
+требуют правки в том же change, а ведро B сжимается до боя/сейвов/предыгры;
+(в) гибрид: вынести только `DistrictSystem` + `PopulationSystem` (их именует AGENTS),
+остальное снести.
