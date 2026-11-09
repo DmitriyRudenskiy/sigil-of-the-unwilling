@@ -42,7 +42,7 @@ job'ах: `static` (checkers + lint), `gdunit` (GdUnit4),
 состав уровней (3), exit-код политику (GdUnit4 0/101 = зелёный;
 pytest 0 = зелёный; checkers — ноль ошибок = зелёный),
 ретрай-политику CI-1(12) (до 3 попыток MCP на раннер-окружение),
-артефакты логов (balance-report, ci2-run-logs), concurrency-группу
+артефакты логов (balance-report, ci2-static-logs), concurrency-группу
 (`ci2-${{ github.ref }}`, cancel-in-progress).
 
 #### Scenario: Никаких пропусков уровней
