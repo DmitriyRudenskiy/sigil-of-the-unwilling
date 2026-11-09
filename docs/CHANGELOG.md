@@ -15,7 +15,7 @@ TESTMAP-рэтчета и четырьмя измерителями сцен. Ж
 (`check_autoloads.py`, `check_node_paths.py`, `check_test_tiers.py`,
 `check_repo_layout.py`, `classify_mcp_junit.py`) получили исполнителя: блок
 `CHECKERS` в `game/run_tests.sh`, чьи pytest-самопроверки стоят в списке `TESTS`
-того же прогона. `scripts/test_gen_map_art.py` переехал в `game/tests/mcp/`.
+того же прогона. `scripts/test_gen_map_art.py` не переезжал: он и до смены исполнялся уровнем `GENART` того же прогона.
 
 **Почему старые протоколы называют вещи иначе.** Переименованы машиной читаемые
 литералы: `NODE-PATH-GATE` → `NODE-PATHS`, `GATE=0|1` (маппинг exit-кодов

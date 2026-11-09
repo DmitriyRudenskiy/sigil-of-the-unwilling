@@ -12996,7 +12996,7 @@ connected to game interaction server`) и `MCP VERDICT: RED`, потому чт�
 Что осталось живой проверкой и где исполняется: `check_autoloads.py`,
 `check_node_paths.py`, `check_test_tiers.py`, `check_repo_layout.py`,
 `classify_mcp_junit.py` — блок `CHECKERS` в `game/run_tests.sh` (самопроверки —
-в списке `TESTS` того же прогона); `test_gen_map_art.py` — `game/tests/mcp/`.
+в списке `TESTS` того же прогона); `test_gen_map_art.py` — уровнем `GENART` того же прогона (он и раньше исполнялся там, не в снятом уровне).
 Словарь вердиктных литералов (`NODE-PATH-GATE` → `NODE-PATHS`, `GATE=` →
 `RUN VERDICT:`/`PUSH:`, `ci2-run-logs` → `ci2-static-logs`) — та же смена;
 почему старые протоколы называют вещи по-старому, объяснено записью
