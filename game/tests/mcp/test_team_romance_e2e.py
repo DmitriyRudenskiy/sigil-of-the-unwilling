@@ -1,4 +1,4 @@
-"""team-romance-roleplay 6.2–6.4: MCP e2e — романская линия, adult-гейт, ревность/предательство.
+"""team-romance-roleplay 6.2–6.4: MCP e2e — романская линия, adult-прогон, ревность/предательство.
 
 Запускается поверх full_game (мир с ботстлабом; cutover D-157: full_cycle
 ведёт на main.tscn, романская линия — легаси-world-пайплайн). UI-диалоги

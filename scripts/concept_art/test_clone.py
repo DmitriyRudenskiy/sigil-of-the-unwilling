@@ -46,7 +46,7 @@ unit = {"unit": "IMG-001", "reference": "references/crops/IMG-001.png", "categor
         "model": "krea2", "status": "in-queue", "version": 0, "versions": {}, "best_score": None,
         "max_attempts": j.MAX_ATTEMPTS, "subject": "бравый воин", "history": []}
 def seal():
-    """Реестр правится тестами часто; каждый раз — перепечатка, иначе гейт прав."""
+    """Реестр правится тестами часто; каждый раз — перепечатка, иначе прогон прав."""
     j.cmd_anchors(Args(what="seal", id=None, mark=None, judge_pass="revision",
                        judge="", klass="independent"))
 
@@ -520,14 +520,14 @@ ok(not j.lint_card("## Отрицания\n\n| a | b | c |\n| --- | --- | --- |\
                    "| Контур | `no outlines` | x |\n"),
    "журнал отрицаний проверен как словарь")
 
-# --- 72. реестр якорей под гейтом: молча порвать прибор нельзя --------------
+# --- 72. реестр якорей под прогоном: молча порвать прибор нельзя --------------
 try:
     j.ANCHORS.write_text(j.ANCHORS.read_text() + "| AP-line-9 | 5 | линия | x | — | a ↔ b | x |\n",
                          encoding="utf-8")
     j.cmd_stat(None)
     raise AssertionError("изменённый реестр принят")
 except SystemExit as e:
-    ok("изменён после опечатки" in str(e), f"гейт назвал причину иначе: {e}")
+    ok("изменён после опечатки" in str(e), f"проверка назвала причину иначе: {e}")
 seal()
 ok(j.anchors_version() == json.loads(j.ANCHOR_MANIFEST.read_text())["version"],
    "печать не сошлась с живым реестром")

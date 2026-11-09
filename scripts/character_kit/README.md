@@ -109,4 +109,4 @@ godot --headless --path game --script res://tools/build_sprite_frames.gd
 `python3 scripts/character_kit/test_character_kit.py` — что ни один корень
 пакета не смотрит путями в выведенный стенд, вывод закрыт `.gitignore`, и что
 приёмка на сломанном входе возвращает `fail` с причиной. Гоняется в
-`scripts/doc_gates.sh`.
+`game/run_tests.sh` (python-уровень).

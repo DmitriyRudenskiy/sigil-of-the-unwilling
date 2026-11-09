@@ -110,7 +110,7 @@ static func visible_lines(node: Dictionary, ctx: Dictionary) -> Array:
 		out = lines
 	return out
 
-## Видимые варианты выбора: cond + контент-гейт (adult → pg_fallback или скрыт).
+## Видимые варианты выбора: cond + контент-фильтр (adult → pg_fallback или скрыт).
 static func visible_choices(node: Dictionary, ctx: Dictionary, content_adult: bool) -> Array:
 	var out: Array = []
 	var choices: Array = node.get("choices", [])
@@ -160,7 +160,7 @@ static func pick_dialog(ctx: Dictionary) -> String:
 # ═══════════════════════════════════════════
 
 ## Применяет эффекты варианта: bond/trust/romance (через RelationshipSystem.modify —
-## с гейтом ориентации), stat (перманентно), buff (временный боевой дух),
+## с условием ориентации), stat (перманентно), buff (временный боевой дух),
 ## event (сцена в очередь), item (предмет в рюкзак).
 static func apply_effects(hero, follower: Follower, effects: Array) -> void:
 	if hero == null or follower == null:

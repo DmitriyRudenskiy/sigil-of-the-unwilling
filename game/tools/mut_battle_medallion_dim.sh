@@ -5,7 +5,7 @@
 . "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
 
 # `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без shim'а
-# каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит», ничего
+# каждый мутант «падал» до запуска Godot, а батарея печатала «прогон держит», ничего
 # не прогнав: отсутствующая команда = «тоже красный».
 timeout() {
 	if command -v gtimeout >/dev/null; then gtimeout "$@"; else shift; "$@"; fi
@@ -48,7 +48,7 @@ run() {
 	echo "$name: $out"
 	case "$out" in
 	"" | *"0 errors | 0 failures"*)
-		echo "  !! ЗЕЛЁНЫЙ (или нечитаемый) МУТАНТ — гейт не ловит"
+		echo "  !! ЗЕЛЁНЫЙ (или нечитаемый) МУТАНТ — прогон не ловит"
 		FAILED=1
 		;;
 	esac
@@ -108,5 +108,5 @@ s = s.replace(old, "\tif btn.disabled:\n\t\tbtn.self_modulate = Color(1, 1, 1, 1
 '
 run M5
 
-echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (гейт держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — гейт дырявый")"
+echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (прогон держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — прогон дырявый")"
 git status --porcelain | grep -v "^??" || echo "дерево чистое"

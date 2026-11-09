@@ -1,7 +1,7 @@
 """Классификатор MCP-журнала (`classify_mcp_junit.py`, D-265): жёлтый — только readiness.
 
 Тест держит границу «среда» / «регрессия»: если классификатор начнёт прощать что-то
-кроме подписки `wait_ready`, гейт станет зелёным при настоящом падении, и это ровно то,
+кроме подписки `wait_ready`, прогон станет зелёным при настоящом падении, и это ровно то,
 ради чего D-265 не приняли молча. Запускается из корня репо:
 `python3 -m pytest scripts/test_classify_mcp_junit.py -q`."""
 from __future__ import annotations
@@ -14,7 +14,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import classify_mcp_junit as clf  # noqa: E402
 
-# Ровно та строка, что упала 2026-10-26 в трёх прогонах гейта (gate_t219*.txt).
+# Ровно та строка, что упала 2026-10-26 в трёх прогонах (gate_t219*.txt).
 READY_MSG = (
     'failed on setup with "godot_mcp.MCPError: игра не готова за 180 с '
     '(последняя ошибка: тулз game_eval вернул ошибку: '
@@ -132,7 +132,7 @@ def test_yellow_exits_three_and_is_printed(tmp_path: Path, capsys: pytest.Captur
 
 
 def test_green_exits_zero_and_is_distinct_from_yellow(tmp_path: Path) -> None:
-    # Разные коды нужны гейту: право снять красный с pytest есть только у жёлтого (3).
+    # Разные коды нужны прогону: право снять красный с pytest есть только у жёлтого (3).
     p = _write(tmp_path, _case("test_a"))
     assert clf.main(["classify_mcp_junit.py", str(p)]) == 0
 

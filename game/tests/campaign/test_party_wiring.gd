@@ -125,9 +125,9 @@ func test_starting_party_r2() -> void:
 		classes.append(str(d.get("class", "")))
 		assert_bool(int(d.get("level", 0)) == 1).is_true()
 		assert_bool(int(d.get("xp", -1)) == 0).is_true()
-		# Stats проходят гейты классов (02d §4.2) — case-insensitive (T-003).
+		# Stats проходят пороги классов (02d §4.2) — case-insensitive (T-003).
 		assert_bool(bool(CanonClasses.gate_ok(str(d.get("class", "")), d.get("stats", {})))) \
-			.override_failure_message("гейт: %s" % str(d.get("class", ""))).is_true()
+			.override_failure_message("прогон: %s" % str(d.get("class", ""))).is_true()
 	assert_bool(classes.has("fighter") and classes.has("ranger")).is_true()
 	# Снабжение: party_size = живые члены (1 еда/день/юнит — T-041 якорь, Q-M91).
 	assert_bool(comp.settlement.party_size == 2).is_true()

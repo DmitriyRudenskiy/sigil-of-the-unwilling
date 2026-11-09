@@ -58,7 +58,7 @@ func test_race_option_offers_no_legacy_mom_races() -> void:
 
 
 ## Ключи, которые конструктор отдаёт профилю, обязаны быть канон-id каталога: их
-## читают кампейн-гейты (`first_tier`) и `PopUnit.ancestry_id`. Расхождение `elf`
+## читают кампейн-пороги (`first_tier`) и `PopUnit.ancestry_id`. Расхождение `elf`
 ## (конструктор) ↔ `elves` (кампейн) и есть измеренный дефект Q-M100. Экран берёт
 ## ключи из этого же списка (проверка ниже — подписи экрана = подписи модели).
 func test_playable_race_options_are_catalog_first_tier_ids() -> void:

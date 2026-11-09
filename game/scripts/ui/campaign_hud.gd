@@ -678,7 +678,7 @@ func _refresh_party_panel() -> void:
 	var shown: Array = []
 	for member in (model.get("members", []) as Array):
 		# Мёртвый в бою слота не занимает — та же alive-модель (D-221), что у
-		# экрана партии и у гейтинга тренировки.
+		# экрана партии и у порогов тренировки.
 		if str(member.get("state", PartySystem.STATE_READY)) != PartySystem.STATE_DEAD:
 			shown.append(member)
 	for i in _party_slots.size():

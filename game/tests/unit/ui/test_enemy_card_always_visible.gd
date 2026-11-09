@@ -167,7 +167,7 @@ func test_card_is_filled_on_the_first_frame_of_a_started_battle() -> void:
 ##
 ## Почему это здесь, а не в новом файле: носитель проверки — `scripts/ui/battle_ui.gd`,
 ## его группа в `docs/mvp/TEST-MAP.md` и так осколота (12 файлов), и
-## Рэтчет карты тестов (`scripts/testmap.py --check`) снят сменой remove-doc-gates —
+## Рэтчет карты тестов снят сменой remove-doc-gates —
 ## новый файл больше не отвечает на него `merge_files +1`.
 ##
 ## Повод. UX-review «Карты кампании» (2026-11-02,

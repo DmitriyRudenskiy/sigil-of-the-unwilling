@@ -22,7 +22,7 @@ extends RefCounted
 ##   (2) settlement-потребление уже считает alive (campaign_composition:
 ##       settlement.party_size = alive_members(party).size()).
 ## D-221 (V-6, 2026-10-20): несогласованность снята — CampaignTrainingService
-##   теперь гейтит по alive_members (DEAD не занимают слот и не блокируют
+##   теперь блокирует слот по alive_members (DEAD не занимают слот и не блокируют
 ##   тренировку/рекрутинг), согласовано с alive-моделью экрана и settlement.
 
 ## Дефолт = CampaignTrainingService.PARTY_CAPACITY (5).

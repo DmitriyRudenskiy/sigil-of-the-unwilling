@@ -1,14 +1,14 @@
 extends SceneTree
 
-# Матрица различимости иконок ОДНОЙ мерой — той, которой её режет гейт
-# (DhashMeasure). Нужна, чтобы числа «до/после перерисовки» были цифрами гейта,
+# Матрица различимости иконок ОДНОЙ мерой — той, которой её режет прогон
+# (DhashMeasure). Нужна, чтобы числа «до/после перерисовки» были цифрами прогона,
 # а не PIL-зеркала (оно удалено: расходится с Godot на 2–12 бит на пару).
 #
 #   godot --headless --path game -s tools/dhash_report.gd -- --dir=/tmp/asset1_before
 #   godot --headless --path game -s tools/dhash_report.gd -- --atlas=/tmp/homm_atlas.png
 #
 # --dir   — каталог с icon_resource_*.png (по умолчанию res://assets/ui/icons/resources)
-# --atlas — 4×4 атлас: снять с него 16 хэшей мерой гейта (константы A-9) и
+# --atlas — 4×4 атлас: снять с него 16 хэшей мерой прогона (константы A-9) и
 #           прогнать A-9 по всем иконкам в двух оправках (канвас и поле).
 
 const Measure := preload("res://tools/dhash_measure.gd")
@@ -98,10 +98,10 @@ func _atlas(atlas_path: String, icons_dir: String) -> void:
 		canvas_cells.append(_hex(Measure.hash_canvas(to32)))
 		# оправка «перекрас в поле §7.1»: у ячейки берётся то же поле, что у иконки.
 		field_cells.append(_hex(Measure.hash_field(_in_field(cell))))
-	print("HOMM_DHASH_CANVAS (мера гейта, 4×4, ячейка %d×%d): [" % [cw, ch])
+	print("HOMM_DHASH_CANVAS (мера прогона, 4×4, ячейка %d×%d): [" % [cw, ch])
 	print(_hex_list(canvas_cells))
 	print("]")
-	print("HOMM_DHASH_FIELD (мера гейта, поле ячейки → 16 px в канвас): [")
+	print("HOMM_DHASH_FIELD (мера прогона, поле ячейки → 16 px в канвас): [")
 	print(_hex_list(field_cells))
 	print("]")
 	var names: Array[String] = []

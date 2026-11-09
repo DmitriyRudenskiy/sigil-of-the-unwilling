@@ -81,7 +81,7 @@ def test_without_log_env_launcher_is_transparent(tmp_path: Path) -> None:
 
 def test_real_engine_writes_the_launch_log() -> None:
     """Настоящий движок обязан оставить в логе хотя бы баннер: иначе канал есть,
-    а слов по нему — ноль (именно этот случай и был виден в гейтах)."""
+    а слов по нему — ноль (именно этот случай и был виден в порогах)."""
     if not os.path.exists(conftest.GODOT_BIN):
         pytest.skip(f"нет бинаря Godot: {conftest.GODOT_BIN}")
     log = conftest.GAME_DIR / "tmp" / "mcp_boot" / "selftest_launch.log"

@@ -45,7 +45,7 @@ SPEC = LAB / "spec.json"
 PAIRS = LAB / "pairs"
 ETALONS = REFS / "manifest.json"
 ANCHOR_MANIFEST = REFS / "anchors-manifest.json"
-INK_MAX = 235                       # порог «не бумага» для поиска фигуры (тот же, что у гейта)
+INK_MAX = 235                       # порог «не бумага» для поиска фигуры (тот же, что у прогона)
 SHEETS_SRC = Path("/Users/user/sigil-of-the-unwilling-slop/___STYLE_BOOK/for_local_agent/unit")
 
 GRID = (4, 3)                   # колонок, строк на листе
@@ -541,7 +541,7 @@ def anchors_version() -> str:
 
 
 def require_anchors() -> str:
-    """Гейт целостности прибора: файл реестра сверяется с манифестом при старте.
+    """Проверка целостности прибора: файл реестра сверяется с манифестом при старте.
 
     Тесты и человек правят реестр чаще, чем коммитят; хеш ловит это до замера,
     а не в отчёте. Несовпадение — отказ, как с эталонным сетом.
@@ -945,7 +945,7 @@ def cmd_sty(a) -> int:
         print("понижения: " + "; ".join(notes))
     if head:
         print(f"голова/фигура: эталон {head['etalon']}%, попытка {head['attempt']}%, "
-              f"дельта {head['delta']:+d} п.п. (в STY-% не входит; гейтинга нет до 8.6)")
+              f"дельта {head['delta']:+d} п.п. (в STY-% не входит; проверки нет до 8.6)")
     advance_chain(unit, json.loads(SPEC.read_text()))
     save(q)
     board(a.id)

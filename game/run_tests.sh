@@ -800,7 +800,7 @@ else
 fi
 
 # Самопроверки живых сверщиков репозитория (remove-doc-gates). До смены их крутил
-# scripts/doc_gates.sh; вместе с ним они остались без исполнителя, а держат они
+# снятый уровень документальных проверок; вместе с ним они остались без исполнителя, а держат они
 # проверщики, которые работают в этом же прогоне: check_autoloads (AUTOLOAD-PRECHECK),
 # check_node_paths (NODE-PATHS), check_test_tiers (QUARANTINE / TIER COVERAGE) и
 # check_repo_layout (его зовёт scripts/ci2_checkers.sh). Проверщик без самопроверки —

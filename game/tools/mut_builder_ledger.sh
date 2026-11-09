@@ -5,14 +5,14 @@
 . "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
 
 # `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без этого
-# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит»,
+# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «прогон держит»,
 # ничего не прогнав: отсутствующая команда = «тоже красный».
 timeout() {
 	# есть gtimeout — работаем им; нет — исполняем команду без ограничения времени
 	# (сдвиг аргумента: $1 — длительность, а не команда).
 	if command -v gtimeout >/dev/null; then gtimeout "$@"; else shift; "$@"; fi
 }
-# Мутационная батарея гейта «фактические City/ledger исходы Городостроителя»
+# Мутационная батарея прогона «фактические City/ledger исходы Городостроителя»
 # (задача 6.3 цикла scenario-matrix-behavior-reliability). Каждый мутант обязан
 # покраснить test_builder_city_ledger_outcomes.gd.
 #
@@ -65,7 +65,7 @@ run() {
 		FAILED=1
 		;;
 	*"0 errors | 0 failures"*)
-		echo "  !! ЗЕЛЁНЫЙ МУТАНТ — гейт не ловит"
+		echo "  !! ЗЕЛЁНЫЙ МУТАНТ — прогон не ловит"
 		FAILED=1
 		;;
 	esac
@@ -118,7 +118,7 @@ run B5 "$ROLE"
 mutate_or_die "$ROLE" 's = s.replace("\t\t\"population_goal\": int(target.get(\"population_goal\", 30)),", "\t\t\"population_goal\": int(target.get(\"population_goal\", 8)),", 1)'
 run B6 "$ROLE"
 
-echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (гейт держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — гейт дырявый")"
+echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (прогон держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — прогон дырявый")"
 # Дерево после батареи: проверяется ровно то, что батарея и трогала.
 if git diff --quiet -- "$ROLE"; then
 	echo "носитель восстановлен: $ROLE"

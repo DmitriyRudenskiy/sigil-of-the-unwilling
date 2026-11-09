@@ -131,7 +131,7 @@ jobs:
           [ "$RC" -eq 0 ] || [ "$RC" -eq 101 ]
 
       - name: "Balance metrics (T-041: трассы композита → artifact, не условие красноты)"
-        # Гейт якорей — тесты test_t041_anchors (GdUnit4); шаг пишет трассы
+        # Прогон якорей — тесты test_t041_anchors (GdUnit4); шаг пишет трассы
         # баланс-прогона (кривые запасов, WARN/DEFICIT, Престиж-сальдо,
         # потери) в артефакт — baseline-точка регрессии чисел.
         env:
@@ -337,7 +337,7 @@ jobs:
     needs: [static, gdunit, mcp]
     if: always()
     steps:
-      - name: "3-уровневая строка (D-147 в редакции remove-doc-gates: GdUnit4 / MCP / exit-код)"
+      - name: "3-уровневая строка (D-147 в редакции remove-documentation-checks: GdUnit4 / MCP / exit-код)"
         # Репортёр, не условие красноты: workflow-красный идёт от job'ов прогона (static/gdunit/mcp).
         # Свита exit-code: 0 ⇔ все три success. Счётчики (2474/38) — в артефактах
         # ci2-gdunit-logs / ci2-mcp-logs (level-строки); ::notice:: — публичный канал

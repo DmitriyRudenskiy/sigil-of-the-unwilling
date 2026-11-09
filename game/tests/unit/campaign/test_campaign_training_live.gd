@@ -342,7 +342,7 @@ func test_city_options_expose_only_approved_classes() -> void:
 	assert_that(String((options[0] as Dictionary).class_id)).is_equal("fighter")
 
 
-## Наследие `City.level` (повышение города) не гейтит тренировку: опции и заявка
+## Наследие `City.level` (повышение города) не блокирует тренировку: опции и заявка
 ## не зависят от того, первый уровень у города или одиннадцатый.
 func test_city_unlocks_ignore_legacy_city_level() -> void:
 	var catalog := CampaignBuildingCatalog.load_catalog()
@@ -359,7 +359,7 @@ func test_city_unlocks_ignore_legacy_city_level() -> void:
 		low, catalog, 7, "fighter", _trainee(), 0).ok).is_true()
 
 
-## Гейт класса и отсутствующая постройка-требование: отказ до списания, очередь
+## Порог класса и отсутствующая постройка-требование: отказ до списания, очередь
 ## пуста, город не беднее.
 func test_request_rejects_class_gate_and_missing_prerequisite() -> void:
 	var weak := _city()
@@ -478,7 +478,7 @@ func test_training_days_come_from_balance_config() -> void:
 
 ## T-171: у сервиса один вход. Dict-форма (`train`, `available_training_actions`,
 ## `population_gate`, `_building_instances`) читателя не имела и держала вытесненную
-## семантику «боец сразу в партии» — возврат её вернёт и расхождение гейтов,
+## семантику «боец сразу в партии» — возврат её вернёт и расхождение порогов,
 ## поэтому отсутствие проверяется по списку методов скрипта, а не по grep.
 func test_dict_entry_points_are_gone() -> void:
 	var script: Script = ServiceScript
@@ -529,9 +529,9 @@ func test_dead_members_do_not_consume_a_training_slot() -> void:
 	assert_that(int(blocked.waiting_slot)).is_equal(1)
 
 
-## T-308 (D-302 (а)): кандидат из панели поселения проходит гейт класса по
+## T-308 (D-302 (а)): кандидат из панели поселения проходит порог класса по
 ## построению — характеристики берутся из порога каталога, а не из головы.
-## Проверка идёт через request_training: публичного читателя гейта нет.
+## Проверка идёт через request_training: публичного читателя порога нет.
 func test_recruit_candidate_passes_the_gate_of_every_trainable_class() -> void:
 	var city := _city(200)
 	var uid := _barracks(city)

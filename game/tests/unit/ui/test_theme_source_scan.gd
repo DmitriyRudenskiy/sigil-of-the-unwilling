@@ -175,7 +175,7 @@ func test_no_scene_level_stylebox_overrides_remain() -> void:
 
 
 ## Скан обязан что-то видеть: пустой список файлов = молчаливый зелёный (тот же класс
-## дефекта, что «уровень молчит» в док-гейте).
+## дефекта, что «уровень молчит» в документальной проверке).
 func test_scan_area_is_not_empty() -> void:
 	var gd := _files(".gd")
 	var tscn := _files(".tscn")

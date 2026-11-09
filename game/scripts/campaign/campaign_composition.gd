@@ -169,7 +169,7 @@ func _build(campaign_seed: int) -> void:
 	population_system.seed_population(settlement.population)
 	# T-003 (R2): стартовая партия — fighter 1 + ranger 1, ур.1 (02-mechanics §3.2).
 	# Расы — humans (дефолт; фактические расы/имена старта — с городским UI, остаток T-003).
-	# Stats проходят гейты классов (02d §4.2): fighter any(STR≥13), ranger all(DEX≥13, WIS≥13).
+	# Stats проходят пороги классов (02d §4.2): fighter any(STR≥13), ranger all(DEX≥13, WIS≥13).
 	party = [
 		{"id": "start_fighter", "class": "fighter", "race": "humans", "level": 1,
 		 "xp": 0, "luck": 0,

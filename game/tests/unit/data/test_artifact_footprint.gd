@@ -58,7 +58,7 @@ func test_footprint_text_is_readable() -> void:
 	assert_str(spear.cells_text()).is_equal("1 клетка")
 
 
-## Гейт реестра: ни один предмет каталога не остался без габарита.
+## Проверка реестра: ни один предмет каталога не остался без габарита.
 func test_every_registered_artifact_has_a_footprint() -> void:
 	var reg: Node = Services.resolve(&"artifacts")
 	assert_object(reg).is_not_null()

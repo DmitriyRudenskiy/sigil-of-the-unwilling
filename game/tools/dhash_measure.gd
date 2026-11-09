@@ -2,7 +2,7 @@ class_name DhashMeasure
 extends RefCounted
 
 # Единственная реализация меры различимости иконок (dHash 9×8 по яркости со
-# смешиванием альфы с носителем). Ей же режет гейт
+# смешиванием альфы с носителем). Ей же режет прогон
 # (tests/unit/assets/test_resource_icons_asset1.gd), ею же снимаются константы
 # A-9 (ячейки удалённого атласа HoMM III) и печатается матрица
 # (tools/dhash_report.gd).

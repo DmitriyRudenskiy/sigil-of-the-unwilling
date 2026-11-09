@@ -45,8 +45,8 @@ func test_gates_match_02d() -> void:
 	for c in catalog.get("classes", []):
 		by_id[c.id] = c
 	assert_bool(bool(_gate_reqs(by_id["monk"]) == [["DEX", 13], ["WIS", 13]])).override_failure_message("монах: не ЛОВ13 и МДР13").is_true()
-	assert_bool(bool(by_id["monk"].gate.mode == "all")).override_failure_message("монах: режим гейта не all").is_true()
-	assert_bool(bool(by_id["fighter"].gate.mode == "any")).override_failure_message("воин: режим гейта не any (СИЛ или ЛОВ)").is_true()
+	assert_bool(bool(by_id["monk"].gate.mode == "all")).override_failure_message("монах: режим порога не all").is_true()
+	assert_bool(bool(by_id["fighter"].gate.mode == "any")).override_failure_message("воин: режим порога не any (СИЛ или ЛОВ)").is_true()
 	assert_bool(bool(_gate_reqs(by_id["paladin"]) == [["STR", 13], ["CHA", 13]])).override_failure_message("паладин: не СИЛ13 и ХАР13").is_true()
 	assert_bool(bool(_gate_reqs(by_id["wizard"]) == [["INT", 13]])).override_failure_message("волшебник: не ИНТ13").is_true()
 	assert_bool(bool(_gate_reqs(by_id["barbarian"]) == [["STR", 13]])).override_failure_message("варвар: не СИЛ13").is_true()

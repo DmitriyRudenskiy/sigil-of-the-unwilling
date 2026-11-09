@@ -5,7 +5,7 @@
 . "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
 
 # `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без этого
-# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит»,
+# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «прогон держит»,
 # ничего не прогнав: отсутствующая команда = «тоже красный».
 timeout() {
 	# есть gtimeout — работаем им; нет — исполняем команду без ограничения времени
@@ -54,7 +54,7 @@ run() { # имя, файл-мишень (его и возвращаем)
 	echo "$name: $out"
 	case "$out" in
 	"" | *"0 errors | 0 failures"*)
-		echo "  !! ЗЕЛЁНЫЙ (или нечитаемый) МУТАНТ — гейт не ловит"
+		echo "  !! ЗЕЛЁНЫЙ (или нечитаемый) МУТАНТ — прогон не ловит"
 		FAILED=1
 		;;
 	esac
@@ -143,7 +143,7 @@ s = s.replace(old, "\t\tl.theme_type_variation = \"PanelChip\"", 1)
 run M7 "$SINK"
 
 # M8 — возврат ложного критерия в гард: «нативный тип == класс ClassDB». TooltipPanel
-# снова объявляется сиротой, допуск пуст — красное. Мутация самого гейта: без неё
+# снова объявляется сиротой, допуск пуст — красное. Мутация самого прогона: без неё
 # «исправили критерий» ничего не стоит (прецедент M6 в mut_form_row.sh).
 mutate "$MATRIX" '
 old = "\tif ClassDB.class_exists(StringName(section)):\n\t\treturn true\n\treturn ThemeDB.get_default_theme().get_type_list().has(section)"
@@ -152,5 +152,5 @@ s = s.replace(old, "\treturn ClassDB.class_exists(StringName(section))", 1)
 '
 run M8 "$MATRIX"
 
-echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (гейт держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — гейт дырявый")"
+echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (прогон держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — прогон дырявый")"
 git status --porcelain | grep -v "^??" || echo "дерево чистое"

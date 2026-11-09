@@ -5,7 +5,7 @@
 . "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
 
 # `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без этого
-# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит»,
+# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «прогон держит»,
 # ничего не прогнав: отсутствующая команда = «тоже красный».
 timeout() {
 	# есть gtimeout — работаем им; нет — исполняем команду без ограничения времени
@@ -14,7 +14,7 @@ timeout() {
 }
 # Мутационная батарея когорты выживания (задачи 7.1/7.3 цикла
 # scenario-matrix-behavior-reliability). Каждый мутант обязан покраснить
-# test_survival_cohort.gd или test_survival_counters.gd; зелёный мутант = дыра гейта.
+# test_survival_cohort.gd или test_survival_counters.gd; зелёный мутант = дыра прогона.
 #
 # Слои меры: выживание читается из состояния игры (S1), восстановление — из роста HP,
 # а не из «не упал» (S2), счётчик торговли не подменяется сбором (S3), цель когорты
@@ -73,7 +73,7 @@ run() {
 		FAILED=1
 		;;
 	*"0 errors | 0 failures"*)
-		echo "  !! ЗЕЛЁНЫЙ МУТАНТ — гейт не ловит"
+		echo "  !! ЗЕЛЁНЫЙ МУТАНТ — прогон не ловит"
 		FAILED=1
 		;;
 	esac
@@ -140,5 +140,5 @@ run S11 "$REPORT"
 mutate "$HEROVIS" 's = s.replace("\tteardown_path_visual()\n", "\tpass\n", 1)'
 run S12 "$HEROVIS" "$MARKER_TEST"
 
-echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (гейт держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — гейт дырявый")"
+echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (прогон держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — прогон дырявый")"
 git status --porcelain | grep -v "^??" || echo "дерево чистое"

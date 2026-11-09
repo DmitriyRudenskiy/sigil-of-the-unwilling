@@ -88,7 +88,7 @@ sigil-of-the-unwilling/
 │   ├── project.godot          # Конфигурация проекта
 │   └── run_tests.sh           # Скрипт запуска тестов
 ├── docs/                      # Obsidian-vault документации (GDD, ADR, журнал)
-├── scripts/                   # Репозиторные гейты и сверщики (host-Python)
+├── scripts/                   # Репозиторные проверки и сверщики (host-Python)
 │   ├── concept_art/           #   генерация концепт-арта и экранов (ComfyUI)
 │   └── character_kit/         #   конвейер кадров персонажа (ComfyUI): портрет →
 │                              #     A-pose → скелет позы → лист → .sprite_frames

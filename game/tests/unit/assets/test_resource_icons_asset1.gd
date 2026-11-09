@@ -4,7 +4,7 @@ extends BaseTest
 # (тикет «чужой пиксель в репо: resources.png», docs/mvp/TICKETS.md; формула
 # иконки — [[13-art-bible]] §7.1, палитра — §4.6). Генератор —
 # game/tools/gen_resource_icons.py; воспроизводимость проверяет он же:
-# `python3 game/tools/gen_resource_icons.py --check` (вне headless-гейта).
+# `python3 game/tools/gen_resource_icons.py --check` (вне headless-проверки).
 #
 # Здесь: A-1 канвас/вес/имя · A-2 поле содержимого · A-4 проработка светом
 # (полоса оттенков есть; направление 45° и ΔL* +8…+20 — глазами, группа B:
@@ -25,7 +25,7 @@ const IDS: Array[String] = [
 	"saltpeter", "silver", "stone", "sulfur", "turquoise", "wood",
 ]
 
-# Мера различимости — одна реализация на гейт, на снятие констант A-9 и на
+# Мера различимости — одна реализация на прогон, на снятие констант A-9 и на
 # печать матрицы (tools/dhash_report.gd). Python-зеркало удалено из репо.
 const Measure := preload("res://tools/dhash_measure.gd")
 
@@ -62,7 +62,7 @@ const PALETTE := {
 # A-9 — 16 ячеек удалённого атласа HoMM III (assets/textures/resources.png,
 # md5 b34a11b6f199645a5a91509c16b08e0f, 410×410, сетка 4×4 по 102 px). Атласа в
 # репо больше нет (A-11), а эталон «на что не должно быть похоже» остаётся
-# данными теста — снятыми МЕРОЙ ГЕЙТА (DhashMeasure), той же, которой режется
+# данными теста — снятыми МЕРОЙ ПРОГОНА (DhashMeasure), той же, которой режется
 # сравнение:
 #   git show 21ff6d2c^:game/assets/textures/resources.png > /tmp/homm_atlas.png
 #   godot --headless --path game -s tools/dhash_report.gd -- --atlas=/tmp/homm_atlas.png
@@ -342,7 +342,7 @@ func test_icons_are_not_recolored_homm_cells() -> void:
 			assert_int(d).override_failure_message(
 				"формы %s и %s неразличимы в 8×8 (dHash %d)" % [ids[i], ids[j], d]
 			).is_greater_equal(PAIR_MIN)
-	# DHASH_MATRIX=1 — матрица той же мерой, которой её режет гейт. Python-зеркало
+	# DHASH_MATRIX=1 — матрица той же мерой, которой её режет прогон. Python-зеркало
 	# здесь неавторитетно: PIL-ресайз 16×16→9×8 расходится с Godot на 2–12 бит
 	# на пару (ore↔silver: Godot 11, PIL 13/16/23 для BOX/HAMMING/LANCZOS).
 	if OS.get_environment("DHASH_MATRIX") != "":
@@ -355,7 +355,7 @@ func test_icons_are_not_recolored_homm_cells() -> void:
 			if p[0] < PAIR_MIN:
 				red += 1
 		dist.sort()
-		print("DHASH MATRIX (мера гейта DhashMeasure, порог %d): пар %d, красных %d" % [
+		print("DHASH MATRIX (мера проверки DhashMeasure, порог %d): пар %d, красных %d" % [
 			PAIR_MIN, pairs.size(), red])
 		print("мин %d · медиана %d · max %d · маржа к порогу %+d" % [
 			dist[0], dist[int(dist.size() / 2.0)], dist[dist.size() - 1], dist[0] - PAIR_MIN])

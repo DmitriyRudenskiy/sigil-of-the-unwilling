@@ -15,7 +15,7 @@ const DEFAULT_REPLACEMENT_LEVEL := 1
 
 static var _balance_config: Dictionary = {}
 
-## D-221 (V-6, 2026-10-20): лимит партии и гейтинг — alive-модель.
+## D-221 (V-6, 2026-10-20): лимит партии и порог — alive-модель.
 ## DEAD не занимают активный слот и не блокируют тренировку/рекрутинг;
 ## согласовано с party_screen_model (alive) и campaign_composition
 ## (settlement.party_size = alive_members).
@@ -89,7 +89,7 @@ static func training_queue(city: City) -> Array[Dictionary]:
 
 
 ## Кандидат-новобранец для заявки из панели поселения (T-308, D-302 (а)): тот,
-## кого постится запись очереди. Характеристики — порог гейта класса из каталога
+## кого постится запись очереди. Характеристики — порог порога класса из каталога
 ## (остальные — база), поэтому заявка проходит `_check_class_gate` по построению
 ## и ни одно число не выдумано. Раса — люди: дефолт игрового среза
 ## (campaign_composition: стартовая партия «Расы — humans (дефолт…)»), выбора
@@ -171,7 +171,7 @@ static func population_gate_city(city: City, party_alive: int, per_unit: int = 0
 	}
 
 
-## Опции тренировки города-носителя (гейты те же, что у dict-формы: постройка
+## Опции тренировки города-носителя (пороги те же, что у dict-формы: постройка
 ## жива, prerequisites, одобренный класс, плюс 2.4 — порог населения и 2.1 —
 ## наличие канон-времени у класса).
 static func available_training_actions_city(city: City, building_catalog: Dictionary,
@@ -222,7 +222,7 @@ static func available_training_actions_city(city: City, building_catalog: Dictio
 
 ## Заявка на тренировку (живой город). Стоимость списывается с ресурсов города
 ## сразу и при паузе не возвращается (02-mechanics §3.3). Кандидат приходит с
-## характеристиками — гейт класса проверяется на заявки, а не на выдаче.
+## характеристиками — порог класса проверяется на заявки, а не на выдаче.
 static func request_training(city: City, building_catalog: Dictionary, building_uid: int,
 		class_id: String, trainee: Dictionary, party_alive: int,
 		scenario_flags: Array = [], admin_capacity: int = 0,

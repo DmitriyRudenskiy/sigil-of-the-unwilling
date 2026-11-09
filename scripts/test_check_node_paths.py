@@ -1,6 +1,6 @@
-"""Самопроверка measure-гейта путей узлов (T-296).
+"""Самопроверка measure-прогона путей узлов (T-296).
 
-Зачем тесты у теста: гейт красит сборку, и его главная опасность — не ложный
+Зачем тесты у теста: прогон красит сборку, и его главная опасность — не ложный
 RED, а ложный GREEN молча сломанного сканера (первая версия замера T-296
 объявляла нерезолвленным всё подряд, и это выглядело как «много ошибок», а не
 как «измеритель сломался»). Поэтому здесь есть и красный кейс (сломанный путь
@@ -68,7 +68,7 @@ def test_green_path_passes(tmp_path):
 
 
 def test_broken_path_is_red(tmp_path):
-    """Главный кейс: узла нет — гейт обязан краснеть, иначе он декорация."""
+    """Главный кейс: узла нет — прогон обязан краснеть, иначе он декорация."""
     script = SCRIPT_OK.replace('"Panel/Title"', '"Panel/Moved"')
     allow = _repo(tmp_path, {"ui/screen.tscn": SCENE_OK},
                   {"scripts/ui/screen.gd": script}, allowlist="")
@@ -79,7 +79,7 @@ def test_broken_path_is_red(tmp_path):
 
 
 def test_rename_of_parent_breaks_chain(tmp_path):
-    """Класс D-280/T-294: блок переехал — цепочка рвётся, гейт красит."""
+    """Класс D-280/T-294: блок переехал — цепочка рвётся, прогон красит."""
     moved = SCENE_OK.replace('parent="Panel"', 'parent="Other"').replace(
         '[node name="Panel" type="PanelContainer" parent="."]',
         '[node name="Other" type="PanelContainer" parent="."]')

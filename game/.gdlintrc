@@ -1,6 +1,6 @@
 # .gdlintrc — минимальный набор под gdparse-зелёное дерево (раунд 12 §3).
 # Шум дефолта: 2444 → остаток 738 (см. docs/mvp/GDLINT-PROPOSAL.md).
-# До утверждения владельцем — report-only (не гейтит).
+# До утверждения владельцем — report-only (не прогонит).
 disable:
   - class-definitions-order
   - load-constant-name

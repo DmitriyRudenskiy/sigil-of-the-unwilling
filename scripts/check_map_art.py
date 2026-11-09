@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Машинные гейты графики карты (openspec: world-map-art-variety).
+"""Машинные проверки графики карты (openspec: world-map-art-variety).
 
 Четыре семейства проверок:
 
@@ -11,7 +11,7 @@
                и источник, источник лежит в репозитории.
 
 Пороги — в `game/data/config/map_art_gates.json`, откалиброваны по базовой линии
-(`docs/reference/map-baseline/`), на которой гейт обязан быть красным.
+(`docs/reference/map-baseline/`), на которой прогон обязан быть красным.
 
   python3 scripts/check_map_art.py                      # всё, что найдено
   python3 scripts/check_map_art.py --shot shot.png      # только frame-меры по кадру
@@ -32,7 +32,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from gen_map_art import hex_mask          # noqa: E402  геометрия клетки — одна на генератор и гейт
+from gen_map_art import hex_mask          # noqa: E402  геометрия клетки — одна на генератор и прогон
 from measure_palette_band import (  # noqa: E402  (общая метрика палитры §4.6)
     DOM_SHARE,
     de76,
@@ -540,10 +540,10 @@ def provenance_check(cfg: dict) -> list[tuple[str, bool, str]]:
 # ---------------------------------------------------------------- self-test
 # Мутационная проверка гардов (задача 2.3, урок фазы 5): гард, который нельзя
 # покраснить конкретным дефектом, — не гард. Синтетический чистый атлас обязан
-# проходить целиком, каждая мутация — валить ровно свой гейт.
+# проходить целиком, каждая мутация — валить ровно свой прогон.
 
 FIXTURE_BIOMES = ("grass", "water")
-FIXTURE_SIDES = ("E", "NE", "NW", "W", "SW", "SE")  # рёбра odd-r гекса, как в гейте
+FIXTURE_SIDES = ("E", "NE", "NW", "W", "SW", "SE")  # рёбра odd-r гекса, как в прогоне
 
 
 def _fixture(cfg: dict, workdir: str) -> str:
@@ -851,7 +851,7 @@ def main() -> int:
     skipped: list[tuple[str, str]] = []
 
     # Отсутствующий носитель — явный SKIP с причиной, а не молчание и не FAIL:
-    # слой ещё не сгенерирован, но «гейт промолчал» и «носителя нет» — разные вердикты.
+    # слой ещё не сгенерирован, но «прогон промолчал» и «носителя нет» — разные вердикты.
     if args.shot:
         if os.path.exists(args.shot):
             checks += frame_checks(args.shot, cfg)

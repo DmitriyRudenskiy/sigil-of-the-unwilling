@@ -5,16 +5,16 @@
 . "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
 
 # `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без этого
-# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит»,
+# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «прогон держит»,
 # ничего не прогнав: отсутствующая команда = «тоже красный».
 timeout() {
 	# есть gtimeout — работаем им; нет — исполняем команду без ограничения времени
 	# (сдвиг аргумента: $1 — длительность, а не команда).
 	if command -v gtimeout >/dev/null; then gtimeout "$@"; else shift; "$@"; fi
 }
-# Мутационная батарея гейта «маршрут Путешественника» (задача 5.3 цикла
+# Мутационная батарея прогона «маршрут Путешественника» (задача 5.3 цикла
 # scenario-matrix-behavior-reliability). Каждый мутант обязан покраснить
-# test_traveler_route.gd; зелёный мутант = дыра гейта.
+# test_traveler_route.gd; зелёный мутант = дыра прогона.
 #
 # Слои меры: счётчик типов террейна (T1 — повторный биом растит счётчик, T6 — метрика
 # обнулена), прибытие (T2 — цель без клетки, T3 — arrived всегда истина), отказ на
@@ -45,7 +45,7 @@ run() {
 		FAILED=1
 		;;
 	*"0 errors | 0 failures"*)
-		echo "  !! ЗЕЛЁНЫЙ МУТАНТ — гейт не ловит"
+		echo "  !! ЗЕЛЁНЫЙ МУТАНТ — прогон не ловит"
 		FAILED=1
 		;;
 	esac
@@ -106,5 +106,5 @@ run T6 "$ROLE"
 mutate "$ROLE" 's = s.replace("\treturn _target != Vector2i(-1, -1) and pilot._hero_cell() == _target", "\treturn _target != Vector2i(-1, -1) and pilot._hero_cell() == _target and _biomes.size() >= int(target.get(\"biome_goal\", 3))", 1)'
 run T7 "$ROLE"
 
-echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (гейт держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — гейт дырявый")"
+echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (прогон держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — прогон дырявый")"
 git status --porcelain | grep -v "^??" || echo "дерево чистое"

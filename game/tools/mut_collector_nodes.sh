@@ -5,14 +5,14 @@
 . "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
 
 # `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без этого
-# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит»,
+# shim'а каждый мутант «падал» до запуска Godot, а батарея печатала «прогон держит»,
 # ничего не прогнав: отсутствующая команда = «тоже красный».
 timeout() {
 	# есть gtimeout — работаем им; нет — исполняем команду без ограничения времени
 	# (сдвиг аргумента: $1 — длительность, а не команда).
 	if command -v gtimeout >/dev/null; then gtimeout "$@"; else shift; "$@"; fi
 }
-# Мутационная батарея гейта «Собиратель: узлы ≠ единицы» (задача 4.2 цикла
+# Мутационная батарея прогона «Собиратель: узлы ≠ единицы» (задача 4.2 цикла
 # scenario-matrix-behavior-reliability, T-210). Каждый мутант обязан покраснить
 # test_collector_nodes_vs_units.gd; зелёный мутант = дыра меры.
 #
@@ -46,7 +46,7 @@ run() {
 		FAILED=1
 		;;
 	*"0 errors | 0 failures"*)
-		echo "  !! ЗЕЛЁНЫЙ МУТАНТ — гейт не ловит"
+		echo "  !! ЗЕЛЁНЫЙ МУТАНТ — прогон не ловит"
 		FAILED=1
 		;;
 	esac
@@ -108,5 +108,5 @@ run M6 "$ROLE"
 mutate "$ROLE" 's = s.replace("\t\t\"rare_nodes\": pilot.rare_nodes(),\n", "", 1)'
 run M7 "$ROLE"
 
-echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (гейт держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — гейт дырявый")"
+echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (прогон держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — прогон дырявый")"
 git status --porcelain | grep -v "^??" || echo "дерево чистое"

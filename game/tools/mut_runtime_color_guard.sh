@@ -5,7 +5,7 @@
 . "${SOTU_MACHINE_ENV:-$HOME/.pi/agent/env/sotu-machine.env}" 2>/dev/null || true
 
 # `timeout` не из POSIX и на macOS живёт как `gtimeout` (из coreutils). Без shim'а
-# каждый мутант «падал» до запуска Godot, а батарея печатала «гейт держит», ничего
+# каждый мутант «падал» до запуска Godot, а батарея печатала «прогон держит», ничего
 # не прогнав: отсутствующая команда = «тоже красный».
 timeout() {
 	if command -v gtimeout >/dev/null; then gtimeout "$@"; else shift; "$@"; fi
@@ -42,7 +42,7 @@ ARMY=game/scripts/ui/army_panel.gd
 CITY=game/scripts/ui/city_screen.gd
 # Мишень «файла в допуске» — панель решения: после подсреза 3 (2026-10-30) она осталась
 # в допуске одна, но якорь всё равно ставится туда, где не светит носитель: протухший
-# якорь краснеет молча, и батарея врёт «гейт держит».
+# якорь краснеет молча, и батарея врёт «прогон держит».
 DP=game/scripts/ui/decision_panel.gd
 FAILED=0
 
@@ -54,7 +54,7 @@ run() { # имя, файл-мишень (его и возвращаем)
 	echo "$name: $out"
 	case "$out" in
 	"" | *"0 errors | 0 failures"*)
-		echo "  !! ЗЕЛЁНЫЙ (или нечитаемый) МУТАНТ — гейт не ловит"
+		echo "  !! ЗЕЛЁНЫЙ (или нечитаемый) МУТАНТ — прогон не ловит"
 		FAILED=1
 		;;
 	esac
@@ -142,5 +142,5 @@ s = s.replace(paint, "\tsubtitle.add_theme_color_override(\"font_color\", LAUNDE
 '
 run M7 "$CITY"
 
-echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (гейт держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — гейт дырявый")"
+echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (прогон держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — прогон дырявый")"
 git status --porcelain | grep -v "^??" || echo "дерево чистое"

@@ -1,6 +1,6 @@
 extends BaseTest
 ## team-romance-roleplay 4.6: TeamDialogData/TeamDialogSystem —
-## валидация, фильтры, эффекты, контент-гейт, детерминизм.
+## валидация, фильтры, эффекты, контент-фильтр, детерминизм.
 
 
 func _hero_with_follower(
@@ -182,7 +182,7 @@ func test_visible_lines_match_vs_generic() -> void:
 	assert_that(String((lines[0] as Dictionary)["text"])).is_equal("generic_line")
 
 # ═══════════════════════════════════════════
-#  КОНТЕНТ-ГЕЙТ (4.4)
+#  КОНТЕНТ-ФИЛЬТР (4.4)
 # ═══════════════════════════════════════════
 
 func test_adult_gate_with_fallback() -> void:

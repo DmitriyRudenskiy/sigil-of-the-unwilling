@@ -1,6 +1,6 @@
 extends BaseTest
 ## T-113 (K1, 02d-classes-skills §2/§4.2): аксессор канон-классов (CanonClasses).
-## Данные (11 классов, hireable-маска 6, гейты) — mvp_catalog.json, покрываются
+## Данные (11 классов, hireable-маска 6, пороги) — mvp_catalog.json, покрываются
 ## test_mvp_catalog.gd; здесь — поведение аксессора, которым пользуется конструктор.
 
 func test_eleven_canon_classes_no_warlock() -> void:
@@ -30,16 +30,16 @@ func test_canon_names_k1() -> void:
 
 
 func test_gate_all_mode() -> void:
-	assert_bool(CanonClasses.gate_ok("monk", {"DEX": 13, "WIS": 13})).override_failure_message("монах: ЛОВ13 и МДР13 — гейт пройден").is_true()
-	assert_bool(not CanonClasses.gate_ok("monk", {"DEX": 13, "WIS": 12})).override_failure_message("монах: МДР12 < 13 — гейт (02d §4.2)").is_true()
-	assert_bool(CanonClasses.gate_ok("cleric", {"WIS": 13})).override_failure_message("жрец: МДР13 — гейт пройден").is_true()
+	assert_bool(CanonClasses.gate_ok("monk", {"DEX": 13, "WIS": 13})).override_failure_message("монах: ЛОВ13 и МДР13 — порог пройден").is_true()
+	assert_bool(not CanonClasses.gate_ok("monk", {"DEX": 13, "WIS": 12})).override_failure_message("монах: МДР12 < 13 — порог (02d §4.2)").is_true()
+	assert_bool(CanonClasses.gate_ok("cleric", {"WIS": 13})).override_failure_message("жрец: МДР13 — порог пройден").is_true()
 
 
 func test_gate_any_mode() -> void:
-	assert_bool(CanonClasses.gate_ok("fighter", {"STR": 13})).override_failure_message("воин: СИЛ13 (any) — гейт пройден").is_true()
-	assert_bool(CanonClasses.gate_ok("fighter", {"DEX": 13})).override_failure_message("воин: ЛОВ13 (any) — гейт пройден").is_true()
-	assert_bool(not CanonClasses.gate_ok("fighter", {"STR": 12, "DEX": 12})).override_failure_message("воин: обе < 13 — гейт").is_true()
+	assert_bool(CanonClasses.gate_ok("fighter", {"STR": 13})).override_failure_message("воин: СИЛ13 (any) — порог пройден").is_true()
+	assert_bool(CanonClasses.gate_ok("fighter", {"DEX": 13})).override_failure_message("воин: ЛОВ13 (any) — порог пройден").is_true()
+	assert_bool(not CanonClasses.gate_ok("fighter", {"STR": 12, "DEX": 12})).override_failure_message("воин: обе < 13 — порог").is_true()
 
 
 func test_gate_unknown_class() -> void:
-	assert_bool(not CanonClasses.gate_ok("warlock", {"CHA": 13})).override_failure_message("неизвестный класс — гейт не пройден").is_true()
+	assert_bool(not CanonClasses.gate_ok("warlock", {"CHA": 13})).override_failure_message("неизвестный класс — порог не пройден").is_true()

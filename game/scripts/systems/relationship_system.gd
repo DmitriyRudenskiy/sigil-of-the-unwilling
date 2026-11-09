@@ -92,7 +92,7 @@ static func stage_name(stage: int, is_romance: bool = false) -> String:
 	return "Незнакомец"
 
 # ═══════════════════════════════════════════
-#  ИЗМЕНЕНИЕ СВЯЗЕЙ (клины, гейт романтики)
+#  ИЗМЕНЕНИЕ СВЯЗЕЙ (клины, условие романтики)
 # ═══════════════════════════════════════════
 
 ## Применяет deltas {bond, trust, romance} к паре. Возвращает фактически
@@ -118,7 +118,7 @@ static func modify(
 	if deltas.has("romance"):
 		var d := int(deltas["romance"])
 		if not compatible(hero_sex, follower.gender, follower.orientation):
-			applied["romance"] = 0  # гейт: romance фиксируется
+			applied["romance"] = 0  # условие: romance фиксируется
 		else:
 			var before_r := int(p["romance"])
 			p["romance"] = clampi(before_r + d, ROMANCE_MIN, ROMANCE_MAX)
