@@ -89,19 +89,19 @@ def test_набором_считается_наследование_а_не_им
 
 
 def test_coverage_все_собраны(tmp_path, root):
-    log = tmp_path / "gate.log"
+    log = tmp_path / "run.log"
     log.write_text(_log(*FILES), encoding="utf-8")
     assert tiers.main(["coverage", "--log", str(log), "--root", str(root)]) == 0
 
 
 def test_coverage_файл_не_собран_красен(tmp_path, root):
-    log = tmp_path / "gate.log"
+    log = tmp_path / "run.log"
     log.write_text(_log(FILES[0]), encoding="utf-8")
     assert tiers.main(["coverage", "--log", str(log), "--root", str(root)]) == 2
 
 
 def test_coverage_исключение_слоя(tmp_path, root):
-    log = tmp_path / "gate.log"
+    log = tmp_path / "run.log"
     log.write_text(_log("tests/unit/test_a.gd"), encoding="utf-8")
     code = tiers.main(["coverage", "--log", str(log), "--root", str(root),
                        "--exclude", "tests/functional"])
@@ -109,14 +109,14 @@ def test_coverage_исключение_слоя(tmp_path, root):
 
 
 def test_coverage_собрано_вне_набора_красно(tmp_path, root):
-    log = tmp_path / "gate.log"
+    log = tmp_path / "run.log"
     log.write_text(_log(*FILES, "tests/unit/naming_test.gd"), encoding="utf-8")
     assert tiers.main(["coverage", "--log", str(log), "--root", str(root)]) == 2
 
 
 def test_coverage_пустой_слой_красен(tmp_path, root):
     """`smoke` без тестов зелёный тишиной — тот же дефект, что уровень без причины."""
-    log = tmp_path / "gate.log"
+    log = tmp_path / "run.log"
     log.write_text("", encoding="utf-8")
     code = tiers.main(["coverage", "--log", str(log), "--root", str(root),
                        "--exclude", "tests/", "--require-nonempty"])
@@ -125,7 +125,7 @@ def test_coverage_пустой_слой_красен(tmp_path, root):
 
 def test_coverage_фильтр_ни_о_чём_не_высит_дерево(tmp_path, root, capsys):
     """Пустой фильтр не должен вываливать 380 имён: сообщение короткое и по делу."""
-    log = tmp_path / "gate.log"
+    log = tmp_path / "run.log"
     log.write_text("", encoding="utf-8")
     assert tiers.main(["coverage", "--log", str(log), "--root", str(root)]) == 2
     err = capsys.readouterr().err

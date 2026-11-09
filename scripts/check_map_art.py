@@ -691,7 +691,7 @@ def self_test(cfg: dict) -> int:
         cfg = json.loads(json.dumps(cfg))   # мутации не должны трогать пороги
         cfg["provenance"]["required_files"] = []
 
-        def gates() -> dict[str, bool]:
+        def checks() -> dict[str, bool]:
             out = {}
             for name, ok, _ in (frame_checks(shot, cfg)
                                 + atlas_checks(atlas + "/atlas.json", cfg)
@@ -699,7 +699,7 @@ def self_test(cfg: dict) -> int:
                 out[name] = ok
             return out
 
-        bad = [g for g, ok in gates().items() if not ok]
+        bad = [g for g, ok in checks().items() if not ok]
         print(f"{'PASS' if not bad else 'FAIL'}  selftest/clean      "
               f"чистый образец: {bad or 'все гарды зелёные'}")
         results = [not bad]
@@ -736,7 +736,7 @@ def self_test(cfg: dict) -> int:
         ]
         for guard, what, apply in mutations:
             apply()
-            caught = not gates().get(guard, False)
+            caught = not checks().get(guard, False)
             print(f"{'PASS' if caught else 'FAIL'}  selftest/{guard:<18} {what} → "
                   f"{'пойман' if caught else 'ПРОПУЩЕН'}")
             results.append(caught)
@@ -879,7 +879,7 @@ def main() -> int:
             print(f"{'FAIL' if not ok else 'PASS'}  {name:<20} {detail}")
         for name, reason in skipped:
             print(f"SKIP  {name:<20} {reason}")
-        print(f"{'GATE=1' if failed else 'GATE=0'}  ({len(failed)} падений из "
+        print(f"{'CHECK=1' if failed else 'CHECK=0'}  ({len(failed)} падений из "
               f"{len(checks)} проверено, {len(skipped)} пропущено явно)")
         # Знаменатель обязан означать ровно измеряемое (урок T-138, где заголовок
         # «17/17» читали как покрытие тумана войны). Охват печатается вместе с вердиктом,
@@ -887,7 +887,7 @@ def main() -> int:
         print("      охват: ΔE/структурные меры кадра и атласа. Проверок тумана войны "
               "здесь нет ни одной и в мутациях --self-test тоже: туман в этом скрипте — "
               "только фильтр исключения затемнённых клеток (_unfogged, FOG_CUT) и FAIL-"
-              "гард «кадр не показателен». Зелёный GATE о тумане не утверждает ничего "
+              "гард «кадр не показателен». Зелёный CHECK о тумане не утверждает ничего "
               "(T-137).")
     return 1 if failed else 0
 

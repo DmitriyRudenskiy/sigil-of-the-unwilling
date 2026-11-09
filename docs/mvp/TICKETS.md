@@ -12966,3 +12966,38 @@ connected to game interaction server`) и `MCP VERDICT: RED`, потому чт�
 в скриптах и доках одна прямо помечает, что часть пути была untracked-пикселями
 намеренно (`scripts/concept_art/generate.py:53`, D-185), так что «всё пропало» —
 не вывод из этого тикета, а вывод из манфестов.
+
+
+---
+
+## 2026-11-10 — носители, удалённые сменой `remove-doc-gates` (строка реестра, D-322)
+
+Запись добавлена в конец файла, потому что реестр append-only: ниже — какие
+закрытые тикеты теряют **носитель** (скрипт-исполнителя), а не свой вердикт.
+Вердикты и формулировки этих тикетов не переписываются; читатель, придя по
+имени скрипта, должен узнать, что исполнителя больше нет.
+
+| Снятый носитель | Тикеты, чьим предметом был этот носитель |
+| --- | --- |
+| `scripts/doc_gates.sh` (уровень целиком) | T-238 |
+| `check_docs_links.py` (+ `test_check_docs_links.py`) | T-143, T-327 |
+| `gen_docs_index.py` | T-332 |
+| `audit_docs_vs_code.py` (+ самопроверка) | T-263, T-277, T-278, T-279 |
+| `check_hero_layout_map.py` (+ самопроверка) | T-296 (вторая половина), T-316 |
+| `check_save_matrix.py` (+ самопроверка) | T-301, T-327 |
+| `gdd_gate.py`, `gdd_grounding.py` (+ самопроверки) | T-229, T-276, T-292, T-303 |
+| `check_asset_provenance.py` (+ самопроверка) | T-125, T-261, T-313 |
+| `check_hero_frames.py`, `audit_hero_frames.py` (+ самопроверки) | T-318, T-331 |
+| `check_openspec_specs.py` (+ самопроверка) | T-274 |
+| `testmap.py`, `testmap.baseline.json` (+ самопроверка) | T-273, T-305, T-323, T-326 |
+| `gen_tier_table.py` | T-328 |
+| `measure_scene_lattice.py`, `measure_scene_clusters.py`, `annotate_scenes.py`, `fit_scene_cells.py` | T-340 |
+
+Что осталось живой проверкой и где исполняется: `check_autoloads.py`,
+`check_node_paths.py`, `check_test_tiers.py`, `check_repo_layout.py`,
+`classify_mcp_junit.py` — блок `CHECKERS` в `game/run_tests.sh` (самопроверки —
+в списке `TESTS` того же прогона); `test_gen_map_art.py` — `game/tests/mcp/`.
+Словарь вердиктных литералов (`NODE-PATH-GATE` → `NODE-PATHS`, `GATE=` →
+`RUN VERDICT:`/`PUSH:`, `ci2-run-logs` → `ci2-static-logs`) — та же смена;
+почему старые протоколы называют вещи по-старому, объяснено записью
+2026-11-10 в `docs/CHANGELOG.md`.
