@@ -13119,3 +13119,41 @@ game/scripts/entities/` пуст), так что игрок получает р�
 требуют правки в том же change, а ведро B сжимается до боя/сейвов/предыгры;
 (в) гибрид: вынести только `DistrictSystem` + `PopulationSystem` (их именует AGENTS),
 остальное снести.
+
+**T-354 (продолжение, 2026-11-10). Решение владельца — (б): живые системы не выносятся, уходят вместе с шеллом.**
+
+Записано до правки кода, потому что от него зависят состав ведра и объём 3.3.
+
+**Ревизия вёдер по (б)** (пересмотр списка — этой записью, как требует 2.1):
+
+- в **ведро A** из прежнего B переезжают: `campaign/test_district_{birth,disband,no_grant,system}.gd`,
+  `campaign/test_population_{system,carriers_seam}.gd` (носители поселения аннулированы),
+  `campaign/test_{party_system,party_hp_rest,party_wiring,veteran}.gd` (`PartySystem` — кампейн-состояние партии),
+  `smoke/test_mvp_save.gd` (менеджер 3 слотов лежит в `scripts/campaign/save/`; покрытие сейвов
+  переезжает на world-путь — **T-350**, группа 4, иначе раундтрип остаётся без носителя),
+  `smoke/test_crisis_effect_contract.gd` (кейсы `morale_change`/`morale_penalty` и `PopulationSystem`),
+  `functional/test_city_screen.gd` (кейсы кампейн-HUD, тренировки и уровня города),
+  `functional/ui/test_live_font_hygiene.gd` (кейсы 3–4 — каталог построек);
+- в **ведре B** остаются и перевешены: `unit/systems/test_signs.gd` (сейв-раундтрип Знака — на
+  `HeroController.serialize()/deserialize()`, носитель Знака = герой с 2026-11-05),
+  `unit/data/test_waves_json.gd` (снят кейс «волны не триггерятся в 21-ходовом цикле» — цикла нет,
+  инварианты данных волн живут), `functional/ui/test_live_font_hygiene.gd` (подъём —
+  `adventure_ui.tscn`, город открывается `WorldUI.open_city_screen`, путь узла
+  `WorldUI/CityScreenLayer/CityScreen`; замер 2026-11-10: 8/8 PASSED);
+- ничего не меняют в себе (кампейн только в комментариях): `slow/test_ui_responsive.gd`,
+  `unit/ui/test_enemy_card_always_visible.gd`, `balance/test_mvp_invariants.gd`,
+  `balance/test_balance_probe.gd`, `campaign/test_pregame_flow_model.gd` (переезд из каталога —
+  косметика, не 2.2).
+
+**Находка, часть 2 (граница всё ещё не полна).** Городостроение переживающего экрана города
+живёт **не** в `scripts/campaign/`, и в список удаления design.md (решение 2) не входит:
+`scripts/city/campaign_building_{construction_service,placement}.gd`,
+`scripts/data/campaign_building_catalog.gd`, `scripts/city/campaign_city_board.gd` — движок
+каталога (98 построек), доски и уровня города; его единственный читатель —
+`scripts/ui/city_screen.gd` (`:9,10,12` preload, `:849` загрузка каталога, `:663-668`
+`_is_campaign_city()`, `:754,1161` обход `city.campaign_buildings`). По (б) экран города теряет
+каталог, доску и кнопку уровня — это и есть удалённые спекы `campaign-city-construction`,
+`campaign-city-level-progression`, `campaign-city-management-ui`, но правка `city_screen.gd`
+(614 строк теста + ~1300 строк экрана) в Impact-таблице proposal не помянута. Пока это не
+записано в объём 3.3, снос даёт либо красную сборку, либо экран города без половины UI «на
+авось».
