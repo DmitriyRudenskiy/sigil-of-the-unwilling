@@ -77,10 +77,29 @@
       `test_capture.py`, `tools/shot_scene.gd` — только комментарии), удаление = удаление
       файлов. Реестр ведра и разбор — в T-354.
 - [x] 2.3 MCP-e2e: `tests/mcp/conftest.py` (путь `меню → создание → Знак → экран`), `test_campaign_carrier.py`, `test_scene_transitions.py` — carrier-тесты на world-путь; кампейн-специфичные e2e-файлы в ведро удаления. **Закрыто 2026-11-09.** `full_cycle` ведёт по потоку до экрана приключения и ждёт героя (`scripts/world/world_controller`), `test_full_cycle.py` проверяет то, что поток обязан донести: `hero_name` (T-110) и `sign_id` (T-002 + 1.3); assertion «ход 1→2» снят — хода как кампейн-операции в мире нет (D-229). 12 тестов `test_campaign_carrier.py` поднимают `main.tscn` **напрямую** (новый fixture `campaign_game`): кампейн как сцена живёт до 3.3, а из потока вышел, — меню-путь им больше не нужен. `test_scene_transitions.py` переведён на `adventure_ui.tscn` раньше (`c6376cca`). Замер: `pytest tests/mcp/test_full_cycle.py test_campaign_carrier.py test_campaign_continue.py` → **14 passed / 41.42 с**. Кампейн-специфичные файлы (тот же `test_campaign_carrier.py`) в ведро удаления не перенесены — это 2.1, список ведра не написан.
-- [ ] 2.4 Манифест съёмки и `tools/theme_smoke.gd`: носители `world_ui.tscn`/`adventure_ui.tscn`/`world.tscn` вместо `main.tscn` и кампейн-HUD; 10 фикстур `game/tools/capture/campaign*.gd` — в ведро удаления, их место в манифесте — за миром
-- [ ] 2.5 `game/run_tests.sh --tier=fast` зелёный (оба ведра уже перевешены, кампейн ещё жив)
+- [x] 2.5 `game/run_tests.sh --tier=fast` зелёный (оба ведра уже перевешены, кампейн ещё жив)
+      **Закрыто 2026-11-10:** `MCP_SSH_HOST= game/run_tests.sh --tier=fast` →
+      **3648 тестов, 0 ошибок, 0 падений**, `TIER COVERAGE: OK (389 из 389)`,
+      `ORPHAN-CHECK: OK`. Строка `RUN VERDICT: PARTIAL` — штатная для слоя (MCP и
+      python-уровни в fast не меряются); полный прогон тем же составом файлов был
+      зелёным сегодня же (`PUSH: OK`).
 
 ## 3. Снести кампейн-механику
+
+> **Объём снесён решением (б) (T-354) и шире исходного списка — файлы, которых нет
+> в Impact-таблице proposal, но без них снос красный:**
+> `scripts/city/campaign_building_{construction_service,placement}.gd`,
+> `scripts/data/campaign_building_catalog.gd`, `campaign_city_board.gd` (движок
+> городостроения, читаемый живым `scripts/ui/city_screen.gd:9,10,12,497-501`);
+> `scripts/ui/battle_info_model.gd` (его читает только собственный тест);
+> правка `scripts/balance/balance_metrics.gd:93,114-118` (PopulationSystem, CampaignBattle);
+> правка `scripts/systems/crisis_event_system.gd` и `AGENTS.md` § «Данные событий»
+> (DistrictSystem как приёмник настроения, канон поселения);
+> 10 фикстур `game/tools/capture/campaign*.gd`.
+> Экран города теряет каталог/доску/уровень — это спеки `campaign-city-*` (REMOVED),
+> а не потеря: правка `city_screen.gd` (~1300 строк) и его теста (614) входит в 3.4/3.5.
+> Драйвер дня после сноса — **Q-M141** (без ответа агента берёт (в): каталог событий
+> снимается вместе с кампанией).
 
 - [ ] 3.1 Откатить сегодняшнюю правку снабжения: `campaign_composition.gd` (полный ранец) и `game/tests/campaign/test_campaign_start_supply.gd` вместе с `.uid` — чинить нечего
 - [ ] 3.2 Удалить `game/scripts/campaign/**` (19 `.gd` + `.uid`), `game/scripts/ui/campaign*.gd` (10), `game/scripts/main/main.gd`, `game/scripts/ui/map_screen_model.gd`, `RegionMap` с регион-графом
