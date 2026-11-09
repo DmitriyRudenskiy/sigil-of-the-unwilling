@@ -36,7 +36,7 @@ game/balance_report.json
 # `SIGIL_REFERENCE_DIR` (по умолчанию ~/sigil-reference), карта — docs/style-reference-index.md.
 # Игнорировать нечего; проверка согласованности — scripts/check_reference_index.py.
 
-# Python-кэш (gen_docs_index.py импортирует check_docs_links; инструменты генерации ассетов game/tools, scripts/)
+# Python-кэш (инструменты генерации ассетов game/tools, scripts/)
 __pycache__/
 *.pyc
 # Концепт-арт: 385 сгенерированных кадров (~60–90 МБ). В git — каталог (scripts/concept_art/spec.json),

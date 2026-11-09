@@ -1,15 +1,15 @@
-# CI-2 (тикет CI-2, TICKETS.md): GitHub Actions — гейт 4 уровня + чекеры + artifact-логи.
-# Гейт = GdUnit4 + MCP e2e (run_tests.sh, таблица exit-кодов закодирована в скрипте:
+# CI-2 (тикет CI-2, TICKETS.md): GitHub Actions — прогон 3 счёта + чекеры + artifact-логи.
+# Прогон = GdUnit4 + MCP e2e (run_tests.sh, таблица exit-кодов закодирована в скрипте:
 # GdUnit 0/101 → зелёный, 100/105 → красный; pytest 0 → зелёный, 1/2/3/5 → красный)
-# + DOCS-LINKS (check_docs_links.py, битая ссылка → красный) + чекеры (ci2_checkers.sh:
+# + чекеры (ci2_checkers.sh:
 # пары .gd/.uid и ассет/.import, case-дубли, маркеры конфликтов, YAML).
 # Райдер парности (13-я итерация §0): чекеры — на PR, не только на main.
 #
 # ci-speedup (2026-10-14): 1 job → 4 параллельных job'а (static / gdunit / mcp / verdict).
 # Baseline (D-148): было 6м41с (38443410901, f0817a00): MCP 259с, GdUnit 69с, lint 26с,
-# setup ~31с. Семантика гейта инвариантна: workflow красный ⇔ любой из static/gdunit/mcp
+# setup ~31с. Семантика прогона инвариантна: workflow красный ⇔ любой из static/gdunit/mcp
 # красный; verdict — репортёр (always(), exit 0): 4-уровневая строка (D-147) +
-# CI-2 Stability (D-174 — мониторинг, не гейт). Кэши: Godot-бинарь, venv'ы, node_modules.
+# CI-2 Stability (D-174 — мониторинг, не условие красноты). Кэши: Godot-бинарь, venv'ы, node_modules.
 name: CI-2
 
 on:
@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   static:
-    name: "Static (checkers + lint + DOCS-LINKS)"
+    name: "Static (checkers + lint)"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -32,7 +32,7 @@ jobs:
       - name: Checkers (uid pairs, case dups, conflict markers, asset+.import, YAML)
         run: |
           # pipefail выключен: RC снимаем явно (иначе -e убивает шаг до
-          # level-строки; гейт — последняя команда шага)
+          # level-строки; условие красноты — последняя команда шага)
           set +o pipefail
           bash scripts/ci2_checkers.sh 2>&1 | tee /tmp/ci2-checkers.log
           RC=${PIPESTATUS[0]}
@@ -46,11 +46,11 @@ jobs:
           path: /tmp/ci2-lint-venv
           key: ci2-lint-venv-gdtoolkit-4.5.0
 
-      - name: "Lint (gdtoolkit: gdparse — gate; gdlint — delta-гейт этапа 1, D-172)"
-        # Раунд 10 §3.4: lint — отдельный шаг. gdparse (синтаксис) гейтит.
+      - name: "Lint (gdtoolkit: gdparse — блокирует; gdlint — дельта-проверка этапа 1, D-172)"
+        # Раунд 10 §3.4: lint — отдельный шаг. gdparse (синтаксис) блокирует.
         # Раунд 9 §3 (gdlint этап 1, GDLINT-PROPOSAL «утверждён»): гигиена
         # (trailing-whitespace/mixed-tabs/unnecessary-pass/is_finite) вычищена
-        # (431+2); гейт — ДЕЛЬТА: число нарушений > baseline = красный,
+        # (431+2); условие красноты — ДЕЛЬТА: число нарушений > baseline = красный,
         # ≤ baseline = report-only. Понижать baseline можно только вниз
         # (списанием max-line-length/duplicated-load), raising = красный CI.
         run: |
@@ -67,7 +67,7 @@ jobs:
             | xargs -0 -n50 /tmp/ci2-lint-venv/bin/gdlint 2>/tmp/ci2-gdlint.txt >/dev/null || true
           N=$(grep -cE '\.gd:[0-9]+: Error' /tmp/ci2-gdlint.txt || true)
           BASELINE=335
-          echo "GDLINT: violations=$N baseline=$BASELINE (дельта-гейт этапа 1)"
+          echo "GDLINT: violations=$N baseline=$BASELINE (дельта-проверка этапа 1)"
           echo "LINT: gdparse=$([ $GDPARSE_RC -eq 0 ] && echo OK || echo RED) gdlint=$N (baseline=$BASELINE)" >> /tmp/ci2-levels.txt
           if [ "$N" -gt "$BASELINE" ]; then
             echo "RED: gdlint вырос над baseline (+$((N-BASELINE))) — новые нарушения стиля не принимаются"
@@ -75,14 +75,6 @@ jobs:
             exit 1
           fi
           [ "$GDPARSE_RC" -eq 0 ]
-
-      - name: "DOCS-LINKS (check_docs_links.py)"
-        run: |
-          set +o pipefail
-          python3 scripts/check_docs_links.py 2>&1 | tee /tmp/ci2-docs-links.log
-          RC=${PIPESTATUS[0]}
-          echo "DOCS-LINKS: $([ $RC -eq 0 ] && echo OK || echo RED)" >> /tmp/ci2-levels.txt
-          [ $RC -eq 0 ]
 
       - name: "Artifact (static: level-строки + логи)"
         if: always()
@@ -92,7 +84,6 @@ jobs:
           path: |
             /tmp/ci2-levels.txt
             /tmp/ci2-checkers.log
-            /tmp/ci2-docs-links.log
             /tmp/ci2-gdlint.txt
           if-no-files-found: ignore
 
@@ -123,9 +114,9 @@ jobs:
         env:
           GODOT_BIN: /tmp/godot/Godot_v4.7-stable_linux.x86_64
         run: |
-          # Эшелонирование: суб-гейты отдельными шагами — пал суб-гейт видно
+          # Эшелонирование: подшаги отдельными шагами — пал подшаг видно
           # без тела лога (jobs-API conclusion). Флаг exit-кодов — в run_tests.sh.
-          # pipefail выключен: RC снимаем явно (гейт — последняя команда шага).
+          # pipefail выключен: RC снимаем явно (условие красноты — последняя команда шага).
           set +o pipefail
           cd game
           "$GODOT_BIN" --headless --path . --import >/dev/null 2>&1 || true
@@ -139,7 +130,7 @@ jobs:
           } >> /tmp/ci2-levels.txt
           [ "$RC" -eq 0 ] || [ "$RC" -eq 101 ]
 
-      - name: "Balance metrics (T-041: трассы композита → artifact, не гейт)"
+      - name: "Balance metrics (T-041: трассы композита → artifact, не условие красноты)"
         # Гейт якорей — тесты test_t041_anchors (GdUnit4); шаг пишет трассы
         # баланс-прогона (кривые запасов, WARN/DEFICIT, Престиж-сальдо,
         # потери) в артефакт — baseline-точка регрессии чисел.
@@ -290,10 +281,10 @@ jobs:
             sleep 15
           done
           cat /tmp/ci2-mcp-$attempt.log
-          cp /tmp/ci2-mcp-$attempt.log /tmp/ci2-gate-mcp.log
+          cp /tmp/ci2-mcp-$attempt.log /tmp/ci2-run-mcp.log
           {
             echo "MCP: rc=$RC attempt=$attempt (2 workers)"
-            grep -aE "PYTEST LEDGER|workers \[" /tmp/ci2-gate-mcp.log | tail -3
+            grep -aE "PYTEST LEDGER|workers \[" /tmp/ci2-run-mcp.log | tail -3
           } >> /tmp/ci2-levels.txt
           exit "$RC"
 
@@ -333,21 +324,21 @@ jobs:
         with:
           name: ci2-mcp-logs
           path: |
-            /tmp/ci2-gate.log
-            /tmp/ci2-gate-mcp.log
+            /tmp/ci2-run.log
+            /tmp/ci2-run-mcp.log
             /tmp/ci2-mcp-*.log
             /tmp/ci2-levels.txt
           if-no-files-found: ignore
 
   verdict:
-    name: "Verdict (4 уровня D-147 + CI-2 Stability D-174)"
+    name: "Verdict (3 счёта D-147 + CI-2 Stability D-174)"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [static, gdunit, mcp]
     if: always()
     steps:
-      - name: "4-уровневая строка (D-147: GdUnit4 / MCP / DOCS-LINKS / exit-код)"
-        # Репортёр, не гейт: workflow-красный идёт от gate-job'ов (static/gdunit/mcp).
+      - name: "3-уровневая строка (D-147 в редакции remove-doc-gates: GdUnit4 / MCP / exit-код)"
+        # Репортёр, не условие красноты: workflow-красный идёт от job'ов прогона (static/gdunit/mcp).
         # Свита exit-code: 0 ⇔ все три success. Счётчики (2474/38) — в артефактах
         # ci2-gdunit-logs / ci2-mcp-logs (level-строки); ::notice:: — публичный канал
         # без токена (D-167-семья).
@@ -359,15 +350,15 @@ jobs:
           for r in "$S_STATIC" "$S_GDUNIT" "$S_MCP"; do
             [ "$r" = "success" ] || EXIT=1
           done
-          LINE="CI2-VERDICT: GdUnit4=$S_GDUNIT | MCP=$S_MCP | DOCS-LINKS(static)=$S_STATIC | exit-code=$EXIT"
+          LINE="CI2-VERDICT: GdUnit4=$S_GDUNIT | MCP=$S_MCP | exit-code=$EXIT (static=$S_STATIC)"
           echo "$LINE"
           echo "::notice::$LINE"
 
       - name: "CI-2 Stability (D-174: последние 5 прогонов + авто-флаг)"
-        # D-174 (раунд 13 §4; перенумерация: D-171→№17, D-172→№18, D-173→№19 — номера заняты параллельными сессиями): сериальный мониторинг гейта. Публичный API
+        # D-174 (раунд 13 §4; перенумерация: D-171→№17, D-172→№18, D-173→№19 — номера заняты параллельными сессиями): сериальный мониторинг прогонов. Публичный API
         # (без токена, публичное репо — D-167-семья): статусы workflow-ранов.
         # Текущий ран не учитывается (в момент запроса он in_progress) —
-        # флаг срабатывает на следующем ране: это мониторинг, не гейт.
+        # флаг срабатывает на следующем ране: это мониторинг, не условие красноты.
         run: |
           API="https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs"
           if ! curl -sf "$API?per_page=10" -H "Accept: application/vnd.github+json" -o /tmp/ci2-runs.json; then

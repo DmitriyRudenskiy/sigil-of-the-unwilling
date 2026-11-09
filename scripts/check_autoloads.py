@@ -12,7 +12,7 @@ autoload-строку, а cleanup делал `git checkout -- project.godot`, с
 что «клетки нет в манифесте» у прежнего носителя). Порядок записей — тоже
 факт дерева: перестановка автолоадов меняет порядок инициализации.
 
-Самопроверка: scripts/test_check_autoloads.py (TESTS в scripts/doc_gates.sh).
+Самопроверка: scripts/test_check_autoloads.py (python-уровень CHECKERS в game/run_tests.sh).
 """
 from __future__ import annotations
 

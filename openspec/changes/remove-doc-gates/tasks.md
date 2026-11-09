@@ -1,21 +1,21 @@
 ## 1. Коммит 1 — удаление носителей
 
-- [ ] 1.1 Удалить `scripts/doc_gates.sh`
-- [ ] 1.2 Удалить 13 проверщиков: `check_docs_links.py`, `gen_docs_index.py`, `audit_docs_vs_code.py`, `check_hero_layout_map.py`, `check_save_matrix.py`, `gdd_gate.py`, `gdd_grounding.py`, `check_asset_provenance.py`, `check_hero_frames.py`, `audit_hero_frames.py`, `check_openspec_specs.py`, `testmap.py`, `gen_tier_table.py`
-- [ ] 1.3 Удалить `scripts/testmap.baseline.json` и комплект измерителей сцен: `measure_scene_lattice.py`, `measure_scene_clusters.py`, `annotate_scenes.py`, `fit_scene_cells.py`
-- [ ] 1.4 Удалить 11 самопроверок удалённых объектов: `test_check_docs_links.py`, `test_audit_docs_vs_code.py`, `test_gdd_gate.py`, `test_gdd_grounding.py`, `test_testmap.py`, `test_check_hero_layout_map.py`, `test_check_openspec_specs.py`, `test_check_save_matrix.py`, `test_check_asset_provenance.py`, `test_check_hero_frames.py`, `test_audit_hero_frames.py`
-- [ ] 1.5 Сверить замыкание: ни один из удалённых модулей не импортируется и не вызывается из оставшегося кода (`git grep -nE 'doc_gates|check_docs_links|gen_docs_index|audit_docs_vs_code|check_hero_layout_map|check_save_matrix|gdd_gate|gdd_grounding|check_asset_provenance|check_hero_frames|audit_hero_frames|check_openspec_specs|testmap|gen_tier_table|measure_scene|annotate_scenes|fit_scene_cells' -- '*.py' '*.sh' '*.yml' '*.gd'` — пустой вывод)
-- [ ] 1.6 Убедиться, что выжившие исполнители целы: `game/run_tests.sh` вызывает `check_autoloads.py`, `check_node_paths.py`, `check_test_tiers.py`; `scripts/ci2_checkers.sh` вызывает `check_repo_layout.py`; `classify_mcp_junit.py` вызывается раннером
-- [ ] 1.7 Тестовый леджер в сводку: `−11 файлов / +0 / нетто −11`, причина — «объект теста удалён»
+- [x] 1.1 Удалить `scripts/doc_gates.sh`
+- [x] 1.2 Удалить 13 проверщиков: `check_docs_links.py`, `gen_docs_index.py`, `audit_docs_vs_code.py`, `check_hero_layout_map.py`, `check_save_matrix.py`, `gdd_gate.py`, `gdd_grounding.py`, `check_asset_provenance.py`, `check_hero_frames.py`, `audit_hero_frames.py`, `check_openspec_specs.py`, `testmap.py`, `gen_tier_table.py`
+- [x] 1.3 Удалить `scripts/testmap.baseline.json` и комплект измерителей сцен: `measure_scene_lattice.py`, `measure_scene_clusters.py`, `annotate_scenes.py`, `fit_scene_cells.py`
+- [x] 1.4 Удалить 11 самопроверок удалённых объектов: `test_check_docs_links.py`, `test_audit_docs_vs_code.py`, `test_gdd_gate.py`, `test_gdd_grounding.py`, `test_testmap.py`, `test_check_hero_layout_map.py`, `test_check_openspec_specs.py`, `test_check_save_matrix.py`, `test_check_asset_provenance.py`, `test_check_hero_frames.py`, `test_audit_hero_frames.py`
+- [x] 1.5 Сверить замыкание: ни один из удалённых модулей не импортируется и не вызывается из оставшегося кода (`git grep -nE 'doc_gates|check_docs_links|gen_docs_index|audit_docs_vs_code|check_hero_layout_map|check_save_matrix|gdd_gate|gdd_grounding|check_asset_provenance|check_hero_frames|audit_hero_frames|check_openspec_specs|testmap|gen_tier_table|measure_scene|annotate_scenes|fit_scene_cells' -- '*.py' '*.sh' '*.yml' '*.gd'` — **пустой вывод**. Уточнение по ходу (2026-11-10): исполняемых ссылок (импорт, вызов, шаг CI) быть не должно вовсе; историческую строку «носитель снят сменой remove-doc-gates» задача 2.5 требует наоборот, поэтому она вынесена из-под критерия явно: приёмка читает вывод и смотрит, чтобы ни одно имя не стояло в позиции вызова)
+- [x] 1.6 Убедиться, что выжившие исполнители целы: `game/run_tests.sh` вызывает `check_autoloads.py`, `check_node_paths.py`, `check_test_tiers.py`; `scripts/ci2_checkers.sh` вызывает `check_repo_layout.py`; `classify_mcp_junit.py` вызывается раннером
+- [x] 1.7 Тестовый леджер в сводку: `−11 файлов / +0 / нетто −11`, причина — «объект теста удалён»
 
 ## 2. Коммит 2 — переподвязка исполнителей
 
-- [ ] 2.1 `game/run_tests.sh`: снять ссылки на удалённых проверщиков из комментариев и строк вердикта; переименовать литералы `NODE-PATH-GATE` и `GATE=` по таблице Д2, не меняя логику маппинга exit-кодов (GdUnit4 `0`/`101` → зелёный)
-- [ ] 2.2 `.github/workflows/ci2.yml`: убрать шаг `DOCS-LINKS (check_docs_links.py)` и его строку в `/tmp/ci2-levels.txt`; вердиктную строку `CI2-VERDICT:` пересчитать на 3 уровня; артефакт `ci2-gate-logs` переименовать (решение Open Question зафиксировать в сообщении коммита)
-- [ ] 2.3 `scripts/ci2_checkers.sh`: убрать упоминание `check_docs_links.py` из шапки, проверить, что перечни уровней и артефактов совпадают с `ci2.yml`
-- [ ] 2.4 `.gitignore`: снять комментарий про `gen_docs_index.py`/`check_docs_links.py`
-- [ ] 2.5 `docs/mvp/TEST-MAP.md` и `docs/mvp/SCENE-SLICE-MEASURE.md`: заменить разделы, ссылающиеся на `testmap.py --check`, `gen_tier_table.py --check` и измерители сцен, на явное «носитель снят сменой remove-doc-gates» — молчание вместо строки запрещено
-- [ ] 2.6 Прогон `MCP_SSH_HOST= game/run_tests.sh --tier=smoke` зелёный; затем `--tier=fast`
+- [x] 2.1 `game/run_tests.sh`: снять ссылки на удалённых проверщиков из комментариев и строк вердикта; переименовать литералы `NODE-PATH-GATE` и `GATE=` по таблице Д2, не меняя логику маппинга exit-кодов (GdUnit4 `0`/`101` → зелёный)
+- [x] 2.2 `.github/workflows/ci2.yml`: убрать шаг `DOCS-LINKS (check_docs_links.py)` и его строку в `/tmp/ci2-levels.txt`; вердиктную строку `CI2-VERDICT:` пересчитать на 3 уровня; артефакт `ci2-gate-logs` переименовать (решение Open Question зафиксировать в сообщении коммита)
+- [x] 2.3 `scripts/ci2_checkers.sh`: убрать упоминание `check_docs_links.py` из шапки, проверить, что перечни уровней и артефактов совпадают с `ci2.yml`
+- [x] 2.4 `.gitignore`: снять комментарий про `gen_docs_index.py`/`check_docs_links.py`
+- [x] 2.5 `docs/mvp/TEST-MAP.md` и `docs/mvp/SCENE-SLICE-MEASURE.md`: заменить разделы, ссылающиеся на `testmap.py --check`, `gen_tier_table.py --check` и измерители сцен, на явное «носитель снят сменой remove-doc-gates» — молчание вместо строки запрещено
+- [x] 2.6 Прогон `MCP_SSH_HOST= game/run_tests.sh --tier=smoke` зелёный; затем `--tier=fast`
 
 ## 3. Коммит 3 — словарь в коде и живых документах
 

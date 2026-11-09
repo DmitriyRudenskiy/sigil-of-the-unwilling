@@ -38,7 +38,7 @@ game/assets/ui/icons/.
 Exit: 0 — чистый набор; 1 — перечень нарушений; 2 — ошибка среды
 (нет Pillow / нет MANIFEST / битый PNG).
 
-Конвенция — scripts/check_docs_links.py (системный python3 + Pillow).
+Интерпретатор — системный python3 + Pillow.
 """
 
 import json

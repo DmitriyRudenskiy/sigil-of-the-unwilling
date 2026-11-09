@@ -29,7 +29,7 @@
 set -u
 G=${GODOT_BIN:?GODOT_BIN — укажи в настройках машины ~/.pi/agent/env/sotu-machine.env}
 # Оба мутанта пишут в один тест-файл: 14 кейсов списка/куклы/полосы живут в
-# test_inventory_actions.gd (сводный файл — требование merge_files-рэтчета testmap,
+# test_inventory_actions.gd (сводный файл — требование merge_files-рэтчета карты тестов,
 # отдельный файл под уже оскоплённым носителем его красит).
 ROWS=res://tests/unit/ui/test_inventory_actions.gd
 BANDS=res://tests/unit/ui/test_inventory_actions.gd

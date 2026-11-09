@@ -4,10 +4,10 @@
 # Exit code GdUnit4: 0 = pass, 101 = только orphan-предупреждения (гигиена тестов),
 # 100 и прочие = реальные падения.
 #
-# Принцип гейта (T-344, чеклист ниже — что входит в вердикт):
+# Принцип прогона (T-344, чеклист ниже — что входит в вердикт):
 #   1. Факт о продакшне измеряется в продакшн-канале: числа отчёта — только из
 #      текущего дерева (метрики чужого checkout аннулируются, не переносятся).
-#   2. Гейт не имеет права молча менять дерево: project.godot фиксируется
+#   2. Прогон не имеет права молча менять дерево: project.godot фиксируется
 #      снапшотом и восстанавливается в trap (EXIT/INT/TERM; SIGKILL не покрыт —
 #      задокументирован у блока снапшота).
 #   3. Уровень, который не мерился, не выглядит зелёным: SKIPPED ⇒ максимум
@@ -17,10 +17,10 @@
 #
 # Чеклист уровней полного прогона (full):
 #   [ ] AUTOLOAD-PRECHECK — секция [autoload] = канон 15 записей (T-344)
-#   [ ] GdUnit4 unit/integration/functional (headless) + TIER COVERAGE + ORPHAN-GATE
-#   [ ] VACUOUS-ASSERT-GATE (T-123) + NODE-PATH-GATE (T-296)
+#   [ ] GdUnit4 unit/integration/functional (headless) + TIER COVERAGE + ORPHAN-CHECK
+#   [ ] VACUOUS-ASSERTS (T-123) + NODE-PATHS (T-296)
 #   [ ] MCP e2e — живой Godot, X-дисплей, junit + классификатор D-265
-#   [ ] python-уровни: GENART (T-150) + READINESS-CLASSIFIER selftest
+#   [ ] python-уровни: GENART (T-150) + CHECKERS selftest + READINESS-CLASSIFIER selftest
 #   [ ] LINT (gdlint, report-only — в вердикт не входит)
 #
 # MCP e2e (feat/mcp-e2e-activation, 2026-10-04): venv + Xvfb + GODOT_PATH +
@@ -39,7 +39,7 @@ cd "$(dirname "$0")"
 # прогоне wait_port_free() молчаливо блокирует ~120 c/тест (диагностика
 # 2026-10-05: свит 30/39 за 890 c вместо 169 c). Машина шарится: убиваем
 # только PIDs, отсутствовавшие на старте (снимок).
-# T-344: гейт не имеет права молча менять дерево. Раньше cleanup делал
+# T-344: прогон не имеет права молча менять дерево. Раньше cleanup делал
 # `git checkout -- project.godot` — чистое дерево ценой СНОСА незакоммиченных
 # правок автолоадов (инцидент 2026-11-06). Теперь состояние фиксируется
 # снапшотом до прогона и восстанавливается им: вендорный инжект снимается,
@@ -64,7 +64,7 @@ cleanup_mcp() {
 		# Вендорный MCP-сервер инжектит mcp_interaction_server.gd + autoload в
 		# project.godot и при выгрузке оставляет пустые строки. Восстановление —
 		# из снапшота начала прогона (T-344): инжект снят, незакоммиченные правки
-		# project.godot переживают гейт (git checkout их сносил).
+		# project.godot переживают прогон (git checkout их сносил).
 		rm -f mcp_interaction_server.gd mcp_interaction_server.gd.uid
 		cp "$PROJECT_SNAPSHOT" project.godot 2>/dev/null || true
 		rm -f "$PROJECT_SNAPSHOT"
@@ -90,7 +90,7 @@ SOTU_SSH_HOST_SET=${MCP_SSH_HOST+x}
 # «задано пусто»; здесь уже нельзя голой ссылкой: под `set -u` прогон умирал
 # на этой строке до source настроек машины (замер 2026-11-09: дефолтный вызов
 # `./run_tests.sh` на машине без экспорта MCP_SSH_HOST выходил с «unbound
-# variable», то есть гейт был мёртв две недели для любого вызова из чистого
+# variable», то есть прогон был мёртв две недели для любого вызова из чистого
 # окружения).
 SOTU_SSH_HOST_PRE="${MCP_SSH_HOST-}"
 if [ -r "$SOTU_MACHINE_ENV" ]; then
@@ -130,7 +130,7 @@ fi
 
 # Слои прогона (срез test-suite-restructure, 2026-11-02): `smoke` — критичный путь
 # headless (бюджет 30 с), `fast` — все GdUnit-проверки без живого Godot (бюджет
-# 3 мин), `full` — сегодняшний гейт целиком (GdUnit + MCP e2e + python-уровни).
+# 3 мин), `full` — сегодняшний прогон целиком (GdUnit + MCP e2e + python-уровни).
 # Слой задаётся МЕСТОМ В ДЕРЕВЕ (tests/smoke, tests/slow) и штатной фильтрацией
 # GdUnit `-a`/`-i`: списка-манифеста «файлы слоя» нет и не заведётся — он расходится
 # с деревом в первый же день и не краснеет, когда файл переименовали.
@@ -147,7 +147,7 @@ usage: run_tests.sh [--tier=smoke|fast|full] [--help]
 		команда: -a res://tests/smoke | не мерит: живой Godot (UI, сцены, клики), python-уровни, lint
   fast  — все GdUnit-проверки кроме game/tests/slow, headless, бюджет 3 мин
 		команда: -a res://tests -i res://tests/slow | не мерит: живой Godot, python-уровни, lint
-  full  — полный гейт: GdUnit + MCP e2e + python-уровни (по умолчанию)
+  full  — полный прогон: GdUnit + MCP e2e + python-уровни (по умолчанию)
 		команда: -a res://tests + pytest tests/mcp/ | не мерит: звук, playtest, ручной ux-review
 Env как раньше: SKIP_GDUNIT=1, MCP_WORKERS=N, GODOT_BIN, MCP_PYTEST_PY, GEN_PY.
 Настройки машины — SOTU_MACHINE_ENV (файл вне репозитория, по умолчанию
@@ -233,7 +233,7 @@ done
 "$GODOT" --headless --path . --import >/dev/null 2>&1
 if [ "${SKIP_GDUNIT:-0}" != "1" ]; then
 		echo "=== gdUnit4: слой $TIER ($GD_INCLUDE, исключений: ${#GD_EXCLUDE[@]}) ==="
-# CI-4 (раунд 11 §4, D-168): лог в файл — файл-level orphan-гейт (allowlist)
+# CI-4 (раунд 11 §4, D-168): лог в файл — файл-level orphan-проверка (allowlist)
 # парсит per-suite «Statistics: … N orphans» после «Run Test Suite: <path>».
 GDUNIT_LOG="$(mktemp)"
 set -o pipefail
@@ -241,7 +241,7 @@ set -o pipefail
 RC=${PIPESTATUS[0]}
 set +o pipefail
 # Политика orphan (CI-2, T-114): 0 = pass; 101 = только orphan-предупреждения
-# (гигиена, не падение); любой другой код = red. Политика закодирована в гейте.
+# (гигиена, не падение); любой другой код = red. Политика закодирована в прогоне.
 if [ "$RC" -ne 0 ] && [ "$RC" -ne 101 ]; then
 		exit "$RC"
 
@@ -272,10 +272,10 @@ if [ -f "$ORPHAN_ALLOWLIST" ]; then
 		if [ "$ORPHAN_RED" -eq 0 ]; then
 				TOTAL_ORPHANS="$(sed 's/\x1b\[[0-9;]*m//g' "$GDUNIT_LOG" | grep -E "^ *Overall Summary:" | tail -1 | sed -E 's/.* ([0-9]+) orphans.*/\1/')"
 				ALLOW_N="$(grep -c '^res://' "$ORPHAN_ALLOWLIST" 2>/dev/null)"
-				echo "ORPHAN-GATE: OK (сирот всего: ${TOTAL_ORPHANS:-0}; allowlist: ${ALLOW_N:-0} файл(а))"
+				echo "ORPHAN-CHECK: OK (сирот всего: ${TOTAL_ORPHANS:-0}; allowlist: ${ALLOW_N:-0} файл(а))"
 		fi
 else
-		echo "ORPHAN-GATE: SKIPPED (нет $ORPHAN_ALLOWLIST — создайте хотя бы заголовок)"
+		echo "ORPHAN-CHECK: SKIPPED (нет $ORPHAN_ALLOWLIST — создайте хотя бы заголовок)"
 fi
 # Полнота сбора: слой не имеет права быть тихой выборкой. Сравниваем то, что раннер
 # реально собрал (строки «Run Test Suite:» в логе), с деревом tests/ за вычетом
@@ -289,8 +289,8 @@ if command -v python3 >/dev/null 2>&1; then
 		[ "$TIER" = "smoke" ] && COV_ARGS+=(--require-nonempty)
 		if ! COV="$(cd .. && python3 scripts/check_test_tiers.py "${COV_ARGS[@]}" 2>&1)"; then
 				echo "TIER COVERAGE: RED — $COV"
-				echo "GATE VERDICT: RED — полнота сбора слоя не сошлась"
-				echo "PUSH: BLOCKED — красный гейт (исправить и прогнать full заново)"
+				echo "RUN VERDICT: RED — полнота сбора слоя не сошлась"
+				echo "PUSH: BLOCKED — красный прогон (исправить и прогнать full заново)"
 				rm -f "$GDUNIT_LOG"
 				exit 1
 		fi
@@ -300,8 +300,8 @@ else
 fi
 rm -f "$GDUNIT_LOG"
 if [ "$ORPHAN_RED" -ne 0 ]; then
-		echo "GATE VERDICT: RED — ORPHAN-GATE"
-		echo "PUSH: BLOCKED — красный гейт (исправить и прогнать full заново)"
+		echo "RUN VERDICT: RED — ORPHAN-CHECK"
+		echo "PUSH: BLOCKED — красный прогон (исправить и прогнать full заново)"
 		exit 1
 fi
 
@@ -309,7 +309,7 @@ fi
 # Владелец, 2026-11-09: уровень, который не мерился, не имеет права выглядеть
 # зелёным. Замер дня: symlink вместо node_modules → зеркало на X-контур
 # (`find … -type f` по symlink не идёт) уезжало без зависимостей →
-# `PYTEST: SKIPPED` при `exit 0` = «зелёный full без e2e» (GATE_EXIT был 0).
+# `PYTEST: SKIPPED` при `exit 0` = «зелёный full без e2e» (RUN_EXIT был 0).
 # Отсюда одна строка вердикта на всех выходах и правило: SKIPPED ⇒ максимум
 # YELLOW, никогда GREEN. Жёлтый exit-кода не краснит — это среда, а не падение
 # (тот же статус, что у readiness D-265).
@@ -318,7 +318,7 @@ SOTU_SKIPPED=""
 skipped_level() { # skipped_level "<уровень>" "<причина>"
 		SOTU_SKIPPED="${SOTU_SKIPPED:+$SOTU_SKIPPED; }$1: $2"
 }
-gate_verdict() { # gate_verdict <red|ok> "<причина падения>"
+run_verdict() { # run_verdict <red|ok> "<причина падения>"
 		local line rc=0 why=${2:-}
 		if [ "$1" = "red" ]; then
 				line="RED — $why"; rc=1
@@ -329,17 +329,17 @@ gate_verdict() { # gate_verdict <red|ok> "<причина падения>"
 		else
 				line="GREEN — измеренные уровни зелёные, пропусков уровней нет"
 		fi
-		echo "GATE VERDICT: $line"
+		echo "RUN VERDICT: $line"
 		push_verdict "$1"
 		return "$rc"
 }
-# Push-условие как гейт (T-344, D-265): основание публикации печатает сам гейт,
+# Push-условие — вердикт прогона (T-344, D-265): основание публикации печатает сам прогон,
 # а не выводится чтением вердикта глазами. Разрешено ровно одно: полный прогон,
 # failed = 0, все уровни измерены; readiness, классифицированный жёлтым по
 # подписи, красным не является (D-265). Любой непомреный уровень — BLOCKED.
 push_verdict() {
 		if [ "$1" = "red" ]; then
-				echo "PUSH: BLOCKED — красный гейт (исправить и прогнать full заново)"
+				echo "PUSH: BLOCKED — красный прогон (исправить и прогнать full заново)"
 		elif [ -n "$SOTU_SKIPPED" ]; then
 				echo "PUSH: BLOCKED — уровень не мерился ($SOTU_SKIPPED); пуш по неполному прогону запрещён (D-224)"
 		elif [ "$MCP_YELLOW" -eq 1 ]; then
@@ -353,7 +353,7 @@ echo ""
 echo "=== lint: gdlint (T-141, report-only) ==="
 # D-210: gdlint ищет .gdlintrc по рабочему каталогу. Скрипт выше делает cd в game/,
 # поэтому секция ниже работает именно с проектным конфигом; запуск из корня репо —
-# ДРУГОЙ конфиг (дефолт), в котором часть правил выключена проектом. Дельта-гейт
+# ДРУГОЙ конфиг (дефолт), в котором часть правил выключена проектом. Дельта-проверка
 # (падение на росте против базы) — вторая половина T-141, не подключена: конфиг линтера
 # сам помечен «report-only, до утверждения владельцем».
 LINT_PY="${LINT_PY:-python3}"
@@ -380,49 +380,49 @@ elif "$LINT_PY" -c 'import gdtoolkit.linter' 2>/dev/null && [ -f .gdlintrc ]; th
 		echo "LINT: свои (scripts + tests + tools/*.gd): ${LINT_OWN:-нет вывода}"
 		echo "LINT: вендор-наследие (tools/mcp — патченная копия godot-mcp, вне дельты): ${LINT_FORK:-нет вывода}"
 		echo "LINT: вендор (addons, вне дельты): ${LINT_VENDOR:-нет вывода}"
-		echo "LINT: конфиг = $(pwd)/.gdlintrc (CWD=game); сигнал = ДЕЛЬТА против базы по СВОИМ 355, не «чисто» (T-141); гейт не подключён"
+		echo "LINT: конфиг = $(pwd)/.gdlintrc (CWD=game); сигнал = ДЕЛЬТА против базы по СВОИМ 355, не «чисто» (T-141); в прогон не подключён"
 else
 		echo "LINT: SKIPPED (нет gdtoolkit у $LINT_PY или нет .gdlintrc в $(pwd))"
 fi
 echo ""
-echo "=== vacuous asserts: сканер T-123 (гейт) ==="
+echo "=== vacuous asserts: сканер T-123 (уровень прогона) ==="
 # Класс «вечно-зелёных» тестов: `assert_*(x)` без check-метода в GdUnit4 НЕ проверяет
 # ничего — тест зелёный всегда. Сканер жил только в CI-2 (checker 6), а вердикт проекта —
 # локальный прогон (директива владельца 2026-10-13), поэтому гард мог быть пустым и
 # зелёным: 2026-10-20 так нашлись 7 мёртвых проверок в уже смерженном
-# test_tail_screens_theme_carrier.gd (срез T-147). Выход сканера — падение гейта.
+# test_tail_screens_theme_carrier.gd (срез T-147). Выход сканера — падение прогона.
 # Сканер требует корень репо как рабочую директорию (git ls-files game/tests).
 if command -v python3 >/dev/null 2>&1; then
 		if VACUOUS="$(cd .. && python3 scripts/ci2_vacuous_asserts.py 2>&1)"; then
-				echo "VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)"
+				echo "VACUOUS-ASSERTS: OK (полупустых assert-* нет)"
 		else
-				echo "VACUOUS-ASSERT-GATE: RED — assert без check-метода не проверяет НИЧЕГО (T-123):"
+				echo "VACUOUS-ASSERTS: RED — assert без check-метода не проверяет НИЧЕГО (T-123):"
 				echo "$VACUOUS"
 				echo "  Правка: добавить терминал (.is_true() / .is_equal(...)); ложные срабатывания —"
 				echo "  в scripts/ci2_vacuous_allowlist.txt (пусто = строго)"
 				exit 1
 		fi
 else
-		echo "VACUOUS-ASSERT-GATE: SKIPPED (python3 не найден — уровень молчит, зафиксировать в отчёте)"
+		echo "VACUOUS-ASSERTS: SKIPPED (python3 не найден — уровень молчит, зафиксировать в отчёте)"
 fi
 echo ""
-echo "=== пути узлов из скриптов ↔ сцены: сканер T-296 (гейт) ==="
+echo "=== пути узлов из скриптов ↔ сцены: сканер T-296 (уровень прогона) ==="
 # Класс «переехал блок — скрипт остался»: экраны собираются генераторами, путь
 # узла — строковый литерал, а `get_node_or_null(...) is Label` делает промах
 # неотличимым от успеха. GdUnit этого не видит (тест экрана проверяет своё),
-# документальные гейты — тоже. Так потерялись левая колонка (D-280), строки
+# документальные проверки — тоже. Так потерялись левая колонка (D-280), строки
 # надетого (T-254), рамки куклы (T-294), полоса маны и навыков (T-295).
 if command -v python3 >/dev/null 2>&1; then
 		if PATHS="$(cd .. && python3 scripts/check_node_paths.py 2>&1)"; then
 				echo "$PATHS"
-				echo "NODE-PATH-GATE: OK"
+				echo "NODE-PATHS: OK"
 		else
-				echo "NODE-PATH-GATE: RED — литерал пути не живёт в сцене (T-296):"
+				echo "NODE-PATHS: RED — литерал пути не живёт в сцене (T-296):"
 				echo "$PATHS"
 				exit 1
 		fi
 else
-		echo "NODE-PATH-GATE: SKIPPED (python3 не найден — уровень молчит, зафиксировать в отчёте)"
+		echo "NODE-PATHS: SKIPPED (python3 не найден — уровень молчит, зафиксировать в отчёте)"
 fi
 # MCP-слой smoke (T-329, срез test-suite-restructure 5.3): живой Godot в слое
 # smoke поднимается только по явному запросу — readiness одной пауки съедает
@@ -454,8 +454,8 @@ if [ "$MCP_RUN" != "1" ]; then
 		echo "NOT MEASURED: python-уровни (генератор арта T-150, классификатор D-265) — не входят в слой $TIER"
 		echo "NOT MEASURED: gdlint (report-only) — не входит в слой $TIER"
 		echo "TIER $TIER: зелёный прогон НЕ является основанием для push — публикация требует зелёного full (D-224)."
-		echo "PUSH: BLOCKED — слой $TIER не полный гейт (D-224; основание публикации — только full)"
-		echo "GATE VERDICT: PARTIAL — слой $TIER, MCP и python-уровни не мерились; читать как «не проверялось»"
+		echo "PUSH: BLOCKED — слой $TIER не полный прогон (D-224; основание публикации — только full)"
+		echo "RUN VERDICT: PARTIAL — слой $TIER, MCP и python-уровни не мерились; читать как «не проверялось»"
 		exit 0
 fi
 echo ""
@@ -497,7 +497,7 @@ if [ -n "${MCP_SSH_HOST:-}" ] && [ -z "${SOTU_ON_X_HOST:-}" ]; then
 				ssh -q "$MCP_SSH_HOST" "rm -rf '$SOTU_REMOTE' && mkdir -p '$SOTU_REMOTE' && tar -xzf - -C '$SOTU_REMOTE' --warning=no-unknown-keyword"; then
 				echo "PYTEST: SKIPPED (дерево не выложено на $MCP_SSH_HOST — MCP-уровень не мерился; сними MCP_SSH_HOST для локального X)"
 				skipped_level "MCP e2e" "дерево не выложено на $MCP_SSH_HOST"
-				gate_verdict ok
+				run_verdict ok
 				exit 0
 		fi
 		# Удалённый прогон — тот же скрипт целиком, только без GdUnit (он измерен здесь)
@@ -521,16 +521,16 @@ if [ -n "${MCP_SSH_HOST:-}" ] && [ -z "${SOTU_ON_X_HOST:-}" ]; then
 		# Вердикт печатает удалённый прогон (тот же скрипт, тот же хвост); здесь — только
 		# передача красного в exit-код, без перекрашивания жёлтого в зелёный.
 		if [ "$MCP_RC" -ne 0 ]; then
-				gate_verdict red "X-контур $MCP_SSH_HOST вернул rc=$MCP_RC"
+				run_verdict red "X-контур $MCP_SSH_HOST вернул rc=$MCP_RC"
 		else
-				echo "GATE VERDICT: итог — в вердикте удалённого прогона ($MCP_SSH_HOST, rc=$MCP_RC)"
+				echo "RUN VERDICT: итог — в вердикте удалённого прогона ($MCP_SSH_HOST, rc=$MCP_RC)"
 		fi
 		exit "$MCP_RC"
 fi
 if [ ! -f "$MCP_SERVER" ]; then
 		echo "PYTEST: SKIPPED (no MCP server: $MCP_SERVER; build: cd addons/godot-mcp && npm ci && npm run build)"
 		skipped_level "MCP e2e" "нет MCP-сервера ($MCP_SERVER)"
-		gate_verdict ok
+		run_verdict ok
 		exit 0
 fi
 # Зависимости аддона — не «деталь сборки», а условие того, что сервер вообще
@@ -541,7 +541,7 @@ if [ ! -d "$(dirname "$(dirname "$MCP_SERVER")")/node_modules" ]; then
 		echo "PYTEST: SKIPPED (нет node_modules у $MCP_SERVER — npm ci в game/addons/godot-mcp/; без них сервер не стартует)"
 		echo "MCP VERDICT: SKIPPED (зависимости godot-mcp не установлены — уровень не мерился)"
 		skipped_level "MCP e2e" "нет node_modules у $MCP_SERVER"
-		gate_verdict ok
+		run_verdict ok
 		exit 0
 fi
 XVFB_PID=""
@@ -559,7 +559,7 @@ if [ -z "${DISPLAY:-}" ] && command -v Xvfb >/dev/null 2>&1; then
 		if [ -z "$XVFB_PID" ]; then
 				echo "PYTEST: SKIPPED (X-дисплея нет: DISPLAY не задан, свободного Xvfb :91–:98 не нашли, MCP_SSH_HOST не задан — настройка машины $SOTU_MACHINE_ENV)"
 				skipped_level "MCP e2e" "X-дисплея нет (DISPLAY, Xvfb :91–:98, MCP_SSH_HOST пусты)"
-				gate_verdict ok
+				run_verdict ok
 				exit 0
 		fi
 fi
@@ -573,7 +573,7 @@ if [ ! -x "$PYTEST_PY" ]; then
 		else
 				echo "PYTEST: SKIPPED (MCP_PYTEST_PY не задан/не исполняемый: «$PYTEST_PY», и нет python3 с mcp+anyio; настройка машины $SOTU_MACHINE_ENV: python3 -m venv <путь> && <путь>/bin/pip install pytest pytest-timeout mcp anyio)"
 				skipped_level "MCP e2e" "интерпретатора MCP-тестов нет (MCP_PYTEST_PY, python3 с mcp+anyio)"
-				gate_verdict ok
+				run_verdict ok
 				[ -n "$XVFB_PID" ] && kill "$XVFB_PID" 2>/dev/null || true
 				exit 0
 		fi
@@ -595,7 +595,7 @@ export GODOT_PROJECT_PATH="${GODOT_PROJECT_PATH:-$PWD}"
 # (4-ядерный раннер, 1 ядро — запас под флейки, D-166-класс). Порт воркера —
 # conftest _worker_port(): gwN → 9090+N (env MCP_PORT; Godot-сторона tools/mcp/
 # читает то же). Без xdist — явная строка + фолбэк на 1 воркер (уровень не
-# молчит, гейт не ослабевает).
+# молчит, прогон не ослабевает).
 MCP_WORKERS="${MCP_WORKERS:-1}"
 PYTEST_WORKER_ARGS=()
 PERF_SERIAL=0
@@ -745,11 +745,11 @@ else
 				*) echo "MCP READINESS: журнал не разобран — readiness-error остаётся красным" ;;
 		esac
 fi
-# Python-гейт генератора арта (T-150): `scripts/test_gen_map_art.py` не входит ни в одну
+# Python-уровень генератора арта (T-150): `scripts/test_gen_map_art.py` не входит ни в одну
 # секцию выше (MCP-секция знает только tests/mcp/), а без него затемнённый побратим листа
 # и кратность MAP_FOG_DIM проверялись бы только руками. Секция не молчит: нет pytest/PIL —
 # явная строка SKIPPED (конвенция MCP-секции).
-echo "=== python: генератор арта карты (scripts/test_gen_map_art.py) + концепт-арта (scripts/concept_art/test_generate.py) ==="
+echo "=== python: инструменты генерации и разбора (gen_map_art, concept_art, scenario_matrix, character_kit) ==="
 # T-289 (D-166-семья): уровень желтел, хотя интерпретатор с pytest+PIL был установлен
 # (замер 2026-10-29: pytest 9.1.1, PIL 13.0.0, 11 тестов уровня за 2.3 с) — проверка
 # `import pytest, PIL` отвечала честно про не тот интерпретатор, дефолт был `python3`.
@@ -769,10 +769,12 @@ if [ -n "$GEN_PY" ]; then
 		echo "GENART: интерпретатор $GEN_PY"
 		# T-291 (D-307): самопроверка генератора концепт-арта исполнима без пикселей эталонов
 		# (`load_spec(check_files=False)` сверяет манифест), поэтому ей есть что проверять и на
-		# чистой машине — до 2026-11-08 она только скипалась и в гейт не попадала вовсе.
+		# чистой машине — до 2026-11-08 она только скипалась и в прогон не попадала вовсе.
 		# -p no:warnings: Pillow-предупреждения вытесняли строку со счётчиком из `tail -5`,
 		# и секция показывала warnings вместо вердикта (замер прогона 2026-11-08).
-		"$GEN_PY" -m pytest ../scripts/test_gen_map_art.py ../scripts/concept_art/test_generate.py -q --tb=short -p no:warnings 2>&1 | tail -3
+		"$GEN_PY" -m pytest ../scripts/test_gen_map_art.py ../scripts/concept_art/test_generate.py \
+				../scripts/test_scenario_matrix.py ../scripts/character_kit/test_character_kit.py \
+				-q --tb=short -p no:warnings 2>&1 | tail -3
 		[ "${PIPESTATUS[0]}" -ne 0 ] && MCP_RC=1
 else
 		echo "GENART: SKIPPED (ни один кандидат не импортирует pytest+PIL: ${GEN_CANDIDATES[*]} — GEN_PY в настройку машины $SOTU_MACHINE_ENV)"
@@ -789,7 +791,7 @@ if "$PYTEST_PY" -c 'import pytest' 2>/dev/null; then
 		if [ "${PIPESTATUS[0]}" -eq 0 ]; then
 				echo "READINESS-CLASSIFIER: selftest GREEN"
 		else
-				echo "READINESS-CLASSIFIER: selftest RED — классификатор сломан, его «жёлтому» гейт не верит"
+				echo "READINESS-CLASSIFIER: selftest RED — классификатор сломан, его «жёлтому» прогон не верит"
 				MCP_RC=1
 		fi
 else
@@ -797,7 +799,38 @@ else
 		skipped_level "READINESS-CLASSIFIER" "нет pytest в $PYTEST_PY"
 fi
 
+# Самопроверки живых сверщиков репозитория (remove-doc-gates). До смены их крутил
+# scripts/doc_gates.sh; вместе с ним они остались без исполнителя, а держат они
+# проверщики, которые работают в этом же прогоне: check_autoloads (AUTOLOAD-PRECHECK),
+# check_node_paths (NODE-PATHS), check_test_tiers (QUARANTINE / TIER COVERAGE) и
+# check_repo_layout (его зовёт scripts/ci2_checkers.sh). Проверщик без самопроверки —
+# тот же класс молчания, что секция без вердикта (D-265).
+echo "=== python: самопроверки сверщиков (autoloads, node-paths, tiers, repo-layout) ==="
+CHECKER_PY=""
+for chk_cand in "${GEN_PY:-}" "${PYTEST_PY:-}" "${MCP_PYTEST_PY:-}" python3; do
+		[ -n "$chk_cand" ] || continue
+		if "$chk_cand" -c 'import pytest' 2>/dev/null; then
+				CHECKER_PY="$chk_cand"
+				break
+		fi
+done
+if [ -n "$CHECKER_PY" ]; then
+		echo "CHECKERS: интерпретатор $CHECKER_PY"
+		"$CHECKER_PY" -m pytest ../scripts/test_check_autoloads.py ../scripts/test_check_node_paths.py \
+				../scripts/test_check_test_tiers.py ../scripts/test_check_repo_layout.py \
+				-q --tb=short -p no:cacheprovider 2>&1 | tail -3
+		if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+				echo "CHECKERS: selftest GREEN"
+		else
+				echo "CHECKERS: selftest RED — сверщик сломан, его уровень в этом прогоне не значил ничего"
+				MCP_RC=1
+		fi
+else
+		echo "CHECKERS: SKIPPED (ни один кандидат не импортирует pytest: ${GEN_PY:-∅} ${PYTEST_PY:-∅} ${MCP_PYTEST_PY:-∅} python3)"
+		skipped_level "CHECKERS" "нет интерпретатора с pytest"
+fi
+
 # Очистка (Xvfb, инжект-артефакты, node/godot MCP-процессы) — в trap cleanup_mcp (EXIT).
 echo "MCP VERDICT: exit=$MCP_RC (0 = зелёный или readiness-жёлтый D-265; 100/1/2 — красный)"
-gate_verdict "$([ "$MCP_RC" -eq 0 ] && echo ok || echo red)" "MCP/pytest вернул rc=$MCP_RC"
+run_verdict "$([ "$MCP_RC" -eq 0 ] && echo ok || echo red)" "MCP/pytest вернул rc=$MCP_RC"
 exit "$MCP_RC"
