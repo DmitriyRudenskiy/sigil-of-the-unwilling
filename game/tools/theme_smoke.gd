@@ -56,10 +56,11 @@ const SCENES: Array[String] = [
 	# (состояния боевого HUD снимает другой harness — tools/ux_shots.gd).
 	"res://scenes/battle.tscn",
 	"res://scenes/ui/world_ui.tscn",
-	# Кампейн-экран, который игрок получает после sign_choice (D-202/ui-mockup-parity):
-	# в списке его не было, и «серый кадр вместо кампейн-HUD» не видел никто —
-	# отсутствие экрана на снимке неотличимо от отсутствия съёмки.
-	"res://scenes/main/main.tscn",
+	# Носитель игры (remove-campaign-mechanic, D-317): игрок попадает в мир через
+	# `adventure_ui.tscn`, а не через `scenes/main/main.tscn` — последний сносит
+	# кампейн-шелл, и снимать больше нечего. `world_ui.tscn` остаётся: это слой
+	# мира, который живёт и сам по себе (T-244), и внутри носителя.
+	"res://scenes/ui/adventure_ui.tscn",
 	# Компоненты К-3/К-6 не живут ни на одном экране — см. «ОГРАНИЧЕНИЕ ПОКРЫТИЯ».
 	"res://scenes/ui/kitchen_sink.tscn",
 ]

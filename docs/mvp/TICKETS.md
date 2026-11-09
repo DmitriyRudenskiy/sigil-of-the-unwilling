@@ -13157,3 +13157,32 @@ game/scripts/entities/` пуст), так что игрок получает р�
 (614 строк теста + ~1300 строк экрана) в Impact-таблице proposal не помянута. Пока это не
 записано в объём 3.3, снос даёт либо красную сборку, либо экран города без половины UI «на
 авось».
+
+**Довесок к ведрам, 2026-11-10 (2.2/2.4 по ходу работы).** Реестр уточнён фактом,
+а не на глаз: пять файлов «правил боя» (`tests/campaign/test_battle_{auto_ai,boss,flank,
+info_model,luck}.gd`) **не** конструируют состояние через `CampaignComposition` — они
+тестируют движок `scripts/campaign/campaign_battle.gd` (`make_combatant`,
+`resolve_multi`, `strike_breakdown`, death saves), то есть правила боя **кампейна**.
+Мир воюет другим движком (`BattleFlow`, `scripts/systems/battle_flow.gd`), и на нём
+уже стоят свои тесты (`unit/systems/test_battle_flow.gd`, `test_battle_coordinator.gd`,
+`test_battle_handoff.gd`), поэтому снос не оставляет дыры: эти пять файлов — ведро A,
+ведро B по боям пустое. Снимается и `scripts/ui/battle_info_model.gd` — его читает
+только собственный тест (`test_battle_info_model.gd`), ни одна сцена и ни один экран к
+нему не обращаются. Потери, которые надо признать явно: `scripts/balance/balance_metrics.gd:114-118`
+(живой) считает K-канон на `CampaignBattle.make_recruit/make_combatant/resolve` —
+мерка баланса боя вместе с движком уходит, возврат только вместе с боевым движком
+мира, не «починить опечаткой».
+
+**2.4 — манифест съёмки.** `tools/theme_smoke.gd` терял кампейн-носитель списком сцен:
+`res://scenes/main/main.tscn` заменён на `res://scenes/ui/adventure_ui.tscn`
+(`world_ui.tscn` в списке был и остаётся — слой живёт и сам по себе, и внутри носителя).
+Проверено самим дым-прогоном, `SMOKE_REQUIRE_RENDER=1` (пустой кадр = падение):
+`adventure_ui` и `world_ui` отрендерили, `THEME_SMOKE_DONE=1`, кадры 433 КБ / 39 КБ.
+Десять фикстур `game/tools/capture/campaign*.gd` (`campaign_chronicle_open`,
+`campaign_city_catalog_open`, `campaign_hud_plain`, `campaign_party_panel`,
+`campaign_party_screen_open`, `campaign_raid_chronicle_open`, `campaign_settings_open`,
+`campaign_sign_chronicle_open`, `campaign_sign_plaque_open`, `campaign_tutorial_open`) —
+ведро A: реестра, который бы на них ссылался, нет (в `tests/mcp/capture.py`,
+`test_capture.py`, `tools/shot_scene.gd` — только исторические комментарии), поэтому
+их удаление — удаление файлов, а не правка списка; упоминание носителя в комментарии
+`tests/unit/ui/test_enemy_card_always_visible.gd:177` — черновая строка, снимается в 3.4.

@@ -57,18 +57,25 @@
       (`main.gd:54`), а переживающий `scripts/ui/city_screen.gd:1347,1388` зовёт
       `PartySystem`/`CampaignTrainingService`. Пока не выбрано (а)/(б)/(в) T-354, ведро B
       не переписывается и группа 3 не начинается.
-- [ ] 2.2 Переписать ведро «перезаписывается»: конструктор состояния — world-слой вместо `CampaignComposition`
-      **Ревизия ведра по решению (б) — в T-354; перевешено 2026-11-10 (полный прогон
-      зелёный: GdUnit 3693 / 0 / 0, MCP 123 passed / 2 skipped):**
-      `unit/systems/test_signs.gd` — сейв-раундтрип Знака на `HeroController.serialize()`
-      (носитель Знака = герой); `unit/data/test_waves_json.gd` — снят кейс 21-ходового
-      цикла, инварианты данных живут; `functional/ui/test_live_font_hygiene.gd` — подъём
-      `adventure_ui.tscn`, город через `WorldUI.open_city_screen` (8/8).
-      **Осталось в ведре:** пять файлов правил боя (`campaign/test_battle_{auto_ai,boss,
-      flank,info_model,luck}.gd`) — у них конструктор боя идёт от композиции, а партия как
-      состояние уходит по (б), поэтому нужен носитель боя world-слоя (`battle_coordinator`),
-      это отдельный заход. В ведро A по (б) переехали district/population/party/сейвы/
-      кампейн-HUD — см. запись в T-354.
+- [x] 2.2 Переписать ведро «перезаписывается»: конструктор состояния — world-слой вместо `CampaignComposition`
+      **Закрыто 2026-11-10 (полный прогон зелёный: GdUnit 3693 / 0 / 0, MCP 123 passed /
+      2 skipped). Ревизия ведра по решению (б) и довесок — в T-354.**
+      Перевешено три файла: `unit/systems/test_signs.gd` — сейв-раундтрип Знака на
+      `HeroController.serialize()` (носитель Знака = герой); `unit/data/test_waves_json.gd`
+      — снят кейс 21-ходового цикла, инварианты данных живут; `functional/ui/test_live_font_hygiene.gd`
+      — подъём `adventure_ui.tscn`, город через `WorldUI.open_city_screen` (8/8).
+      Остальное ведра B правки не требует (несёт `adventure_ui.tscn`, `pregame_flow_model`,
+      battle-HUD на `BattleFlow`). Пять файлов «правил боя» оказались ведром A: они тестируют
+      движок `scripts/campaign/campaign_battle.gd`, а мир воюет `BattleFlow` (свои тесты есть),
+      — разбор и цена (мерка баланса в `balance_metrics.gd`) в T-354.
+- [x] 2.4 Манифест съёмки и `tools/theme_smoke.gd`: носители `world_ui.tscn`/`adventure_ui.tscn`/`world.tscn` вместо `main.tscn` и кампейн-HUD; 10 фикстур `game/tools/capture/campaign*.gd` — в ведро удаления, их место в манифесте — за миром
+      **Закрыто 2026-11-10.** В списке сцен `tools/theme_smoke.gd` `scenes/main/main.tscn`
+      заменён на `scenes/ui/adventure_ui.tscn` (`world_ui.tscn` был и остаётся). Мера —
+      сам дым-прогон с `SMOKE_REQUIRE_RENDER=1` (пустой кадр = падение): `adventure_ui`
+      и `world_ui` отрендерили, `THEME_SMOKE_DONE=1`, кадры 433 КБ / 39 КБ.
+      Десять фикстур — ведро A: ссылающегося реестра нет (в `tests/mcp/capture.py`,
+      `test_capture.py`, `tools/shot_scene.gd` — только комментарии), удаление = удаление
+      файлов. Реестр ведра и разбор — в T-354.
 - [x] 2.3 MCP-e2e: `tests/mcp/conftest.py` (путь `меню → создание → Знак → экран`), `test_campaign_carrier.py`, `test_scene_transitions.py` — carrier-тесты на world-путь; кампейн-специфичные e2e-файлы в ведро удаления. **Закрыто 2026-11-09.** `full_cycle` ведёт по потоку до экрана приключения и ждёт героя (`scripts/world/world_controller`), `test_full_cycle.py` проверяет то, что поток обязан донести: `hero_name` (T-110) и `sign_id` (T-002 + 1.3); assertion «ход 1→2» снят — хода как кампейн-операции в мире нет (D-229). 12 тестов `test_campaign_carrier.py` поднимают `main.tscn` **напрямую** (новый fixture `campaign_game`): кампейн как сцена живёт до 3.3, а из потока вышел, — меню-путь им больше не нужен. `test_scene_transitions.py` переведён на `adventure_ui.tscn` раньше (`c6376cca`). Замер: `pytest tests/mcp/test_full_cycle.py test_campaign_carrier.py test_campaign_continue.py` → **14 passed / 41.42 с**. Кампейн-специфичные файлы (тот же `test_campaign_carrier.py`) в ведро удаления не перенесены — это 2.1, список ведра не написан.
 - [ ] 2.4 Манифест съёмки и `tools/theme_smoke.gd`: носители `world_ui.tscn`/`adventure_ui.tscn`/`world.tscn` вместо `main.tscn` и кампейн-HUD; 10 фикстур `game/tools/capture/campaign*.gd` — в ведро удаления, их место в манифесте — за миром
 - [ ] 2.5 `game/run_tests.sh --tier=fast` зелёный (оба ведра уже перевешены, кампейн ещё жив)
