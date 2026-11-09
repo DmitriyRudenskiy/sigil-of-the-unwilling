@@ -28,32 +28,6 @@ command.
 - **THEN** the skill links to that script instead of restating it
 - **AND** no second implementation of the same check is added
 
-### Requirement: Re-grounding reads a bounded digest
-
-Each entry into the workflow SHALL load a generated grounding digest instead of the
-whole documentation vault. The digest SHALL stay within its declared line limit and
-SHALL list dropped entries by count.
-
-#### Scenario: Digest is generated and bounded
-
-- **WHEN** `scripts/gdd_grounding.py` runs
-- **THEN** it prints section-state counters, open questions, pending and
-  vision-changing decisions, and the tail of each registry
-- **AND** the output does not exceed the declared limit
-
-#### Scenario: Pending owner items come first
-
-- **WHEN** the digest is truncated
-- **THEN** entries are dropped in the order vision-flag, pending, red, other
-- **AND** vision-flagged entries are never dropped while red ones are kept
-
-#### Scenario: Owner input is applied before new work
-
-- **WHEN** the digest reports a decision awaiting confirmation
-- **THEN** the workflow applies or overrides that decision before opening new
-  questions
-- **AND** affected sections and tickets are re-checked afterwards
-
 ### Requirement: Section states are recorded in frontmatter
 
 Section lifecycle `draft → audited → deepened → verified → locked` SHALL be stored in
