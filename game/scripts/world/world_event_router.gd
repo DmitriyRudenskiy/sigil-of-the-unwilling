@@ -268,6 +268,15 @@ func _on_end_turn() -> void:
 
 	_run_turn_scheduler(month)
 
+	# Q-M141 → (а): ход мира = день каталога событий. До этого у
+	# `GameManager.on_day_passed()` был один писатель — кнопка хода кампейн-HUD
+	# (`scripts/main/main.gd:187`), и со снятием шелла `game/data/events/`
+	# перестал вызываться кто-либо. Кризис — не ход: панель модальна, триггеры
+	# событий под ней двигать нельзя (то же условие было у снятого `_advance_day`).
+	var gm: Node = get_tree().get_first_node_in_group("game_manager")
+	if gm != null and gm.has_method("on_day_passed") and not gm.is_crisis_active_now():
+		gm.on_day_passed()
+
 	if ui_manager:
 		ui_manager.refresh_ui()
 

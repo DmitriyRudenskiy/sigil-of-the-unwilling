@@ -64,6 +64,15 @@ func show_crisis_panel(crisis_data: Dictionary, crisis_id: String):
 		popup.connect("crisis_resolved", _on_crisis_choice_selected.bind(crisis_id))
 
 ## Закрыть текущую панель решения
+## Панели кладутся в /root (над носителем), поэтому вместе с носителем НЕ умирают:
+## снятие мира/кампейна освобождало менеджера, а Window-панель оставалась в /root
+## и перехватывала ввод уже у следующего владельца экрана (замер: клик по полю
+## карты кампании не доходил до `CampaignMapField` после чужой панели события).
+func _exit_tree() -> void:
+	close_decision_panel()
+	close_crisis_panel()
+
+
 func close_decision_panel():
 	if current_decision_popup != null:
 		current_decision_popup.queue_free()

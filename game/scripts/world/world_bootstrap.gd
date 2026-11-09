@@ -36,6 +36,7 @@ class BootstrapResult:
 	var enemy_proc: Variant = null
 	var shortcuts: Node = null
 	var endgame: Node = null
+	var game_manager: Node = null
 	var event_bus_subscribers: Array[Callable] = []
 
 static func run(
@@ -70,6 +71,7 @@ static func run(
 	_create_world(parent, R)
 	_create_city_layer(parent, platform, R)
 	_create_subsystems(parent, R)
+	_create_event_layer(parent, R)
 	_create_endgame(parent, R)
 	return R
 
@@ -95,6 +97,25 @@ static func _create_city_layer(parent: Node2D, platform: Variant, R: BootstrapRe
 	R.hero.city_manager = R.cities
 	_create_ui(parent, platform, R)
 	_create_resource_nodes(parent, R)
+
+## Q-M141 → (а): мир — единственный носитель дня, поэтому каталог событий
+## (game/data/events/) монтируется здесь, а не в кампейн-шелле. Носитель —
+## та же тройка, что висела в `main.tscn`: GameManager (+ его дети UIManager и
+## CrisisEventSystem). Дети добавляются ДО ввода в дерево: `GameManager._ready`
+## смотрит `has_node("UIManager")`, а системы резолвят менеджеры через группы
+## "game_manager"/"ui_manager" (тот же контракт, что у тестов на /root).
+static func _create_event_layer(parent: Node2D, R: BootstrapResult) -> void:
+	var gm: GameManager = GameManager.new()
+	gm.name = "GameManager"
+	var um: UIManager = UIManager.new()
+	um.name = "UIManager"
+	gm.add_child(um)
+	var es: CrisisEventSystem = CrisisEventSystem.new()
+	es.name = "CrisisEventSystem"
+	gm.add_child(es)
+	parent.add_child(gm)
+	R.game_manager = gm
+
 
 static func _create_endgame(parent: Node2D, R: BootstrapResult) -> void:
 	R.endgame = EndgameControllerScript.new()
