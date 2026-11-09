@@ -15,9 +15,10 @@ date: 2026-10-29
 ссылаются на эту страницу ([[18-system-map]]), а не пересказывают её — повторение
 одного перечня в трёх местах даёт три места расхождения.
 
-Сверяется машиной: `python3 scripts/audit_docs_vs_code.py` (exit ≠ 0, если
+Сверялась машиной: `python3 scripts/audit_docs_vs_code.py` (exit ≠ 0, если
 автозагрузка, действие ввода, сцена или ключ сейва не названы в `docs/`, или если
-док ссылается на несуществующий файл).
+док ссылается на несуществующий файл). Сверщик снят сменой `remove-doc-gates` —
+расхождение дока с кодом ищет ревью диффа.
 
 ## 1. Автозагрузки (`project.godot [autoload]`, 15)
 
@@ -511,8 +512,11 @@ scope не сокращает.
 
 ## 8. Как сверять
 
+Машинной сверки «док ↔ код» больше нет: `audit_docs_vs_code.py` и
+`check_docs_links.py` сняты сменой `remove-doc-gates`, их часть — шаг
+верификации [[19-gdd-workflow]] и ревью диффа. Из живого:
+
 ```bash
-python3 scripts/audit_docs_vs_code.py          # текст; exit 1 — есть расхождение
-python3 scripts/audit_docs_vs_code.py --json   # машиночитаемо
-python3 scripts/check_docs_links.py            # связность wikilink-графа
+game/run_tests.sh --tier=fast          # тесты логики
+python3 scripts/check_repo_layout.py   # порядок в дереве репозитория
 ```

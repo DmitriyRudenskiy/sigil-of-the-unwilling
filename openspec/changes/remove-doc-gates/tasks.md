@@ -10,8 +10,8 @@
 
 ## 2. Коммит 2 — переподвязка исполнителей
 
-- [x] 2.1 `game/run_tests.sh`: снять ссылки на удалённых проверщиков из комментариев и строк вердикта; переименовать литералы `NODE-PATH-GATE` и `GATE=` по таблице Д2, не меняя логику маппинга exit-кодов (GdUnit4 `0`/`101` → зелёный)
-- [x] 2.2 `.github/workflows/ci2.yml`: убрать шаг `DOCS-LINKS (check_docs_links.py)` и его строку в `/tmp/ci2-levels.txt`; вердиктную строку `CI2-VERDICT:` пересчитать на 3 уровня; артефакт `ci2-gate-logs` переименовать (решение Open Question зафиксировать в сообщении коммита)
+- [x] 2.1 `game/run_tests.sh`: снять ссылки на удалённых проверщиков из комментариев и строк вердикта; переименовать литералы `NODE-PATHS` и `GATE=` по таблице Д2, не меняя логику маппинга exit-кодов (GdUnit4 `0`/`101` → зелёный)
+- [x] 2.2 `.github/workflows/ci2.yml`: убрать шаг `STATIC (check_docs_links.py)` и его строку в `/tmp/ci2-levels.txt`; вердиктную строку `CI2-VERDICT:` пересчитать на 3 уровня; артефакт `ci2-run-logs` переименовать (решение Open Question зафиксировать в сообщении коммита)
 - [x] 2.3 `scripts/ci2_checkers.sh`: убрать упоминание `check_docs_links.py` из шапки, проверить, что перечни уровней и артефактов совпадают с `ci2.yml`
 - [x] 2.4 `.gitignore`: снять комментарий про `gen_docs_index.py`/`check_docs_links.py`
 - [x] 2.5 `docs/mvp/TEST-MAP.md` и `docs/mvp/SCENE-SLICE-MEASURE.md`: заменить разделы, ссылающиеся на `testmap.py --check`, `gen_tier_table.py --check` и измерители сцен, на явное «носитель снят сменой remove-doc-gates» — молчание вместо строки запрещено
@@ -19,10 +19,10 @@
 
 ## 3. Коммит 3 — словарь в коде и живых документах
 
-- [ ] 3.1 Составить таблицу фиксированных сочетаний (Д2): `гейт-семантика`, `гейт-блок`, `гейт-артефакт`, `док-гейт`, `MCP-гейт`, `NODE-PATH-GATE`, `DOC GATES`, `ci2-gate-logs`, `documentation gate`, `the gate` — и прогнать её первым проходом по `game/`, `scripts/`, `.github/`, `docs/` (кроме реестров), `AGENTS.md`
+- [ ] 3.1 Составить таблицу фиксированных сочетаний (Д2): `семантика гейта`, `блок вердикта`, `артефакт гейта`, `документальная проверка`, `MCP-секция`, `NODE-PATHS`, `DOCUMENTATION CHECKS`, `ci2-run-logs`, `documentation checks`, `the gate` — и прогнать её первым проходом по `game/`, `scripts/`, `.github/`, `docs/` (кроме реестров), `AGENTS.md`
 - [ ] 3.2 Второй проход: остаточный стем `гейт` → `прогон`/`проверка`; латиница — только `\b[Gg]ates?\b` и `\bGATES?\b` (граница слова обязательна: `negate`, `propagate`, `mitigated`, `obligated`, `surrogate`, `gateway` не трогаются)
 - [ ] 3.3 Вычитать `git diff` по `game/**/*.gd` и `game/**/*.sh`: убедиться, что ни одна константа движка, имя узла, input action и save-ключ не изменены; `gdlint` и `gdformat --check` по изменённым `.gd`
-- [ ] 3.4 `AGENTS.md`: убрать строку «Проверка связности перед пушем: python3 scripts/check_docs_links.py», обновить таблицу «Верификация» и секции, где «гейт» значился как имя слоя; переименовать `NODE-PATH-GATE` (T-296) по таблице
+- [ ] 3.4 `AGENTS.md`: убрать строку «Проверка связности перед пушем: python3 scripts/check_docs_links.py», обновить таблицу «Верификация» и секции, где «гейт» значился как имя слоя; переименовать `NODE-PATHS` (T-296) по таблице
 - [ ] 3.5 Имена capability (Д6): `openspec/specs/ui-verification-gates` → `ui-verification-checks`, `openspec/specs/world-map-art-gates` → `world-map-art-checks`, обновить ссылки в живых сменах; `attribute-gated-actions` не трогать
 - [ ] 3.6 Проверить игровой словарь нетронутым: `git grep -n "gate_ok\|population_gate\|_check_class_gate\|\"gate\""` даёт тот же набор, что до смены
 - [ ] 3.7 `MCP_SSH_HOST= game/run_tests.sh --tier=fast` зелёный

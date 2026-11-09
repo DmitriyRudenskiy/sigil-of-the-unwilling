@@ -6,9 +6,10 @@ status: reference
 date: 2026-10-14
 ---
 
-> **Автогенерат — руками не редактировать.** Перегенерация:
-> `python3 scripts/gen_docs_index.py`; проверка устаревания — тот же файл
-> с `--check`. Зона та же, что у `scripts/check_docs_links.py`:
+> **Индекс правится руками.** Автогенерация снята: носитель
+> `scripts/gen_docs_index.py` удалён сменой `remove-doc-gates` вместе со сверкой
+> wikilink-графа `scripts/check_docs_links.py` — устаревание строк мерят глазами
+> при правке доков. Зона та же:
 > банковская зона `docs/bank/` вне индекса (D-102), архив выведенных проектов `docs/archive/` — тоже
 
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /

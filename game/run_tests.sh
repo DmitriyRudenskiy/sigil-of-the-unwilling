@@ -803,9 +803,10 @@ fi
 # снятый уровень документальных проверок; вместе с ним они остались без исполнителя, а держат они
 # проверщики, которые работают в этом же прогоне: check_autoloads (AUTOLOAD-PRECHECK),
 # check_node_paths (NODE-PATHS), check_test_tiers (QUARANTINE / TIER COVERAGE) и
-# check_repo_layout (его зовёт scripts/ci2_checkers.sh). Проверщик без самопроверки —
+# check_repo_layout (его зовёт scripts/ci2_checkers.sh) + разбор матрицы сценариев.
+# Проверщик без самопроверки —
 # тот же класс молчания, что секция без вердикта (D-265).
-echo "=== python: самопроверки сверщиков (autoloads, node-paths, tiers, repo-layout) ==="
+echo "=== python: самопроверки сверщиков (autoloads, node-paths, tiers, repo-layout, matrix) ==="
 CHECKER_PY=""
 for chk_cand in "${GEN_PY:-}" "${PYTEST_PY:-}" "${MCP_PYTEST_PY:-}" python3; do
 		[ -n "$chk_cand" ] || continue
@@ -818,6 +819,7 @@ if [ -n "$CHECKER_PY" ]; then
 		echo "CHECKERS: интерпретатор $CHECKER_PY"
 		"$CHECKER_PY" -m pytest ../scripts/test_check_autoloads.py ../scripts/test_check_node_paths.py \
 				../scripts/test_check_test_tiers.py ../scripts/test_check_repo_layout.py \
+				../scripts/test_scenario_matrix.py \
 				-q --tb=short -p no:cacheprovider 2>&1 | tail -3
 		if [ "${PIPESTATUS[0]}" -eq 0 ]; then
 				echo "CHECKERS: selftest GREEN"

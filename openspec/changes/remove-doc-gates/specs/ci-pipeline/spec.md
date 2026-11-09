@@ -1,9 +1,9 @@
 ## RENAMED Requirements
 
-- FROM: `### Requirement: Параллельная раскладка гейта`
+- FROM: `### Requirement: Параллельная раскладка прогона`
 - TO: `### Requirement: Параллельная раскладка прогона CI-2`
 
-- FROM: `### Requirement: Инвариантность гейт-семантики`
+- FROM: `### Requirement: Инвариантность семантики прогона`
 - TO: `### Requirement: Инвариантность семантики прогона CI-2`
 
 ## MODIFIED Requirements
@@ -14,7 +14,7 @@ Workflow CI-2 SHALL выполнять уровни прогона в отдел
 job'ах: `static` (checkers + lint), `gdunit` (GdUnit4),
 `mcp` (MCP e2e), плюс финальный job `verdict` (`needs`: все три,
 `if: always()`) с CI-2 Stability (D-174) и итоговой 3-уровневой
-строкой (D-147). Уровень `DOCS-LINKS` из раскладки снят вместе с его
+строкой (D-147). Уровень `STATIC` из раскладки снят вместе с его
 инструментом.
 
 #### Scenario: Зелёный ран

@@ -7,7 +7,7 @@
   кампейн. Знак повешен на героя (`hero_controller.gd`: `sign_id` + `serialize`/`deserialize`),
   кладёт его `world_bootstrap._init_hero`; проверка — `test_hero_serialize.gd` (round-trip,
   старый сейв) и `tests/slow/test_world_bootstrap.gd` (Знак доезжает до героя мира)
-- [x] 1.4b Полный гейт `game/run_tests.sh --tier=full` (2026-11-05, X 192.168.0.86): GDUnit **3683 / 0 / 0** (счётчик восстановлен с 2861: в `tests/` остались три несборные кампании-фикстуры, они в ведре 3.3), MCP **104 passed / 2 skipped / 5 failed / 14 errors** — жёлтый. Обоснование: 14 errors + `test_campaign_continue` — кампейн-e2e на `main.tscn` (`conftest.full_cycle` ждёт `scripts/main/main`, а Знак ведёт в `adventure_ui.tscn`) → ведро 2.3/3.3; 3 fail — семейство `test_threat_rings_visual` «окно носителя … за кадром» (зарегистрированная flake геометрии окна: тот же ассерт и текст в тикете к T-302, в изоляции проходит); 1 fail — `test_marker_fog_visual` (то же семейство визуальных замеров). Падений логики ботстрапа/героя/сейвов нет
+- [x] 1.4b Полный прогон `game/run_tests.sh --tier=full` (2026-11-05, X 192.168.0.86): GDUnit **3683 / 0 / 0** (счётчик восстановлен с 2861: в `tests/` остались три несборные кампании-фикстуры, они в ведре 3.3), MCP **104 passed / 2 skipped / 5 failed / 14 errors** — жёлтый. Обоснование: 14 errors + `test_campaign_continue` — кампейн-e2e на `main.tscn` (`conftest.full_cycle` ждёт `scripts/main/main`, а Знак ведёт в `adventure_ui.tscn`) → ведро 2.3/3.3; 3 fail — семейство `test_threat_rings_visual` «окно носителя … за кадром» (зарегистрированная flake геометрии окна: тот же ассерт и текст в тикете к T-302, в изоляции проходит); 1 fail — `test_marker_fog_visual` (то же семейство визуальных замеров). Падений логики ботстрапа/героя/сейвов нет
 - [ ] 1.4 Кадр: `tools/shot_scene.gd --scene=res://scenes/ui/adventure_ui.tscn` + каноническая съёмка; кадр кладётся в `tmp/shots/`, в репозиторий не коммитится (D-185)
       **Кадр снят 2026-11-09, каноническая съёмка — нет.**
       `game/tmp/shots/rmc-adventure-1080.png` (`tools/shot_scene.gd`, 1920×1080, без
@@ -23,10 +23,10 @@
       0 падений, exit 0** (`TIER COVERAGE: OK, собрано 6 из 6`). До зелёного общий
       прогон красил единственный FAIL не логики, а сора: `game/concept_art/` (копия
       канонического `concept_art/krea2/`, 45 `.webp` + 45 `.import`) попадал в
-      Godot-проект и красил `SCAN/SKIP`-гейт `tests/smoke/test_compile_all.gd:57`.
+      Godot-проект и красил `SCAN/SKIP`-прогон `tests/smoke/test_compile_all.gd:57`.
       Копия сверена `md5` с каноном (45/45 совпали, расхождений нет) и вынесена в
       `/tmp/sotu_stray_concept_art_2026-11-09/`; на голом HEAD срез тоже не проверялся
-      отдельно — полный гейт на нём зелёный (`c6376cca`,
+      отдельно — полный прогон на нём зелёный (`c6376cca`,
       `artifacts/head_export_gate_2026-11-09.log`).
 
 ## 2. Перевесить носители тестов на новый путь
@@ -44,22 +44,22 @@
 - [ ] 3.3 Удалить `game/scenes/main/main.tscn` и ведро «удаляется» из 2.1 (тесты, фикстуры, `.uid`)
 - [ ] 3.4 Снять кампейнские поля `City`: `campaign_buildings`, `campaign_training`, `campaign_group_state` (`scripts/world/city_data.gd`), ветки `city_serializer.gd`, флаг и ветку `is_campaign` в `city_manager.gd`; тесты линии тренировки T-170 правятся в этом же шаге
 - [ ] 3.5 `city_screen.tscn` остаётся единственным носителем города: убрать `preload` из кампейн-HUD (был `campaign_hud.gd:40`), проверить потребителей (`world_ui.tscn`, `balance_probe.gd`)
-- [ ] 3.6 `godot --headless --path game --import` (кэш глобальных классов), затем `game/run_tests.sh --tier=fast`, затем полный `game/run_tests.sh` — зелёный, включая NODE-PATH-GATE и ORPHAN-GATE
+- [ ] 3.6 `godot --headless --path game --import` (кэш глобальных классов), затем `game/run_tests.sh --tier=fast`, затем полный `game/run_tests.sh` — зелёный, включая NODE-PATHS и ORPHAN-CHECK
 - [ ] 3.7 Снос — один коммит, `git mv` для возвращённых сцен сохранён; откат = revert этого коммита
 
 ## 4. Поставить запрет
 
 - [ ] 4.1 `scripts/check_campaign_lockout.py`: запрещённые пути (`game/scripts/campaign/`, `game/scenes/main/main.tscn`, `game/scripts/ui/campaign*`) и идентификаторы (`CampaignComposition`, `res://scenes/main/main.tscn`) вне allowlist; печать числа проверенных путей; самопроверка чекера — по образцу `scripts/test_check_node_paths.py`
-- [ ] 4.2 Включить чекер в `scripts/doc_gates.sh` и в список `TESTS` гейта; пустой обход должен быть красным
+- [ ] 4.2 Включить чекер в список `TESTS` прогона `game/run_tests.sh`; пустой обход должен быть красным
 - [ ] 4.3 Рантайм-отказ: схема T-110 теряет секции `campaign.*`, загрузка кампейн-сейва отвечает атомарным отказом с причиной «механика кампании удалена»; тест GdUnit на отказ и на «обычные сейвы грузятся как раньше»
 - [ ] 4.4 `AGENTS.md`: строка запрета (работа поверх снятого слоя = нарушение правил) со ссылкой на новый D
 - [ ] 4.5 `docs/DECISIONS.md`: новый D — вытесняет D-157 и D-163, причина, границы запрета, ссылка на change
-- [ ] 4.6 Проверить запрет на самом себе: временно вернуть файл из-под запрета → гейт красный с путём и id решения; убрать → зелёный. Результат прогона — в тикете сноса
+- [ ] 4.6 Проверить запрет на самом себе: временно вернуть файл из-под запрета → прогон красный с путём и id решения; убрать → зелёный. Результат прогона — в тикете сноса
 
 ## 5. Документация и след в истории
 
 - [ ] 5.1 `docs/mvp/TICKETS.md`: кампейн-тикеты (T-010, T-020, T-021, T-022, T-041, T-110, T-115, T-116, T-117, T-121, T-182, T-186, T-196, T-280 и другие из 116 упоминаний) получают статус «снят с плана (D-…)» с причиной; текст остаётся; T-196/T-280 — по решению из open questions design.md
 - [ ] 5.2 Записать в TICKETS, что мера баланса отсутствует: с кампанией ушли 7 якорей T-041 и 21-ходовой каркас
 - [ ] 5.3 `docs/DECISIONS.md`: новая запись D-… фиксирует снятие cutover-актов D-157/D-163 и указание владельца от 2026-11-05, снимающее силу с D-204 (Q-M87 → (б), «архивный `world.tscn` не реанимируется»); `scenes/archive/README.md` — обратная запись: носитель вернулся в рантайм-путь, трёхисходное правило D-157 к нему больше не применяется
-- [ ] 5.4 `python3 scripts/check_docs_links.py` зелёный; `gdlint`/`gdformat` по изменённым `.gd`
+- [ ] 5.4 Связность wikilinks проверена по диффу (сверщик `check_docs_links.py` снят); `gdlint`/`gdformat` по изменённым `.gd`
 - [ ] 5.5 `openspec validate remove-campaign-mechanic --strict` зелёный; после реализации — `openspec archive` применяет `REMOVED`-дельты семи кампейн-возможностей и `ADDED` носителя запрета

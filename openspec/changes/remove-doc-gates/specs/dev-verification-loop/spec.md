@@ -1,8 +1,3 @@
-## RENAMED Requirements
-
-- FROM: `### Requirement: Полный гейт выполняется один раз перед публикацией`
-- TO: `### Requirement: Полный прогон выполняется один раз перед публикацией`
-
 ## MODIFIED Requirements
 
 ### Requirement: Полный прогон выполняется один раз перед публикацией

@@ -123,7 +123,7 @@ date: 2026-10-29
 | `TutorialOverlay` | `tutorial_overlay.gd` | оверлей первых ходов, не экран: без своего состояния и места в списке восьми; содержимое — `campaign.json → tutorial.day_N` (раньше блок был писателем без читателя) | `campaign_hud.gd` (`_build_tutorial_overlay`, `campaign_hud.gd:996`) по сигналу SM `tutorial_requested` |
 | `PartyScreenModel` | `party_screen_model.gd` | view model экрана партии: строит строки из `party_system` (id, класс, раса, уровень, xp, статы, luck, READY/DEAD) и подсказку «что освободит слот», когда очередь пуста, а партия полна | `party_screen.gd` (visual-слой), читает `campaign_hud.gd` |
 | `ArtifactInventoryScreen` | `artifact_inventory_screen.gd` | экран героя и сумки 10×5: наведение показывает предмет, клик выбирает его для «Equip»/«Dispose» (раньше кнопки действовали на «первый попавшийся»); кэш текстур, слоты экипировки | `scenes/main_menu.tscn` (живой путь), `scenes/ui/world_ui.tscn` (легаси-копия), генератор сцены `scripts/build/gen_inventory_scene.gd` |
-| `HeroLayout` | `hero_layout.gd` | единственная таблица геометрии экрана «Герой» (макет 12, канва съёмки 1600×900): сцена получает из неё доли якорей, скрипт — пиксели; композиция держится на любом окне без прокрутки | `artifact_inventory_screen.gd`; согласованность таблицы с узлами сцены проверяет `scripts/check_hero_layout_map.py` (гейт `doc_gates.sh`) |
+| `HeroLayout` | `hero_layout.gd` | единственная таблица геометрии экрана «Герой» (макет 12, канва съёмки 1600×900): сцена получает из неё доли якорей, скрипт — пиксели; композиция держится на любом окне без прокрутки | `artifact_inventory_screen.gd`; согласованность таблицы с узлами сцены мерит ux-review по кадру (машинный сверщик снят сменой `remove-doc-gates`) |
 | `BoardOutline` | `widgets/board_outline.gd` | рамка боевого поля: рисует только внешние рёбра (общее ребро двух пограничных гексов дало бы двойную линию), тёмная подложка + светлая линия, потому что кадр бывает снежным и болотным | `systems/battle_view.gd` — нужна, когда под гексами кадр местности и тайлы прозрачны |
 | `AdventureUI` | `adventure_ui.gd` | раскладка приключения легаси-мира: семь панелей (миникарта, армия, ресурсы, инфо), сигналы хода/даты/миникамеры | `scenes/ui/adventure_ui.tscn`, сама монтируется только `scenes/ui/world_ui.tscn` → замороженная линия |
 | `MarkerLayer` | `marker_layer.gd` | маркеры движения на hex-карте: зелёный/жёлтый/красный по стоимости хода (`TerrainCostTable`), сигналы наведения и клика, клик по городской метке | узел `$MarkerLayer` сцены `scenes/ui/world_ui.tscn`, им управляет `ui/world_ui_manager.gd` (`setup`/`show_markers`/`hide_markers`) → замороженная линия |
@@ -143,8 +143,9 @@ date: 2026-10-29
 ## Управление (по input map)
 
 Секция собрана из `game/project.godot` и обработчиков кода — это единственная
-строка сверки «док ↔ движок» по вводу (гейт `scripts/audit_docs_vs_code.py`
-требует, чтобы каждое имя из `[input]` было названо в `docs/`).
+строка сверки «док ↔ движок» по вводу. Раньше её держил сверщик
+`scripts/audit_docs_vs_code.py`, требовавший назвать каждое имя из `[input]` в
+`docs/`; он снят сменой `remove-doc-gates`, и за этим следит ревью диффа.
 
 **Именованные действия `InputMap` — ровно пять** (`project.godot [input]`):
 

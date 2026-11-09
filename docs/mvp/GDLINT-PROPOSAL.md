@@ -15,7 +15,7 @@ date: 2026-10-12
 47 + unnecessary-pass 1 реальный; 4 false-positive class-body — inline
 `# gdlint: ignore=unnecessary-pass`), `comparison-with-itself` ×2 → `is_finite()`
 (строже: отсекает и inf), `.gdlintrc` вербатим в `game/.gdlintrc`, CI-2-шаг
-Lint — **дельта-гейт**: baseline 335 (max-line-length 328 + duplicated-load 7),
+Lint — **дельта-проверка**: baseline 335 (max-line-length 328 + duplicated-load 7),
 рост над baseline = красный; понижение baseline — только вниз списанием.
 `unnecessary-pass` в конфиге не отключён (уточнение к таблице: 4 из 5 были
 ложными — class-body pass обязателен, подавлены inline).
@@ -66,7 +66,7 @@ unnecessary-pass) — одним `gdlint --fix`, без изменения се�
 ```yaml
 # .gdlintrc — минимальный набор под gdparse-зелёное дерево (раунд 12 §3).
 # Шум дефолта: 2444 → остаток 738 (см. docs/mvp/GDLINT-PROPOSAL.md).
-# До утверждения владельцем — report-only (не гейтит).
+# До утверждения владельцем — report-only (не прогонит).
 disable:
   - class-definitions-order
   - load-constant-name
@@ -93,5 +93,5 @@ max-line-length: 120
 
 ## Связь
 
-CI-2 (lint-шаг, раунд 10 §3.4), D-144 (не красим гейт на первом прогоне),
+CI-2 (lint-шаг, раунд 10 §3.4), D-144 (не красим прогон на первой правке),
 TICKETS CI-2 (gdlint report-only).

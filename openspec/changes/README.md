@@ -53,7 +53,7 @@ cиклов нет». Строка не правилась задним числ
 
 | Цикл | Задачи | Что держит остаток | Спеки |
 | --- | --- | --- | --- |
-| `scene-first-dev-loop` | 12/12 | — (закрыт; гейт перенесён в конец смены) | создан `dev-verification-loop` |
+| `scene-first-dev-loop` | 12/12 | — (закрыт; прогон перенесён в конец смены) | создан `dev-verification-loop` |
 | `wave-1-ui-foundation-battle` | 1/8 | код карточки/очереди/медальонов в `main` и под тестами, не хватает фикстуры состояния боя для кадра → **T-241** | создан `specs/battle-ui` |
 | `theme-type-hygiene` | 20/27 | Q-M95 (фокус) открыт; `T-148.2`–`T-148.5` не начаты → **T-231** | создан `specs/theme-type-hygiene` |
 | `ui-mockup-parity` | 43/63 | панель описания артефактов → **T-232**; мирная рать и бронзовый комплект → **T-233** (блок: палитра, T-231) | созданы `battle-hud`, `campaign-hud`, `inventory-screen`, `start-screen`, `ui-screenshot-verification`; `ui-graphics` уже был — не перезаписан |

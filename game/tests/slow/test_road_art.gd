@@ -19,6 +19,9 @@ const P := MapRoadGenerator.RoadType.PRIMARY
 const S := MapRoadGenerator.RoadType.SECONDARY
 const T := MapRoadGenerator.RoadType.TRAIL
 
+# Пол различимости пары «основная/второстепенная» — по замеру листа (см. тест).
+const _MIN_DELTA := {"strip": 30.0, "bridge": 15.0}
+
 
 ## Карта с дорожной сетью вместо генератора дорог: геометрия должна быть
 ## построена тестом, а не «поймана» на сиде, иначе проверка перекрёстка
@@ -173,7 +176,6 @@ func test_secondary_surface_by_road_type() -> void:
 ## (Δ ≈ 45) и для моста висел на 21.1, то есть падал от любой правки листа, не
 ## связанной с различимостью. Последнее такое падение — перемаскирование гексом
 ## 360ed7bd (срезанные углы клетки сдвинули средний тон моста на 1.8).
-const _MIN_DELTA := {"strip": 30.0, "bridge": 15.0}
 
 
 func test_primary_and_secondary_are_distinguishable() -> void:

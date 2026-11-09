@@ -82,7 +82,7 @@ population = min(жильё, floor(продовольствие_в_сутки / 
 | Инвариант «производство ≥ потребление, иначе SM дефицита» — тест | `game/tests/campaign/test_settlement_processor.gd:43-44` (`sm["food"]["state"] == "DEFICIT"`), `:79-82` (DEFICIT→OK за три дня) | подтверждено |
 | Инвариант «к ходу 21 оборона ≥ крупного рейда при полной сети» — тест | `game/tests/smoke/test_t041_anchors.gd:119-121` (`final_raid_repelled`), `game/tests/balance/test_campaign_city_balance_fixture.gd:74` (`day21_defense == 4`) | частично: якорь реального рейда есть, «полной сети» нет → **Q-M108** |
 | Продажа здания: возврат 50% | — (`grep sell/refund` по `scripts/city`, `scripts/world` — носителя нет) | нет носителя → **Q-M105** (тот же слой «районы/сервисы») |
-| Секция «Легаси city-economy (не канон)» | `openspec/changes/archive/2026-10-20-campaign-city-building-economy/legacy-city-economy.md` (носитель легаси, T-121 акт 1.2, срез D-157) | подтверждено как легаси-пометка; в банк не переносится (банк — зона без гейта, `docs/bank/`). Ссылка вела в неархивированный путь — исправлено |
+| Секция «Легаси city-economy (не канон)» | `openspec/changes/archive/2026-10-20-campaign-city-building-economy/legacy-city-economy.md` (носитель легаси, T-121 акт 1.2, срез D-157) | подтверждено как легаси-пометка; в банк не переносится (банк — зона без проверок, `docs/bank/`). Ссылка вела в неархивированный путь — исправлено |
 | 7 районов = 7 канонических групп | `scripts/campaign/settlement_processor.gd:27-31`; `assets/data/mvp_catalog.json` `groups` | подтверждено, но имена в двух написаниях («Земледельцы **и** Пивовары» против «Земледельцы **&** Пивовары») → **T-225** |
 
 **Итог прогона** (числа пересняты скриптом по таблице, а не с памяти агента). В таблице
