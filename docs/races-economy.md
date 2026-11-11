@@ -10,9 +10,13 @@ date: 2026-11-08
 # Экономический слой рас — Sigil of the Unwilling (Fission AI)
 
 > Дизайн-док: экономпрофили 7 рас + D&D-расы по группам + интеграция зданий (кварталы,
-> Слияние). Адаптирован под реальный домен (A/A/A): 7 рас, 18 зданий, 7 городских
-> ресурсов, системы `zoning_system`, `adjacency_system`, `logistics_calculator`,
-> `reputation_system`, `ProductionChain.building_eff`.
+> Слияние). Адаптирован под реальный домен (A/A/A): 7 рас, 18 зданий; id ресурсов — только
+> из реестра `scripts/autoload/resource_registry.gd` ([[GGD]] §4), собственных словарей док
+> не заводит. Носители систем: `scripts/city/reputation_system.gd`,
+> `scripts/city/processors/zoning_processor.gd`, `ProductionChain.building_eff`.
+> Систем `zoning_system`, `adjacency_system`, `logistics_calculator` в проекте нет ([[GGD]] §5);
+> поля `morale`/`logistics` в `assets/data/race_economy.json` — писатели без системы-читателя
+> (мораль аннулирована K-M14), до вердикта не расширять.
 >
 > Связь: [[social-mechanics]] = политический слой, этот док = экономический.
 > Статус: черновик. Числа — стартовые, под баланс. Фаза 1 (профили), фаза 2 — по JSON §10.
